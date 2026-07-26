@@ -50,6 +50,9 @@ async function getClaimsFromToken(
   };
 }
 
+/** Legacy id of the removed hosted "Pro" LLM provider. */
+const RETIRED_HOSTED_LLM_PROVIDER = "hyprnote";
+
 const TRIAL_STARTED_SEEN_PREFIX = "anarlog:trial_started_seen:";
 const TRIAL_ENDED_SEEN_PREFIX = "anarlog:trial_ended_seen:";
 const TRIAL_PAYMENT_REMINDER_SEEN_PREFIX =
@@ -185,12 +188,10 @@ export function BillingProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
+  // The hosted "Pro" LLM provider was removed. Clear it so upgraded installs
+  // fall back to provider selection instead of a provider that no longer exists.
   useEffect(() => {
-    if (!auth?.session?.user.id || !isReady || billing.isPaid) {
-      return;
-    }
-
-    if (currentLlmProvider !== "hyprnote") {
+    if (!isReady || currentLlmProvider !== RETIRED_HOSTED_LLM_PROVIDER) {
       return;
     }
 
@@ -198,7 +199,7 @@ export function BillingProvider({ children }: { children: ReactNode }) {
       current_llm_provider: "",
       current_llm_model: "",
     });
-  }, [auth?.session?.user.id, billing.isPaid, currentLlmProvider, isReady]);
+  }, [currentLlmProvider, isReady]);
 
   const prevIsPaidRef = useRef(billing.isPaid);
   useEffect(() => {

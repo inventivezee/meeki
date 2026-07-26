@@ -1,4 +1,4 @@
-import { useLingui } from "@lingui/react/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { platform } from "@tauri-apps/plugin-os";
 import {
   ArrowRightIcon,
@@ -12,6 +12,8 @@ import { useRef } from "react";
 
 import { type PermissionStatus } from "@hypr/plugin-permissions";
 import { cn } from "@hypr/utils";
+
+import { OnboardingButton } from "./shared";
 
 import { useMountEffect } from "~/shared/hooks/useMountEffect";
 import { usePermission } from "~/shared/hooks/usePermissions";
@@ -123,9 +125,13 @@ function PermissionsSectionContent({
   const systemAudio = usePermission("systemAudio");
   const hasContinuedRef = useRef(false);
 
-  // Accessibility is optional: recording/transcription only need mic + system audio.
-  const isComplete =
+  // Recording only needs mic + system audio. On macOS, keep the step open so the
+  // user can try Accessibility, then Skip if they don't want it.
+  const requiredComplete =
     mic.status === "authorized" && systemAudio.status === "authorized";
+  const accessibilityComplete =
+    !accessibility || accessibility.status === "authorized";
+  const isComplete = requiredComplete && accessibilityComplete;
 
   const handleAction = (perm: ReturnType<typeof usePermission>) => {
     if (perm.status === "denied") {
@@ -133,6 +139,12 @@ function PermissionsSectionContent({
     } else {
       perm.request();
     }
+  };
+
+  const handleSkipAccessibility = () => {
+    if (hasContinuedRef.current) return;
+    hasContinuedRef.current = true;
+    onContinue?.();
   };
 
   return (
@@ -184,6 +196,17 @@ function PermissionsSectionContent({
           />
         )}
       </div>
+
+      {requiredComplete && !accessibilityComplete && (
+        <div className="mt-4">
+          <OnboardingButton
+            variant="secondary"
+            onClick={handleSkipAccessibility}
+          >
+            <Trans>Skip Accessibility</Trans>
+          </OnboardingButton>
+        </div>
+      )}
     </div>
   );
 }

@@ -169,13 +169,13 @@ export function formatModelSize(sizeBytes?: number | null) {
 const _PROVIDERS = [
   {
     disabled: false,
-    id: "hyprnote",
-    displayName: "Anarlog",
+    id: "assemblyai",
+    displayName: "AssemblyAI",
     badge: "Recommended",
-    icon: <AnarlogProviderIcon />,
-    baseUrl: new URL("/stt", env.VITE_API_URL).toString(),
-    models: ["cloud"],
-    requirements: [],
+    icon: <AssemblyAI size={16} style={{ height: 16, width: 16 }} />,
+    baseUrl: "https://api.assemblyai.com",
+    models: ["u3-rt-pro", "universal-3-pro"],
+    requirements: [{ kind: "requires_config", fields: ["api_key"] }],
   },
   {
     disabled: false,
@@ -190,14 +190,15 @@ const _PROVIDERS = [
     requirements: [{ kind: "requires_config", fields: ["api_key"] }],
   },
   {
+    // On-device Soniqo models (Qwen / Parakeet). Cloud "Anarlog Pro" stays hidden.
     disabled: false,
-    id: "assemblyai",
-    displayName: "AssemblyAI",
-    badge: null,
-    icon: <AssemblyAI size={16} style={{ height: 16, width: 16 }} />,
-    baseUrl: "https://api.assemblyai.com",
-    models: ["universal-3-pro", "u3-rt-pro"],
-    requirements: [{ kind: "requires_config", fields: ["api_key"] }],
+    id: "hyprnote",
+    displayName: "On device",
+    badge: "Local",
+    icon: <AnarlogProviderIcon />,
+    baseUrl: new URL("/stt", env.VITE_API_URL).toString(),
+    models: [],
+    requirements: [],
   },
   {
     disabled: false,

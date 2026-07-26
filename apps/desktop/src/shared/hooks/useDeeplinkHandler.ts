@@ -12,7 +12,6 @@ import { dismissInstruction } from "@hypr/plugin-windows";
 
 import { useAuth } from "~/auth";
 import { createAuthCallbackHandler } from "~/auth/deeplink";
-import { stopActiveWelcomeDemo } from "~/onboarding/welcome-note";
 import {
   allowReconnectedCalendarConnections,
   CALENDAR_SYNC_TASK_ID,
@@ -75,10 +74,6 @@ export function useDeeplinkHandler() {
       } else if (payload.to === "/billing/refresh") {
         void authRef.current.refreshSession();
         void dismissInstruction();
-      } else if (payload.to === "/onboarding-demo/complete") {
-        void stopActiveWelcomeDemo().catch((error) => {
-          console.error("[onboarding] failed to complete welcome demo", error);
-        });
       } else if (payload.to === "/integration/callback") {
         const {
           disconnected_connection_id,

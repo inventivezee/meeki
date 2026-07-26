@@ -59,9 +59,9 @@ describe("summary length policy", () => {
       maxSections: 4,
     });
     expect(policyFor(30_000)).toEqual({
-      maxCharacters: 6_000,
+      maxCharacters: 16_000,
       minSections: 5,
-      maxSections: 8,
+      maxSections: 12,
     });
   });
 

@@ -1,7 +1,11 @@
 import { useRouteContext } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef } from "react";
 
-import { useLanguageModel, useLLMConnection } from "~/ai/hooks";
+import {
+  useEnsureLocalLlm,
+  useLanguageModel,
+  useLLMConnection,
+} from "~/ai/hooks";
 import { AttachmentTransferLifecycle } from "~/attachment-sync/lifecycle";
 import { useAuth } from "~/auth";
 import { searchCalendarEvents } from "~/calendar/queries";
@@ -9,7 +13,10 @@ import { useSessionTab } from "~/chat/components/use-session-tab";
 import { buildChatTools } from "~/chat/tools";
 import { searchContacts } from "~/contacts/queries";
 import { useRegisterTools } from "~/contexts/tool";
-import { takePendingWelcomeSession } from "~/onboarding/welcome-note";
+import {
+  stripLegacyWelcomeDemoMeetingLinks,
+  takePendingWelcomeSession,
+} from "~/onboarding/welcome-note";
 import { useSearchEngine } from "~/search/contexts/engine";
 import { initEnhancerService } from "~/services/enhancer";
 import { OwnedSharedNotePublisher } from "~/session-sharing/sync";
@@ -17,7 +24,10 @@ import { SharedAttachmentCacheLifecycle } from "~/shared-notes/attachment-cache-
 import { SharedNotePreviewAuthLifecycle } from "~/shared-notes/preview";
 import { DurableSharedNoteCacheSync } from "~/shared-notes/sync";
 import { useConfigValue } from "~/shared/config";
+import { configureAssemblyAiSttFromEnv } from "~/shared/config/configure-assemblyai";
+import { configureVeniceLlmFromEnv } from "~/shared/config/configure-venice";
 import { useDesktopTabLifecycle } from "~/shared/desktop-tab-lifecycle";
+import { useMountEffect } from "~/shared/hooks/useMountEffect";
 import { useTabs } from "~/store/zustand/tabs";
 import { LiveCaptureRecovery } from "~/stt/live-capture-recovery";
 import { MainListenerControlBridge } from "~/stt/window-control";
@@ -54,9 +64,38 @@ export function ClassicMainServices() {
       <LiveCaptureRecovery />
       <MainListenerControlBridge />
       <ToolRegistration />
+      <LocalLlmEnsure />
       <EnhancerInit />
+      <LegacyWelcomeDemoCleanup />
     </>
   );
+}
+
+function LocalLlmEnsure() {
+  useEnsureLocalLlm();
+  return null;
+}
+
+function LegacyWelcomeDemoCleanup() {
+  useMountEffect(() => {
+    void stripLegacyWelcomeDemoMeetingLinks().catch((error) => {
+      console.error(
+        "[onboarding] failed to clear legacy welcome demo meeting links",
+        error,
+      );
+    });
+    void configureAssemblyAiSttFromEnv().catch((error) => {
+      console.error(
+        "[stt] failed to configure AssemblyAI from environment",
+        error,
+      );
+    });
+    void configureVeniceLlmFromEnv().catch((error) => {
+      console.error("[llm] failed to configure Venice from environment", error);
+    });
+  });
+
+  return null;
 }
 
 function ToolRegistration() {

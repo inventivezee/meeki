@@ -65,6 +65,24 @@ fn models_base<R: Runtime, T: Manager<R>>(manager: &T) -> PathBuf {
         .unwrap_or_else(|_| dirs::data_dir().unwrap_or_default().join("models"))
 }
 
+fn resolve_llama_server_bin<R: Runtime>(app: &tauri::AppHandle<R>) -> PathBuf {
+    use tauri::Manager;
+    use tauri::path::BaseDirectory;
+
+    if let Ok(path) = app
+        .path()
+        .resolve("llama-cpp/llama-server", BaseDirectory::Resource)
+    {
+        if path.exists() {
+            return path;
+        }
+    }
+
+    // Dev / unbundled fallback.
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../../apps/desktop/src-tauri/resources/llama-cpp/llama-server")
+}
+
 async fn downloader<R: Runtime>(
     manager: &impl Manager<R>,
 ) -> ModelDownloadManager<crate::SupportedModel> {
@@ -98,7 +116,18 @@ impl<'a, R: Runtime, M: Manager<R>> LocalLlmExt<'a, R, M> {
     #[tracing::instrument(skip_all)]
     pub async fn server_url(&self) -> Result<Option<String>, crate::Error> {
         let state = self.manager.state::<crate::SharedState>();
-        let guard = state.lock().await;
+        let mut guard = state.lock().await;
+
+        // Drop a crashed llama-server so callers restart instead of reusing a dead URL.
+        if guard
+            .server
+            .as_mut()
+            .is_some_and(|server| !server.is_running())
+            && let Some(dead) = guard.server.take()
+        {
+            dead.stop().await;
+            return Ok(None);
+        }
 
         Ok(guard.server.as_ref().map(|server| server.url().to_string()))
     }
@@ -169,7 +198,68 @@ impl<'a, R: Runtime, M: Manager<R>> LocalLlmExt<'a, R, M> {
         Ok(hypr_local_llm_core::list_custom_models()?)
     }
 
-    pub fn start_server(&self) {}
+    #[tracing::instrument(skip_all)]
+    pub async fn recommended_model(
+        &self,
+    ) -> Result<hypr_local_llm_core::ModelRecommendation, crate::Error> {
+        let total_memory_bytes = sysinfo::System::new_with_specifics(
+            sysinfo::RefreshKind::nothing().with_memory(sysinfo::MemoryRefreshKind::everything()),
+        )
+        .total_memory();
+
+        Ok(hypr_local_llm_core::ModelRecommendation {
+            model: hypr_local_llm_core::recommended_model_for_memory(total_memory_bytes)
+                .map(|model| hypr_local_llm_core::supported_model_info(&model)),
+            total_memory_bytes,
+        })
+    }
+
+    /// Idempotent: reuses a live server already serving `model`, otherwise
+    /// replaces whatever is running. Starting happens outside the state lock so
+    /// slow model loads don't block downloads or status polls.
+    #[tracing::instrument(skip_all)]
+    pub async fn start_server(&self, model: crate::SupportedModel) -> Result<String, crate::Error> {
+        let state = self.manager.state::<crate::SharedState>();
+        let model_id = model.openai_model_id();
+
+        {
+            let mut guard = state.lock().await;
+            if let Some(existing) = guard.server.as_mut()
+                && existing.model_id() == model_id
+                && existing.is_running()
+            {
+                return Ok(existing.url().to_string());
+            }
+        }
+
+        let model_path = self.models_dir().join(model.file_name());
+        let server_bin = resolve_llama_server_bin(self.manager.app_handle());
+
+        let server = hypr_local_llm_core::LlmServer::start_with_model_path(
+            model_id.to_string(),
+            model_path,
+            server_bin,
+        )
+        .await?;
+        let url = server.url().to_string();
+
+        let mut guard = state.lock().await;
+        if let Some(existing) = guard.server.take() {
+            existing.stop().await;
+        }
+        guard.server = Some(server);
+        Ok(url)
+    }
+
+    #[tracing::instrument(skip_all)]
+    pub async fn stop_server(&self) -> Result<(), crate::Error> {
+        let state = self.manager.state::<crate::SharedState>();
+        let mut guard = state.lock().await;
+        if let Some(existing) = guard.server.take() {
+            existing.stop().await;
+        }
+        Ok(())
+    }
 }
 
 pub trait LocalLlmPluginExt<R: Runtime> {

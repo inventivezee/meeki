@@ -746,8 +746,7 @@ mod tests {
         let temp_file = NamedTempFile::new().unwrap();
         let temp_path = temp_file.path();
 
-        let s3_url =
-            "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny-q8_0.bin";
+        let s3_url = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny-q8_0.bin";
 
         let partial_content = b"PARTIAL_CONTENT".repeat(100);
         std::fs::write(temp_path, &partial_content).unwrap();

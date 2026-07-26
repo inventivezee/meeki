@@ -471,7 +471,7 @@ describe("OuterHeader", () => {
     expect(mocks.startListening).toHaveBeenCalledTimes(1);
   });
 
-  it("opens the welcome demo with an automatic completion callback", async () => {
+  it("treats the legacy welcome demo link as a normal Record action", () => {
     mocks.sessionEvents = {
       "session-1": {
         tracking_id: "anarlog-onboarding-demo-v1",
@@ -486,69 +486,12 @@ describe("OuterHeader", () => {
       />,
     );
 
-    const joinButton = screen.getByRole("button", { name: "Join & record" });
-    const logo = joinButton.querySelector("img");
+    const recordButton = screen.getByRole("button", { name: "Record" });
+    fireEvent.click(recordButton);
 
-    fireEvent.click(joinButton);
-
-    expect(logo?.getAttribute("src")).toBe("/assets/anarlog-icon.png");
-    expect(logo?.getAttribute("alt")).toBe("");
     expect(mocks.startListening).toHaveBeenCalledOnce();
-    await vi.waitFor(() => {
-      expect(mocks.startCallbackServer).toHaveBeenCalledWith("anarlog-dev");
-      expect(mocks.openUrl).toHaveBeenCalledOnce();
-    });
-
-    const openedUrl = new URL(mocks.openUrl.mock.calls[0][0]);
-    expect(openedUrl.origin + openedUrl.pathname).toBe(
-      "https://anarlog.so/onboarding-demo/",
-    );
-    expect(openedUrl.searchParams.get("completion_url")).toBe(
-      "http://127.0.0.1:43210/onboarding-demo/complete",
-    );
-  });
-
-  it("ignores repeated welcome demo joins while startup is in progress", async () => {
-    let resolveCallbackServer: (value: {
-      status: "ok";
-      data: number;
-    }) => void = () => {};
-    mocks.startCallbackServer.mockReturnValue(
-      new Promise((resolve) => {
-        resolveCallbackServer = resolve;
-      }),
-    );
-    mocks.sessionEvents = {
-      "session-1": {
-        tracking_id: "anarlog-onboarding-demo-v1",
-        meeting_link: "https://anarlog.so/onboarding-demo/",
-      },
-    };
-
-    render(
-      <OuterHeader
-        sessionId="session-1"
-        currentView={{ type: "raw" } as EditorView}
-      />,
-    );
-
-    const joinButton = screen.getByRole("button", { name: "Join & record" });
-
-    fireEvent.click(joinButton);
-    fireEvent.click(joinButton);
-
-    expect(joinButton.hasAttribute("disabled")).toBe(true);
-    expect(mocks.startListening).toHaveBeenCalledOnce();
-    await vi.waitFor(() => {
-      expect(mocks.startCallbackServer).toHaveBeenCalledOnce();
-    });
-
-    resolveCallbackServer({ status: "ok", data: 43210 });
-
-    await vi.waitFor(() => {
-      expect(mocks.openUrl).toHaveBeenCalledOnce();
-      expect(joinButton.hasAttribute("disabled")).toBe(false);
-    });
+    expect(mocks.openUrl).not.toHaveBeenCalled();
+    expect(mocks.startCallbackServer).not.toHaveBeenCalled();
   });
 
   it("shows the meeting countdown to the left of the header action", () => {

@@ -6,17 +6,14 @@ import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 import { extractReasoningMiddleware, wrapLanguageModel } from "ai";
-import { useMemo, useRef } from "react";
+import { useMemo } from "react";
 
 import type { CharTask } from "@hypr/api-client";
 import type { AIProviderStorage } from "@hypr/store";
 
-import { createAuthFetch } from "../auth-fetch";
-import { createTracedFetch, tracedFetch } from "../traced-fetch";
-
+import { createWarmupFetch } from "~/ai/local-llm-warmup";
 import { useAuth } from "~/auth";
 import { useBillingAccess } from "~/auth/billing-context";
-import { env } from "~/env";
 import { type ProviderId, PROVIDERS } from "~/settings/ai/llm/shared";
 import {
   getProviderSelectionBlockers,
@@ -38,8 +35,8 @@ export type LLMConnectionStatus =
   | { status: "pending"; reason: "missing_provider" }
   | { status: "pending"; reason: "missing_model"; providerId: ProviderId }
   | { status: "error"; reason: "provider_not_found"; providerId: string }
-  | { status: "error"; reason: "unauthenticated"; providerId: "hyprnote" }
-  | { status: "error"; reason: "not_pro"; providerId: "hyprnote" }
+  | { status: "error"; reason: "unauthenticated"; providerId: ProviderId }
+  | { status: "error"; reason: "not_pro"; providerId: ProviderId }
   | {
       status: "error";
       reason: "missing_config";
@@ -55,25 +52,11 @@ type LLMConnectionResult = {
 
 export const useLanguageModel = (task?: CharTask): LanguageModelV3 | null => {
   const { conn } = useLLMConnection();
-  const { session } = useAuth();
-
-  // Auth is resolved at fetch time (not model construction) so token
-  // refreshes take effect without recreating the chat transport chain.
-  const accessTokenRef = useRef(session?.access_token);
-  accessTokenRef.current = session?.access_token;
 
   return useMemo(() => {
     if (!conn) return null;
 
-    const hostedFetch =
-      conn.providerId === "hyprnote"
-        ? createAuthFetch(
-            task ? createTracedFetch(task) : tracedFetch,
-            () => accessTokenRef.current,
-          )
-        : undefined;
-
-    return createLanguageModel(conn, task, hostedFetch);
+    return createLanguageModel(conn);
   }, [conn, task]);
 };
 
@@ -176,13 +159,13 @@ const resolveLLMConnection = (params: {
 
   if (blockers.length > 0) {
     const blocker = blockers[0];
-    if (blocker.code === "requires_auth" && providerId === "hyprnote") {
+    if (blocker.code === "requires_auth") {
       return {
         conn: null,
         status: { status: "error", reason: "unauthenticated", providerId },
       };
     }
-    if (blocker.code === "requires_entitlement" && providerId === "hyprnote") {
+    if (blocker.code === "requires_entitlement") {
       return {
         conn: null,
         status: { status: "error", reason: "not_pro", providerId },
@@ -201,20 +184,20 @@ const resolveLLMConnection = (params: {
     }
   }
 
-  if (providerId === "hyprnote" && session) {
+  if (providerId === "on_device" && !baseUrl) {
     return {
-      conn: {
+      conn: null,
+      status: {
+        status: "error",
+        reason: "missing_config",
         providerId,
-        modelId,
-        baseUrl: baseUrl ?? new URL("/llm", env.VITE_API_URL).toString(),
-        apiKey: session.access_token,
+        missing: ["base_url"],
       },
-      status: { status: "success", providerId, isHosted: true },
     };
   }
 
   return {
-    conn: { providerId, modelId, baseUrl, apiKey },
+    conn: { providerId, modelId, baseUrl, apiKey: apiKey || "local" },
     status: { status: "success", providerId, isHosted: false },
   };
 };
@@ -231,21 +214,8 @@ const wrapWithThinkingMiddleware = (
   });
 };
 
-const createLanguageModel = (
-  conn: LLMConnectionInfo,
-  task?: CharTask,
-  hostedFetch?: typeof fetch,
-): LanguageModelV3 => {
+const createLanguageModel = (conn: LLMConnectionInfo): LanguageModelV3 => {
   switch (conn.providerId) {
-    case "hyprnote": {
-      const provider = createOpenRouter({
-        fetch: hostedFetch ?? (task ? createTracedFetch(task) : tracedFetch),
-        baseURL: conn.baseUrl,
-        apiKey: conn.apiKey,
-      });
-      return wrapWithThinkingMiddleware(provider.chat(conn.modelId));
-    }
-
     case "anthropic": {
       const provider = createAnthropic({
         fetch: tauriFetch,
@@ -318,6 +288,17 @@ const createLanguageModel = (
         fetch: ollamaFetch,
         name: conn.providerId,
         baseURL: conn.baseUrl,
+      });
+      return wrapWithThinkingMiddleware(provider.chatModel(conn.modelId));
+    }
+
+    // Only the bundled llama-server sleeps, so only it needs the warm-up probe.
+    case "on_device": {
+      const provider = createOpenAICompatible({
+        fetch: createWarmupFetch(tauriFetch),
+        name: conn.providerId,
+        baseURL: conn.baseUrl,
+        apiKey: conn.apiKey,
       });
       return wrapWithThinkingMiddleware(provider.chatModel(conn.modelId));
     }

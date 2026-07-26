@@ -3,6 +3,7 @@ import { useCallback } from "react";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import { commands as detectCommands } from "@hypr/plugin-detect";
+import { commands as localLlmCommands } from "@hypr/plugin-local-llm";
 import { commands as localSttCommands } from "@hypr/plugin-local-stt";
 import { commands as templateCommands } from "@hypr/plugin-template";
 import { commands as trayCommands } from "@hypr/plugin-tray";
@@ -432,6 +433,12 @@ function applySettingSideEffects(values: SettingValues): void {
     void syncLocalSttServer().catch(console.error);
   }
   if (
+    values.current_llm_provider !== undefined ||
+    values.current_llm_model !== undefined
+  ) {
+    void syncLocalLlmServer().catch(console.error);
+  }
+  if (
     values.spoken_languages !== undefined ||
     values.current_stt_provider !== undefined ||
     values.current_stt_model !== undefined ||
@@ -472,6 +479,17 @@ async function syncLocalSttServer(): Promise<void> {
   } else {
     await localSttCommands.stopServer(null);
   }
+}
+
+async function syncLocalLlmServer(): Promise<void> {
+  const { values } = await getStoredSettingValues();
+  // Start + base_url refresh live in useEnsureLocalLlm. Only stop here when
+  // leaving on-device so we don't race a stale stored OpenAI base URL.
+  if (values.current_llm_provider === "on_device" && values.current_llm_model) {
+    return;
+  }
+
+  await localLlmCommands.stopServer();
 }
 
 async function syncAnalyticsSettingProperties(): Promise<void> {

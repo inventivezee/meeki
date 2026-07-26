@@ -2,13 +2,9 @@ import { md2json } from "@hypr/editor/markdown";
 import type { SessionEvent } from "@hypr/store";
 
 import { liveQueryClient } from "~/db";
-import {
-  WELCOME_NOTE_DEMO_URL,
-  WELCOME_NOTE_TRACKING_ID,
-} from "~/onboarding/welcome-note.constants";
+import { WELCOME_NOTE_TRACKING_ID } from "~/onboarding/welcome-note.constants";
 import { createSession } from "~/session/queries";
 import { DEFAULT_USER_ID } from "~/shared/utils";
-import { listenerStore } from "~/store/zustand/listener/instance";
 
 const PENDING_WELCOME_SESSION_KEY = "anarlog.pending-welcome-session";
 
@@ -18,10 +14,10 @@ const WELCOME_NOTE = `Welcome to Anarlog 👋
 This note is a quick way to see how Anarlog works.
 
 
-Click **Join & record** in the top-right corner. It will open a private, prerecorded demo meeting, so you don't have to worry about your camera or microphone. Anarlog will listen, transcribe the conversation, and turn it into notes just like a real meeting.
+Click **Record** in the top-right corner. Anarlog will listen to your microphone and system audio, transcribe what it hears, and turn it into notes.
 
 
-When the video ends, Anarlog will stop listening and start creating your summary automatically.`;
+When you stop recording, Anarlog can start creating your summary.`;
 
 let pendingWelcomeSession: Promise<string> | null = null;
 
@@ -48,39 +44,40 @@ export function takePendingWelcomeSession(): string | null {
   return sessionId;
 }
 
-export async function stopActiveWelcomeDemo() {
-  const active = listenerStore.getState().live;
-  const sessionId = active.sessionId;
-  if (!sessionId || active.status !== "active") {
-    return;
-  }
-  const captureGeneration = active.captureGenerationBySession[sessionId];
+async function stripLegacyDemoMeetingLink(sessionId: string) {
+  await liveQueryClient.execute(
+    `
+      UPDATE sessions
+      SET
+        event_json = json_set(
+          json_set(event_json, '$.meeting_link', ''),
+          '$.description',
+          'A quick introduction to recording with Anarlog.'
+        ),
+        updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+      WHERE id = ?
+        AND deleted_at IS NULL
+        AND json_valid(event_json)
+        AND coalesce(json_extract(event_json, '$.meeting_link'), '') LIKE '%onboarding-demo%'
+    `,
+    [sessionId],
+  );
+}
 
+/** Clears leftover hosted demo meeting links from welcome notes. */
+export async function stripLegacyWelcomeDemoMeetingLinks() {
   const rows = await liveQueryClient.execute<{ id: string }>(
     `
       SELECT id
       FROM sessions
-      WHERE id = ?
-        AND deleted_at IS NULL
-        AND CASE
-          WHEN json_valid(event_json)
-          THEN json_extract(event_json, '$.tracking_id')
-        END = ?
-      LIMIT 1
+      WHERE deleted_at IS NULL
+        AND json_valid(event_json)
+        AND coalesce(json_extract(event_json, '$.meeting_link'), '') LIKE '%onboarding-demo%'
     `,
-    [sessionId, WELCOME_NOTE_TRACKING_ID],
+    [],
   );
-  if (!rows[0]) {
-    return;
-  }
-
-  const current = listenerStore.getState();
-  if (
-    current.live.sessionId === sessionId &&
-    current.live.status === "active" &&
-    current.live.captureGenerationBySession[sessionId] === captureGeneration
-  ) {
-    current.stop();
+  for (const row of rows) {
+    await stripLegacyDemoMeetingLink(row.id);
   }
 }
 
@@ -99,7 +96,15 @@ async function findOrCreateWelcomeSession(): Promise<string> {
     `,
     [WELCOME_NOTE_TRACKING_ID],
   );
-  if (rows[0]) return rows[0].id;
+  if (rows[0]) {
+    await stripLegacyDemoMeetingLink(rows[0].id).catch((error) => {
+      console.error(
+        "[onboarding] failed to clear legacy welcome demo meeting link",
+        error,
+      );
+    });
+    return rows[0].id;
+  }
 
   const now = new Date().toISOString();
   const event: SessionEvent = {
@@ -110,8 +115,7 @@ async function findOrCreateWelcomeSession(): Promise<string> {
     ended_at: "",
     is_all_day: false,
     has_recurrence_rules: false,
-    meeting_link: WELCOME_NOTE_DEMO_URL,
-    description: "A private, prerecorded introduction to Anarlog.",
+    description: "A quick introduction to recording with Anarlog.",
   };
 
   return createSession("Welcome to Anarlog", DEFAULT_USER_ID, {

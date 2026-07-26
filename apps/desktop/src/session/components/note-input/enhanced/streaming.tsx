@@ -4,8 +4,10 @@ import { Streamdown } from "streamdown";
 import { cn } from "@hypr/utils";
 
 import { streamdownComponents } from "../../streamdown";
+import { ThinkingDisclosure } from "./thinking";
 
 import { useAITaskTask } from "~/ai/hooks";
+import { ModelWarmingUp } from "~/shared/ui/model-warming-up";
 import { createTaskId } from "~/store/zustand/ai-task/task-configs";
 import { getPersistableGeneratedTitle } from "~/store/zustand/ai-task/task-configs/title-success";
 
@@ -41,7 +43,10 @@ export function StreamingView({
   enhancedNoteId: string;
 }) {
   const taskId = createTaskId(enhancedNoteId, "enhance");
-  const { streamedText, isGenerating } = useAITaskTask(taskId, "enhance");
+  const { streamedText, streamedReasoning, isGenerating } = useAITaskTask(
+    taskId,
+    "enhance",
+  );
   const titleTaskId = createTaskId(sessionId, "title");
   const { streamedText: streamedTitle, isGenerating: isGeneratingTitle } =
     useAITaskTask(titleTaskId, "title");
@@ -58,6 +63,11 @@ export function StreamingView({
         aria-live="polite"
         className="text-muted-foreground flex flex-col gap-0.5 pb-2 text-sm"
       >
+        <ThinkingDisclosure
+          reasoning={streamedReasoning}
+          isGenerating={isGenerating}
+        />
+        <ModelWarmingUp className="pb-1" />
         <p className="leading-5">
           <Trans>Analyzing structure...</Trans>
         </p>
@@ -78,6 +88,10 @@ export function StreamingView({
     <div className="pb-2">
       <div className="flex flex-col gap-1">
         <SummaryTitleSpace title={visibleTitle} />
+        <ThinkingDisclosure
+          reasoning={streamedReasoning}
+          isGenerating={isGenerating}
+        />
         <Streamdown
           components={streamdownComponents}
           className={cn(["flex flex-col"])}

@@ -1,7 +1,6 @@
 import { useCallback } from "react";
 
 import type { TranscriptionParams } from "@hypr/plugin-transcription";
-import { sonnerToast } from "@hypr/ui/components/ui/toast";
 
 import { useListener } from "./contexts";
 import { persistTranscriptWrite } from "./persist-retry";
@@ -77,10 +76,10 @@ export const EMPTY_CURRENT_CAPTURE_TRANSCRIPT_ERROR_MESSAGE =
   "Batch transcription did not include the current recording.";
 const LOCAL_SONIQO_BATCH_TARGET = {
   provider: "soniqo",
-  model: "soniqo-parakeet-batch",
+  model: "soniqo-qwen3-large",
   baseUrl: "soniqo://local",
   apiKey: "",
-  label: "Soniqo batch transcription",
+  label: "Soniqo Qwen3 1.7B batch transcription",
 } satisfies BatchTarget;
 
 export function getBatchProvider(
@@ -110,24 +109,15 @@ export function canRunBatchTranscription(
 }
 
 export function getBatchFallbackTarget({
-  isPaid,
-  accessToken,
-  apiBaseUrl,
+  isPaid: _isPaid,
+  accessToken: _accessToken,
+  apiBaseUrl: _apiBaseUrl,
 }: {
   isPaid: boolean;
   accessToken?: string | null;
   apiBaseUrl: string;
 }): BatchTarget {
-  if (isPaid && accessToken) {
-    return {
-      provider: "hyprnote",
-      model: "cloud",
-      baseUrl: new URL("/stt", apiBaseUrl).toString(),
-      apiKey: accessToken,
-      label: "Pro cloud transcription",
-    };
-  }
-
+  // Meety does not fall back to Anarlog Pro cloud — use local Soniqo batch.
   return LOCAL_SONIQO_BATCH_TARGET;
 }
 
@@ -293,12 +283,13 @@ export const useRunBatch = (sessionId: string) => {
         : fallbackTarget;
 
       if (!shouldUseSelectedTarget) {
-        sonnerToast.warning("Using a batch transcription provider", {
-          description: `${
-            selectedTarget
-              ? selectedProviderLabel(conn, selectedModel)
-              : selectedProviderLabel(conn)
-          } is not available for batch transcription. Using ${target.label} instead.`,
+        // Informational only — avoid toast spam during automatic post-stop repair.
+        console.info("[runBatch] using batch transcription provider fallback", {
+          sessionId,
+          selected: selectedTarget
+            ? selectedProviderLabel(conn, selectedModel)
+            : selectedProviderLabel(conn),
+          fallback: target.label,
         });
       }
 

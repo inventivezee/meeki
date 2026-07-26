@@ -59,7 +59,8 @@ export function OverflowButton({
   );
   const { audioExists, audioExistsResolved } = useAudioPlayer();
   const { uploadAudio, uploadTranscript } = useUploadFile(sessionId);
-  const regenerateTranscript = useRegenerateTranscript(sessionId);
+  const { regenerateTranscript, confirmDialog: retranscribeConfirmDialog } =
+    useRegenerateTranscript(sessionId);
   const sessionMode = useListener((state) => state.getSessionMode(sessionId));
   const floatingBarEnabled = useConfigValue("floating_bar_enabled");
   const isMeetingInProgress =
@@ -207,6 +208,7 @@ export function OverflowButton({
           onOpenChange={setIsExportModalOpen}
         />
       )}
+      {retranscribeConfirmDialog}
     </>
   );
 }

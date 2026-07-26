@@ -3,9 +3,9 @@ import type { Transcript } from "@hypr/plugin-template";
 export const MIN_TRANSCRIPT_CHARACTERS_FOR_SUMMARY = 160;
 export const SHORT_TRANSCRIPT_CHARACTER_LIMIT = 1_200;
 export const MIN_SUMMARY_CHARACTERS = 320;
-export const MAX_SUMMARY_GUIDANCE_CHARACTERS = 6_000;
+export const MAX_SUMMARY_GUIDANCE_CHARACTERS = 16_000;
 const SECTION_GUIDANCE_CHARACTER_STEP = 2_000;
-const MAX_GUIDANCE_SECTIONS = 8;
+const MAX_GUIDANCE_SECTIONS = 12;
 
 export type SummaryLengthPolicy = {
   maxCharacters: number;

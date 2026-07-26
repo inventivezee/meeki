@@ -1,6 +1,8 @@
 import type { RefObject } from "react";
 import { useCallback } from "react";
 
+import { AudioDropTarget } from "../audio-drop-target";
+import { useNoteFileHandlerConfig } from "../file-handler";
 import { useRegenerateTranscript } from "./actions";
 import { TranscriptViewer } from "./renderer";
 import { BatchState } from "./screens/batch";
@@ -20,14 +22,22 @@ export function Transcript({
 }) {
   const screen = useTranscriptScreen({ sessionId });
   const { uploadAudio, uploadTranscript } = useUploadFile(sessionId);
-  const regenerateTranscript = useRegenerateTranscript(sessionId);
+  const { regenerateTranscript, confirmDialog } =
+    useRegenerateTranscript(sessionId);
   const stopTranscription = useListener((state) => state.stopTranscription);
   const handleStopTranscription = useCallback(() => {
     void stopTranscription(sessionId);
   }, [sessionId, stopTranscription]);
+  // The empty state invites "Upload audio", so a drop here has to work too.
+  const { audioDropTargetProps, isAudioDragActive } =
+    useNoteFileHandlerConfig(sessionId);
 
   return (
-    <div className="relative flex h-full flex-col overflow-hidden">
+    <AudioDropTarget
+      targetProps={audioDropTargetProps}
+      isActive={isAudioDragActive}
+      className="flex h-full flex-col overflow-hidden"
+    >
       {screen.kind === "running_batch" && (
         <TranscriptEmptyState
           isBatching
@@ -66,6 +76,7 @@ export function Transcript({
           scrollRef={scrollRef}
         />
       )}
-    </div>
+      {confirmDialog}
+    </AudioDropTarget>
   );
 }

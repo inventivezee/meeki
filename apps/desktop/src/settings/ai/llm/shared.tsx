@@ -11,8 +11,6 @@ import {
 } from "@lobehub/icons";
 import type { ReactNode } from "react";
 
-import { env } from "~/env";
-import { AnarlogProviderIcon } from "~/settings/ai/shared";
 import { type ProviderRequirement } from "~/settings/ai/shared/eligibility";
 import {
   checkLMStudioAvailability,
@@ -37,15 +35,30 @@ export type Provider = {
 
 const _PROVIDERS = [
   {
-    id: "hyprnote",
-    displayName: "Anarlog",
-    badge: "Recommended",
-    icon: <AnarlogProviderIcon />,
-    baseUrl: new URL("/llm", env.VITE_API_URL).toString(),
-    requirements: [
-      { kind: "requires_auth" },
-      { kind: "requires_entitlement", entitlement: "pro" },
-    ],
+    id: "on_device",
+    displayName: "On device",
+    badge: "Local",
+    icon: <Icon icon="mingcute:chip-fill" width={16} />,
+    baseUrl: undefined,
+    requirements: [],
+  },
+  {
+    id: "venice",
+    displayName: "Venice",
+    badge: "Cloud",
+    icon: <Icon icon="mingcute:safe-lock-fill" width={16} />,
+    baseUrl: "https://api.venice.ai/api/v1",
+    requirements: [{ kind: "requires_config", fields: ["api_key"] }],
+    links: {
+      models: {
+        label: "Available models",
+        url: "https://docs.venice.ai/models/text",
+      },
+      setup: {
+        label: "API docs",
+        url: "https://docs.venice.ai/overview/getting-started",
+      },
+    },
   },
   {
     id: "lmstudio",
@@ -61,10 +74,6 @@ const _PROVIDERS = [
         url: "https://lmstudio.ai/download",
       },
       models: { label: "Available models", url: "https://lmstudio.ai/models" },
-      setup: {
-        label: "Setup guide",
-        url: "https://docs.anarlog.so/ai-setup#lm-studio",
-      },
     },
   },
   {
@@ -81,10 +90,6 @@ const _PROVIDERS = [
         url: "https://ollama.com/download",
       },
       models: { label: "Available models", url: "https://ollama.com/library" },
-      setup: {
-        label: "Setup guide",
-        url: "https://docs.anarlog.so/ai-setup#ollama",
-      },
     },
   },
   {

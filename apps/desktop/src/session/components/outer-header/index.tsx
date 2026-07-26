@@ -7,7 +7,6 @@ import {
 } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 
-import { commands as deeplinkCommands } from "@hypr/plugin-deeplink2";
 import { commands as openerCommands } from "@hypr/plugin-opener2";
 import { cn, safeParseDate } from "@hypr/utils";
 
@@ -18,10 +17,6 @@ import { OverflowButton } from "./overflow";
 import { useAudioPlayer } from "~/audio-player";
 import { useNow } from "~/calendar/hooks";
 import { useShell } from "~/contexts/shell";
-import {
-  buildWelcomeNoteDemoUrl,
-  WELCOME_NOTE_TRACKING_ID,
-} from "~/onboarding/welcome-note.constants";
 import { SessionShareButton } from "~/session-sharing";
 import { useEventCountdown } from "~/session/hooks/useEventCountdown";
 import {
@@ -29,8 +24,8 @@ import {
   type RemoteMeeting,
 } from "~/session/hooks/useRemoteMeeting";
 import { useSessionEvent } from "~/session/hooks/useSessionEvent";
+import { resolveMeetingLink } from "~/session/meeting-link";
 import { useConfigValue } from "~/shared/config";
-import { getScheme } from "~/shared/utils";
 import type { EditorView } from "~/store/zustand/tabs/schema";
 import { useListener } from "~/stt/contexts";
 import { useStartListening } from "~/stt/useStartListening";
@@ -156,8 +151,8 @@ function HeaderMeetingActionPill({
   const autoStartScheduledMeetings = useConfigValue(
     "auto_start_scheduled_meetings",
   );
-  const remote = getRemoteMeeting(event?.meeting_link);
-  const meetingLink = event?.meeting_link || null;
+  const meetingLink = resolveMeetingLink(event?.meeting_link);
+  const remote = getRemoteMeeting(meetingLink);
   const endedAt = event?.ended_at ? safeParseDate(event.ended_at) : null;
   const ended = !!endedAt && endedAt.getTime() <= now.getTime();
   const hasTranscript = useHasTranscript(sessionId);
@@ -179,24 +174,8 @@ function HeaderMeetingActionPill({
       return;
     }
 
-    let url = meetingLink;
-    if (event?.tracking_id === WELCOME_NOTE_TRACKING_ID) {
-      try {
-        const scheme = await getScheme();
-        const result = await deeplinkCommands.startCallbackServer(scheme);
-        if (result.status === "ok") {
-          url = buildWelcomeNoteDemoUrl(meetingLink, result.data);
-        }
-      } catch (error) {
-        console.error(
-          "[onboarding] failed to prepare demo completion callback",
-          error,
-        );
-      }
-    }
-
-    void openerCommands.openUrl(url, null);
-  }, [event?.tracking_id, meetingLink]);
+    void openerCommands.openUrl(meetingLink, null);
+  }, [meetingLink]);
   const joinMeeting = useCallback(async () => {
     if (joiningMeetingRef.current) {
       return;
@@ -265,12 +244,7 @@ function HeaderMeetingActionPill({
       return {
         label: t`Join & record`,
         title: t`Join meeting and record`,
-        icon:
-          event?.tracking_id === WELCOME_NOTE_TRACKING_ID ? (
-            <img src="/assets/anarlog-icon.png" alt="" className="size-4" />
-          ) : remote ? (
-            getMeetingDisplay(remote.type).icon
-          ) : undefined,
+        icon: remote ? getMeetingDisplay(remote.type).icon : undefined,
         onClick: () => {
           void joinMeeting();
         },

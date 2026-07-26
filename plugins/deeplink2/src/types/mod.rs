@@ -129,9 +129,8 @@ impl FromStr for DeepLink {
             "auth/callback" => Ok(DeepLink::AuthCallback(serde_qs::from_str(query)?)),
             "billing/refresh" => Ok(DeepLink::BillingRefresh(serde_qs::from_str(query)?)),
             "integration/callback" => Ok(DeepLink::IntegrationCallback(serde_qs::from_str(query)?)),
-            "onboarding-demo/complete" => {
-                Ok(DeepLink::OnboardingDemoComplete(serde_qs::from_str(query)?))
-            }
+            // Legacy Anarlog demo completion links are intentionally rejected.
+            "onboarding-demo/complete" => Err(crate::Error::UnknownPath(full_path)),
             _ => Err(crate::Error::UnknownPath(full_path)),
         }
     }
@@ -142,10 +141,10 @@ mod tests {
     use super::*;
 
     #[test]
-    fn parses_onboarding_demo_completion() {
+    fn rejects_legacy_onboarding_demo_completion() {
         assert!(matches!(
-            DeepLink::from_str("anarlog://onboarding-demo/complete").unwrap(),
-            DeepLink::OnboardingDemoComplete(_)
+            DeepLink::from_str("anarlog://onboarding-demo/complete"),
+            Err(crate::Error::UnknownPath(_))
         ));
     }
 }

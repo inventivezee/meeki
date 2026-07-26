@@ -15,7 +15,13 @@
     "i18n:compile": "lingui compile",
     "i18n:check": "lingui extract --clean --workers 1 && lingui compile --strict --workers 1 && git diff --exit-code -- src/i18n/locales",
     "tauri:dev": "dotenvx run --ignore MISSING_ENV_FILE --env RELAY_PORT=1424 -f ../../.env.supabase -f .env -- tauri dev --no-watch --features dev",
-    "tauri:build": "tauri build"
+    "tauri:build": "pnpm tauri:build:app",
+    "models:prepare": "MEETY_BUNDLE_MODELS=qwen3-large,parakeet-streaming node ./src-tauri/scripts/prepare-bundled-models.mjs",
+    "llama:prepare": "node ./src-tauri/scripts/prepare-llama-cpp.mjs",
+    "tauri:build:app": "pnpm llama:prepare && dotenvx run --ignore MISSING_ENV_FILE -f ../../.env.supabase -f .env -f .env.build -- tauri build --config ./src-tauri/tauri.conf.thin.json && node ./src-tauri/scripts/copy-packaging-artifacts.mjs",
+    "tauri:build:thin": "pnpm tauri:build:app",
+    "tauri:build:bundled": "echo 'Bundled-with-weights builds are archived. Use pnpm tauri:build:app (lightweight + one-click HF downloads).' && exit 1",
+    "tauri:build:both": "pnpm tauri:build:app"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.69",
@@ -46,6 +52,7 @@
     "@hypr/plugin-hooks": "workspace:*",
     "@hypr/plugin-icon": "workspace:*",
     "@hypr/plugin-importer": "workspace:*",
+    "@hypr/plugin-local-llm": "workspace:*",
     "@hypr/plugin-local-stt": "workspace:*",
     "@hypr/plugin-misc": "workspace:*",
     "@hypr/plugin-notification": "workspace:*",

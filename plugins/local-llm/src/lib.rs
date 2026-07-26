@@ -15,7 +15,8 @@ mod migrate;
 pub use error::*;
 pub use ext::*;
 pub use hypr_local_llm_core::{
-    CustomModelInfo, ModelIdentifier, ModelInfo, SUPPORTED_MODELS, SupportedModel,
+    CustomModelInfo, ModelIdentifier, ModelInfo, ModelRecommendation, SUPPORTED_MODELS,
+    SupportedModel,
 };
 
 const PLUGIN_NAME: &str = "local-llm";
@@ -41,7 +42,10 @@ fn make_specta_builder<R: tauri::Runtime>() -> tauri_specta::Builder<R> {
             commands::delete_model::<Wry>,
             commands::list_downloaded_model::<Wry>,
             commands::list_custom_models::<Wry>,
+            commands::recommended_model::<Wry>,
             commands::server_url::<Wry>,
+            commands::start_server::<Wry>,
+            commands::stop_server::<Wry>,
         ])
         .error_handling(tauri_specta::ErrorHandlingMode::Result)
 }

@@ -15,6 +15,7 @@ import { DateEditor } from "./date";
 import { ParticipantsDisplay } from "./participants";
 
 import { useSessionEvent } from "~/session/hooks/useSessionEvent";
+import { resolveMeetingLink } from "~/session/meeting-link";
 import { useConfigValue } from "~/shared/config";
 
 export function MetadataButton({
@@ -84,7 +85,7 @@ function ContentInner({ sessionId }: { sessionId: string }) {
         startedAt: sessionEvent.started_at,
         endedAt: sessionEvent.ended_at,
         location: sessionEvent.location,
-        meetingLink: sessionEvent.meeting_link,
+        meetingLink: resolveMeetingLink(sessionEvent.meeting_link) ?? undefined,
         description: sessionEvent.description,
         calendarId: sessionEvent.calendar_id,
       }
@@ -120,9 +121,11 @@ export function EventDisplay({
 }) {
   const tz = useConfigValue("timezone") || undefined;
 
+  const meetingLink = resolveMeetingLink(event.meetingLink);
+
   const handleJoinMeeting = () => {
-    if (event.meetingLink) {
-      void openerCommands.openUrl(event.meetingLink, null);
+    if (meetingLink) {
+      void openerCommands.openUrl(meetingLink, null);
     }
   };
 
@@ -157,11 +160,11 @@ export function EventDisplay({
   };
 
   const getMeetingLinkDomain = () => {
-    if (!event.meetingLink) {
+    if (!meetingLink) {
       return null;
     }
     try {
-      const url = new URL(event.meetingLink);
+      const url = new URL(meetingLink);
       return url.hostname.replace("www.", "");
     } catch {
       return null;
@@ -198,7 +201,7 @@ export function EventDisplay({
         </>
       )}
 
-      {event.meetingLink && (
+      {meetingLink && (
         <>
           <div className="flex items-center justify-between gap-2">
             <div className="text-muted-foreground flex min-w-0 items-center gap-2 text-sm">

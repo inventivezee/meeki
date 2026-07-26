@@ -5,10 +5,23 @@ import { beginCloudsyncActivity, endCloudsyncActivity } from "@hypr/plugin-db";
 
 const mocks = vi.hoisted(() => ({
   audioPath: vi.fn(),
+  getLatestBatchTranscript: vi.fn(),
   handleBatchFailed: vi.fn(),
   queueAutoEnhanceIfSummaryEmpty: vi.fn(),
+  requestAutoEnhance: vi.fn(),
   runBatch: vi.fn(),
   toastError: vi.fn(),
+  conn: {
+    provider: "deepgram",
+    model: "nova-3-general",
+    baseUrl: "https://api.deepgram.com/v1",
+    apiKey: "key",
+  } as {
+    provider: string;
+    model: string;
+    baseUrl: string;
+    apiKey: string;
+  } | null,
 }));
 
 vi.mock("@hypr/plugin-fs-sync", () => ({
@@ -22,6 +35,7 @@ vi.mock("@hypr/ui/components/ui/toast", () => ({
 vi.mock("~/services/enhancer", () => ({
   getEnhancerService: () => ({
     queueAutoEnhanceIfSummaryEmpty: mocks.queueAutoEnhanceIfSummaryEmpty,
+    requestAutoEnhance: mocks.requestAutoEnhance,
   }),
 }));
 
@@ -30,10 +44,25 @@ vi.mock("~/stt/contexts", () => ({
     selector({ handleBatchFailed: mocks.handleBatchFailed }),
 }));
 
-vi.mock("~/stt/useRunBatch", () => ({
-  isStoppedTranscriptionError: (error: unknown) =>
-    error instanceof Error && error.message === "Transcription stopped.",
-  useRunBatch: () => mocks.runBatch,
+vi.mock("~/stt/useRunBatch", async () => {
+  const actual =
+    await vi.importActual<typeof import("~/stt/useRunBatch")>(
+      "~/stt/useRunBatch",
+    );
+  return {
+    ...actual,
+    isStoppedTranscriptionError: (error: unknown) =>
+      error instanceof Error && error.message === "Transcription stopped.",
+    useRunBatch: () => mocks.runBatch,
+  };
+});
+
+vi.mock("~/stt/useSTTConnection", () => ({
+  useSTTConnection: () => ({ conn: mocks.conn }),
+}));
+
+vi.mock("~/stt/queries", () => ({
+  getLatestBatchTranscript: mocks.getLatestBatchTranscript,
 }));
 
 import { useRegenerateTranscript } from "./actions";
@@ -41,10 +70,17 @@ import { useRegenerateTranscript } from "./actions";
 describe("useRegenerateTranscript", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.conn = {
+      provider: "deepgram",
+      model: "nova-3-general",
+      baseUrl: "https://api.deepgram.com/v1",
+      apiKey: "key",
+    };
     mocks.audioPath.mockResolvedValue({
       status: "ok",
       data: "/tmp/session.wav",
     });
+    mocks.getLatestBatchTranscript.mockResolvedValue(null);
   });
 
   it("shows batch transcription failures even when an old transcript exists", async () => {
@@ -52,11 +88,14 @@ describe("useRegenerateTranscript", () => {
     const { result } = renderHook(() => useRegenerateTranscript("session-1"));
 
     await act(async () => {
-      await result.current();
+      await result.current.regenerateTranscript();
     });
 
     expect(mocks.runBatch).toHaveBeenCalledWith("/tmp/session.wav", {
       promotion: { scope: "whole_session" },
+      model: "nova-3-general",
+      baseUrl: "https://api.deepgram.com/v1",
+      apiKey: "key",
     });
     expect(mocks.handleBatchFailed).toHaveBeenCalledWith(
       "session-1",
@@ -78,7 +117,7 @@ describe("useRegenerateTranscript", () => {
     );
     const { result } = renderHook(() => useRegenerateTranscript("session-1"));
 
-    const regeneration = result.current();
+    const regeneration = result.current.regenerateTranscript();
     await waitFor(() => {
       expect(mocks.queueAutoEnhanceIfSummaryEmpty).toHaveBeenCalledWith(
         "session-1",
@@ -99,5 +138,22 @@ describe("useRegenerateTranscript", () => {
       "transcription",
       vi.mocked(beginCloudsyncActivity).mock.calls[0]?.[1],
     );
+  });
+
+  it("asks before replacing a transcript from a different model", async () => {
+    mocks.getLatestBatchTranscript.mockResolvedValue({
+      id: "t1",
+      provider: "soniqo",
+      model: "soniqo-qwen3-large",
+      source: "batch_transcription",
+    });
+    const { result } = renderHook(() => useRegenerateTranscript("session-1"));
+
+    await act(async () => {
+      await result.current.regenerateTranscript();
+    });
+
+    expect(mocks.runBatch).not.toHaveBeenCalled();
+    expect(result.current.confirmDialog).toBeTruthy();
   });
 });

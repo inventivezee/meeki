@@ -17,7 +17,10 @@ const {
 }));
 
 vi.mock("./actions", () => ({
-  useRegenerateTranscript: () => regenerateTranscriptMock,
+  useRegenerateTranscript: () => ({
+    regenerateTranscript: regenerateTranscriptMock,
+    confirmDialog: null,
+  }),
 }));
 
 vi.mock("~/stt/queries", () => ({
@@ -56,10 +59,14 @@ vi.mock("./renderer", () => ({
 }));
 
 vi.mock("~/stt/useUploadFile", () => ({
+  // AUDIO_EXTENSIONS is read at module scope by the audio drop overlay.
+  AUDIO_EXTENSIONS: ["wav", "mp3"],
+  isAudioUploadFile: vi.fn(() => false),
   useUploadFile: vi.fn(() => ({
     uploadAudio: vi.fn(),
     uploadTranscript: vi.fn(),
     processFile: vi.fn(),
+    processAudioFile: vi.fn(),
   })),
 }));
 

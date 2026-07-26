@@ -16,6 +16,7 @@ import { useListener } from "./contexts";
 import { fromResult } from "./fromResult";
 import { ChannelProfile } from "./segment";
 import { isStoppedTranscriptionError, useRunBatch } from "./useRunBatch";
+import { warnIfSttPackMissing } from "./warn-if-stt-pack-missing";
 
 import { withCloudsyncActivity } from "~/db/cloudsync-activity";
 import { getEnhancerService } from "~/services/enhancer";
@@ -25,6 +26,8 @@ import { useSession, useUpdateSession } from "~/session/queries";
 import { type Tab, useTabs } from "~/store/zustand/tabs";
 import { createTranscript } from "~/stt/queries";
 
+// Mirrors what hypr_audio_norm can actually decode (rodio + symphonia-all),
+// covered by the test_import_* cases in crates/audio-norm/src/lib.rs.
 export const AUDIO_EXTENSIONS = [
   "wav",
   "mp3",
@@ -34,6 +37,8 @@ export const AUDIO_EXTENSIONS = [
   "flac",
   "webm",
   "aac",
+  "aiff",
+  "caf",
 ];
 const AUDIO_TRANSFER_EXTENSIONS = [...AUDIO_EXTENSIONS, "qta"];
 const TRANSCRIPT_EXTENSIONS = ["vtt", "srt"];
@@ -194,6 +199,7 @@ export function useUploadFile(sessionId: string) {
     ) => {
       const program = pipe(
         Effect.promise(inspectAudioDate),
+        Effect.tap(() => Effect.promise(warnIfSttPackMissing)),
         Effect.tap(() =>
           Effect.sync(() => {
             handleBatchStarted(sessionId, "importing");

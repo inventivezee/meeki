@@ -8,7 +8,10 @@ const COMMANDS: &[&str] = &[
     "list_downloaded_model",
     "list_supported_model",
     "list_custom_models",
+    "recommended_model",
     "server_url",
+    "start_server",
+    "stop_server",
 ];
 
 fn main() {

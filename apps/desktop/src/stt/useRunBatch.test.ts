@@ -180,7 +180,7 @@ describe("canRunBatchTranscription", () => {
 });
 
 describe("getBatchFallbackTarget", () => {
-  test("uses hosted cloud transcription for paid users with a session", () => {
+  test("uses local Qwen3 Large batch instead of Anarlog Pro cloud", () => {
     expect(
       getBatchFallbackTarget({
         isPaid: true,
@@ -188,15 +188,15 @@ describe("getBatchFallbackTarget", () => {
         apiBaseUrl: "https://api.test",
       }),
     ).toEqual({
-      provider: "hyprnote",
-      model: "cloud",
-      baseUrl: "https://api.test/stt",
-      apiKey: "token",
-      label: "Pro cloud transcription",
+      provider: "soniqo",
+      model: "soniqo-qwen3-large",
+      baseUrl: "soniqo://local",
+      apiKey: "",
+      label: "Soniqo Qwen3 1.7B batch transcription",
     });
   });
 
-  test("uses local Soniqo batch transcription otherwise", () => {
+  test("uses local Qwen3 Large batch transcription for unpaid users", () => {
     expect(
       getBatchFallbackTarget({
         isPaid: false,
@@ -205,10 +205,10 @@ describe("getBatchFallbackTarget", () => {
       }),
     ).toEqual({
       provider: "soniqo",
-      model: "soniqo-parakeet-batch",
+      model: "soniqo-qwen3-large",
       baseUrl: "soniqo://local",
       apiKey: "",
-      label: "Soniqo batch transcription",
+      label: "Soniqo Qwen3 1.7B batch transcription",
     });
   });
 });
@@ -518,7 +518,7 @@ describe("useRunBatch", () => {
     );
   });
 
-  test("falls back to local Soniqo when the selected provider is not batch-capable", async () => {
+  test("falls back to local Qwen3 Large when the selected provider is not batch-capable", async () => {
     useSTTConnectionMock.mockReturnValue({
       conn: {
         provider: "custom",
@@ -538,22 +538,16 @@ describe("useRunBatch", () => {
     expect(startTranscriptionMock).toHaveBeenCalledWith(
       expect.objectContaining({
         provider: "soniqo",
-        model: "soniqo-parakeet-batch",
+        model: "soniqo-qwen3-large",
         base_url: "soniqo://local",
         api_key: "",
       }),
       expect.any(Object),
     );
-    expect(sonnerToastWarningMock).toHaveBeenCalledWith(
-      "Using a batch transcription provider",
-      expect.objectContaining({
-        description:
-          "realtime-only is not available for batch transcription. Using Soniqo batch transcription instead.",
-      }),
-    );
+    expect(sonnerToastWarningMock).not.toHaveBeenCalled();
   });
 
-  test("falls back to hosted cloud transcription for paid users", async () => {
+  test("falls back to local Qwen3 Large instead of Anarlog Pro cloud for paid users", async () => {
     isSupportedLanguagesBatchMock.mockResolvedValue(false);
     useBillingAccessMock.mockReturnValue({
       isPaid: true,
@@ -568,20 +562,14 @@ describe("useRunBatch", () => {
 
     expect(startTranscriptionMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        provider: "hyprnote",
-        model: "cloud",
-        base_url: "https://api.test/stt",
-        api_key: "paid-token",
+        provider: "soniqo",
+        model: "soniqo-qwen3-large",
+        base_url: "soniqo://local",
+        api_key: "",
       }),
       expect.any(Object),
     );
-    expect(sonnerToastWarningMock).toHaveBeenCalledWith(
-      "Using a batch transcription provider",
-      expect.objectContaining({
-        description:
-          "nova-3 is not available for batch transcription. Using Pro cloud transcription instead.",
-      }),
-    );
+    expect(sonnerToastWarningMock).not.toHaveBeenCalled();
   });
 
   test("refreshes an expired cloud token and retries transcription once", async () => {

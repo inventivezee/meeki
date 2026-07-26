@@ -3,7 +3,7 @@
 **Product:** Anarlog (this repository; historically Hyprnote; forkable as Meety)  
 **License:** MIT  
 **Status:** Living reference of *current* product behavior and architecture  
-**Last updated:** 2026-07-25  
+**Last updated:** 2026-07-26  
 **Sources:** `README.md`, `AGENTS.md`, `docs/`, `apps/*`, `packages/*`, `plugins/*`, `crates/*`, `supabase/`
 
 This document describes what the app does today and how it is built, so future edits have a shared baseline. It is not a redesign proposal.
@@ -69,7 +69,7 @@ From product docs and `packages/pricing/src/tiers.ts`:
 
 Entitlement keys: `hyprnote_pro`, `hyprnote_lite` (Lite counts as paid for many STT/LLM/integration gates; Pro-only for CloudSync / some share / E2EE APIs).
 
-- Hosted (Anarlog) cloud transcription and cloud LLM
+- Hosted (Anarlog) cloud transcription — **the hosted cloud LLM provider was removed from the desktop app** (§2.6)
 - Local ↔ cloud sync (E2EE CloudSync)
 - Google Calendar / Outlook Calendar (via Nango + API)
 - Shareable links / invites / public slugs (partial DocSend-like features)
@@ -111,14 +111,30 @@ Each session exposes:
 
 ### 2.6 AI (Intelligence)
 
-- Providers: Anarlog hosted (Pro), OpenAI, Anthropic, Gemini, OpenRouter, Azure, Mistral, Cloudflare Workers AI, Ollama, LM Studio, custom OpenAI-compatible
-- Powers summaries, titles, chat
-- Templates + Auto prompt customize summaries (`docs/customize-summaries.mdx`)
+Powers summaries, titles, and chat. Templates + Auto prompt customize summaries (`docs/customize-summaries.mdx`).
+
+**Providers** (`apps/desktop/src/settings/ai/llm/shared.tsx`), in sort order:
+
+`on_device` (bundled llama.cpp), `venice`, `lmstudio`, `ollama`, `openrouter`, `openai`,
+`cloudflare_workers_ai`, `anthropic`, `mistral`, `azure_openai`, `azure_ai`,
+`google_generative_ai`, `custom`.
+
+The hosted **`hyprnote` / "Anarlog Pro" LLM provider was removed.** Its auth + entitlement
+gate, the "Upgrade to Pro" redirect on provider select, and the "Pro (Cloud)" model label are
+gone. Installs still pointing at it are cleared on launch (`apps/desktop/src/auth/billing.tsx`,
+`RETIRED_HOSTED_LLM_PROVIDER`). Note the id `hyprnote` still exists on the **STT** side, where
+it means *on-device Soniqo* — see §2.7.
+
+**On device** is the default path; see §3.6 for the runtime and §5.5 for the pipeline.
 
 ### 2.7 Transcription (STT)
 
-- Local: Whisper quantized, AM, Soniqo models via `plugins/local-stt`
-- Hosted Anarlog: `{VITE_API_URL}/stt` with JWT (paid rate limits)
+- Local: Soniqo (Parakeet / Qwen3 ASR), Whisper quantized, AM models via `plugins/local-stt`.
+  Provider id is `hyprnote`, displayed as **"On device"** — this is *not* the removed cloud LLM provider.
+- Live capture always uses `soniqo-parakeet-streaming` (preview only, never persisted); the saved
+  transcript comes from a batch pass with `soniqo-qwen3-large` by default.
+- Hosted Anarlog cloud STT (`{VITE_API_URL}/stt`, model id `cloud`) still exists in code but is
+  hidden from the picker.
 - BYO: Deepgram, AssemblyAI, OpenAI, Cartesia, Gladia, Soniox, ElevenLabs, Mistral, Fireworks, Pyannote, Aquavoice, custom, etc. (`settings/ai/stt/shared.tsx`)
 
 ### 2.8 Sharing & sync
@@ -236,6 +252,96 @@ Web: marketing · account/checkout · share viewers · ops admin APIs
 
 Desktop constructs `supabase: null` when `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` are absent (`apps/desktop/src/auth/client.ts`).
 
+### 3.6 On-device LLM runtime
+
+The app ships a **bundled llama.cpp** so local interpretation needs no second install.
+Weights are never bundled — they download from Hugging Face on demand.
+
+| Concern | Detail |
+|---------|--------|
+| Runtime | `llama-server` + dylibs (~50 MB) at `Contents/Resources/llama-cpp/` |
+| Fetched by | `apps/desktop/src-tauri/scripts/prepare-llama-cpp.mjs` (release `b10067`, macOS arm64; override `MEETY_LLAMA_CPP_RELEASE`) |
+| Wired via | `tauri.conf.json` → `"resources/llama-cpp": "llama-cpp"`; `pnpm llama:prepare` runs before every app build |
+| Catalog | `crates/local-model/src/lib.rs` (`GgufLlmModel`) |
+| Selectable set | `crates/local-llm-core/src/model.rs` (`SUPPORTED_MODELS`, aarch64 only) |
+| Process control | `plugins/local-llm/src/ext.rs` — `start_server` / `stop_server` / `server_url` / `recommended_model` |
+| Weights path | `{settings.global_base}/models/llm/<file>.gguf` |
+
+**Model catalog and memory tiers.** `recommended_model_for_memory()` reads total RAM
+(`sysinfo`) and picks a model that fits inside Metal's ~75% working-set budget with ~2 GB
+spare for KV cache. Gemma leads open models on summarization faithfulness, which is the
+job here, so it takes the tiers that can hold it.
+
+| Total RAM | Recommended | Size | Min RAM | Notes |
+|-----------|-------------|------|---------|-------|
+| ≥ 22 GiB | `gemma-4-26b-a4b` | 13.6 GB | 24 GB | MoE, 3.8B active |
+| ≥ 12 GiB | `gemma-4-12b` | 7.1 GB | 16 GB | dense |
+| below | `qwen3-4b` | 2.5 GB | 8 GB | dense |
+
+Also selectable but never recommended: `qwen3.6-35b-a3b` (17.7 GB, min 32 GB) and
+`qwen3.6-35b-a3b-q4km` (22.1 GB, min 36 GB), kept for tool-heavy chat — the Qwen 3.5/3.6
+line trades summarization faithfulness for agentic skill. The two are the **same weights at
+different quantizations** (Unsloth Dynamic IQ4_XS vs Q4_K_M); the Q4_K_M file is 4.4 GB
+larger for a small fidelity gain and only fits comfortably on 36 GB+ Macs. Users download
+them from the **Other local models** expander (`settings/ai/llm/other-models.tsx`); the
+model dropdown only lists weights already on disk.
+
+**Per-model facts in the UI.** `GgufLlmModel` carries `description()` (plain-language
+strengths, no sizes), `min_memory_bytes()` (the Mac tier a model realistically needs) and
+`warmup_seconds()`; all three ride on `ModelInfo` to TypeScript. `ModelFacts`
+(`settings/ai/shared/model-facts.tsx`) renders strengths + download size + RAM need in the
+on-device setup card, the on-device card, and the Other-local-models expander, and warns in
+amber when a model exceeds this Mac's memory. `never_recommends_a_model_the_mac_cannot_hold`
+keeps `min_memory_bytes()` and `recommended_model_for_memory()` from drifting apart.
+
+**Server flags** (`crates/local-llm-core/src/server.rs`):
+
+```
+--model <path> --host 127.0.0.1 --port <free>
+--ctx-size 65536            # ANARLOG_LLM_CTX_SIZE, clamped 8192–262144
+--reasoning-format deepseek # thoughts land in reasoning_content, never in the note
+--reasoning-budget -1       # ANARLOG_LLM_THINK_BUDGET
+--chat-template-kwargs {"enable_thinking":false}
+--sleep-idle-seconds 300    # ANARLOG_LLM_SLEEP_IDLE_SECONDS
+--alias <openai_model_id> -ngl 99
+```
+
+The KV cache is allocated up front, so `--ctx-size` costs memory whether or not a
+conversation fills it (~20 KB/token for Gemma-class models; 64k ≈ 1.3 GB).
+
+**Idle sleep.** After 300 s without a request llama-server unloads the weights and drops to
+~80 MB RSS; the next request reloads them. Measured on an M4 / 16 GB Mac against b10067 with
+`gemma-4-12b` (7.1 GB): RSS 9,285 MB → 81 MB asleep, reload ~3.0 s with the file in the page
+cache and ~4.8 s once evicted (≈4.0 s and ≈6.2 s end-to-end including the completion).
+`warmup_seconds()` models this as `1 + size / 1.5 GB/s`. llama-server **rejects
+`--sleep-idle-seconds 0`** and exits at startup, so `parse_sleep_idle_seconds` maps any
+value ≤ 0 to `-1` (disabled) and floors positive values at 30 s to avoid reload thrash.
+
+**Lifecycle.** `start_server` is idempotent — it reuses a live server already serving the
+same model, otherwise replaces it, and starts outside the state lock so a slow load doesn't
+block downloads or status polls. `server_url` prunes crashed processes.
+`useEnsureLocalLlm` (mounted in `main/lifecycle.tsx`) polls every 5 s while `on_device` is
+selected, keeps the server up, and writes the live `base_url` into provider storage only
+when it changes. `syncLocalLlmServer` in `settings/queries.ts` stops the server when the
+user switches away.
+
+The 5 s poll does **not** defeat idle sleep: `start_server`'s reuse path only calls
+`child.try_wait()`, a process check with no HTTP traffic. `/health`, `/props` and
+`/v1/models` also answer without waking a sleeping server — but `/slots` and `/metrics`
+**do** wake it, so neither may be used for status polling.
+
+**Warm-up indicator.** Because a sleeping server's process is still alive, `start_server`
+returns instantly and the whole reload lands inside an ordinary HTTP request — a latency
+class that did not exist before. There is no non-waking endpoint that reports it
+(`/health` stays `{"status":"ok"}` through a wake; its 503 `"Loading model"` only covers the
+initial process start), so it is observed at the transport instead: `createWarmupFetch`
+(`ai/local-llm-warmup.ts`) wraps the `on_device` fetch in `useLLMConnection.ts` and flags a
+warm-up when headers take longer than 900 ms. `ModelWarmingUp`
+(`shared/ui/model-warming-up.tsx`) renders a countdown against `warmup_seconds()` in the
+enhance streaming view and the chat loading bubble, capping at 95 % and switching to an
+indeterminate pulse on overrun rather than stalling at 100 %. `tasks.ts` adds the remaining
+warm-up estimate to `TASK_STREAM_START_TIMEOUT_MS` so a reload is not mistaken for a stall.
+
 ---
 
 ## 4. Domain model
@@ -325,6 +431,58 @@ flowchart TB
 - UI orchestration: `apps/desktop/src/stt/useStartListening.ts`, `useRunBatch.ts`, `useSTTConnection.ts`, `contexts.tsx`
 - Plugin: `plugins/transcription`, `plugins/local-stt`, `plugins/detect`, `plugins/fs-sync`
 - Rust: `crates/listener-core`, `crates/listener2-core`, `crates/audio-actual`, `crates/owhisper-client`, `crates/detect`
+
+**Importing an existing audio file.** `AUDIO_EXTENSIONS` (`stt/useUploadFile.ts`) is the single
+source for the file-picker filters in both entry points and for the drop-overlay copy. Decoding
+is `hypr_audio_norm::normalize_file` → `rodio::Decoder::try_from(File)` with **no format hint**,
+so symphonia sniffs the content and the extension lists are advisory only; everything is
+re-encoded to a 16 kHz `audio.mp3`.
+
+| Format | Decodes | Note |
+|--------|---------|------|
+| wav, mp3, ogg (Vorbis), mp4, m4a, flac, aac, aiff, caf | yes | each covered by a `test_import_*` case in `crates/audio-norm/src/lib.rs` |
+| webm | **usually not** | listed and advertised, but WebM audio is nearly always Opus and this build has no Opus decoder; only Vorbis-in-WebM works |
+| opus | macOS only | falls through to the `afconvert` shim (`crates/afconvert`); fails on other platforms |
+
+Drop and paste are wider than the picker: `isAudioUploadFile` also accepts `.qta` and any
+`audio/*` MIME, and `allowUnknownAudio` bypasses the check entirely, so unsupported containers
+surface as raw decoder errors through `handleBatchFailed`.
+
+Audio drop targets are wired in the raw note editor, the enhanced note editor, and the transcript
+tab (`session/components/note-input/audio-drop-target.tsx`). Other surfaces — sidebar, empty tab,
+chat — ignore dropped files. Because the Soniqo bridge downloads its weights lazily on first use,
+`warnIfSttPackMissing` toasts before the first import so a ~2 GB fetch doesn't look like a hang.
+
+### 5.2b Summarization (enhance) pipeline
+
+```text
+transform  → load session, transcripts, template, participants, images
+prompt     → crates/template-app renders enhance.system + enhance.user (Jinja/Askama)
+stream     → streamText(temperature 0.2, topP 0.9, maxOutputTokens 32768, maxRetries 4)
+validate   → first 10–30 chars must match the template's first section (≤2 retries)
+transforms → normalizeBulletPoints → smoothStream(250 ms, line)
+consume    → tasks.ts: text-delta → streamedText, reasoning-delta → streamedReasoning
+persist    → enhance-success.ts → session_documents.body (ProseMirror JSON)
+```
+
+Key behaviors worth preserving:
+
+- **Sampling is explicit.** Left unset, llama.cpp samples at `temperature 0.8`, which invents
+  detail on the one task where faithfulness matters. `groundedGenerationSettings()` pins
+  summaries to `0.2 / topP 0.9`. Short structured tasks use `deterministicGenerationSettings()`
+  (temperature 0).
+- **Thinking mode is opt-in** via the `llm_thinking` setting (default `false`,
+  `settings/ai/llm/thinking-toggle.tsx`). The server disables thinking globally; enhance
+  re-enables it per request through `thinkingProviderOptions()`. This scoping is load-bearing:
+  title generation caps output at 128 tokens and chat titles at 32, so a reasoning model would
+  spend the whole budget thinking and return nothing.
+- **Reasoning is displayed, never stored.** `streamedReasoning` feeds an expandable
+  disclosure above the streaming summary (`enhanced/thinking.tsx`); only the final markdown is
+  persisted.
+- **Length scales with the meeting.** `services/enhancer/summary-length.ts` guides the model
+  to ≤ 16,000 characters and ≤ 12 sections, proportional to transcript length.
+- **Action items have explicit rules** in `enhance.system.md.jinja`: only explicit commitments,
+  owner taken from the transcript speaker, no inferred deadlines, no invented owners.
 
 ### 5.3 Auth & billing claim flow
 
@@ -562,6 +720,18 @@ Docs: `docs/reference/cli.mdx`, `docs/reference/mcp.mdx`.
 | `VITE_PRO_GRANT_EMAILS` | Comma-separated emails unlocked client-side |
 | `VITE_SENTRY_DSN`, `VITE_POSTHOG_*` | Telemetry (optional) |
 | `VITE_APP_VERSION` | Version string |
+| `VITE_ASSEMBLYAI_API_KEY` | Preselects AssemblyAI STT when present |
+| `VITE_VENICE_API_KEY` / `VITE_VENICE_BASE_URL` / `VITE_VENICE_MODEL` | Preselects Venice LLM; never overrides an `on_device` selection |
+
+Runtime env read by the Rust side (not Vite):
+
+| Variable | Purpose |
+|----------|---------|
+| `ANARLOG_LLM_CTX_SIZE` | Local LLM context window; default 65536, clamped 8192–262144 |
+| `ANARLOG_LLM_THINK_BUDGET` | Reasoning token budget; default `-1` (unrestricted) |
+| `ANARLOG_LLM_SLEEP_IDLE_SECONDS` | Idle seconds before llama-server unloads its weights; default 300, floored at 30, any value ≤ 0 disables sleeping |
+| `MEETY_LLAMA_CPP_RELEASE` | llama.cpp release tag fetched by `llama:prepare` |
+| `MEETY_HYPR_LLM_URL` | Re-enables the legacy HyprLLM download (disabled by default) |
 
 ### 10.2 API / sync (selected)
 
@@ -579,6 +749,46 @@ pnpm exec dprint fmt
 pnpm -F desktop typecheck
 cargo check
 ```
+
+---
+
+## 10.4 Desktop packaging
+
+One lightweight product ships: **Anarlog**, built from `tauri.conf.thin.json`.
+
+```bash
+pnpm -F @hypr/desktop tauri:build:app
+# = llama:prepare → tauri build --config src-tauri/tauri.conf.thin.json
+#   → copy-packaging-artifacts.mjs
+```
+
+| Config | Product | Bundle id | Purpose |
+|--------|---------|-----------|---------|
+| `tauri.conf.json` | Anarlog Dev | `com.hyprnote.dev` | base config, dev |
+| **`tauri.conf.thin.json`** | **Anarlog** | `com.hyprnote.dev.thin` | **shipping build**, targets `app` + `dmg` |
+| `tauri.conf.stable.json` | Anarlog | `com.hyprnote.stable` | updater disabled |
+| `tauri.conf.staging.json` | Anarlog Staging | `com.hyprnote.staging` | staging |
+| `tauri.conf.bundled-models.json` | Anarlog STT | `com.hyprnote.dev.stt` | archived; STT weights baked in |
+| `tauri.conf.macos-intel.json` / `flatpak.json` | — | — | other targets |
+
+`tauri:build:bundled` is deliberately disabled (`exit 1`) — the product downloads weights
+rather than bundling them.
+
+**Signing matters more than it looks.** The thin config sets
+`bundle.macOS.signingIdentity: "-"`. Without it Tauri leaves the app *linker-signed only*:
+the signing identifier is the binary name rather than the bundle id, `Info.plist` is not
+bound, and **the entitlements in `Entitlements.plist` are never applied** — which silently
+breaks microphone permission, because macOS cannot attribute or persist a TCC grant to such
+a bundle. A correct build reports `Identifier=com.hyprnote.dev.thin`,
+`flags=0x10002(adhoc,runtime)`, `Info.plist entries=22`.
+
+Builds are ad-hoc signed and not notarized, so other Macs warn on first open. After
+installing over a previously broken build, reset the stale grant:
+`tccutil reset All com.hyprnote.dev.thin`.
+
+Artifacts land in `apps/desktop/src-tauri/target/release/bundle/` and are copied to
+`apps/desktop/dist-packaging/app/`. Copy signed bundles with `ditto`, not `cp -R`.
+Approximate sizes: `.app` 422 MB, `.dmg` 188 MB.
 
 ---
 
@@ -613,6 +823,17 @@ Meety fork P0 posture (2026-07-25):
 - Argmax/AM packs and HyprLLM downloads disabled unless `MEETY_AM_*_URL` / `MEETY_HYPR_LLM_URL` set
 - Resource suggestions do not call `anarlog.so` unless `VITE_RESOURCE_SUGGESTIONS_URL` is set
 - Web prod `VITE_API_URL` has no upstream default (`api.char.com` removed)
+- Desktop upstream links removed (2026-07-26): changelog no longer fetches from
+  `raw.githubusercontent.com/fastrepl/char` (this phoned home on every changelog view),
+  onboarding Discord/GitHub/X buttons, tray "Report Bug" / "Suggest Feature" (which opened
+  `anarlog.so/discord`), `docs.anarlog.so` links in LM Studio / Ollama / CLI / MCP / calendar,
+  and `fastrepl/char` issue links. Publisher is now `Anarlog`.
+- Local LLM weights come from Hugging Face (`unsloth/*`); the runtime comes from the
+  `ggml-org/llama.cpp` GitHub release
+
+Still upstream, deliberately: `com.hyprnote.*` bundle identifiers (they own the data
+directory and Keychain entries — renaming loses existing user data), the legacy `hyprnote://`
+deep-link scheme, and CI / web / Supabase / Stripe infrastructure.
 
 Still intentional when the user opts in / configures cloud:
 
@@ -657,6 +878,17 @@ Use these as “current product still works” checks when editing:
 8. **CLI** `anarlog meetings list` reads the same `app.db` as the desktop app.
 9. **Export** produces Markdown/PDF from memo/summary/transcript as configured.
 10. **Schema changes** go through `crates/db-app/migrations/` + Drizzle mirror — never hand-edit production DB files.
+11. **On-device LLM one-click** — the settings card offers the model matching this Mac's RAM,
+    downloads it with visible progress and a working cancel, then starts the server and selects
+    `on_device` without further input.
+12. **Local server survives a restart** — with `on_device` selected, quitting and reopening the
+    app leaves a working summary path (no stale `base_url`, no orphaned process).
+13. **Thinking mode is off by default**; enabling it shows an expandable thinking section during
+    summary generation and still produces a complete summary (title generation must keep working).
+14. **Signed bundle** — a fresh `tauri:build:app` produces a bundle whose `codesign -dv` reports
+    the real bundle id with `Info.plist` bound and the audio-input entitlement present.
+15. **No upstream phone-home** — opening the changelog, onboarding, or tray menus issues no
+    requests to `anarlog.so`, `hyprnote.com`, or `fastrepl/*`.
 
 ---
 
@@ -687,6 +919,16 @@ When changing the product:
 | Capture start | `apps/desktop/src/stt/useStartListening.ts` |
 | Listener core | `crates/listener-core/` |
 | Audio capture | `crates/audio-actual/` |
+| Local LLM catalog | `crates/local-model/src/lib.rs` |
+| Memory tiers | `crates/local-llm-core/src/model.rs` |
+| llama-server flags | `crates/local-llm-core/src/server.rs` |
+| Local LLM plugin | `plugins/local-llm/src/ext.rs` |
+| On-device LLM card | `apps/desktop/src/settings/ai/llm/on-device.tsx` |
+| Server keep-alive | `apps/desktop/src/ai/hooks/useEnsureLocalLlm.ts` |
+| Sampling / thinking | `apps/desktop/src/ai/model-settings.ts` |
+| Summary prompt | `crates/template-app/assets/enhance.system.md.jinja` |
+| Enhance workflow | `apps/desktop/src/store/zustand/ai-task/task-configs/enhance-workflow.ts` |
+| Packaging build | `apps/desktop/src-tauri/tauri.conf.thin.json` |
 | Agent guidelines | `AGENTS.md` |
 
 ---

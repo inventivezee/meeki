@@ -3,3 +3,5 @@ passthrough-aarch64-apple-darwin
 stt
 ttt
 mlx.metallib
+soniqo-models
+llama-cpp

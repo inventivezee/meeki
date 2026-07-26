@@ -3,6 +3,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useRef, useState } from "react";
 
 import {
+  commands as localLlmCommands,
+  type GgufLlmModel,
+} from "@hypr/plugin-local-llm";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -13,6 +17,7 @@ import { cn } from "@hypr/utils";
 
 import { useLlmSettings } from "./context";
 import { HealthStatusIndicator, useConnectionHealth } from "./health";
+import { OnDeviceLlmCard } from "./on-device";
 import {
   getDefaultLlmSelection,
   getPreferredProviderModel,
@@ -20,6 +25,7 @@ import {
   shouldShowMissingModelWarning,
 } from "./selection";
 import { type Provider, PROVIDERS } from "./shared";
+import { ThinkingToggle } from "./thinking-toggle";
 
 import { useAuth } from "~/auth";
 import { useBillingAccess } from "~/auth/billing-context";
@@ -47,6 +53,7 @@ import {
 } from "~/settings/ai/shared/list-openai";
 import { listOpenRouterModels } from "~/settings/ai/shared/list-openrouter";
 import { ModelCombobox } from "~/settings/ai/shared/model-combobox";
+import { OnDeviceSetupCard } from "~/settings/ai/shared/on-device-setup";
 import { PersistAiSelection } from "~/settings/ai/shared/persist-selection";
 import {
   getConfiguredProviderIds,
@@ -242,11 +249,6 @@ export function SelectProviderAndModel() {
       : undefined;
 
   const handleProviderChange = (provider: string) => {
-    if (provider === "hyprnote" && !billing.isPaid) {
-      billing.upgradeToPro();
-      return;
-    }
-
     const requestId = ++selectionRequestRef.current;
 
     const status = configuredProviders[provider];
@@ -344,6 +346,9 @@ export function SelectProviderAndModel() {
           model={defaultSelection.model}
         />
       ) : null}
+      <OnDeviceSetupCard />
+      <OnDeviceLlmCard />
+      <ThinkingToggle />
       <SettingsAlertToast
         id="llm-settings-alert"
         description={alertDescription}
@@ -457,17 +462,12 @@ export function getLlmProviderStatus({
     return { configured: false };
   }
 
-  if (provider.id === "hyprnote") {
-    const result: ListModelsResult = {
-      models: ["Auto"],
-      ignored: [],
-      metadata: {
-        Auto: {
-          input_modalities: ["text", "image"] as InputModality[],
-        },
-      },
+  if (provider.id === "on_device") {
+    return {
+      // Weights must be present before On device counts as a selectable default.
+      configured: false,
+      listModels: undefined,
     };
-    return { configured: true, listModels: async () => result };
   }
 
   let listModelsFunc: () => Promise<ListModelsResult>;
@@ -484,6 +484,9 @@ export function getLlmProviderStatus({
       break;
     case "openrouter":
       listModelsFunc = () => listOpenRouterModels(baseUrl, apiKey);
+      break;
+    case "venice":
+      listModelsFunc = () => listOpenAIModels(baseUrl, apiKey);
       break;
     case "google_generative_ai":
       listModelsFunc = () => listGoogleModels(baseUrl, apiKey);
@@ -524,11 +527,45 @@ function useConfiguredMapping(): {
   const billing = useBillingAccess();
   const { providers: configuredProviders, isReady } =
     useAiProvidersState("llm");
+  const downloadedOnDevice = useQuery({
+    queryKey: ["local-llm-downloaded"],
+    queryFn: async () => {
+      const result = await localLlmCommands.listDownloadedModel();
+      return result.status === "ok" ? result.data : [];
+    },
+    refetchInterval: 2_000,
+  });
 
   const mapping = useMemo(() => {
     return Object.fromEntries(
       PROVIDERS.map((provider) => {
         const config = configuredProviders[providerRowId("llm", provider.id)];
+        if (provider.id === "on_device") {
+          const models =
+            downloadedOnDevice.data && downloadedOnDevice.data.length > 0
+              ? downloadedOnDevice.data
+              : ([] as GgufLlmModel[]);
+          return [
+            provider.id,
+            {
+              configured: models.length > 0,
+              listModels:
+                models.length > 0
+                  ? async () =>
+                      ({
+                        models,
+                        ignored: [],
+                        metadata: Object.fromEntries(
+                          models.map((model) => [
+                            model,
+                            { input_modalities: ["text"] as InputModality[] },
+                          ]),
+                        ),
+                      }) satisfies ListModelsResult
+                  : undefined,
+            } satisfies ProviderStatus,
+          ];
+        }
         return [
           provider.id,
           getLlmProviderStatus({
@@ -540,7 +577,7 @@ function useConfiguredMapping(): {
         ];
       }),
     ) as Record<string, ProviderStatus>;
-  }, [configuredProviders, auth, billing]);
+  }, [configuredProviders, auth, billing, downloadedOnDevice.data]);
 
   return { providers: mapping, isReady };
 }

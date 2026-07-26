@@ -10,6 +10,7 @@ import {
   type TaskType,
 } from "./task-configs";
 
+import { getWarmupGraceMs } from "~/ai/local-llm-warmup";
 import { getStoredSettingValues } from "~/settings/queries";
 
 export type TasksState = {
@@ -51,6 +52,8 @@ export type TaskState<T extends TaskType = TaskType> = {
   taskType: T;
   status: TaskStatus;
   streamedText: string;
+  /** Reasoning trace when the model is in thinking mode. Never persisted. */
+  streamedReasoning: string;
   error?: Error;
   abortController: AbortController | null;
   currentStep?: TaskStepInfo<T>;
@@ -203,6 +206,7 @@ export const createTasksSlice = <T extends TasksState & TasksActions>(
           taskType: task.taskType,
           status: "idle",
           streamedText: task.streamedText,
+          streamedReasoning: task.streamedReasoning,
           error: undefined,
           abortController: null,
           currentStep: undefined,
@@ -220,6 +224,7 @@ export const createTasksSlice = <T extends TasksState & TasksActions>(
             taskType: state.taskType,
             status: "idle",
             streamedText: "",
+            streamedReasoning: "",
             error: undefined,
             abortController: null,
             currentStep: undefined,
@@ -238,6 +243,7 @@ export const createTasksSlice = <T extends TasksState & TasksActions>(
           taskType: task.taskType,
           status: task.status,
           streamedText: task.streamedText,
+          streamedReasoning: "",
           error: task.error ? createSyncedTaskError(task.error) : undefined,
           abortController: null,
           currentStep: task.currentStep,
@@ -255,6 +261,7 @@ export const createTasksSlice = <T extends TasksState & TasksActions>(
               taskType: task.taskType,
               status: task.status,
               streamedText: task.streamedText,
+              streamedReasoning: "",
               error: task.error ? createSyncedTaskError(task.error) : undefined,
               abortController: null,
               currentStep: task.currentStep,
@@ -288,6 +295,7 @@ export const createTasksSlice = <T extends TasksState & TasksActions>(
             taskType: config.taskType,
             status: "generating",
             streamedText: "",
+            streamedReasoning: "",
             error: undefined,
             abortController,
             currentStep: undefined,
@@ -304,6 +312,7 @@ export const createTasksSlice = <T extends TasksState & TasksActions>(
         abortController.signal,
       );
       let fullText = "";
+      let fullReasoning = "";
 
       const checkAbort = () => {
         throwIfAborted(abortController.signal);
@@ -346,7 +355,9 @@ export const createTasksSlice = <T extends TasksState & TasksActions>(
             iterator,
             fullText.trim()
               ? TASK_STREAM_IDLE_TIMEOUT_MS
-              : TASK_STREAM_START_TIMEOUT_MS,
+              : // A sleeping on-device model spends its first seconds reloading
+                // weights, which is not the stall this timeout guards against.
+                TASK_STREAM_START_TIMEOUT_MS + getWarmupGraceMs(),
           );
           checkAbort();
 
@@ -375,6 +386,17 @@ export const createTasksSlice = <T extends TasksState & TasksActions>(
                 const currentState = draft.tasks[taskId];
                 if (currentState) {
                   currentState.streamedText = fullText;
+                }
+              }),
+            );
+          } else if (chunk.type === "reasoning-delta") {
+            fullReasoning += chunk.text;
+
+            set((state) =>
+              mutate(state, (draft) => {
+                const currentState = draft.tasks[taskId];
+                if (currentState) {
+                  currentState.streamedReasoning = fullReasoning;
                 }
               }),
             );
@@ -417,6 +439,7 @@ export const createTasksSlice = <T extends TasksState & TasksActions>(
             taskType: config.taskType,
             status: "success",
             streamedText: fullText,
+            streamedReasoning: fullReasoning,
             error: undefined,
             abortController: null,
             currentStep: undefined,
@@ -446,6 +469,7 @@ export const createTasksSlice = <T extends TasksState & TasksActions>(
               taskType: config.taskType,
               status: "idle",
               streamedText: "",
+              streamedReasoning: "",
               error: undefined,
               abortController: null,
               currentStep: undefined,
@@ -460,6 +484,7 @@ export const createTasksSlice = <T extends TasksState & TasksActions>(
               taskType: config.taskType,
               status: "error",
               streamedText: "",
+              streamedReasoning: "",
               error,
               abortController: null,
               currentStep: undefined,

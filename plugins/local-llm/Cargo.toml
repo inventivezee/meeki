@@ -32,4 +32,5 @@ tracing = { workspace = true }
 dirs = { workspace = true }
 serde = { workspace = true }
 specta = { workspace = true }
+sysinfo = { workspace = true }
 tokio = { workspace = true, features = ["rt", "macros"] }

@@ -13,15 +13,22 @@ import type { EnhanceImageContext } from "./enhance-images";
 import { createEnhanceValidator } from "./enhance-validator";
 
 import {
+  groundedGenerationSettings,
+  thinkingProviderOptions,
+} from "~/ai/model-settings";
+import {
   formatSummaryLengthGuidance,
   getSummaryLengthPolicy,
 } from "~/services/enhancer/summary-length";
+import { getStoredSettingValues } from "~/settings/queries";
 import { normalizeBulletPoints } from "~/store/zustand/ai-task/shared/transform_impl";
 import { withEarlyValidationRetry } from "~/store/zustand/ai-task/shared/validate";
 import { assertCanonicalTemplateSections } from "~/templates/codec";
 
 const AI_GENERATION_MAX_RETRIES = 4;
-const SUMMARY_MAX_OUTPUT_TOKENS = 8192;
+// Long meetings need room for a full structured summary, and reasoning tokens
+// come out of the same budget before any of the note is written.
+const SUMMARY_MAX_OUTPUT_TOKENS = 32768;
 const IMAGE_CONTEXT_NOTE =
   "Attached note images are included as visual context. Use visible text, diagrams, screenshots, and other image content when it materially improves the summary.";
 
@@ -124,6 +131,9 @@ async function* generateSummary(params: {
 
   onProgress({ type: "generating" });
 
+  const { values } = await getStoredSettingValues();
+  const thinking = values.llm_thinking ? thinkingProviderOptions() : undefined;
+
   const validator = createEnhanceValidator(args.template, {
     overrideTemplateFormatting: Boolean(args.promptOverride.trim()),
   });
@@ -150,6 +160,8 @@ IMPORTANT: Previous attempt failed. ${previousFeedback}`;
         model,
         system,
         ...createPromptInput(enhancedPrompt, args.imageContext),
+        ...groundedGenerationSettings(model),
+        ...(thinking ? { providerOptions: thinking } : {}),
         abortSignal: combinedController.signal,
         maxRetries: AI_GENERATION_MAX_RETRIES,
         maxOutputTokens: SUMMARY_MAX_OUTPUT_TOKENS,

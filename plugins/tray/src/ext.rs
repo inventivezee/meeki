@@ -17,8 +17,8 @@ use crate::{
 };
 
 use crate::menu_items::{
-    AppInfo, AppNew, HelpReportBug, HelpSuggestFeature, MenuItemHandler, TrayCheckUpdate, TrayOpen,
-    TrayQuit, TraySettings, TrayShowEvents, TrayStart, TrayVersion, build_agenda_item,
+    AppInfo, AppNew, MenuItemHandler, TrayCheckUpdate, TrayOpen, TrayQuit, TraySettings,
+    TrayShowEvents, TrayStart, TrayVersion, build_agenda_item,
 };
 use tauri_plugin_store2::Store2PluginExt;
 
@@ -48,8 +48,6 @@ impl<'a, M: tauri::Manager<tauri::Wry>> Tray<'a, tauri::Wry, M> {
         let check_update_item = TrayCheckUpdate::build(app)?;
         let settings_item = TraySettings::build(app)?;
         let new_item = AppNew::build(app)?;
-        let report_bug_item = HelpReportBug::build(app)?;
-        let suggest_feature_item = HelpSuggestFeature::build(app)?;
 
         if cfg!(target_os = "macos")
             && let Some(menu) = app.menu()
@@ -98,14 +96,6 @@ impl<'a, M: tauri::Manager<tauri::Wry>> Tray<'a, tauri::Wry, M> {
                     break;
                 }
             }
-
-            let help_submenu = Submenu::with_items(
-                app,
-                "Help",
-                true,
-                &[&report_bug_item, &suggest_feature_item],
-            )?;
-            menu.append(&help_submenu)?;
         }
 
         Ok(())

@@ -288,6 +288,42 @@ export async function transcriptExists(transcriptId: string): Promise<boolean> {
   return Boolean(rows[0]);
 }
 
+export type BatchTranscriptIdentity = {
+  id: string;
+  provider: string;
+  model: string;
+  source: string;
+};
+
+/** Latest non-deleted batch transcript for a session, if any. */
+export async function getLatestBatchTranscript(
+  sessionId: string,
+): Promise<BatchTranscriptIdentity | null> {
+  const rows = await liveQueryClient.execute<BatchTranscriptIdentity>(
+    `
+      SELECT id, provider, model, source
+      FROM transcripts
+      WHERE session_id = ?
+        AND deleted_at IS NULL
+        AND source = 'batch_transcription'
+        AND TRIM(COALESCE(model, '')) != ''
+      ORDER BY created_at DESC, started_at_ms DESC, id DESC
+      LIMIT 1
+    `,
+    [sessionId],
+  );
+  const row = rows[0];
+  if (!row) {
+    return null;
+  }
+  return {
+    id: row.id,
+    provider: row.provider ?? "",
+    model: row.model ?? "",
+    source: row.source ?? "",
+  };
+}
+
 export function applyLiveTranscriptDeltaToDatabase(
   transcriptId: string,
   delta: LiveTranscriptDelta,

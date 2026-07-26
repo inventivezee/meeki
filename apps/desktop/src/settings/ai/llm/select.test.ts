@@ -46,4 +46,15 @@ describe("getLlmProviderStatus", () => {
     expect(status.configured).toBe(true);
     expect(status.listModels).toBeTypeOf("function");
   });
+
+  test("does not mark on-device as configured until weights are present", () => {
+    const status = getLlmProviderStatus({
+      provider: provider("on_device"),
+      isAuthenticated: false,
+      isPaid: false,
+    });
+
+    expect(status.configured).toBe(false);
+    expect(status.listModels).toBeUndefined();
+  });
 });

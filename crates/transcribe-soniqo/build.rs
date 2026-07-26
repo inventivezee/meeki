@@ -8,7 +8,9 @@ use std::{
 };
 
 #[cfg(target_os = "macos")]
-const SONIQO_SWIFT_MACOS_DEPLOYMENT_TARGET: &str = "14.2";
+// Qwen3ASR uses Core ML APIs that require macOS 15. The desktop app already
+// ships with minimumSystemVersion 15.0, so keep Swift aligned with that floor.
+const SONIQO_SWIFT_MACOS_DEPLOYMENT_TARGET: &str = "15.0";
 #[cfg(target_os = "macos")]
 const SONIQO_METALLIB_MACOS_DEPLOYMENT_TARGET: &str = "15.0";
 
@@ -185,10 +187,12 @@ fn patch_speech_swift_manifest(swift_build_dir: &Path) {
         return;
     }
 
-    let patched = contents.replace(".macOS(\"15.0\")", &target);
+    let patched = contents
+        .replace(".macOS(\"14.2\")", &target)
+        .replace(".macOS(\"15.0\")", &target);
     if patched == contents {
         panic!(
-            "failed to patch Soniqo speech-swift manifest {}; expected macOS 15.0 platform declaration",
+            "failed to patch Soniqo speech-swift manifest {}; expected macOS 14.2/15.0 platform declaration",
             manifest.display()
         );
     }

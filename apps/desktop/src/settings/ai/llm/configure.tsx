@@ -22,7 +22,7 @@ export function ConfigureProviders() {
         value={accordionValue}
         onValueChange={setAccordionValue}
       >
-        {PROVIDERS.filter((provider) => provider.id !== "hyprnote").map(
+        {PROVIDERS.filter((provider) => provider.id !== "on_device").map(
           (provider) => (
             <NonHyprProviderCard
               key={provider.id}
@@ -44,19 +44,21 @@ function ProviderContext({ providerId }: { providerId: ProviderId }) {
       ? "- Ensure LM Studio server is **running.** (Default port is 1234)\n- Enable **CORS** in LM Studio config."
       : providerId === "ollama"
         ? "- Ensure Ollama is **running** (`ollama serve`)\n- Pull a model first (`ollama pull llama3.2`)"
-        : providerId === "custom"
-          ? "We only support **OpenAI-compatible** endpoints for now."
-          : providerId === "openrouter"
-            ? "We filter out models from the combobox based on heuristics like **input modalities** and **tool support**."
-            : providerId === "azure_openai"
-              ? "Enter your **Azure OpenAI endpoint** (e.g. `https://your-resource.openai.azure.com`) as the Base URL and your **API key**. [Report issues](https://github.com/fastrepl/char/issues/3928)"
-              : providerId === "azure_ai"
-                ? "Enter your **Azure AI Foundry endpoint** as the Base URL and your **API key**. Supports Claude and other models deployed via Azure AI Foundry. [Report issues](https://github.com/fastrepl/char/issues/3928)"
-                : providerId === "google_generative_ai"
-                  ? "Visit [AI Studio](https://aistudio.google.com/api-keys) to create an API key."
-                  : providerId === "cloudflare_workers_ai"
-                    ? "Enter the Workers AI **OpenAI-compatible base URL** as `https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/v1` and use a Cloudflare API token with Workers AI access."
-                    : "";
+        : providerId === "venice"
+          ? "Optional cloud path. Paste your Venice API key to use **Qwen 3.6 35B A3B** privately in a TEE instead of local weights. [Get an API key](https://venice.ai)."
+          : providerId === "custom"
+            ? "We only support **OpenAI-compatible** endpoints for now."
+            : providerId === "openrouter"
+              ? "We filter out models from the combobox based on heuristics like **input modalities** and **tool support**."
+              : providerId === "azure_openai"
+                ? "Enter your **Azure OpenAI endpoint** (e.g. `https://your-resource.openai.azure.com`) as the Base URL and your **API key**."
+                : providerId === "azure_ai"
+                  ? "Enter your **Azure AI Foundry endpoint** as the Base URL and your **API key**. Supports Claude and other models deployed via Azure AI Foundry."
+                  : providerId === "google_generative_ai"
+                    ? "Visit [AI Studio](https://aistudio.google.com/api-keys) to create an API key."
+                    : providerId === "cloudflare_workers_ai"
+                      ? "Enter the Workers AI **OpenAI-compatible base URL** as `https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/v1` and use a Cloudflare API token with Workers AI access."
+                      : "";
 
   if (!content) {
     return null;

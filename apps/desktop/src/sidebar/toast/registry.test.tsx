@@ -12,7 +12,6 @@ const baseParams = {
   hasLLMConfigured: true,
   hasSttConfigured: true,
   hasProSttConfigured: false,
-  hasProLlmConfigured: false,
   isAiTranscriptionTabActive: false,
   isAiIntelligenceTabActive: false,
   isBatchTranscribingInActiveTranscriptTab: false,
@@ -20,6 +19,7 @@ const baseParams = {
   hasActiveDownload: false,
   downloadingModel: null,
   activeDownloads: [],
+  captureErrors: [],
   localSttStatus: null,
   isLocalSttModel: false,
   onSignIn: vi.fn(),
@@ -28,6 +28,28 @@ const baseParams = {
 };
 
 describe("sidebar toast registry", () => {
+  it("surfaces capture errors once ahead of setup prompts", () => {
+    const toast = getToastToShow(
+      createToastRegistry({
+        ...baseParams,
+        hasLLMConfigured: false,
+        captureErrors: [
+          {
+            id: "capture-error:transcript-incomplete:session-1",
+            message:
+              "Anarlog could not finish saving the transcript. The recording was kept so you can try again.",
+            variant: "error",
+          },
+        ],
+      }),
+      () => false,
+    );
+
+    expect(toast?.id).toBe("capture-error:transcript-incomplete:session-1");
+    expect(toast?.variant).toBe("error");
+    expect(toast?.dismissible).toBe(true);
+  });
+
   it("keeps the missing language model message short", () => {
     const toast = getToastToShow(
       createToastRegistry({
@@ -86,7 +108,7 @@ describe("sidebar toast registry", () => {
     expect(toast?.description).toBe("Transcription provider needed");
   });
 
-  it("keeps Pro providers usable while authentication is loading", () => {
+  it("keeps Pro STT usable while authentication is loading", () => {
     const proSttToast = getToastToShow(
       createToastRegistry({
         ...baseParams,
@@ -96,18 +118,21 @@ describe("sidebar toast registry", () => {
       }),
       () => false,
     );
-    const proLlmToast = getToastToShow(
+
+    expect(proSttToast).toBeNull();
+  });
+
+  it("keeps a configured LLM usable without an account", () => {
+    const toast = getToastToShow(
       createToastRegistry({
         ...baseParams,
         isAuthenticated: false,
-        isAuthLoading: true,
-        hasProLlmConfigured: true,
+        isAuthLoading: false,
       }),
       () => false,
     );
 
-    expect(proSttToast).toBeNull();
-    expect(proLlmToast).toBeNull();
+    expect(toast?.id).not.toBe("missing-llm");
   });
 
   it("hides local STT loading while the active transcript tab shows batch progress", () => {
@@ -153,7 +178,7 @@ describe("sidebar toast registry", () => {
     expect(toast?.loading).toBe(true);
   });
 
-  it("renders the pro upgrade toast without an icon", () => {
+  it("does not upsell Anarlog Pro in the sidebar toast registry", () => {
     const toast = getToastToShow(
       createToastRegistry({
         ...baseParams,
@@ -168,9 +193,8 @@ describe("sidebar toast registry", () => {
       onOpenSTTSettings: vi.fn(),
     });
 
-    expect(toast?.id).toBe("upgrade-to-pro");
-    expect(toast?.description).toBe("Pro features available");
-    expect(toast?.icon).toBeUndefined();
+    expect(toast).toBeNull();
+    expect(previewToast.id).toBe("devtools-upgrade-to-pro");
     expect(previewToast.icon).toBeUndefined();
   });
 

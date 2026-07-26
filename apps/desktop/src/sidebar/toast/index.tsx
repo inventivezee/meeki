@@ -16,6 +16,7 @@ import { useNotifications } from "~/contexts/notifications";
 import { useConfigValues } from "~/shared/config";
 import { useLatestRef } from "~/shared/hooks/useLatestRef";
 import { useMountEffect } from "~/shared/hooks/useMountEffect";
+import { useCaptureErrors } from "~/store/zustand/capture-errors";
 import { useDevtoolsToastPreview } from "~/store/zustand/devtools-toast-preview";
 import { useTabs } from "~/store/zustand/tabs";
 import { useToastAction } from "~/store/zustand/toast-action";
@@ -37,6 +38,8 @@ export function ToastNotifications() {
     localSttStatus,
     isLocalSttModel,
   } = useNotifications();
+  const captureErrors = useCaptureErrors((state) => state.errors);
+  const dismissCaptureError = useCaptureErrors((state) => state.dismiss);
 
   const isAuthenticated = !!auth?.session;
   const isAuthLoading = auth.session === undefined;
@@ -60,7 +63,6 @@ export function ToastNotifications() {
     current_stt_provider,
     current_stt_model,
   );
-  const hasProLlmConfigured = current_llm_provider === "hyprnote";
 
   const currentTab = useTabs((state) => state.currentTab);
   const devtoolsPreview = useDevtoolsToastPreview((state) => state.preview);
@@ -121,7 +123,6 @@ export function ToastNotifications() {
         hasLLMConfigured,
         hasSttConfigured,
         hasProSttConfigured,
-        hasProLlmConfigured,
         isAiTranscriptionTabActive,
         isAiIntelligenceTabActive,
         isBatchTranscribingInActiveTranscriptTab,
@@ -132,6 +133,7 @@ export function ToastNotifications() {
         hasActiveDownload,
         downloadingModel,
         activeDownloads,
+        captureErrors,
         localSttStatus,
         isLocalSttModel,
         onSignIn: handleSignIn,
@@ -144,7 +146,6 @@ export function ToastNotifications() {
       hasLLMConfigured,
       hasSttConfigured,
       hasProSttConfigured,
-      hasProLlmConfigured,
       isAiTranscriptionTabActive,
       isAiIntelligenceTabActive,
       isBatchTranscribingInActiveTranscriptTab,
@@ -152,6 +153,7 @@ export function ToastNotifications() {
       hasActiveDownload,
       downloadingModel,
       activeDownloads,
+      captureErrors,
       localSttStatus,
       isLocalSttModel,
       handleSignIn,
@@ -193,9 +195,16 @@ export function ToastNotifications() {
     }
 
     if (currentToast) {
+      dismissCaptureError(currentToast.id);
       dismissToast(currentToast.id);
     }
-  }, [clearDevtoolsPreview, currentToast, devtoolsToast, dismissToast]);
+  }, [
+    clearDevtoolsPreview,
+    currentToast,
+    devtoolsToast,
+    dismissCaptureError,
+    dismissToast,
+  ]);
 
   if (!shouldShowToast || !displayToast) {
     return null;

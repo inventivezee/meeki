@@ -211,8 +211,8 @@ msgid "Anarlog needs access to your microphone and system audio to record and tr
 msgstr "Anarlog needs access to your microphone and system audio to record and transcribe your meetings"
 
 #: src/onboarding/index.tsx
-msgid "Anarlog needs microphone and system audio to transcribe your meetings, plus Accessibility to read meeting controls, visible chat, and participant status."
-msgstr "Anarlog needs microphone and system audio to transcribe your meetings, plus Accessibility to read meeting controls, visible chat, and participant status."
+#~ msgid "Anarlog needs microphone and system audio to transcribe your meetings, plus Accessibility to read meeting controls, visible chat, and participant status."
+#~ msgstr "Anarlog needs microphone and system audio to transcribe your meetings, plus Accessibility to read meeting controls, visible chat, and participant status."
 
 #: src/main/sync-status.tsx
 msgid "Anarlog Pro is required to use cloud sync."
@@ -1016,8 +1016,8 @@ msgid "Help Anarlog listen to you"
 msgstr "Help Anarlog listen to you"
 
 #: src/onboarding/permissions.tsx
-msgid "Help Anarlog read meeting activity"
-msgstr "Help Anarlog read meeting activity"
+#~ msgid "Help Anarlog read meeting activity"
+#~ msgstr "Help Anarlog read meeting activity"
 
 #: src/sidebar/timeline/index.tsx
 msgid "Hide Deleted Events"
@@ -1093,8 +1093,8 @@ msgid "Join meeting and record"
 msgstr "Join meeting and record"
 
 #: src/onboarding/final.tsx
-msgid "Join our community and stay updated:"
-msgstr "Join our community and stay updated:"
+#~ msgid "Join our community and stay updated:"
+#~ msgstr "Join our community and stay updated:"
 
 #: src/settings/general/app-settings.tsx
 msgid "Join scheduled meetings"
@@ -1248,6 +1248,10 @@ msgstr "Microphone"
 #: src/onboarding/permissions.tsx
 msgid "Microphone access turned on"
 msgstr "Microphone access turned on"
+
+#: src/onboarding/index.tsx
+msgid "Microphone and system audio are required to record. Accessibility is optional and only used for meeting-app helpers like chat capture and mute sync."
+msgstr "Microphone and system audio are required to record. Accessibility is optional and only used for meeting-app helpers like chat capture and mute sync."
 
 #: src/settings/general/notification.tsx
 msgid "Microphone detection"
@@ -1419,6 +1423,10 @@ msgstr "Now"
 msgid "Objects"
 msgstr "Objects"
 
+#: src/settings/general/app-settings.tsx
+msgid "Off by default. If enabled, send anonymous usage analytics (not meeting content) to help improve the app."
+msgstr "Off by default. If enabled, send anonymous usage analytics (not meeting content) to help improve the app."
+
 #: src/contacts/shared.tsx
 msgid "Oldest"
 msgstr "Oldest"
@@ -1485,6 +1493,14 @@ msgstr "Open web copy"
 #: src/shared-notes/index.tsx
 msgid "Opening…"
 msgstr "Opening…"
+
+#: src/onboarding/permissions.tsx
+msgid "Optional: read meeting activity"
+msgstr "Optional: read meeting activity"
+
+#: src/onboarding/permissions.tsx
+msgid "Optional. Used for meeting controls, visible chat, mute sync, and participant status — not required to record"
+msgstr "Optional. Used for meeting controls, visible chat, mute sync, and participant status — not required to record"
 
 #: src/calendar/components/apple/permission.tsx
 #: src/settings/todo/provider-content.tsx
@@ -1584,8 +1600,8 @@ msgid "Protect cloud sync"
 msgstr "Protect cloud sync"
 
 #: src/onboarding/permissions.tsx
-msgid "Read meeting controls, visible chat, and participant status"
-msgstr "Read meeting controls, visible chat, and participant status"
+#~ msgid "Read meeting controls, visible chat, and participant status"
+#~ msgstr "Read meeting controls, visible chat, and participant status"
 
 #: src/onboarding/index.tsx
 msgid "Ready to go"
@@ -1865,8 +1881,8 @@ msgid "Select..."
 msgstr "Select..."
 
 #: src/settings/general/app-settings.tsx
-msgid "Send anonymous usage analytics to help improve Anarlog."
-msgstr "Send anonymous usage analytics to help improve Anarlog."
+#~ msgid "Send anonymous usage analytics to help improve Anarlog."
+#~ msgstr "Send anonymous usage analytics to help improve Anarlog."
 
 #: src/contacts/organization-details.tsx
 msgid "Send email"
@@ -2096,6 +2112,10 @@ msgstr "Signing out..."
 #: src/onboarding/shared.tsx
 msgid "Skip"
 msgstr "Skip"
+
+#: src/onboarding/permissions.tsx
+msgid "Skip Accessibility"
+msgstr "Skip Accessibility"
 
 #: src/onboarding/index.tsx
 msgid "Skipped"
@@ -2519,6 +2539,10 @@ msgstr "Your Account"
 #: src/session-sharing/comments.tsx
 msgid "Your comment couldn’t be added. Try again."
 msgstr "Your comment couldn’t be added. Try again."
+
+#: src/onboarding/final.tsx
+msgid "Your notes and recordings stay on this Mac unless you choose a cloud provider."
+msgstr "Your notes and recordings stay on this Mac unless you choose a cloud provider."
 
 #: src/settings/sync/index.tsx
 msgid "Your notes remain available locally."

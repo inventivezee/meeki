@@ -11,6 +11,11 @@ import {
 } from "./useStartListening";
 
 import { enqueueSessionAudioOperation } from "~/session/audio-operations";
+import {
+  captureBatchFailedErrorId,
+  captureTranscriptIncompleteErrorId,
+  useCaptureErrors,
+} from "~/store/zustand/capture-errors";
 
 const {
   queueAutoEnhanceMock,
@@ -293,6 +298,20 @@ describe("getPostCaptureAction", () => {
     ).toBe("enhance_only");
   });
 
+  test("always batches after live when local Soniqo preview must be replaced by Qwen", () => {
+    expect(
+      getPostCaptureAction(
+        {
+          audioPath: "/tmp/session.wav",
+          liveTranscriptionActive: true,
+          needsBatchRepair: false,
+        },
+        true,
+        { alwaysBatchAfterLive: true },
+      ),
+    ).toBe("batch_then_enhance");
+  });
+
   test("repairs the full transcript after live transcription recovered", () => {
     expect(
       getPostCaptureAction(
@@ -350,6 +369,7 @@ describe("getPostCaptureAction", () => {
 describe("useStartListening", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    useCaptureErrors.getState().clear();
     idMock.mockReturnValue("generated-id");
 
     getEnhancerServiceMock.mockImplementation(() => ({
@@ -2177,10 +2197,14 @@ describe("useStartListening", () => {
       });
     });
 
-    expect(sonnerToastErrorMock).toHaveBeenCalledWith(
-      "Anarlog could not save part of the live transcript.",
-      { id: "live-transcript-persist-failed" },
-    );
+    expect(useCaptureErrors.getState().errors).toEqual([
+      {
+        id: "capture-error:live-transcript-persist:session-1",
+        message: "Anarlog could not save part of the live transcript.",
+        variant: "error",
+      },
+    ]);
+    expect(sonnerToastErrorMock).not.toHaveBeenCalled();
     expect(queueAutoEnhanceIfSummaryEmptyMock).not.toHaveBeenCalled();
     expect(queueAutoEnhanceMock).not.toHaveBeenCalled();
     expect(saveCaptureLifecycleMarkerMock).not.toHaveBeenCalledWith(
@@ -2227,10 +2251,15 @@ describe("useStartListening", () => {
       });
     });
 
-    expect(sonnerToastErrorMock).toHaveBeenCalledWith(
-      "Anarlog could not finish saving the transcript. The recording was kept so you can try again.",
-      { id: "post-capture-transcript-incomplete" },
-    );
+    expect(useCaptureErrors.getState().errors).toEqual([
+      {
+        id: captureTranscriptIncompleteErrorId("session-1"),
+        message:
+          "Anarlog could not finish saving the transcript. The recording was kept so you can try again.",
+        variant: "error",
+      },
+    ]);
+    expect(sonnerToastErrorMock).not.toHaveBeenCalled();
     expect(markSessionAudioTranscriptionCompleteMock).not.toHaveBeenCalled();
     expect(deleteProcessedAudioForRetentionMock).not.toHaveBeenCalled();
     expect(queueAutoEnhanceIfSummaryEmptyMock).not.toHaveBeenCalled();
@@ -2266,10 +2295,15 @@ describe("useStartListening", () => {
       });
     });
 
-    expect(sonnerToastErrorMock).toHaveBeenCalledWith(
-      "Post-meeting transcription failed. The recording was kept so you can try again.",
-      { id: "post-capture-batch-failed" },
-    );
+    expect(useCaptureErrors.getState().errors).toEqual([
+      {
+        id: captureBatchFailedErrorId("session-1"),
+        message:
+          "Post-meeting transcription failed. The recording was kept so you can try again.",
+        variant: "error",
+      },
+    ]);
+    expect(sonnerToastErrorMock).not.toHaveBeenCalled();
     expect(markSessionAudioTranscriptionCompleteMock).not.toHaveBeenCalled();
     expect(deleteProcessedAudioForRetentionMock).not.toHaveBeenCalled();
     expect(queueAutoEnhanceIfSummaryEmptyMock).not.toHaveBeenCalled();
@@ -2305,10 +2339,15 @@ describe("useStartListening", () => {
       });
     });
 
-    expect(sonnerToastErrorMock).toHaveBeenCalledWith(
-      "Anarlog could not finish saving the transcript. The recording was kept so you can try again.",
-      { id: "post-capture-transcript-incomplete" },
-    );
+    expect(useCaptureErrors.getState().errors).toEqual([
+      {
+        id: captureTranscriptIncompleteErrorId("session-1"),
+        message:
+          "Anarlog could not finish saving the transcript. The recording was kept so you can try again.",
+        variant: "error",
+      },
+    ]);
+    expect(sonnerToastErrorMock).not.toHaveBeenCalled();
     expect(queueAutoEnhanceIfSummaryEmptyMock).not.toHaveBeenCalled();
     expect(deleteProcessedAudioForRetentionMock).not.toHaveBeenCalled();
     expect(saveCaptureLifecycleMarkerMock).not.toHaveBeenCalledWith(
@@ -2648,7 +2687,7 @@ describe("useStartListening", () => {
     expect(softDeleteTranscriptMock).not.toHaveBeenCalled();
   });
 
-  test("forces batch transcription for batch-only local models with realtime stored", async () => {
+  test("uses Parakeet live preview for local Soniqo models even when Qwen is selected", async () => {
     useSTTConnectionMock.mockReturnValue({
       conn: {
         provider: "hyprnote",
@@ -2665,7 +2704,63 @@ describe("useStartListening", () => {
     });
 
     expect(startMock.mock.calls[0]?.[0]).toMatchObject({
-      transcription_mode: "batch",
+      model: "soniqo-parakeet-streaming",
+      transcription_mode: "live",
+      base_url: "soniqo://local",
+    });
+  });
+
+  test("keeps Parakeet live preview ephemeral and finalizes with Qwen3 Large batch", async () => {
+    useSTTConnectionMock.mockReturnValue({
+      conn: {
+        provider: "hyprnote",
+        model: "soniqo-qwen3-large",
+        baseUrl: "soniqo://local",
+        apiKey: "",
+      },
+    });
+
+    const { result } = renderHook(() => useStartListening("session-1"));
+
+    await act(async () => {
+      await result.current();
+    });
+
+    const callbacks = startMock.mock.calls[0]?.[1];
+    callbacks?.handlePersist?.({
+      new_words: [
+        {
+          id: "word-preview",
+          text: "preview",
+          start_ms: 0,
+          end_ms: 100,
+          channel: 0,
+        },
+      ],
+      replaced_ids: [],
+      partials: [],
+    });
+
+    expect(createLiveTranscriptMock).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await callbacks?.onStopped?.("session-1", {
+        durationSeconds: 42,
+        audioPath: "/tmp/session.wav",
+        requestedLiveTranscription: true,
+        liveTranscriptionActive: true,
+        needsBatchRepair: false,
+      });
+    });
+
+    expect(runBatchMock).toHaveBeenCalledWith("/tmp/session.wav", {
+      deferAudioFinalization: true,
+      model: "soniqo-qwen3-large",
+      baseUrl: "soniqo://local",
+      apiKey: "",
+      promotion: {
+        scope: "whole_session",
+      },
     });
   });
 

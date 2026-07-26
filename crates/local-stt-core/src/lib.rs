@@ -1,6 +1,8 @@
 pub use hypr_local_model::{AmModel, LocalModel, SoniqoModel, WhisperModel};
 
 pub static SUPPORTED_MODELS: &[LocalModel] = &[
+    LocalModel::Soniqo(SoniqoModel::Qwen3Large),
+    LocalModel::Soniqo(SoniqoModel::Qwen3Small),
     LocalModel::Soniqo(SoniqoModel::ParakeetStreaming),
     LocalModel::Soniqo(SoniqoModel::ParakeetBatch),
     LocalModel::Am(AmModel::ParakeetV2),

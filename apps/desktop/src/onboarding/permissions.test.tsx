@@ -74,17 +74,48 @@ describe("PermissionsSection", () => {
     expect(container.querySelectorAll(".lucide-arrow-right")).toHaveLength(3);
   });
 
-  it("continues on macOS once mic and system audio are granted", () => {
+  it("stays on macOS permissions until Accessibility is granted or skipped", () => {
     const onContinue = vi.fn();
     mocks.permissions.microphone.status = "authorized";
     mocks.permissions.systemAudio.status = "authorized";
     mocks.permissions.accessibility.status = "denied";
 
+    render(<PermissionsSection onContinue={onContinue} />);
+
+    expect(onContinue).not.toHaveBeenCalled();
+    expect(screen.getByText("Optional: read meeting activity")).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: "Skip Accessibility" }),
+    ).toBeTruthy();
+  });
+
+  it("continues on macOS once Accessibility is granted", () => {
+    const onContinue = vi.fn();
+    mocks.permissions.microphone.status = "authorized";
+    mocks.permissions.systemAudio.status = "authorized";
+    mocks.permissions.accessibility.status = "authorized";
+
     const view = render(<PermissionsSection onContinue={onContinue} />);
 
     expect(onContinue).toHaveBeenCalledTimes(1);
+    expect(
+      screen.queryByRole("button", { name: "Skip Accessibility" }),
+    ).toBeNull();
 
     view.rerender(<PermissionsSection onContinue={onContinue} />);
+
+    expect(onContinue).toHaveBeenCalledTimes(1);
+  });
+
+  it("continues on macOS when Accessibility is skipped", () => {
+    const onContinue = vi.fn();
+    mocks.permissions.microphone.status = "authorized";
+    mocks.permissions.systemAudio.status = "authorized";
+    mocks.permissions.accessibility.status = "denied";
+
+    render(<PermissionsSection onContinue={onContinue} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Skip Accessibility" }));
 
     expect(onContinue).toHaveBeenCalledTimes(1);
   });

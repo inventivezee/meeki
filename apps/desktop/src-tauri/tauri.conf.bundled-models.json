@@ -1,0 +1,12 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Anarlog STT",
+  "mainBinaryName": "anarlog-stt",
+  "identifier": "com.hyprnote.dev.stt",
+  "bundle": {
+    "createUpdaterArtifacts": false,
+    "resources": {
+      "resources/soniqo-models": "soniqo-models"
+    }
+  }
+}

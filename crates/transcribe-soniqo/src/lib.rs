@@ -4,6 +4,9 @@ use std::time::Instant;
 
 use owhisper_interface::{batch, stream};
 
+mod seed;
+pub use seed::seed_bundled_models;
+
 pub const LOCAL_BASE_URL: &str = "soniqo://local";
 const SYNTHETIC_BATCH_WORD_SECONDS: f64 = 0.4;
 const MIN_SYNTHETIC_DURATION_SECONDS: f64 = 0.05;
@@ -71,6 +74,8 @@ impl SoniqoModel {
         Self::ParakeetStreaming,
         Self::ParakeetBatch,
         Self::Omnilingual,
+        Self::Qwen3Small,
+        Self::Qwen3Large,
     ];
 
     const KNOWN: &'static [Self] = &[
@@ -81,7 +86,12 @@ impl SoniqoModel {
         Self::Qwen3Large,
     ];
 
-    const SELECTABLE: &'static [Self] = &[Self::ParakeetStreaming, Self::ParakeetBatch];
+    const SELECTABLE: &'static [Self] = &[
+        Self::Qwen3Large,
+        Self::Qwen3Small,
+        Self::ParakeetStreaming,
+        Self::ParakeetBatch,
+    ];
 
     pub const fn all() -> &'static [Self] {
         Self::ALL
@@ -126,8 +136,8 @@ impl SoniqoModel {
             Self::ParakeetStreaming => "Realtime transcription for 25 European languages.",
             Self::ParakeetBatch => "Batch transcription for 25 European languages.",
             Self::Omnilingual => "Multilingual batch transcription.",
-            Self::Qwen3Small => "Multilingual batch transcription.",
-            Self::Qwen3Large => "Multilingual batch transcription.",
+            Self::Qwen3Small => "Multilingual batch transcription (52 languages, MLX 4-bit).",
+            Self::Qwen3Large => "Higher-accuracy multilingual batch transcription (MLX 8-bit).",
         }
     }
 
@@ -146,11 +156,13 @@ impl SoniqoModel {
     }
 
     pub const fn is_available_on_current_platform(self) -> bool {
-        cfg!(all(target_os = "macos", target_arch = "aarch64")) && !self.requires_macos_15()
+        // Qwen3 uses MLX (macOS 15+ / Apple Silicon). The desktop app already
+        // ships with minimumSystemVersion 15.0, so aarch64 macOS is enough.
+        cfg!(all(target_os = "macos", target_arch = "aarch64"))
     }
 
     const fn requires_macos_15(self) -> bool {
-        matches!(self, Self::Qwen3Small | Self::Qwen3Large)
+        false
     }
 
     pub const fn supports_live_on_current_platform(self) -> bool {
@@ -320,11 +332,15 @@ pub enum Error {
     ResponseParse(#[from] serde_json::Error),
     #[error("failed to delete Soniqo model: {0}")]
     Delete(std::io::Error),
+    #[error("failed to seed bundled Soniqo model: {0}")]
+    Seed(std::io::Error),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
 
 fn ensure_supported_platform(model: SoniqoModel) -> Result<()> {
+    let _ = model;
+
     if !cfg!(all(target_os = "macos", target_arch = "aarch64")) {
         return Err(Error::UnsupportedPlatform);
     }
@@ -932,6 +948,8 @@ mod tests {
                 SoniqoModel::ParakeetStreaming,
                 SoniqoModel::ParakeetBatch,
                 SoniqoModel::Omnilingual,
+                SoniqoModel::Qwen3Small,
+                SoniqoModel::Qwen3Large,
             ]
         );
     }
@@ -940,7 +958,12 @@ mod tests {
     fn selectable_includes_advertised_models() {
         assert_eq!(
             SoniqoModel::selectable(),
-            &[SoniqoModel::ParakeetStreaming, SoniqoModel::ParakeetBatch]
+            &[
+                SoniqoModel::Qwen3Large,
+                SoniqoModel::Qwen3Small,
+                SoniqoModel::ParakeetStreaming,
+                SoniqoModel::ParakeetBatch,
+            ]
         );
     }
 
@@ -983,13 +1006,10 @@ mod tests {
 
     #[cfg(all(target_os = "macos", target_arch = "aarch64"))]
     #[test]
-    fn qwen3_platform_error_mentions_macos_15() {
-        let error = ensure_supported_platform(SoniqoModel::Qwen3Small).unwrap_err();
-
-        assert_eq!(
-            error.to_string(),
-            "Soniqo Qwen3 0.6B requires macOS 15 or newer."
-        );
+    fn qwen3_is_available_on_apple_silicon() {
+        assert!(SoniqoModel::Qwen3Small.is_available_on_current_platform());
+        assert!(SoniqoModel::Qwen3Large.is_available_on_current_platform());
+        assert!(ensure_supported_platform(SoniqoModel::Qwen3Small).is_ok());
     }
 
     #[test]

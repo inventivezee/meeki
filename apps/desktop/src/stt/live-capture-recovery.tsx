@@ -2,11 +2,16 @@ import { useCallback, useEffect, useState } from "react";
 
 import { commands as listenerCommands } from "@hypr/plugin-transcription";
 
-import { loadCaptureLifecycleMarkers } from "./capture-lifecycle-storage";
+import {
+  clearCaptureLifecycleMarker,
+  loadCaptureLifecycleMarker,
+  loadCaptureLifecycleMarkers,
+} from "./capture-lifecycle-storage";
 import { listenCaptureRecoveryRequests } from "./capture-recovery-requests";
 import { useResumeListeningLifecycle } from "./useStartListening";
 
 const CAPTURE_RECOVERY_RETRY_MS = 2_000;
+const MAX_CAPTURE_RECOVERY_RETRIES = 3;
 
 export function LiveCaptureRecovery() {
   const [recoveryTokens, setRecoveryTokens] = useState<Record<string, number>>(
@@ -128,8 +133,10 @@ function LiveCaptureSessionRecovery({
   useEffect(() => {
     let active = true;
     let retryTimer: ReturnType<typeof setTimeout> | undefined;
+    let attempts = 0;
 
     const recover = async () => {
+      attempts += 1;
       let result: "attached" | "inactive" | "error";
       try {
         result = await resumeListeningLifecycle();
@@ -140,11 +147,28 @@ function LiveCaptureSessionRecovery({
       if (!active) {
         return;
       }
-      if (result === "error") {
+      if (result === "error" && attempts < MAX_CAPTURE_RECOVERY_RETRIES) {
         retryTimer = setTimeout(() => {
           void recover();
         }, CAPTURE_RECOVERY_RETRY_MS);
         return;
+      }
+      if (result === "error") {
+        console.warn(
+          "[listener] giving up capture recovery after repeated failures",
+          { sessionId, attempts },
+        );
+        try {
+          const marker = await loadCaptureLifecycleMarker(sessionId);
+          if (marker) {
+            await clearCaptureLifecycleMarker(sessionId, marker.transcriptId);
+          }
+        } catch (error) {
+          console.error(
+            "[listener] failed to clear capture recovery after giving up",
+            error,
+          );
+        }
       }
       onComplete(sessionId, recoveryToken);
     };

@@ -61,6 +61,7 @@ import {
   getProviderSelectionBlockers,
   requiresEntitlement,
 } from "~/settings/ai/shared/eligibility";
+import { OnDeviceSetupCard } from "~/settings/ai/shared/on-device-setup";
 import { PersistAiSelection } from "~/settings/ai/shared/persist-selection";
 import {
   getConfiguredProviderIds,
@@ -238,6 +239,7 @@ export function SelectProviderAndModel() {
       <h3 className="text-md font-sans font-semibold">
         <Trans>Model being used</Trans>
       </h3>
+      <OnDeviceSetupCard />
       <div className="flex flex-row items-center gap-4">
         <div className="min-w-0 flex-2" data-stt-provider-selector>
           <Select value={visibleProvider} onValueChange={handleProviderChange}>
@@ -591,9 +593,7 @@ function useConfiguredMapping(): {
       }
 
       if (provider.id === "hyprnote") {
-        const models: ModelEntry[] = [
-          { id: "cloud", isDownloaded: billing.isPaid, category: "latest" },
-        ];
+        const models: ModelEntry[] = [];
 
         if (isAppleSilicon) {
           soniqoModels.forEach((model, i) => {
@@ -610,7 +610,7 @@ function useConfiguredMapping(): {
           });
         }
 
-        return [provider.id, { configured: true, models }];
+        return [provider.id, { configured: models.length > 0, models }];
       }
 
       if (provider.id === "custom") {

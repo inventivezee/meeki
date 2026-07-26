@@ -78,8 +78,41 @@ export function isConfiguredSttModel(
   return true;
 }
 
+/** Live preview only — shown in UI during capture, not persisted. */
+export const LOCAL_LIVE_PREVIEW_MODEL = "soniqo-parakeet-streaming" as const;
+
+/** Default final transcript after stop when the selected local model is live-only. */
+export const LOCAL_FINAL_BATCH_MODEL = "soniqo-qwen3-large" as const;
+
+const LOCAL_SONIQO_BATCH_MODELS = new Set([
+  "soniqo-qwen3-large",
+  "soniqo-qwen3-small",
+  "soniqo-parakeet-batch",
+]);
+
 export function isRealtimeLocalModel(model?: string | null) {
-  return model === "soniqo-parakeet-streaming";
+  return model === LOCAL_LIVE_PREVIEW_MODEL;
+}
+
+export function isLocalSoniqoBatchModel(model?: string | null) {
+  return typeof model === "string" && LOCAL_SONIQO_BATCH_MODELS.has(model);
+}
+
+/** Batch model used after a local Soniqo live preview (or when re-transcribing). */
+export function getLocalFinalBatchModel(
+  selectedModel?: string | null,
+): LocalModel {
+  if (isLocalSoniqoBatchModel(selectedModel)) {
+    return selectedModel as LocalModel;
+  }
+  return LOCAL_FINAL_BATCH_MODEL;
+}
+
+export function isLocalSoniqoSttModel(
+  provider?: string | null,
+  model?: string | null,
+) {
+  return provider === "hyprnote" && !!model?.startsWith("soniqo-");
 }
 
 export function getSttModelTranscriptionMode(

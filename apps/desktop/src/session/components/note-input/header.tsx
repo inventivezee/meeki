@@ -750,7 +750,10 @@ function HeaderViewTranscriptActive({
     muted: boolean;
   };
 }) {
-  const regenerate = useRegenerateTranscript(sessionId);
+  const {
+    regenerateTranscript: regenerate,
+    confirmDialog: retranscribeConfirmDialog,
+  } = useRegenerateTranscript(sessionId);
   const { request: transcriptExportRequest } =
     useSessionTranscriptRenderData(sessionId);
   const {
@@ -833,13 +836,16 @@ function HeaderViewTranscriptActive({
   const showContextMenu = useNativeContextMenu(contextMenu);
 
   return (
-    <HeaderViewTranscriptButton
-      isActive={isActive}
-      isTranscribing={isTranscribing}
-      onClick={onClick}
-      onContextMenu={showContextMenu}
-      live={live}
-    />
+    <>
+      <HeaderViewTranscriptButton
+        isActive={isActive}
+        isTranscribing={isTranscribing}
+        onClick={onClick}
+        onContextMenu={showContextMenu}
+        live={live}
+      />
+      {retranscribeConfirmDialog}
+    </>
   );
 }
 

@@ -15,11 +15,16 @@ import { sonnerToast } from "@hypr/ui/components/ui/toast";
 
 import { useBillingAccess } from "~/auth/billing-context";
 import { useToastAction } from "~/store/zustand/toast-action";
+import {
+  modelsForOnDeviceDownload,
+  ON_DEVICE_STT_PACK,
+} from "~/stt/on-device-pack";
 
 type SttSettingsContextType = {
   accordionValue: string;
   setAccordionValue: (value: string) => void;
   startDownload: (model: LocalModel) => void;
+  startOnDevicePackDownload: () => void;
   queuedDownloads: LocalModel[];
   startTrial: () => void;
 };
@@ -48,7 +53,7 @@ export function SttSettingsProvider({
   const [queuedDownloads, setQueuedDownloads] = useState<LocalModel[]>([]);
   const queuedDownloadsRef = useRef<Set<LocalModel>>(new Set());
 
-  const startDownload = useCallback((model: LocalModel) => {
+  const enqueueDownload = useCallback((model: LocalModel) => {
     if (queuedDownloadsRef.current.has(model)) {
       return;
     }
@@ -71,8 +76,6 @@ export function SttSettingsProvider({
         }
 
         // The command resolves when the download starts, not when it finishes.
-        // Keep the queue entry until progress events take over the row state,
-        // so the gap cannot accept another click.
         setTimeout(dequeue, DOWNLOAD_PROGRESS_GRACE_MS);
       },
       (error) => {
@@ -84,6 +87,26 @@ export function SttSettingsProvider({
     );
   }, []);
 
+  const startDownload = useCallback(
+    (model: LocalModel) => {
+      for (const next of modelsForOnDeviceDownload(model)) {
+        enqueueDownload(next);
+      }
+    },
+    [enqueueDownload],
+  );
+
+  const startOnDevicePackDownload = useCallback(() => {
+    sonnerToast.message("Downloading on-device transcription", {
+      description:
+        "Parakeet (live preview) and Qwen3 Large (final transcript) from Hugging Face.",
+      id: "on-device-stt-pack-download",
+    });
+    for (const model of ON_DEVICE_STT_PACK) {
+      enqueueDownload(model);
+    }
+  }, [enqueueDownload]);
+
   const startTrial = useCallback(() => {
     upgradeToPro();
   }, [upgradeToPro]);
@@ -94,6 +117,7 @@ export function SttSettingsProvider({
         accordionValue,
         setAccordionValue,
         startDownload,
+        startOnDevicePackDownload,
         queuedDownloads,
         startTrial,
       }}

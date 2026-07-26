@@ -78,9 +78,33 @@ async listCustomModels() : Promise<Result<CustomModelInfo[], string>> {
     else return { status: "error", error: e  as any };
 }
 },
+async recommendedModel() : Promise<Result<ModelRecommendation, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|recommended_model") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async serverUrl() : Promise<Result<string | null, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|server_url") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async startServer(model: GgufLlmModel) : Promise<Result<string, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|start_server", { model }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async stopServer() : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|stop_server") };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -99,8 +123,9 @@ async serverUrl() : Promise<Result<string | null, string>> {
 /** user-defined types **/
 
 export type CustomModelInfo = { path: string; name: string }
-export type GgufLlmModel = "Llama3p2_3bQ4" | "Gemma3_4bQ4" | "HyprLLM"
-export type ModelInfo = { key: GgufLlmModel; name: string; description: string; size_bytes: number }
+export type GgufLlmModel = "qwen3.6-35b-a3b" | "qwen3.6-35b-a3b-q4km" | "gemma-4-26b-a4b" | "gemma-4-12b" | "qwen3-4b" | "Llama3p2_3bQ4" | "Gemma3_4bQ4" | "HyprLLM"
+export type ModelInfo = { key: GgufLlmModel; name: string; description: string; size_bytes: number; min_memory_bytes: number; warmup_seconds: number }
+export type ModelRecommendation = { model: ModelInfo | null; total_memory_bytes: number }
 export type TAURI_CHANNEL<TSend> = null
 
 /** tauri-specta globals **/

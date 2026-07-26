@@ -3,6 +3,7 @@ import Foundation
 import OmnilingualASR
 import ParakeetASR
 import ParakeetStreamingASR
+import Qwen3ASR
 import SwiftRs
 
 private enum SoniqoBridgeError: LocalizedError {
@@ -156,7 +157,13 @@ private enum SpeechModelKind: String, CaseIterable {
         )
       )
     case .qwen3Small, .qwen3Large:
-      throw SoniqoBridgeError.message("\(label) requires macOS 15 or newer.")
+      return .qwen3(
+        try await Qwen3ASRModel.fromPretrained(
+          modelId: repo,
+          offlineMode: offlineMode,
+          progressHandler: progressHandler
+        )
+      )
     }
   }
 
@@ -231,6 +238,7 @@ private enum LoadedSpeechModel {
   case streaming(ParakeetStreamingASRModel)
   case parakeetBatch(ParakeetASRModel)
   case omnilingual(OmnilingualASRModel)
+  case qwen3(Qwen3ASRModel)
 
   func asStreamingModel() throws -> ParakeetStreamingASRModel {
     guard case .streaming(let model) = self else {
@@ -252,6 +260,8 @@ private enum LoadedSpeechModel {
       return try model.transcribeAudio(audio, sampleRate: sampleRate, language: languageHint)
     case .omnilingual(let model):
       return try model.transcribeAudio(audio, sampleRate: sampleRate)
+    case .qwen3(let model):
+      return model.transcribe(audio: audio, sampleRate: sampleRate, language: languageHint)
     }
   }
 }

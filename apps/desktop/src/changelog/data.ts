@@ -8,21 +8,6 @@ export function getLatestVersion(): string | null {
   return latestVersion;
 }
 
-async function fetchChangelogFromGitHub(
-  version: string,
-): Promise<string | null> {
-  const url = `https://raw.githubusercontent.com/fastrepl/char/main/packages/changelog/content/${version}.md`;
-  try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      return null;
-    }
-    return await response.text();
-  } catch {
-    return null;
-  }
-}
-
 export function useChangelogContent(version: string) {
   const [content, setContent] = useState<string | null>(null);
   const [date, setDate] = useState<string | null>(null);
@@ -41,17 +26,11 @@ export function useChangelogContent(version: string) {
         return;
       }
 
-      const raw = await fetchChangelogFromGitHub(version);
+      // Only the bundled changelog is available; older entries are not fetched
+      // from a remote repository.
       if (cancelled) return;
-
-      if (raw) {
-        const { content: parsed, date: parsedDate } = processContent(raw);
-        setContent(parsed);
-        setDate(parsedDate);
-      } else {
-        setContent(null);
-        setDate(null);
-      }
+      setContent(null);
+      setDate(null);
       setLoading(false);
     }
 

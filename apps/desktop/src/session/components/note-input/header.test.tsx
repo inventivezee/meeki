@@ -193,7 +193,10 @@ vi.mock("~/session/queries", () => ({
 }));
 
 vi.mock("~/session/components/note-input/transcript/actions", () => ({
-  useRegenerateTranscript: () => hoisted.regenerateTranscript,
+  useRegenerateTranscript: () => ({
+    regenerateTranscript: hoisted.regenerateTranscript,
+    confirmDialog: null,
+  }),
 }));
 
 vi.mock("~/session/components/note-input/transcript/export-data", () => ({

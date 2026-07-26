@@ -59,6 +59,7 @@ export function useAITaskTask<T extends TaskType>(
 
   const status = taskState?.status ?? "idle";
   const streamedText = taskState?.streamedText ?? "";
+  const streamedReasoning = taskState?.streamedReasoning ?? "";
   const error = taskState?.error;
   const currentStep = taskState?.currentStep;
 
@@ -104,6 +105,7 @@ export function useAITaskTask<T extends TaskType>(
   return {
     status,
     streamedText,
+    streamedReasoning,
     error,
     currentStep,
     hasTask: !!taskState,

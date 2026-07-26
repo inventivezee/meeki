@@ -3,13 +3,11 @@ import {
   CheckCircle2Icon,
   Code2Icon,
   CopyIcon,
-  ExternalLinkIcon,
   Loader2Icon,
   PlugIcon,
   TerminalIcon,
 } from "lucide-react";
 
-import { commands as openerCommands } from "@hypr/plugin-opener2";
 import { Button } from "@hypr/ui/components/ui/button";
 import { sonnerToast } from "@hypr/ui/components/ui/toast";
 import { cn } from "@hypr/utils";
@@ -18,8 +16,6 @@ import { SettingsPageTitle } from "~/settings/page-title";
 import { commands, type EmbeddedCliStatus } from "~/types/tauri.gen";
 
 const CLI_STATUS_QUERY_KEY = ["embedded-cli-status"] as const;
-const CLI_GUIDE_URL = "https://docs.anarlog.so/agents/cli";
-const MCP_GUIDE_URL = "https://docs.anarlog.so/agents/mcp";
 
 async function loadStatus() {
   const result = await commands.checkEmbeddedCli();
@@ -140,15 +136,6 @@ function CliSection({
             </div>
           </div>
           <div className="flex shrink-0 gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => void openerCommands.openUrl(CLI_GUIDE_URL, null)}
-            >
-              Guide
-              <ExternalLinkIcon className="size-3.5" />
-            </Button>
             <Button
               type="button"
               size="sm"
@@ -290,16 +277,6 @@ function McpSection({ status }: { status: EmbeddedCliStatus | undefined }) {
               </p>
             </div>
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="shrink-0"
-            onClick={() => void openerCommands.openUrl(MCP_GUIDE_URL, null)}
-          >
-            Guide
-            <ExternalLinkIcon className="size-3.5" />
-          </Button>
         </div>
 
         <div className="border-border bg-muted/30 border-t p-3">

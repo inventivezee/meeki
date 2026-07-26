@@ -16,11 +16,22 @@ pub fn is_model_downloaded(model: &SupportedModel, models_dir: &Path) -> Result<
     }
 
     let actual = hypr_file::file_size(&path)?;
-    if actual != model.model_size() {
-        return Ok(false);
-    }
+    Ok(gguf_size_matches(
+        actual,
+        model.model_size(),
+        model.model_checksum(),
+    ))
+}
 
-    Ok(true)
+fn gguf_size_matches(actual: u64, expected: u64, checksum: Option<u32>) -> bool {
+    if actual == expected {
+        return true;
+    }
+    if checksum.is_none() {
+        let tolerance = (expected / 200).max(32 * 1024 * 1024);
+        return actual.abs_diff(expected) <= tolerance;
+    }
+    false
 }
 
 pub fn list_downloaded_models(models_dir: &Path) -> Result<Vec<SupportedModel>, Error> {
@@ -45,6 +56,7 @@ pub fn list_downloaded_models(models_dir: &Path) -> Result<Vec<SupportedModel>, 
             .iter()
             .find(|model| model.file_name() == file_name_str)
             && entry.path().is_file()
+            && is_model_downloaded(model, models_dir).unwrap_or(false)
         {
             models.push(model.clone());
         }

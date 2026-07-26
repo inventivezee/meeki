@@ -12,6 +12,7 @@ describe("getDefaultSttModel", () => {
   test("repairs external providers with their first supported model", () => {
     expect(getDefaultSttModel("deepgram")).toBe("nova-3-general");
     expect(getDefaultSttModel("soniox")).toBe("stt-rt-v5");
+    expect(getDefaultSttModel("assemblyai")).toBe("u3-rt-pro");
   });
 
   test("does not invent a model for custom or Anarlog providers", () => {

@@ -35,13 +35,21 @@ import { useSession, useSessionTranscriptExistence } from "~/session/queries";
 import { getSessionEvent } from "~/session/utils";
 import { useConfigValue } from "~/shared/config";
 import { id } from "~/shared/utils";
+import {
+  captureBatchFailedErrorId,
+  captureTranscriptIncompleteErrorId,
+  reportCaptureErrorOnce,
+} from "~/store/zustand/capture-errors";
 import type {
   LiveTranscriptPersistCallback,
   OnStoppedCallback,
 } from "~/store/zustand/listener/transcript";
 import {
+  LOCAL_LIVE_PREVIEW_MODEL,
   getLiveTranscriptionConfig,
+  getLocalFinalBatchModel,
   getTranscriptionLanguages,
+  isLocalSoniqoSttModel,
 } from "~/stt/capabilities";
 import {
   type CaptureLifecycleMarker,
@@ -317,11 +325,14 @@ export function getPostCaptureRepairReasons(
 export function getPostCaptureAction(
   details: PostCaptureDetails,
   canRunBatch: boolean,
+  options?: { alwaysBatchAfterLive?: boolean },
 ) {
+  // Local Soniqo: live Parakeet is preview-only; always finalize with Qwen batch.
   if (
     details.liveTranscriptionActive &&
     !details.needsBatchRepair &&
-    !details.transcriptWriteFailed
+    !details.transcriptWriteFailed &&
+    !options?.alwaysBatchAfterLive
   ) {
     return "enhance_only" as const;
   }
@@ -380,6 +391,8 @@ function useCaptureLifecycle(sessionId: string) {
         recoveredMarker?.ownerUserId ?? session?.user_id ?? "";
       const provider = recoveredMarker?.provider ?? conn?.provider;
       const model = recoveredMarker?.model ?? conn?.model;
+      // Preview with Parakeet Streaming in the UI only; local batch writes the saved transcript.
+      const ephemeralLivePreview = isLocalSoniqoSttModel(provider, model);
       const cloudsyncLeaseKey = `${sessionId}:${transcriptId}`;
       let pendingSummaryMode = recoveredMarker?.summaryMode;
       let capturePhase =
@@ -522,6 +535,7 @@ function useCaptureLifecycle(sessionId: string) {
                 transcriptWriteFailed: Boolean(transcriptWriteError),
               },
               canRunBatchRef.current,
+              { alwaysBatchAfterLive: ephemeralLivePreview },
             );
         const repairReasons = pendingSummaryMode
           ? []
@@ -532,10 +546,17 @@ function useCaptureLifecycle(sessionId: string) {
 
         let batchCompleted = false;
         if (postCaptureAction === "batch_then_enhance") {
-          console.info("[listener] starting post-stop transcript repair", {
-            sessionId,
-            reasons: repairReasons,
-          });
+          const localFinalBatchModel = getLocalFinalBatchModel(model);
+          console.info(
+            ephemeralLivePreview
+              ? "[listener] starting post-stop local batch (replacing live preview)"
+              : "[listener] starting post-stop transcript repair",
+            {
+              sessionId,
+              reasons: repairReasons,
+              batchModel: ephemeralLivePreview ? localFinalBatchModel : model,
+            },
+          );
           try {
             const existingAudioDurationMs = await existingAudioDurationPromise;
             const finalAudioDurationMs = preserveExistingTranscript
@@ -549,11 +570,19 @@ function useCaptureLifecycle(sessionId: string) {
                 : 0;
             await runBatchRef.current(details.audioPath!, {
               deferAudioFinalization: true,
+              ...(ephemeralLivePreview
+                ? {
+                    model: localFinalBatchModel,
+                    baseUrl: "soniqo://local",
+                    apiKey: "",
+                  }
+                : {}),
               promotion: preserveExistingTranscript
                 ? {
                     scope: "current_capture",
                     audioOffsetMs,
-                    ...(transcriptCreated
+                    // Ephemeral live never created a DB row; only replace if one exists.
+                    ...(!ephemeralLivePreview && transcriptCreated
                       ? { replaceTranscriptId: transcriptId }
                       : {}),
                     startedAt,
@@ -561,10 +590,15 @@ function useCaptureLifecycle(sessionId: string) {
                 : { scope: "whole_session" },
             });
             batchCompleted = true;
-            console.info("[listener] completed post-stop transcript repair", {
-              sessionId,
-              reasons: repairReasons,
-            });
+            console.info(
+              ephemeralLivePreview
+                ? "[listener] completed post-stop local batch"
+                : "[listener] completed post-stop transcript repair",
+              {
+                sessionId,
+                reasons: repairReasons,
+              },
+            );
           } catch (error) {
             if (isStoppedTranscriptionError(error)) {
               await requestRecovery();
@@ -576,15 +610,19 @@ function useCaptureLifecycle(sessionId: string) {
               error,
             });
             if (transcriptWriteError || !details.liveTranscriptionActive) {
-              sonnerToast.error(
-                "Anarlog could not finish saving the transcript. The recording was kept so you can try again.",
-                { id: "post-capture-transcript-incomplete" },
-              );
+              reportCaptureErrorOnce({
+                id: captureTranscriptIncompleteErrorId(sessionId),
+                message:
+                  "Anarlog could not finish saving the transcript. The recording was kept so you can try again.",
+                variant: "error",
+              });
             } else {
-              sonnerToast.error(
-                "Post-meeting transcription failed. The recording was kept so you can try again.",
-                { id: "post-capture-batch-failed" },
-              );
+              reportCaptureErrorOnce({
+                id: captureBatchFailedErrorId(sessionId),
+                message:
+                  "Post-meeting transcription failed. The recording was kept so you can try again.",
+                variant: "error",
+              });
             }
             await requestRecovery();
             return;
@@ -595,16 +633,15 @@ function useCaptureLifecycle(sessionId: string) {
           transcriptWriteError &&
           postCaptureAction !== "batch_then_enhance"
         ) {
-          sonnerToast.error(
-            details.audioPath
+          reportCaptureErrorOnce({
+            id: details.audioPath
+              ? captureTranscriptIncompleteErrorId(sessionId)
+              : `capture-error:live-transcript-persist:${sessionId}`,
+            message: details.audioPath
               ? "Anarlog could not finish saving the transcript. The recording was kept so you can try again."
               : "Anarlog could not save part of the live transcript.",
-            {
-              id: details.audioPath
-                ? "post-capture-transcript-incomplete"
-                : "live-transcript-persist-failed",
-            },
-          );
+            variant: "error",
+          });
         }
 
         const emptyFreshCapture =
@@ -756,6 +793,11 @@ function useCaptureLifecycle(sessionId: string) {
         finalizeStopped(details, false);
 
       const handlePersist: LiveTranscriptPersistCallback = (delta) => {
+        if (ephemeralLivePreview) {
+          // Parakeet preview stays in Zustand UI only; Qwen batch persists after stop.
+          return;
+        }
+
         if (delta.new_words.length === 0 && delta.replaced_ids.length === 0) {
           return;
         }
@@ -1076,9 +1118,16 @@ export function useStartListening(sessionId: string) {
       dictionaryTerms,
     });
     const languages = getTranscriptionLanguages(aiLanguage, spokenLanguages);
+    const localSoniqoPreview = isLocalSoniqoSttModel(
+      conn?.provider,
+      conn?.model,
+    );
+    const liveModel = localSoniqoPreview
+      ? LOCAL_LIVE_PREVIEW_MODEL
+      : (conn?.model ?? "");
     const liveTranscriptionConfig = await getLiveTranscriptionConfig({
       provider: conn?.provider,
-      model: conn?.model,
+      model: liveModel,
       languages,
     });
     if (!canStartLiveSession(sessionId)) {
@@ -1140,12 +1189,17 @@ export function useStartListening(sessionId: string) {
           session_id: sessionId,
           languages: liveTranscriptionConfig.languages,
           onboarding: false,
-          model: conn?.model ?? "",
-          base_url: conn?.baseUrl ?? "",
+          // Local Soniqo: always preview with Parakeet Streaming; Qwen batches after stop.
+          model: liveModel,
+          base_url: localSoniqoPreview
+            ? "soniqo://local"
+            : (conn?.baseUrl ?? ""),
           api_key: conn?.apiKey ?? "",
           keywords,
           mic_device: microphoneDevice || null,
-          transcription_mode: liveTranscriptionConfig.transcriptionMode,
+          transcription_mode: localSoniqoPreview
+            ? "live"
+            : liveTranscriptionConfig.transcriptionMode,
           participant_human_ids: participantHumanIds,
           self_human_id: session?.user_id || null,
         },

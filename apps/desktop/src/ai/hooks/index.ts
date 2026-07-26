@@ -1,4 +1,5 @@
 export { useAITaskTask } from "./useAITaskTask";
+export { useEnsureLocalLlm } from "./useEnsureLocalLlm";
 export {
   type LLMConnectionStatus,
   useLanguageModel,

@@ -7,6 +7,7 @@ import { createSession } from "~/session/queries";
 import { useTabs } from "~/store/zustand/tabs";
 import { useListener } from "~/stt/contexts";
 import { setPendingUpload } from "~/stt/pending-upload";
+import { AUDIO_EXTENSIONS } from "~/stt/useUploadFile";
 
 export function useNewNote({
   behavior = "new",
@@ -74,9 +75,9 @@ export function useNewNoteAndListen({
   return handler;
 }
 
-const AUDIO_FILTERS = [
-  { name: "Audio", extensions: ["wav", "mp3", "ogg", "mp4", "m4a", "flac"] },
-];
+// Shared with the in-session upload button and the drop overlay's copy, so the
+// three can't drift — this list used to omit webm and aac, which drop accepted.
+const AUDIO_FILTERS = [{ name: "Audio", extensions: AUDIO_EXTENSIONS }];
 const TRANSCRIPT_FILTERS = [{ name: "Transcript", extensions: ["vtt", "srt"] }];
 
 export function useNewNoteAndUpload() {

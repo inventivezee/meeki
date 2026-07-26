@@ -7,6 +7,16 @@ pub use hypr_whisper_local_model::WhisperModel;
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type, Eq, Hash, PartialEq)]
 pub enum GgufLlmModel {
+    #[serde(rename = "qwen3.6-35b-a3b")]
+    Qwen36_35bA3bIq4Xs,
+    #[serde(rename = "qwen3.6-35b-a3b-q4km")]
+    Qwen36_35bA3bQ4Km,
+    #[serde(rename = "gemma-4-26b-a4b")]
+    Gemma4_26bA4bIq4Xs,
+    #[serde(rename = "gemma-4-12b")]
+    Gemma4_12bQ4Km,
+    #[serde(rename = "qwen3-4b")]
+    Qwen3_4bQ4Km,
     Llama3p2_3bQ4,
     Gemma3_4bQ4,
     HyprLLM,
@@ -15,6 +25,11 @@ pub enum GgufLlmModel {
 impl GgufLlmModel {
     pub fn file_name(&self) -> &str {
         match self {
+            GgufLlmModel::Qwen36_35bA3bIq4Xs => "Qwen3.6-35B-A3B-UD-IQ4_XS.gguf",
+            GgufLlmModel::Qwen36_35bA3bQ4Km => "Qwen3.6-35B-A3B-UD-Q4_K_M.gguf",
+            GgufLlmModel::Gemma4_26bA4bIq4Xs => "gemma-4-26B-A4B-it-UD-IQ4_XS.gguf",
+            GgufLlmModel::Gemma4_12bQ4Km => "gemma-4-12b-it-Q4_K_M.gguf",
+            GgufLlmModel::Qwen3_4bQ4Km => "Qwen3-4B-Q4_K_M.gguf",
             GgufLlmModel::Llama3p2_3bQ4 => "llm.gguf",
             GgufLlmModel::HyprLLM => "hypr-llm.gguf",
             GgufLlmModel::Gemma3_4bQ4 => "gemma-3-4b-it-Q4_K_M.gguf",
@@ -23,14 +38,27 @@ impl GgufLlmModel {
 
     pub fn model_url(&self) -> &str {
         match self {
+            GgufLlmModel::Qwen36_35bA3bIq4Xs => {
+                "https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF/resolve/main/Qwen3.6-35B-A3B-UD-IQ4_XS.gguf"
+            }
+            GgufLlmModel::Qwen36_35bA3bQ4Km => {
+                "https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF/resolve/main/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf"
+            }
+            GgufLlmModel::Gemma4_26bA4bIq4Xs => {
+                "https://huggingface.co/unsloth/gemma-4-26B-A4B-it-GGUF/resolve/main/gemma-4-26B-A4B-it-UD-IQ4_XS.gguf"
+            }
+            GgufLlmModel::Gemma4_12bQ4Km => {
+                "https://huggingface.co/unsloth/gemma-4-12b-it-GGUF/resolve/main/gemma-4-12b-it-Q4_K_M.gguf"
+            }
+            GgufLlmModel::Qwen3_4bQ4Km => {
+                "https://huggingface.co/unsloth/Qwen3-4B-GGUF/resolve/main/Qwen3-4B-Q4_K_M.gguf"
+            }
             GgufLlmModel::Llama3p2_3bQ4 => {
                 "https://huggingface.co/lmstudio-community/Llama-3.2-3B-Instruct-GGUF/resolve/main/Llama-3.2-3B-Instruct-Q4_K_M.gguf"
             }
             // Proprietary package historically hosted on hyprnote CDN — disabled by default.
             // Set MEETY_HYPR_LLM_URL at build time to re-enable downloads from your own host.
-            GgufLlmModel::HyprLLM => {
-                option_env!("MEETY_HYPR_LLM_URL").unwrap_or("")
-            }
+            GgufLlmModel::HyprLLM => option_env!("MEETY_HYPR_LLM_URL").unwrap_or(""),
             GgufLlmModel::Gemma3_4bQ4 => {
                 "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q4_K_M.gguf"
             }
@@ -39,36 +67,127 @@ impl GgufLlmModel {
 
     pub fn model_size(&self) -> u64 {
         match self {
+            GgufLlmModel::Qwen36_35bA3bIq4Xs => 17_730_509_792,
+            GgufLlmModel::Qwen36_35bA3bQ4Km => 22_134_528_992,
+            GgufLlmModel::Gemma4_26bA4bIq4Xs => 13_597_177_568,
+            GgufLlmModel::Gemma4_12bQ4Km => 7_121_861_440,
+            GgufLlmModel::Qwen3_4bQ4Km => 2_497_281_312,
             GgufLlmModel::Llama3p2_3bQ4 => 2019377440,
             GgufLlmModel::HyprLLM => 1107409056,
             GgufLlmModel::Gemma3_4bQ4 => 2489894016,
         }
     }
 
-    pub fn model_checksum(&self) -> u32 {
+    pub fn model_checksum(&self) -> Option<u32> {
         match self {
-            GgufLlmModel::Llama3p2_3bQ4 => 2831308098,
-            GgufLlmModel::HyprLLM => 4037351144,
-            GgufLlmModel::Gemma3_4bQ4 => 2760830291,
+            // Large HF quants: skip CRC so one-click download is not blocked on a baked hash.
+            GgufLlmModel::Qwen36_35bA3bIq4Xs
+            | GgufLlmModel::Qwen36_35bA3bQ4Km
+            | GgufLlmModel::Gemma4_26bA4bIq4Xs
+            | GgufLlmModel::Gemma4_12bQ4Km
+            | GgufLlmModel::Qwen3_4bQ4Km => None,
+            GgufLlmModel::Llama3p2_3bQ4 => Some(2831308098),
+            GgufLlmModel::HyprLLM => Some(4037351144),
+            GgufLlmModel::Gemma3_4bQ4 => Some(2760830291),
         }
     }
 
     pub fn display_name(&self) -> &'static str {
         match self {
+            GgufLlmModel::Qwen36_35bA3bIq4Xs => "Qwen 3.6 35B A3B",
+            GgufLlmModel::Qwen36_35bA3bQ4Km => "Qwen 3.6 35B A3B (Q4_K_M)",
+            GgufLlmModel::Gemma4_26bA4bIq4Xs => "Gemma 4 26B A4B",
+            GgufLlmModel::Gemma4_12bQ4Km => "Gemma 4 12B",
+            GgufLlmModel::Qwen3_4bQ4Km => "Qwen 3 4B",
             GgufLlmModel::Llama3p2_3bQ4 => "Llama 3.2 3B Q4",
             GgufLlmModel::HyprLLM => "HyprLLM",
             GgufLlmModel::Gemma3_4bQ4 => "Gemma 3 4B Q4",
         }
     }
 
-    pub fn description(&self) -> String {
-        let mb = self.model_size() as f64 / (1024.0 * 1024.0);
-        if mb >= 1024.0 {
-            format!("{:.1} GB", mb / 1024.0)
-        } else {
-            format!("{:.0} MB", mb)
+    /// What the model is good at, in the user's terms. Size and memory are
+    /// rendered separately, so they must not be repeated here.
+    pub fn description(&self) -> &'static str {
+        match self {
+            GgufLlmModel::Qwen36_35bA3bIq4Xs => {
+                "Strongest at chat, tool use and step-by-step reasoning. Less faithful than Gemma when summarizing — it tends to add detail the meeting didn't contain."
+            }
+            GgufLlmModel::Qwen36_35bA3bQ4Km => {
+                "The same Qwen 3.6 weights at a higher-fidelity quantization: a small quality gain for 4.4 GB more memory."
+            }
+            GgufLlmModel::Gemma4_26bA4bIq4Xs => {
+                "Sharpest meeting summaries. Mixture-of-experts, so only 3.8B parameters run per token and it answers about as fast as a small model."
+            }
+            GgufLlmModel::Gemma4_12bQ4Km => {
+                "Nearly as faithful as the 26B on summaries, at half the memory. The safe pick for 16 GB Macs."
+            }
+            GgufLlmModel::Qwen3_4bQ4Km => {
+                "Fast and small. Fine for titles and short meetings; drops detail on long, multi-topic ones."
+            }
+            GgufLlmModel::Llama3p2_3bQ4 => "Legacy lightweight model kept for older installs.",
+            GgufLlmModel::Gemma3_4bQ4 => {
+                "Previous-generation small Gemma, superseded by Qwen 3 4B."
+            }
+            GgufLlmModel::HyprLLM => "Legacy Hyprnote summarization model.",
         }
     }
+
+    /// Total machine RAM a model realistically needs, rounded to the Mac
+    /// configurations Apple actually sells. Metal only gets ~75% of unified
+    /// memory and the KV cache plus compute buffers add ~2 GB on top of the
+    /// weights, so this is well above `model_size()`.
+    pub fn min_memory_bytes(&self) -> u64 {
+        const GIB: u64 = 1024 * 1024 * 1024;
+
+        match self {
+            GgufLlmModel::Qwen36_35bA3bQ4Km => 36 * GIB,
+            GgufLlmModel::Qwen36_35bA3bIq4Xs => 32 * GIB,
+            GgufLlmModel::Gemma4_26bA4bIq4Xs => 24 * GIB,
+            GgufLlmModel::Gemma4_12bQ4Km => 16 * GIB,
+            GgufLlmModel::Qwen3_4bQ4Km
+            | GgufLlmModel::Llama3p2_3bQ4
+            | GgufLlmModel::Gemma3_4bQ4
+            | GgufLlmModel::HyprLLM => 8 * GIB,
+        }
+    }
+
+    /// Rough seconds to get from "no weights resident" to "answering", used to
+    /// pace the warm-up indicator. Measured on an M-series SSD against
+    /// llama-server b10067: a 7.1 GB model takes ~3 s with the file still in the
+    /// page cache and ~5-6 s once it has been evicted. This tracks the evicted
+    /// case so the estimate usually finishes early rather than overrunning.
+    pub fn warmup_seconds(&self) -> u32 {
+        const BYTES_PER_SECOND: u64 = 1_500_000_000;
+        const FIXED_OVERHEAD_SECONDS: u64 = 1;
+
+        (FIXED_OVERHEAD_SECONDS + self.model_size().div_ceil(BYTES_PER_SECOND)) as u32
+    }
+
+    pub fn openai_model_id(&self) -> &'static str {
+        match self {
+            GgufLlmModel::Qwen36_35bA3bIq4Xs => "qwen3.6-35b-a3b",
+            GgufLlmModel::Qwen36_35bA3bQ4Km => "qwen3.6-35b-a3b-q4km",
+            GgufLlmModel::Gemma4_26bA4bIq4Xs => "gemma-4-26b-a4b",
+            GgufLlmModel::Gemma4_12bQ4Km => "gemma-4-12b",
+            GgufLlmModel::Qwen3_4bQ4Km => "qwen3-4b",
+            GgufLlmModel::Llama3p2_3bQ4 => "llm-llama3-2-3b-q4",
+            GgufLlmModel::HyprLLM => "llm-hypr-llm",
+            GgufLlmModel::Gemma3_4bQ4 => "llm-gemma3-4b-q4",
+        }
+    }
+}
+
+fn gguf_size_matches(actual: u64, expected: u64, checksum: Option<u32>) -> bool {
+    if actual == expected {
+        return true;
+    }
+    // CRC-less HF quants: tolerate small size drift so one-click downloads
+    // aren't bricked when the remote file is republished.
+    if checksum.is_none() {
+        let tolerance = (expected / 200).max(32 * 1024 * 1024);
+        return actual.abs_diff(expected) <= tolerance;
+    }
+    false
 }
 
 #[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
@@ -119,6 +238,11 @@ impl LocalModel {
         ]);
 
         models.extend([
+            LocalModel::GgufLlm(GgufLlmModel::Qwen36_35bA3bIq4Xs),
+            LocalModel::GgufLlm(GgufLlmModel::Qwen36_35bA3bQ4Km),
+            LocalModel::GgufLlm(GgufLlmModel::Gemma4_26bA4bIq4Xs),
+            LocalModel::GgufLlm(GgufLlmModel::Gemma4_12bQ4Km),
+            LocalModel::GgufLlm(GgufLlmModel::Qwen3_4bQ4Km),
             LocalModel::GgufLlm(GgufLlmModel::Llama3p2_3bQ4),
             LocalModel::GgufLlm(GgufLlmModel::HyprLLM),
             LocalModel::GgufLlm(GgufLlmModel::Gemma3_4bQ4),
@@ -158,9 +282,7 @@ impl LocalModel {
             LocalModel::Am(AmModel::ParakeetV2) => "am-parakeet-v2",
             LocalModel::Am(AmModel::ParakeetV3) => "am-parakeet-v3",
             LocalModel::Am(AmModel::WhisperLargeV3) => "am-whisper-large-v3",
-            LocalModel::GgufLlm(GgufLlmModel::Llama3p2_3bQ4) => "llm-llama3-2-3b-q4",
-            LocalModel::GgufLlm(GgufLlmModel::HyprLLM) => "llm-hypr-llm",
-            LocalModel::GgufLlm(GgufLlmModel::Gemma3_4bQ4) => "llm-gemma3-4b-q4",
+            LocalModel::GgufLlm(model) => model.openai_model_id(),
         }
     }
 
@@ -187,7 +309,7 @@ impl LocalModel {
             LocalModel::Soniqo(model) => model.description().to_string(),
             LocalModel::Whisper(model) => model.description(),
             LocalModel::Am(model) => model.description().to_string(),
-            LocalModel::GgufLlm(model) => model.description(),
+            LocalModel::GgufLlm(model) => model.description().to_string(),
         }
     }
 
@@ -218,7 +340,7 @@ impl DownloadableModel for GgufLlmModel {
     }
 
     fn download_checksum(&self) -> Option<u32> {
-        Some(self.model_checksum())
+        self.model_checksum()
     }
 
     fn download_destination(&self, models_base: &Path) -> PathBuf {
@@ -233,7 +355,11 @@ impl DownloadableModel for GgufLlmModel {
 
         let actual =
             hypr_file::file_size(&path).map_err(|e| Error::OperationFailed(e.to_string()))?;
-        Ok(actual == self.model_size())
+        Ok(gguf_size_matches(
+            actual,
+            self.model_size(),
+            self.model_checksum(),
+        ))
     }
 
     fn finalize_download(&self, _downloaded_path: &Path, _models_base: &Path) -> Result<(), Error> {

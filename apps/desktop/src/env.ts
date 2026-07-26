@@ -9,13 +9,20 @@ export const env = createEnv({
     VITE_SUPABASE_URL: z.string().min(1).optional(),
     VITE_SUPABASE_ANON_KEY: z.string().min(1).optional(),
     VITE_PRO_PRODUCT_ID: z.string().min(1).optional(),
-    // Unlock Pro UI without Stripe. Prefer VITE_PRO_GRANT_EMAILS in shared builds.
+    // Unlock Anarlog Pro UI without Stripe (off by default for Meety).
     VITE_FORCE_PRO: z
       .enum(["true", "false", "1", "0"])
       .optional()
       .transform((value) => value === "true" || value === "1"),
     // Comma-separated emails that get Pro client-side (also seed private.pro_grants for API/RLS).
     VITE_PRO_GRANT_EMAILS: z.string().optional(),
+    // Prefer AssemblyAI for cloud STT instead of Anarlog Pro.
+    VITE_ASSEMBLYAI_API_KEY: z.string().min(1).optional(),
+    VITE_ASSEMBLYAI_BASE_URL: z.string().url().optional(),
+    // Venice AI (OpenAI-compatible) for private LLM analysis / interpretation.
+    VITE_VENICE_API_KEY: z.string().min(1).optional(),
+    VITE_VENICE_BASE_URL: z.string().url().optional(),
+    VITE_VENICE_MODEL: z.string().min(1).optional(),
     VITE_SENTRY_DSN: z.string().min(1).optional(),
     VITE_POSTHOG_API_KEY: z.string().min(1).optional(),
     VITE_POSTHOG_HOST: z.string().min(1).default("https://us.i.posthog.com"),

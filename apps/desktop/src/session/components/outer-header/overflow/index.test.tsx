@@ -105,7 +105,10 @@ vi.mock("~/audio-player", () => ({
 }));
 
 vi.mock("~/session/components/note-input/transcript/actions", () => ({
-  useRegenerateTranscript: () => regenerateTranscriptMock,
+  useRegenerateTranscript: () => ({
+    regenerateTranscript: regenerateTranscriptMock,
+    confirmDialog: null,
+  }),
 }));
 
 vi.mock("@hypr/plugin-windows", () => ({

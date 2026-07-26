@@ -164,6 +164,11 @@ export const SETTING_DEFINITIONS = {
     path: ["notification", "mic_active_threshold"],
     default: 15 as number,
   },
+  llm_thinking: {
+    type: "boolean",
+    path: ["ai", "llm_thinking"],
+    default: false as boolean,
+  },
   current_llm_provider: {
     type: "string",
     path: ["ai", "current_llm_provider"],

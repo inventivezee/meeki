@@ -2,6 +2,7 @@ import type { ServerStatus } from "@hypr/plugin-local-stt";
 
 import type { DownloadProgress, ToastCondition, ToastType } from "./types";
 
+import type { CaptureErrorNotification } from "~/store/zustand/capture-errors";
 import type { DevtoolsToastPreview } from "~/store/zustand/devtools-toast-preview";
 
 const ANARLOG_ICON_SRC = "/assets/anarlog-icon.png";
@@ -17,7 +18,6 @@ type ToastRegistryParams = {
   hasLLMConfigured: boolean;
   hasSttConfigured: boolean;
   hasProSttConfigured: boolean;
-  hasProLlmConfigured: boolean;
   isAiTranscriptionTabActive: boolean;
   isAiIntelligenceTabActive: boolean;
   isBatchTranscribingInActiveTranscriptTab: boolean;
@@ -25,6 +25,7 @@ type ToastRegistryParams = {
   hasActiveDownload: boolean;
   downloadingModel: string | null;
   activeDownloads: DownloadProgress[];
+  captureErrors: CaptureErrorNotification[];
   localSttStatus: ServerStatus | null;
   isLocalSttModel: boolean;
   onSignIn: () => void | Promise<void>;
@@ -45,7 +46,6 @@ export function createToastRegistry({
   hasLLMConfigured,
   hasSttConfigured,
   hasProSttConfigured,
-  hasProLlmConfigured,
   isAiTranscriptionTabActive,
   isAiIntelligenceTabActive,
   isBatchTranscribingInActiveTranscriptTab,
@@ -53,6 +53,7 @@ export function createToastRegistry({
   hasActiveDownload,
   downloadingModel,
   activeDownloads,
+  captureErrors,
   localSttStatus,
   isLocalSttModel,
   onSignIn,
@@ -66,9 +67,17 @@ export function createToastRegistry({
   const hasUsableSttConfigured =
     hasSttConfigured &&
     (isAuthLoading || isAuthenticated || !hasProSttConfigured);
-  const hasUsableLlmConfigured =
-    hasLLMConfigured &&
-    (isAuthLoading || isAuthenticated || !hasProLlmConfigured);
+  // Every remaining LLM provider is local or user-keyed, so sign-in never gates it.
+  const hasUsableLlmConfigured = hasLLMConfigured;
+  const captureErrorEntries = captureErrors.map((error) => ({
+    toast: {
+      id: error.id,
+      description: error.message,
+      dismissible: true,
+      variant: error.variant,
+    } satisfies ToastType,
+    condition: () => true,
+  }));
 
   // order matters
   return [
@@ -90,6 +99,7 @@ export function createToastRegistry({
       },
       condition: () => cloudsyncInitialSyncToastId !== null,
     },
+    ...captureErrorEntries,
     {
       toast: {
         id: "local-stt-loading",
@@ -176,14 +186,8 @@ export function createToastRegistry({
         },
         dismissible: true,
       },
-      // suppress until auth resolves to avoid flash on startup
-      condition: () =>
-        !isAuthLoading &&
-        !isAuthenticated &&
-        hasLLMConfigured &&
-        hasSttConfigured &&
-        !hasProSttConfigured &&
-        !hasProLlmConfigured,
+      // Meety does not upsell Anarlog Pro.
+      condition: () => false,
     },
   ];
 }

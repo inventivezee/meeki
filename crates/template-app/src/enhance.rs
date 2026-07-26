@@ -112,6 +112,14 @@ mod tests {
     - When both sections are present, focus on what changed or was added in Meeting Notes compared to Pre-Meeting Notes to understand what the user captured during the meeting.
     - Either section may sometimes be empty.
 
+    # Action Items
+
+    - An action item is something a person explicitly committed to doing. Ideas, suggestions, and topics nobody took on are not action items.
+    - Attribute each item to the person who committed to it, using their name as it appears in the transcript.
+    - Include a deadline only when one was stated. Do not infer dates.
+    - Never invent an owner. If nobody clearly took the item, write it without an owner.
+    - When the user says something like "I'll handle that", the owner is the speaker of that line.
+
     # Guidelines
 
     - Notes and transcript may contain errors made by human and STT, respectively. Make the best out of every material.

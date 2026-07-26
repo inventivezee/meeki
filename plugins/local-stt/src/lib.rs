@@ -79,6 +79,25 @@ pub fn init<R: tauri::Runtime>(options: InitOptions) -> tauri::plugin::TauriPlug
 
             app.manage(state.clone());
 
+            #[cfg(target_os = "macos")]
+            {
+                use tauri::path::BaseDirectory;
+                if let Ok(bundled) = app.path().resolve("soniqo-models", BaseDirectory::Resource) {
+                    match hypr_transcribe_soniqo::seed_bundled_models(&bundled) {
+                        Ok(seeded) if !seeded.is_empty() => {
+                            tracing::info!(
+                                count = seeded.len(),
+                                "seeded_bundled_soniqo_models_from_resources"
+                            );
+                        }
+                        Ok(_) => {}
+                        Err(error) => {
+                            tracing::warn!(?error, "failed_to_seed_bundled_soniqo_models");
+                        }
+                    }
+                }
+            }
+
             let parent = options.parent_supervisor.clone();
             tauri::async_runtime::spawn(async move {
                 match server::supervisor::spawn_stt_supervisor(parent).await {

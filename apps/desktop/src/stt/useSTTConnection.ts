@@ -11,8 +11,11 @@ import { type ProviderId } from "~/settings/ai/stt/shared";
 import { useAiProvider } from "~/settings/providers";
 import { useConfigValues } from "~/shared/config";
 import {
+  LOCAL_LIVE_PREVIEW_MODEL,
+  getLocalFinalBatchModel,
   isHyprnoteCloudSttModel,
   isHyprnoteLocalSttModel,
+  isLocalSoniqoSttModel,
 } from "~/stt/capabilities";
 
 export const useSTTConnection = () => {
@@ -52,12 +55,26 @@ export const useSTTConnection = () => {
         return null;
       }
 
-      const downloaded = await localSttCommands.isModelDownloaded(localModel);
-      if (downloaded.status !== "ok" || !downloaded.data) {
-        return { status: "not_downloaded" as const, connection: null };
+      // Local Soniqo meetings: Parakeet for live preview + selected/default batch model.
+      const requiredModels = isLocalSoniqoSttModel(
+        current_stt_provider,
+        localModel,
+      )
+        ? [LOCAL_LIVE_PREVIEW_MODEL, getLocalFinalBatchModel(localModel)]
+        : [localModel];
+
+      for (const model of requiredModels) {
+        const downloaded = await localSttCommands.isModelDownloaded(model);
+        if (downloaded.status !== "ok" || !downloaded.data) {
+          return { status: "not_downloaded" as const, connection: null };
+        }
       }
 
-      const serverResult = await localSttCommands.getServerForModel(localModel);
+      const serverResult = await localSttCommands.getServerForModel(
+        requiredModels.includes(LOCAL_LIVE_PREVIEW_MODEL)
+          ? LOCAL_LIVE_PREVIEW_MODEL
+          : localModel,
+      );
 
       if (serverResult.status !== "ok") {
         return null;

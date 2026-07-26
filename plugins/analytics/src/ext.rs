@@ -43,7 +43,7 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Analytics<'a, R, M> {
     }
 
     fn enrich_payload(manager: &M, payload: &mut hypr_analytics::AnalyticsPayload) {
-        let app_version = env!("APP_VERSION");
+        let app_version = option_env!("APP_VERSION").unwrap_or("0.0.0-local");
         let app_identifier = manager.config().identifier.clone();
         let git_hash = manager.misc().get_git_hash();
         let bundle_id = manager.config().identifier.clone();

@@ -1,7 +1,5 @@
 mod app_info;
 mod app_new;
-mod help_report_bug;
-mod help_suggest_feature;
 mod tray_agenda;
 mod tray_check_update;
 mod tray_open;
@@ -13,8 +11,6 @@ mod tray_version;
 
 pub use app_info::AppInfo;
 pub use app_new::AppNew;
-pub use help_report_bug::HelpReportBug;
-pub use help_suggest_feature::HelpSuggestFeature;
 pub use tray_agenda::{build_agenda_item, handle_agenda_menu_event};
 pub use tray_check_update::{TrayCheckUpdate, UpdateMenuState};
 pub use tray_open::TrayOpen;
@@ -80,6 +76,4 @@ menu_items! {
     TrayVersion => TrayVersion,
     AppInfo => AppInfo,
     AppNew => AppNew,
-    HelpReportBug => HelpReportBug,
-    HelpSuggestFeature => HelpSuggestFeature,
 }

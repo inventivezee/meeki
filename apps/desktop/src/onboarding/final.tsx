@@ -1,11 +1,9 @@
-import { Icon } from "@iconify-icon/react";
 import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import { Loader2Icon } from "lucide-react";
 import { useRef, useState } from "react";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
-import { commands as openerCommands } from "@hypr/plugin-opener2";
 import { commands as sfxCommands } from "@hypr/plugin-sfx";
 
 import { OnboardingButton } from "./shared";
@@ -18,49 +16,15 @@ import { createSession } from "~/session/queries";
 import { flushAutomaticRelaunch } from "~/shared/relaunch";
 import { commands } from "~/types/tauri.gen";
 
-const SOCIALS = [
-  {
-    label: "Discord",
-    icon: "simple-icons:discord",
-    url: "https://anarlog.so/discord",
-  },
-  {
-    label: "GitHub",
-    icon: "simple-icons:github",
-    url: "https://github.com/fastrepl/char",
-  },
-  {
-    label: "X",
-    icon: "simple-icons:x",
-    size: 14,
-    url: "https://x.com/getcharnotes",
-  },
-] as const;
-
-const SOCIAL_ICON_SIZE = 18;
-
 export function FinalDescription() {
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
       <span>
-        <Trans>Join our community and stay updated:</Trans>
+        <Trans>
+          Your notes and recordings stay on this Mac unless you choose a cloud
+          provider.
+        </Trans>
       </span>
-      <div className="flex items-center gap-2">
-        {SOCIALS.map((social) => {
-          const iconSize = "size" in social ? social.size : SOCIAL_ICON_SIZE;
-
-          return (
-            <button
-              key={social.label}
-              onClick={() => void openerCommands.openUrl(social.url, null)}
-              className="text-muted-foreground hover:text-muted-foreground inline-flex size-5 items-center justify-center rounded-md transition-colors duration-150"
-              aria-label={social.label}
-            >
-              <Icon icon={social.icon} width={iconSize} height={iconSize} />
-            </button>
-          );
-        })}
-      </div>
     </div>
   );
 }

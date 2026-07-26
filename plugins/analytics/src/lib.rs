@@ -35,19 +35,16 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
     tauri::plugin::Builder::new(PLUGIN_NAME)
         .invoke_handler(specta_builder.invoke_handler())
         .setup(|app, _api| {
-            let posthog_key = {
-                #[cfg(not(debug_assertions))]
-                {
-                    let v = env!("POSTHOG_API_KEY");
-                    assert!(v.starts_with("phc_"));
-                    Some(v)
+            // PostHog is opt-in. Release builds no longer hard-require POSTHOG_API_KEY so
+            // private forks (and local packaging) can ship without telemetry credentials.
+            let posthog_key = option_env!("POSTHOG_API_KEY").and_then(|value| {
+                let trimmed = value.trim();
+                if trimmed.is_empty() {
+                    None
+                } else {
+                    Some(trimmed)
                 }
-
-                #[cfg(debug_assertions)]
-                {
-                    option_env!("POSTHOG_API_KEY")
-                }
-            };
+            });
 
             let client = {
                 let mut builder = hypr_analytics::AnalyticsClientBuilder::default();
