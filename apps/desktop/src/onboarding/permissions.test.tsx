@@ -58,31 +58,29 @@ describe("PermissionsSection", () => {
     });
   });
 
-  it("collects Accessibility permission on macOS", () => {
+  it("shows optional Accessibility permission on macOS", () => {
     const { container } = render(<PermissionsSection />);
 
     expect(screen.getByText("Help Anarlog listen to you")).toBeTruthy();
     expect(screen.getByText("Help Anarlog listen to others")).toBeTruthy();
-    expect(screen.getByText("Help Anarlog read meeting activity")).toBeTruthy();
+    expect(screen.getByText("Optional: read meeting activity")).toBeTruthy();
     expect(
       screen
         .getByRole("button", { name: "Enable accessibility" })
         .getAttribute("title"),
-    ).toBe("Read meeting controls, visible chat, and participant status");
+    ).toBe(
+      "Optional. Used for meeting controls, visible chat, mute sync, and participant status — not required to record",
+    );
     expect(container.querySelectorAll(".lucide-arrow-right")).toHaveLength(3);
   });
 
-  it("waits for all three macOS permissions before continuing", () => {
+  it("continues on macOS once mic and system audio are granted", () => {
     const onContinue = vi.fn();
     mocks.permissions.microphone.status = "authorized";
     mocks.permissions.systemAudio.status = "authorized";
+    mocks.permissions.accessibility.status = "denied";
 
     const view = render(<PermissionsSection onContinue={onContinue} />);
-
-    expect(onContinue).not.toHaveBeenCalled();
-
-    mocks.permissions.accessibility.status = "authorized";
-    view.rerender(<PermissionsSection onContinue={onContinue} />);
 
     expect(onContinue).toHaveBeenCalledTimes(1);
 
@@ -99,7 +97,7 @@ describe("PermissionsSection", () => {
 
     render(<PermissionsSection onContinue={onContinue} />);
 
-    expect(screen.queryByText("Help Anarlog read meeting activity")).toBeNull();
+    expect(screen.queryByText("Optional: read meeting activity")).toBeNull();
     expect(mocks.usePermission).not.toHaveBeenCalledWith("accessibility");
     expect(onContinue).toHaveBeenCalledTimes(1);
   });

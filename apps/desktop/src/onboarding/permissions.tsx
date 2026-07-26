@@ -123,10 +123,9 @@ function PermissionsSectionContent({
   const systemAudio = usePermission("systemAudio");
   const hasContinuedRef = useRef(false);
 
+  // Accessibility is optional: recording/transcription only need mic + system audio.
   const isComplete =
-    mic.status === "authorized" &&
-    systemAudio.status === "authorized" &&
-    (!accessibility || accessibility.status === "authorized");
+    mic.status === "authorized" && systemAudio.status === "authorized";
 
   const handleAction = (perm: ReturnType<typeof usePermission>) => {
     if (perm.status === "denied") {
@@ -173,9 +172,9 @@ function PermissionsSectionContent({
         {accessibility && (
           <PermissionBlock
             enabledLabel={t`Anarlog can read meeting details`}
-            enableLabel={t`Help Anarlog read meeting activity`}
+            enableLabel={t`Optional: read meeting activity`}
             enabledBody={t`Meeting details access turned on`}
-            enableBody={t`Read meeting controls, visible chat, and participant status`}
+            enableBody={t`Optional. Used for meeting controls, visible chat, mute sync, and participant status — not required to record`}
             Icon={MousePointer2Icon}
             permissionName={t`Accessibility`}
             status={accessibility.status}
