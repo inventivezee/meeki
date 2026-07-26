@@ -1,6 +1,10 @@
 import { expect, test } from "vitest";
 
-import { deriveBillingInfo } from "@hypr/supabase/billing";
+import {
+  applyClientProGrant,
+  deriveBillingInfo,
+  parseProGrantEmails,
+} from "@hypr/supabase/billing";
 
 const secondsFromNow = (seconds: number) =>
   Math.floor(Date.now() / 1000) + seconds;
@@ -62,4 +66,51 @@ test("a bare active subscription does not invent an entitlement", () => {
   expect(billing.isPro).toBe(false);
   expect(billing.isPaid).toBe(false);
   expect(billing.plan).toBe("free");
+});
+
+test("parseProGrantEmails splits and normalizes emails", () => {
+  expect(parseProGrantEmails(" Ada@Example.com , bob@test.com ")).toEqual([
+    "ada@example.com",
+    "bob@test.com",
+  ]);
+});
+
+test("forcePro grants Pro without a session payload", () => {
+  const billing = deriveBillingInfo(
+    applyClientProGrant(null, { forcePro: true }),
+  );
+
+  expect(billing.isPro).toBe(true);
+  expect(billing.isPaid).toBe(true);
+  expect(billing.plan).toBe("pro");
+});
+
+test("allowlisted email grants Pro on an otherwise free payload", () => {
+  const billing = deriveBillingInfo(
+    applyClientProGrant(
+      { entitlements: [], subscription_status: null },
+      {
+        grantEmails: ["admin@meety.local"],
+        email: "Admin@Meety.local",
+      },
+    ),
+  );
+
+  expect(billing.isPro).toBe(true);
+  expect(billing.isPaid).toBe(true);
+});
+
+test("non-allowlisted email does not grant Pro", () => {
+  const billing = deriveBillingInfo(
+    applyClientProGrant(
+      { entitlements: [], subscription_status: null },
+      {
+        grantEmails: ["admin@meety.local"],
+        email: "user@example.com",
+      },
+    ),
+  );
+
+  expect(billing.isPro).toBe(false);
+  expect(billing.isPaid).toBe(false);
 });

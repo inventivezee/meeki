@@ -1,10 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
 
+import { env } from "~/env";
+
+/**
+ * Optional remote suggestions. Disabled unless VITE_RESOURCE_SUGGESTIONS_URL is set
+ * so Meety does not phone home to anarlog.so by default.
+ */
 export function useWebResources<T>(endpoint: string) {
+  const baseUrl = env.VITE_RESOURCE_SUGGESTIONS_URL?.replace(/\/$/, "");
+
   return useQuery({
-    queryKey: ["settings", endpoint, "suggestions"],
+    queryKey: ["settings", endpoint, "suggestions", baseUrl ?? ""],
+    enabled: !!baseUrl,
     queryFn: async () => {
-      const response = await fetch(`https://anarlog.so/api/${endpoint}`, {
+      if (!baseUrl) {
+        return [];
+      }
+      const response = await fetch(`${baseUrl}/${endpoint}`, {
         headers: { Accept: "application/json" },
       });
       if (!response.ok) {

@@ -1,5 +1,5 @@
 begin;
-select plan(14);
+select plan(15);
 
 select tests.create_supabase_user('pro', 'pro@example.com');
 select tests.create_supabase_user('free', 'free@example.com');
@@ -220,6 +220,27 @@ select is(
   ),
   'false'::jsonb,
   'custom_access_token_hook reports a missing payment method'
+);
+
+select tests.create_supabase_user('comp', 'comp@example.com');
+
+insert into private.pro_grants (email)
+values ('comp@example.com')
+on conflict (email) do nothing;
+
+select results_eq(
+  $$
+  select (
+    public.custom_access_token_hook(
+      jsonb_build_object(
+        'user_id', tests.get_supabase_uid('comp')::text,
+        'claims', '{}'::jsonb
+      )
+    ) -> 'claims' -> 'entitlements'
+  )::jsonb
+  $$,
+  array['["hyprnote_pro"]'::jsonb],
+  'custom_access_token_hook grants hyprnote_pro from private.pro_grants without Stripe'
 );
 
 select * from finish();

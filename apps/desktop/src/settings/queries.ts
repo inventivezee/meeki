@@ -411,11 +411,10 @@ function applySettingSideEffects(values: SettingValues): void {
       .setMicActiveThreshold(values.mic_active_threshold)
       .catch(console.error);
   }
-  if (values.telemetry_consent !== undefined) {
-    void analyticsCommands
-      .setDisabled(!values.telemetry_consent)
-      .catch(console.error);
-  }
+  // Always sync: unset consent defaults to opt-out (analytics disabled).
+  void analyticsCommands
+    .setDisabled(!(values.telemetry_consent ?? false))
+    .catch(console.error);
   if (values.show_app_in_dock !== undefined) {
     void windowsCommands
       .setShowAppInDock(values.show_app_in_dock)

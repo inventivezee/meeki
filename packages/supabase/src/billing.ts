@@ -14,6 +14,57 @@ export type BillingInfo = {
   plan: Plan;
 };
 
+export function parseProGrantEmails(
+  value: string | undefined | null,
+): string[] {
+  if (!value) {
+    return [];
+  }
+
+  return value
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+/** Client-side Pro unlock for allowlisted emails or a local force flag. */
+export function applyClientProGrant(
+  payload: SupabaseJwtPayload | null,
+  options: {
+    forcePro?: boolean;
+    grantEmails?: string[];
+    email?: string | null;
+  },
+): SupabaseJwtPayload | null {
+  const grantEmails = options.grantEmails ?? [];
+  const email = options.email?.trim().toLowerCase() ?? null;
+  const emailGranted = !!email && grantEmails.includes(email);
+  const shouldGrant = options.forcePro === true || emailGranted;
+
+  if (!shouldGrant) {
+    return payload;
+  }
+
+  const base: SupabaseJwtPayload = payload ?? {
+    entitlements: [],
+    subscription_status: null,
+  };
+  const entitlements = base.entitlements ?? [];
+
+  if (entitlements.includes("hyprnote_pro")) {
+    return base;
+  }
+
+  return {
+    ...base,
+    entitlements: [...entitlements, "hyprnote_pro"],
+    subscription_status:
+      base.subscription_status === "trialing"
+        ? base.subscription_status
+        : (base.subscription_status ?? "active"),
+  };
+}
+
 export function deriveBillingInfo(
   payload: SupabaseJwtPayload | null,
 ): BillingInfo {

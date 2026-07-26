@@ -95,16 +95,12 @@ impl AmModel {
     }
 
     pub fn tar_url(&self) -> &str {
+        // Argmax model packs were hosted on hyprnote S3. Meety does not phone home there;
+        // set MEETY_AM_*_URL at build time to your own CDN when you re-host the packs.
         match self {
-            AmModel::ParakeetV2 => {
-                "https://hyprnote.s3.us-east-1.amazonaws.com/v0/nvidia_parakeet-v2_476MB.tar"
-            }
-            AmModel::ParakeetV3 => {
-                "https://hyprnote.s3.us-east-1.amazonaws.com/v0/nvidia_parakeet-v3_494MB.tar"
-            }
-            AmModel::WhisperLargeV3 => {
-                "https://hyprnote.s3.us-east-1.amazonaws.com/v0/openai_whisper-large-v3-v20240930_626MB.tar"
-            }
+            AmModel::ParakeetV2 => option_env!("MEETY_AM_PARAKEET_V2_URL").unwrap_or(""),
+            AmModel::ParakeetV3 => option_env!("MEETY_AM_PARAKEET_V3_URL").unwrap_or(""),
+            AmModel::WhisperLargeV3 => option_env!("MEETY_AM_WHISPER_LARGE_V3_URL").unwrap_or(""),
         }
     }
 
@@ -135,7 +131,11 @@ impl AmModel {
         output_path: impl AsRef<std::path::Path>,
         progress_callback: F,
     ) -> Result<(), crate::Error> {
-        hypr_file::download_file_parallel(self.tar_url(), output_path, progress_callback).await?;
+        let url = self.tar_url();
+        if url.is_empty() {
+            return Err(crate::Error::TarFileNotFound);
+        }
+        hypr_file::download_file_parallel(url, output_path, progress_callback).await?;
         Ok(())
     }
 }

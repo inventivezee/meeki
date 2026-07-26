@@ -7,4 +7,8 @@ export type { SubscriptionStatus, SupabaseJwtPayload } from "./jwt";
 export { createJwksVerifier } from "./jwt";
 
 export type { BillingInfo, Plan } from "./billing";
-export { deriveBillingInfo } from "./billing";
+export {
+  applyClientProGrant,
+  deriveBillingInfo,
+  parseProGrantEmails,
+} from "./billing";

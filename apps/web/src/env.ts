@@ -38,11 +38,16 @@ export const env = createEnv({
       : z.string().min(1),
     VITE_API_URL: isDev
       ? z.string().default("http://localhost:3001")
-      : z.string().default("https://api.char.com"),
+      : z.string().min(1),
     VITE_SUPABASE_URL: requiredInProd(z.string().min(1)),
     VITE_SUPABASE_ANON_KEY: requiredInProd(z.string().min(1)),
     VITE_POSTHOG_API_KEY: requiredInProd(z.string().min(1)),
     VITE_POSTHOG_HOST: z.string().default("https://us.i.posthog.com"),
+    VITE_FORCE_PRO: z
+      .enum(["true", "false", "1", "0"])
+      .optional()
+      .transform((value) => value === "true" || value === "1"),
+    VITE_PRO_GRANT_EMAILS: z.string().optional(),
     VITE_OTEL_EXPORTER_OTLP_ENDPOINT: z.url().optional(),
     VITE_OTEL_SAMPLE_RATE: z.coerce.number().int().positive().default(10),
     VITE_SENTRY_DSN: z.string().min(1).optional(),

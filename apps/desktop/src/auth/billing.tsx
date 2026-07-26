@@ -14,7 +14,12 @@ import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import { commands as authCommands } from "@hypr/plugin-auth";
 import { commands as openerCommands } from "@hypr/plugin-opener2";
 import { openUrlWithInstruction } from "@hypr/plugin-windows";
-import { deriveBillingInfo, type SupabaseJwtPayload } from "@hypr/supabase";
+import {
+  applyClientProGrant,
+  deriveBillingInfo,
+  parseProGrantEmails,
+  type SupabaseJwtPayload,
+} from "@hypr/supabase";
 
 import { TrialEndedDialog } from "../billing/trial-ended-dialog";
 import { TrialPaymentReminderDialog } from "../billing/trial-payment-reminder-dialog";
@@ -78,8 +83,24 @@ export function BillingProvider({ children }: { children: ReactNode }) {
       previous?.sub === auth?.session?.user.id ? previous : undefined,
   });
 
-  const billing = deriveBillingInfo(claimsQuery.data ?? null);
-  const isReady = !claimsQuery.isPending && !claimsQuery.isError;
+  const forcePro = env.VITE_FORCE_PRO === true;
+  const proGrantEmailsRaw = env.VITE_PRO_GRANT_EMAILS;
+
+  const billing = useMemo(() => {
+    const email = auth?.session?.user.email ?? claimsQuery.data?.email ?? null;
+    const payload = applyClientProGrant(claimsQuery.data ?? null, {
+      forcePro,
+      grantEmails: parseProGrantEmails(proGrantEmailsRaw),
+      email,
+    });
+    return deriveBillingInfo(payload);
+  }, [
+    auth?.session?.user.email,
+    claimsQuery.data,
+    forcePro,
+    proGrantEmailsRaw,
+  ]);
+  const isReady = forcePro || (!claimsQuery.isPending && !claimsQuery.isError);
 
   // eslint-disable-next-line @tanstack/query/exhaustive-deps -- Auth supplies request headers; the user ID is the eligibility identity.
   const canTrialQuery = useQuery({

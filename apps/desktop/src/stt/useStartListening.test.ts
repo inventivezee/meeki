@@ -2835,7 +2835,7 @@ describe("useStartListening", () => {
 
     await waitFor(() => {
       expect(sendMeetingChatMessageMock).toHaveBeenCalledWith(
-        "I'm using Anarlog to record and transcribe this meeting. https://anarlog.so",
+        "I'm using Meety to record and transcribe this meeting.",
         ["com.tinyspeck.slackmacgap"],
       );
     });
@@ -2933,7 +2933,7 @@ describe("useStartListening", () => {
 
     expect(listMicUsingApplicationsMock).toHaveBeenCalledTimes(2);
     expect(sendMeetingChatMessageMock).toHaveBeenCalledWith(
-      expect.stringContaining("https://anarlog.so"),
+      expect.stringContaining("I'm using Meety"),
       ["com.tinyspeck.slackmacgap"],
     );
     expect(sonnerToastWarningMock).not.toHaveBeenCalled();
@@ -2964,7 +2964,7 @@ describe("useStartListening", () => {
 
     await waitFor(() => {
       expect(sendMeetingChatMessageMock).toHaveBeenCalledWith(
-        expect.stringContaining("https://anarlog.so"),
+        expect.stringContaining("I'm using Meety"),
         ["com.hyprnote.dev", "com.tinyspeck.slackmacgap"],
       );
     });
@@ -2993,7 +2993,7 @@ describe("useStartListening", () => {
     });
 
     expect(sendMeetingChatMessageMock).toHaveBeenCalledWith(
-      expect.stringContaining("https://anarlog.so"),
+      expect.stringContaining("I'm using Meety"),
       ["us.zoom.xos", "com.tinyspeck.slackmacgap"],
     );
     expect(warn).toHaveBeenCalledWith(
@@ -3001,7 +3001,7 @@ describe("useStartListening", () => {
       "expected exactly one recognized meeting app bundle",
     );
     expect(sonnerToastWarningMock).toHaveBeenCalledWith(
-      "Recording started, but Anarlog could not post the meeting chat disclosure.",
+      "Recording started, but Meety could not post the meeting chat disclosure.",
       { id: "meeting-disclosure-send-failed" },
     );
     warn.mockRestore();
@@ -3151,7 +3151,7 @@ describe("useStartListening", () => {
       error,
     );
     expect(sonnerToastWarningMock).toHaveBeenCalledWith(
-      "Recording started, but Anarlog could not post the meeting chat disclosure.",
+      "Recording started, but Meety could not post the meeting chat disclosure.",
       { id: "meeting-disclosure-send-failed" },
     );
     warn.mockRestore();
@@ -3176,7 +3176,7 @@ describe("useStartListening", () => {
       expect(startMeetingChatCaptureMock).toHaveBeenCalledWith({
         sessionId: "session-1",
         excludedTexts: [
-          "I'm using Anarlog to record and transcribe this meeting. https://anarlog.so",
+          "I'm using Meety to record and transcribe this meeting.",
         ],
       });
     });
@@ -3214,7 +3214,7 @@ describe("useStartListening", () => {
       expect(startMeetingChatCaptureMock).toHaveBeenCalledWith({
         sessionId: "session-1",
         excludedTexts: [
-          "I'm using Anarlog to record and transcribe this meeting. https://anarlog.so",
+          "I'm using Meety to record and transcribe this meeting.",
         ],
       });
     });

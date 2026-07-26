@@ -31,7 +31,10 @@ import { TrayScheduleSync } from "./services/tray-schedule";
 import { useRemoteSessionDeletionUndoListener } from "./session/hooks/useDeleteSession";
 import { refreshLegacySettingsSnapshots } from "./settings/legacy-snapshots";
 import { migratePlaintextAiProviderApiKeys } from "./settings/providers";
-import { initializeApplicationSettings } from "./settings/queries";
+import {
+  getStoredSettingValues,
+  initializeApplicationSettings,
+} from "./settings/queries";
 import { initializeAppExitFlush } from "./shared/app-exit";
 import { useConfigValue } from "./shared/config";
 import { ErrorComponent, NotFoundComponent } from "./shared/control";
@@ -77,7 +80,19 @@ function App() {
   );
 }
 
-if (env.VITE_SENTRY_DSN) {
+async function maybeInitSentryFromConsent() {
+  if (!env.VITE_SENTRY_DSN) {
+    return;
+  }
+
+  const stored = await getStoredSettingValues();
+  const consent = stored.hasValues.has("telemetry_consent")
+    ? stored.values.telemetry_consent === true
+    : false;
+  if (!consent) {
+    return;
+  }
+
   Sentry.init({
     dsn: env.VITE_SENTRY_DSN,
     release: env.VITE_APP_VERSION
@@ -147,6 +162,9 @@ async function renderApp() {
     });
     await migratePlaintextAiProviderApiKeys().catch((error) => {
       console.error("Failed to migrate AI provider credentials", error);
+    });
+    await maybeInitSentryFromConsent().catch((error) => {
+      console.error("Failed to initialize Sentry", error);
     });
   }
   await Promise.all([bootstrapThemeFromSettings(), enableReactScanInDev()]);

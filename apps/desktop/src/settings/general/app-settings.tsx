@@ -68,7 +68,8 @@ export function AppSettingsView({
             title={<Trans>Share usage data</Trans>}
             description={
               <Trans>
-                Send anonymous usage analytics to help improve Anarlog.
+                Off by default. If enabled, send anonymous usage analytics (not
+                meeting content) to help improve the app.
               </Trans>
             }
             checked={telemetryConsent.value}

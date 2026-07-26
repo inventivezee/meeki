@@ -77,8 +77,17 @@ pub async fn main() {
             None => (None, None),
         };
 
+    // Crash reporting is opt-in at build time. Set ENABLE_SENTRY=true and SENTRY_DSN
+    // only when intentionally shipping telemetry; Meety defaults to off.
     let sentry_client = {
-        let dsn = option_env!("SENTRY_DSN");
+        let sentry_enabled = option_env!("ENABLE_SENTRY").is_some_and(|value| {
+            matches!(value.to_ascii_lowercase().as_str(), "1" | "true" | "yes")
+        });
+        let dsn = if sentry_enabled {
+            option_env!("SENTRY_DSN")
+        } else {
+            None
+        };
 
         if let Some(dsn) = dsn {
             let release =

@@ -24,13 +24,15 @@ impl GgufLlmModel {
     pub fn model_url(&self) -> &str {
         match self {
             GgufLlmModel::Llama3p2_3bQ4 => {
-                "https://hyprnote.s3.us-east-1.amazonaws.com/v0/lmstudio-community/Llama-3.2-3B-Instruct-GGUF/main/Llama-3.2-3B-Instruct-Q4_K_M.gguf"
+                "https://huggingface.co/lmstudio-community/Llama-3.2-3B-Instruct-GGUF/resolve/main/Llama-3.2-3B-Instruct-Q4_K_M.gguf"
             }
+            // Proprietary package historically hosted on hyprnote CDN — disabled by default.
+            // Set MEETY_HYPR_LLM_URL at build time to re-enable downloads from your own host.
             GgufLlmModel::HyprLLM => {
-                "https://hyprnote.s3.us-east-1.amazonaws.com/v0/yujonglee/hypr-llm-sm/model_q4_k_m.gguf"
+                option_env!("MEETY_HYPR_LLM_URL").unwrap_or("")
             }
             GgufLlmModel::Gemma3_4bQ4 => {
-                "https://hyprnote.s3.us-east-1.amazonaws.com/v0/unsloth/gemma-3-4b-it-GGUF/gemma-3-4b-it-Q4_K_M.gguf"
+                "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q4_K_M.gguf"
             }
         }
     }
@@ -207,7 +209,12 @@ impl DownloadableModel for GgufLlmModel {
     }
 
     fn download_url(&self) -> Option<String> {
-        Some(self.model_url().to_string())
+        let url = self.model_url();
+        if url.is_empty() {
+            None
+        } else {
+            Some(url.to_string())
+        }
     }
 
     fn download_checksum(&self) -> Option<u32> {
@@ -255,8 +262,14 @@ impl DownloadableModel for LocalModel {
     fn download_url(&self) -> Option<String> {
         match self {
             LocalModel::Soniqo(_) => None,
-            LocalModel::Whisper(model) => Some(model.model_url().to_string()),
-            LocalModel::Am(model) => Some(model.tar_url().to_string()),
+            LocalModel::Whisper(model) => {
+                let url = model.model_url();
+                (!url.is_empty()).then(|| url.to_string())
+            }
+            LocalModel::Am(model) => {
+                let url = model.tar_url();
+                (!url.is_empty()).then(|| url.to_string())
+            }
             LocalModel::GgufLlm(model) => model.download_url(),
         }
     }

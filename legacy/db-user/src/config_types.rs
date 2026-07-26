@@ -59,7 +59,7 @@ impl Default for ConfigGeneral {
             display_language: hypr_language::ISO639::En.into(),
             spoken_languages: vec![hypr_language::ISO639::En.into()],
             jargons: vec![],
-            telemetry_consent: true,
+            telemetry_consent: false,
             save_recordings: Some(false),
             selected_template_id: None,
             summary_language: hypr_language::ISO639::En.into(),

@@ -49,7 +49,7 @@ impl ApiAgentClientBuilder {
 
         let api_base = self
             .api_base
-            .unwrap_or_else(|| "https://api.char.com".to_string())
+            .unwrap_or_else(|| "http://localhost:3001".to_string())
             .parse()?;
 
         Ok(ApiAgentClient { client, api_base })

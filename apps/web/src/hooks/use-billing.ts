@@ -3,32 +3,43 @@ import { jwtDecode } from "jwt-decode";
 import { useCallback, useEffect, useState } from "react";
 
 import {
+  applyClientProGrant,
   type BillingInfo,
   deriveBillingInfo,
+  parseProGrantEmails,
   type SupabaseJwtPayload,
 } from "@hypr/supabase";
 
+import { env } from "@/env";
 import { getSupabaseBrowserClient } from "@/functions/supabase";
 
-const DEFAULT_BILLING = deriveBillingInfo(null);
+const DEFAULT_BILLING = deriveBillingInfo(
+  applyClientProGrant(null, {
+    forcePro: env.VITE_FORCE_PRO === true,
+    grantEmails: parseProGrantEmails(env.VITE_PRO_GRANT_EMAILS),
+  }),
+);
 
 export function useBilling() {
   const queryClient = useQueryClient();
   const [accessToken, setAccessToken] = useState<string | null | undefined>(
     undefined,
   );
+  const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
 
     void supabase.auth.getSession().then(({ data }) => {
       setAccessToken(data.session?.access_token ?? null);
+      setEmail(data.session?.user.email ?? null);
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setAccessToken(session?.access_token ?? null);
+      setEmail(session?.user.email ?? null);
     });
 
     return () => {
@@ -37,13 +48,33 @@ export function useBilling() {
   }, []);
 
   const jwtQuery = useQuery({
-    queryKey: ["billing", "jwt", accessToken ?? ""],
+    queryKey: [
+      "billing",
+      "jwt",
+      accessToken ?? "",
+      email ?? "",
+      env.VITE_FORCE_PRO ?? false,
+      env.VITE_PRO_GRANT_EMAILS ?? "",
+    ],
     queryFn: async () => {
       if (!accessToken) {
-        return DEFAULT_BILLING;
+        return deriveBillingInfo(
+          applyClientProGrant(null, {
+            forcePro: env.VITE_FORCE_PRO === true,
+            grantEmails: parseProGrantEmails(env.VITE_PRO_GRANT_EMAILS),
+            email,
+          }),
+        );
       }
 
-      return deriveBillingInfo(jwtDecode<SupabaseJwtPayload>(accessToken));
+      const payload = jwtDecode<SupabaseJwtPayload>(accessToken);
+      return deriveBillingInfo(
+        applyClientProGrant(payload, {
+          forcePro: env.VITE_FORCE_PRO === true,
+          grantEmails: parseProGrantEmails(env.VITE_PRO_GRANT_EMAILS),
+          email: email ?? payload.email,
+        }),
+      );
     },
     enabled: accessToken !== undefined,
     retry: false,

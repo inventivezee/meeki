@@ -747,7 +747,7 @@ mod tests {
         let temp_path = temp_file.path();
 
         let s3_url =
-            "https://storage2.hyprnote.com/v0/ggerganov/whisper.cpp/main/ggml-tiny-q8_0.bin";
+            "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny-q8_0.bin";
 
         let partial_content = b"PARTIAL_CONTENT".repeat(100);
         std::fs::write(temp_path, &partial_content).unwrap();
@@ -917,7 +917,7 @@ mod tests {
         use std::time::Instant;
         use tempfile::NamedTempFile;
 
-        let url = "https://storage2.hyprnote.com/v0/yujonglee/hypr-llm-sm/model_q4_k_m.gguf";
+        let url = "https://huggingface.co/lmstudio-community/Llama-3.2-3B-Instruct-GGUF/resolve/main/Llama-3.2-3B-Instruct-Q4_K_M.gguf";
         let test_client = reqwest::Client::builder().http1_only().build().unwrap();
 
         let head_response = test_client

@@ -102,7 +102,7 @@ export const SETTING_DEFINITIONS = {
   telemetry_consent: {
     type: "boolean",
     path: ["general", "telemetry_consent"],
-    default: true as boolean,
+    default: false as boolean,
   },
   consent_auto_send_chat: {
     type: "boolean",

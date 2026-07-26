@@ -8,10 +8,8 @@
       "desktop": { "schemes": ["anarlog", "hyprnote"] }
     },
     "updater": {
-      "active": true,
-      "endpoints": [
-        "https://desktop2.hyprnote.com/update/{{target}}-{{arch}}/{{current_version}}?channel=stable"
-      ]
+      "active": false,
+      "endpoints": []
     }
   }
 }
