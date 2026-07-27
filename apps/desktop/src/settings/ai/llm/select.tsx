@@ -17,6 +17,7 @@ import { cn } from "@meeki/utils";
 
 import { useLlmSettings } from "./context";
 import { HealthStatusIndicator, useConnectionHealth } from "./health";
+import { LocalModels } from "./local-models";
 import { OnDeviceLlmCard } from "./on-device";
 import {
   getDefaultLlmSelection,
@@ -88,6 +89,10 @@ export function SelectProviderAndModel() {
   const selectedProviderConfigured = current_llm_provider
     ? (configuredProviders[current_llm_provider]?.configured ?? false)
     : false;
+  // Once a local model is running, the Local & Private list below covers
+  // everything the setup card was for.
+  const localModelInUse =
+    current_llm_provider === "on_device" && Boolean(current_llm_model);
   const visibleSelection = getVisibleModelSelection(
     current_llm_provider,
     current_llm_model,
@@ -347,7 +352,7 @@ export function SelectProviderAndModel() {
         />
       ) : null}
       <OnDeviceSetupCard />
-      <OnDeviceLlmCard />
+      {localModelInUse ? null : <OnDeviceLlmCard />}
       <ThinkingToggle />
       <SettingsAlertToast
         id="llm-settings-alert"
@@ -355,8 +360,10 @@ export function SelectProviderAndModel() {
         variant={hasError ? "error" : "warning"}
       />
 
+      <LocalModels />
+
       <h3 className="text-md font-sans font-semibold">
-        <Trans>Model being used</Trans>
+        <Trans>Cloud</Trans>
       </h3>
       <div className="flex flex-row items-center gap-4">
         <div className="min-w-0 flex-2" data-llm-provider-selector>

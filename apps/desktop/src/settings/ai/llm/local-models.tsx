@@ -1,0 +1,285 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Channel } from "@tauri-apps/api/core";
+import {
+  CheckIcon,
+  HelpCircleIcon,
+  Loader2,
+  TriangleAlertIcon,
+} from "lucide-react";
+import { useState } from "react";
+
+import {
+  commands as localLlmCommands,
+  type GgufLlmModel,
+  type ModelInfo,
+} from "@meeki/plugin-local-llm";
+import { Button } from "@meeki/ui/components/ui/button";
+import { sonnerToast } from "@meeki/ui/components/ui/toast";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@meeki/ui/components/ui/tooltip";
+import { cn } from "@meeki/utils";
+
+import {
+  fitsInMemory,
+  formatGb,
+  formatMemoryGb,
+} from "~/settings/ai/shared/model-facts";
+import { setAiProvider } from "~/settings/providers";
+import { setSettingValues } from "~/settings/queries";
+import { useConfigValues } from "~/shared/config";
+
+const DOWNLOADED_QUERY_KEY = ["local-llm-downloaded"] as const;
+
+async function activate(model: GgufLlmModel) {
+  const started = await localLlmCommands.startServer(model);
+  if (started.status === "error") {
+    throw new Error(started.error);
+  }
+  await setAiProvider("llm", "on_device", {
+    base_url: started.data,
+    api_key: "local",
+  });
+  await setSettingValues({
+    current_llm_provider: "on_device",
+    current_llm_model: model,
+  });
+}
+
+/**
+ * Everything the user needs to judge a model without leaving the app: what it
+ * is good at, what it costs to fetch, and whether this Mac can actually hold
+ * it. The trigger turns amber when it cannot, which is how a frontier model
+ * explains itself rather than just looking arbitrarily absent.
+ */
+function ModelHelp({
+  model,
+  fits,
+  totalMemoryBytes,
+  installable,
+}: {
+  model: ModelInfo;
+  fits: boolean;
+  totalMemoryBytes: number;
+  installable: boolean;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          aria-label={`About ${model.name}`}
+          className={cn([
+            "shrink-0 rounded-full transition-colors",
+            fits
+              ? "text-muted-foreground hover:text-foreground"
+              : "text-amber-700 hover:text-amber-900",
+          ])}
+        >
+          {fits ? (
+            <HelpCircleIcon className="size-3.5" />
+          ) : (
+            <TriangleAlertIcon className="size-3.5" />
+          )}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent className="max-w-xs">
+        <div className="flex flex-col gap-1.5">
+          <p className="leading-relaxed">{model.description}</p>
+          <p className="text-[11px] opacity-80">
+            {formatGb(model.size_bytes)} GB download ·{" "}
+            {formatMemoryGb(model.min_memory_bytes)} GB memory recommended
+          </p>
+          {fits ? null : (
+            <p className="text-[11px] leading-relaxed">
+              This Mac has {formatMemoryGb(totalMemoryBytes)} GB. Running it
+              would exceed what Metal can allocate, so it would swap heavily or
+              fail to load.
+            </p>
+          )}
+          {installable ? null : (
+            <p className="text-[11px] leading-relaxed">
+              Ships as multiple files, which the downloader can't fetch yet.
+            </p>
+          )}
+        </div>
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
+export function LocalModels() {
+  const queryClient = useQueryClient();
+  const [downloading, setDownloading] = useState<GgufLlmModel | null>(null);
+  const { current_llm_provider, current_llm_model } = useConfigValues([
+    "current_llm_provider",
+    "current_llm_model",
+  ] as const);
+
+  const supported = useQuery({
+    queryKey: ["local-llm-supported"],
+    queryFn: async () => {
+      const result = await localLlmCommands.listSupportedModel();
+      return result.status === "ok" ? result.data : [];
+    },
+    staleTime: Infinity,
+  });
+
+  const recommended = useQuery({
+    queryKey: ["local-llm-recommended"],
+    queryFn: async () => {
+      const result = await localLlmCommands.recommendedModel();
+      if (result.status === "error") {
+        throw new Error(result.error);
+      }
+      return result.data;
+    },
+    staleTime: Infinity,
+  });
+
+  const downloaded = useQuery({
+    queryKey: DOWNLOADED_QUERY_KEY,
+    queryFn: async () => {
+      const result = await localLlmCommands.listDownloadedModel();
+      return result.status === "ok" ? result.data : [];
+    },
+    refetchInterval: 2_000,
+  });
+
+  const download = useMutation({
+    mutationFn: async (model: ModelInfo) => {
+      setDownloading(model.key);
+      const channel = new Channel<number>();
+      channel.onmessage = (value) => {
+        if (value >= 0) {
+          sonnerToast.message(`Downloading ${model.name}`, {
+            id: `local-llm-${model.key}`,
+            description: `${Math.round(value)}%`,
+          });
+        }
+      };
+      const result = await localLlmCommands.downloadModel(model.key, channel);
+      if (result.status === "error") {
+        throw new Error(result.error);
+      }
+    },
+    onSuccess: async (_data, model) => {
+      await queryClient.invalidateQueries({ queryKey: DOWNLOADED_QUERY_KEY });
+      sonnerToast.success(`${model.name} downloaded`, {
+        id: `local-llm-${model.key}`,
+        description: "Select Enable to start using it.",
+      });
+    },
+    onError: (error, model) => {
+      sonnerToast.error(`Couldn't download ${model.name}`, {
+        id: `local-llm-${model.key}`,
+        description: error instanceof Error ? error.message : String(error),
+      });
+    },
+    onSettled: () => setDownloading(null),
+  });
+
+  const enable = useMutation({
+    mutationFn: (model: ModelInfo) => activate(model.key),
+    onSuccess: (_data, model) =>
+      sonnerToast.success(`${model.name} is ready`, {
+        id: `local-llm-${model.key}`,
+      }),
+    onError: (error, model) =>
+      sonnerToast.error(`Couldn't start ${model.name}`, {
+        id: `local-llm-${model.key}`,
+        description: error instanceof Error ? error.message : String(error),
+      }),
+  });
+
+  const models = supported.data ?? [];
+  if (models.length === 0) {
+    return null;
+  }
+
+  const totalMemoryBytes = recommended.data?.total_memory_bytes ?? 0;
+  const busy = downloading !== null || enable.isPending;
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-1">
+        <h3 className="text-md font-sans font-semibold">Local &amp; Private</h3>
+        <p className="text-muted-foreground text-xs leading-relaxed">
+          Runs on this Mac with the bundled llama.cpp runtime. Nothing leaves
+          the device.
+        </p>
+      </div>
+
+      <div className="border-border/60 bg-card/70 divide-border/60 flex flex-col divide-y rounded-2xl border">
+        {models.map((model) => {
+          const isDownloaded = downloaded.data?.includes(model.key) ?? false;
+          const isActive =
+            current_llm_provider === "on_device" &&
+            current_llm_model === model.key;
+          const fits = fitsInMemory(model, totalMemoryBytes);
+          const installable = model.key !== "deepseek-v4-flash";
+
+          return (
+            <div
+              key={model.key}
+              className="flex items-center justify-between gap-3 px-4 py-3"
+            >
+              <div className="flex min-w-0 flex-col gap-0.5">
+                <div className="flex items-center gap-1.5">
+                  <p className="truncate text-sm font-medium">{model.name}</p>
+                  <ModelHelp
+                    model={model}
+                    fits={fits}
+                    totalMemoryBytes={totalMemoryBytes}
+                    installable={installable}
+                  />
+                </div>
+                <p
+                  className={cn([
+                    "text-[11px]",
+                    fits ? "text-muted-foreground" : "text-amber-700",
+                  ])}
+                >
+                  {formatGb(model.size_bytes)} GB ·{" "}
+                  {formatMemoryGb(model.min_memory_bytes)} GB RAM
+                </p>
+              </div>
+
+              {isActive ? (
+                <span className="text-muted-foreground flex shrink-0 items-center gap-1 text-xs">
+                  <CheckIcon className="size-3.5" />
+                  In use
+                </span>
+              ) : isDownloaded ? (
+                <Button
+                  size="sm"
+                  className="h-7 shrink-0 px-3 text-xs"
+                  disabled={busy}
+                  onClick={() => enable.mutate(model)}
+                >
+                  Enable
+                </Button>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 shrink-0 px-3 text-xs"
+                  disabled={busy || !installable}
+                  onClick={() => download.mutate(model)}
+                >
+                  {downloading === model.key ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    "Download"
+                  )}
+                </Button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

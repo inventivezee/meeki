@@ -17,6 +17,8 @@ pub enum GgufLlmModel {
     Gemma4_12bQ4Km,
     #[serde(rename = "qwen3-4b")]
     Qwen3_4bQ4Km,
+    #[serde(rename = "deepseek-v4-flash")]
+    DeepseekV4FlashIq1S,
     Llama3p2_3bQ4,
     Gemma3_4bQ4,
     HyprLLM,
@@ -30,6 +32,7 @@ impl GgufLlmModel {
             GgufLlmModel::Gemma4_26bA4bIq4Xs => "gemma-4-26B-A4B-it-UD-IQ4_XS.gguf",
             GgufLlmModel::Gemma4_12bQ4Km => "gemma-4-12b-it-Q4_K_M.gguf",
             GgufLlmModel::Qwen3_4bQ4Km => "Qwen3-4B-Q4_K_M.gguf",
+            GgufLlmModel::DeepseekV4FlashIq1S => "DeepSeek-V4-Flash-UD-IQ1_S-00001-of-00003.gguf",
             GgufLlmModel::Llama3p2_3bQ4 => "llm.gguf",
             GgufLlmModel::HyprLLM => "hypr-llm.gguf",
             GgufLlmModel::Gemma3_4bQ4 => "gemma-3-4b-it-Q4_K_M.gguf",
@@ -53,6 +56,12 @@ impl GgufLlmModel {
             GgufLlmModel::Qwen3_4bQ4Km => {
                 "https://huggingface.co/unsloth/Qwen3-4B-GGUF/resolve/main/Qwen3-4B-Q4_K_M.gguf"
             }
+            // Every quant of a 284B model exceeds Hugging Face's 50 GB per-file
+            // limit, so this one ships as three shards. The downloader fetches a
+            // single URL, and shard 1 alone is 5 MB, so a naive download would
+            // "succeed" with an unusable file. Left empty until the downloader
+            // understands shards; the catalog entry still documents the model.
+            GgufLlmModel::DeepseekV4FlashIq1S => "",
             GgufLlmModel::Llama3p2_3bQ4 => {
                 "https://huggingface.co/lmstudio-community/Llama-3.2-3B-Instruct-GGUF/resolve/main/Llama-3.2-3B-Instruct-Q4_K_M.gguf"
             }
@@ -72,6 +81,7 @@ impl GgufLlmModel {
             GgufLlmModel::Gemma4_26bA4bIq4Xs => 13_597_177_568,
             GgufLlmModel::Gemma4_12bQ4Km => 7_121_861_440,
             GgufLlmModel::Qwen3_4bQ4Km => 2_497_281_312,
+            GgufLlmModel::DeepseekV4FlashIq1S => 82_500_000_000,
             GgufLlmModel::Llama3p2_3bQ4 => 2019377440,
             GgufLlmModel::HyprLLM => 1107409056,
             GgufLlmModel::Gemma3_4bQ4 => 2489894016,
@@ -85,7 +95,8 @@ impl GgufLlmModel {
             | GgufLlmModel::Qwen36_35bA3bQ4Km
             | GgufLlmModel::Gemma4_26bA4bIq4Xs
             | GgufLlmModel::Gemma4_12bQ4Km
-            | GgufLlmModel::Qwen3_4bQ4Km => None,
+            | GgufLlmModel::Qwen3_4bQ4Km
+            | GgufLlmModel::DeepseekV4FlashIq1S => None,
             GgufLlmModel::Llama3p2_3bQ4 => Some(2831308098),
             GgufLlmModel::HyprLLM => Some(4037351144),
             GgufLlmModel::Gemma3_4bQ4 => Some(2760830291),
@@ -99,6 +110,7 @@ impl GgufLlmModel {
             GgufLlmModel::Gemma4_26bA4bIq4Xs => "Gemma 4 26B A4B",
             GgufLlmModel::Gemma4_12bQ4Km => "Gemma 4 12B",
             GgufLlmModel::Qwen3_4bQ4Km => "Qwen 3 4B",
+            GgufLlmModel::DeepseekV4FlashIq1S => "DeepSeek V4 Flash",
             GgufLlmModel::Llama3p2_3bQ4 => "Llama 3.2 3B Q4",
             GgufLlmModel::HyprLLM => "HyprLLM",
             GgufLlmModel::Gemma3_4bQ4 => "Gemma 3 4B Q4",
@@ -124,6 +136,9 @@ impl GgufLlmModel {
             GgufLlmModel::Qwen3_4bQ4Km => {
                 "Fast and small. Fine for titles and short meetings; drops detail on long, multi-topic ones."
             }
+            GgufLlmModel::DeepseekV4FlashIq1S => {
+                "Frontier-class reasoning and coding, 284B parameters with 13B active. Far beyond what a normal Mac can hold — listed so you can see the tradeoff, not because it suits meeting notes."
+            }
             GgufLlmModel::Llama3p2_3bQ4 => "Legacy lightweight model kept for older installs.",
             GgufLlmModel::Gemma3_4bQ4 => {
                 "Previous-generation small Gemma, superseded by Qwen 3 4B."
@@ -140,6 +155,7 @@ impl GgufLlmModel {
         const GIB: u64 = 1024 * 1024 * 1024;
 
         match self {
+            GgufLlmModel::DeepseekV4FlashIq1S => 128 * GIB,
             GgufLlmModel::Qwen36_35bA3bQ4Km => 36 * GIB,
             GgufLlmModel::Qwen36_35bA3bIq4Xs => 32 * GIB,
             GgufLlmModel::Gemma4_26bA4bIq4Xs => 24 * GIB,
@@ -170,6 +186,7 @@ impl GgufLlmModel {
             GgufLlmModel::Gemma4_26bA4bIq4Xs => "gemma-4-26b-a4b",
             GgufLlmModel::Gemma4_12bQ4Km => "gemma-4-12b",
             GgufLlmModel::Qwen3_4bQ4Km => "qwen3-4b",
+            GgufLlmModel::DeepseekV4FlashIq1S => "deepseek-v4-flash",
             GgufLlmModel::Llama3p2_3bQ4 => "llm-llama3-2-3b-q4",
             GgufLlmModel::HyprLLM => "llm-meeki-llm",
             GgufLlmModel::Gemma3_4bQ4 => "llm-gemma3-4b-q4",
@@ -243,6 +260,7 @@ impl LocalModel {
             LocalModel::GgufLlm(GgufLlmModel::Gemma4_26bA4bIq4Xs),
             LocalModel::GgufLlm(GgufLlmModel::Gemma4_12bQ4Km),
             LocalModel::GgufLlm(GgufLlmModel::Qwen3_4bQ4Km),
+            LocalModel::GgufLlm(GgufLlmModel::DeepseekV4FlashIq1S),
             LocalModel::GgufLlm(GgufLlmModel::Llama3p2_3bQ4),
             LocalModel::GgufLlm(GgufLlmModel::HyprLLM),
             LocalModel::GgufLlm(GgufLlmModel::Gemma3_4bQ4),
