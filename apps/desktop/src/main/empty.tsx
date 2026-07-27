@@ -1,12 +1,17 @@
 import { Trans } from "@lingui/react/macro";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 import { Kbd } from "@meeki/ui/components/ui/kbd";
 import { cn } from "@meeki/utils";
 
 import { FloatingChatCTA } from "~/shared/chat-cta";
 import { StandardContentWrapper } from "~/shared/main";
-import { useNewNote, useNewNoteAndListen } from "~/shared/useNewNote";
+import {
+  useNewNote,
+  useNewNoteAndListen,
+  useNewNoteAndUpload,
+  useNewNoteFromDroppedAudio,
+} from "~/shared/useNewNote";
 import { type Tab, useTabs } from "~/store/zustand/tabs";
 
 export function TabContentEmpty({
@@ -24,7 +29,15 @@ export function TabContentEmpty({
 function EmptyView() {
   const newNote = useNewNote({ behavior: "current" });
   const newNoteAndListen = useNewNoteAndListen({ behavior: "current" });
+  const newNoteAndUpload = useNewNoteAndUpload();
+  const newNoteFromDroppedAudio = useNewNoteFromDroppedAudio();
+  const [isAudioDragActive, setIsAudioDragActive] = useState(false);
   const openCurrent = useTabs((state) => state.openCurrent);
+
+  const uploadRecording = useCallback(
+    () => void newNoteAndUpload("audio"),
+    [newNoteAndUpload],
+  );
 
   const openSettings = useCallback(
     () => openCurrent({ type: "settings" }),
@@ -34,8 +47,29 @@ function EmptyView() {
   return (
     <div
       data-tauri-drag-region
-      className="flex h-full flex-col items-center justify-center gap-6"
+      onDragOver={(event) => {
+        event.preventDefault();
+        setIsAudioDragActive(true);
+      }}
+      onDragLeave={() => setIsAudioDragActive(false)}
+      onDrop={(event) => {
+        event.preventDefault();
+        setIsAudioDragActive(false);
+        const file = Array.from(event.dataTransfer.files ?? [])[0];
+        if (file) {
+          void newNoteFromDroppedAudio(file);
+        }
+      }}
+      className={cn([
+        "relative flex h-full flex-col items-center justify-center gap-6",
+        isAudioDragActive && "bg-accent/40",
+      ])}
     >
+      {isAudioDragActive ? (
+        <div className="border-border/70 text-muted-foreground pointer-events-none absolute inset-6 flex items-center justify-center rounded-xl border border-dashed text-sm">
+          <Trans>Drop an audio file to transcribe it</Trans>
+        </div>
+      ) : null}
       <div className="flex min-w-[280px] flex-col gap-1 text-center">
         <ActionItem
           label={<Trans>New Note</Trans>}
@@ -46,6 +80,10 @@ function EmptyView() {
           label={<Trans>Start Recording</Trans>}
           shortcut={["⌘", "⇧", "N"]}
           onClick={newNoteAndListen}
+        />
+        <ActionItem
+          label={<Trans>Upload a Recording</Trans>}
+          onClick={uploadRecording}
         />
         <div className="bg-accent my-1 h-px" />
         <ActionItem

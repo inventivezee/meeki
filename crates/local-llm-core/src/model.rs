@@ -9,9 +9,9 @@ pub static SUPPORTED_MODELS: &[SupportedModel] = &[
     // the Qwen 3.5/3.6 line trades summarisation faithfulness for agentic skill.
     SupportedModel::Qwen36_35bA3bIq4Xs,
     SupportedModel::Qwen36_35bA3bQ4Km,
-    // Listed so the catalog explains why a frontier model isn't the default,
-    // rather than leaving users to wonder. Needs more memory than any laptop.
-    SupportedModel::DeepseekV4FlashIq1S,
+    // The heavyweight option: real, downloadable, and honest about needing
+    // workstation-class memory.
+    SupportedModel::Llama33_70bQ4Km,
 ];
 
 #[cfg(not(target_arch = "aarch64"))]
@@ -148,10 +148,10 @@ mod tests {
     fn warmup_estimate_grows_with_weights_and_stays_sane() {
         for model in SUPPORTED_MODELS {
             let seconds = model.warmup_seconds();
-            // The ceiling tracks the largest catalog entry; a 82.5 GB frontier
-            // model legitimately takes a minute to page in.
+            // The ceiling tracks the largest catalog entry; a 42.5 GB dense 70B
+            // legitimately takes half a minute to page in.
             assert!(
-                (2..=90).contains(&seconds),
+                (2..=45).contains(&seconds),
                 "{model:?} estimates {seconds}s, which the countdown UI cannot present usefully"
             );
         }

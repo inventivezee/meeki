@@ -7,7 +7,7 @@ import { createSession } from "~/session/queries";
 import { useTabs } from "~/store/zustand/tabs";
 import { useListener } from "~/stt/contexts";
 import { setPendingUpload } from "~/stt/pending-upload";
-import { AUDIO_EXTENSIONS } from "~/stt/useUploadFile";
+import { AUDIO_EXTENSIONS, isAudioUploadFile } from "~/stt/useUploadFile";
 
 export function useNewNote({
   behavior = "new",
@@ -111,4 +111,26 @@ export function useNewNoteAndUpload() {
   );
 
   return handler;
+}
+
+/** Drop an audio file anywhere on the empty tab: make a note, then import it. */
+export function useNewNoteFromDroppedAudio() {
+  const openNew = useTabs((state) => state.openNew);
+
+  return useCallback(
+    async (file: File) => {
+      if (!isAudioUploadFile(file)) {
+        return;
+      }
+
+      const sessionId = await createSession();
+      setPendingUpload(sessionId, { kind: "audio", file });
+      openNew({
+        type: "sessions",
+        id: sessionId,
+        state: { view: null, autoStart: null },
+      });
+    },
+    [openNew],
+  );
 }

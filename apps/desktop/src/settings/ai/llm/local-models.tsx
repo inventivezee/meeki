@@ -14,6 +14,14 @@ import {
   type ModelInfo,
 } from "@meeki/plugin-local-llm";
 import { Button } from "@meeki/ui/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@meeki/ui/components/ui/dialog";
 import { sonnerToast } from "@meeki/ui/components/ui/toast";
 import {
   Tooltip,
@@ -58,12 +66,10 @@ function ModelHelp({
   model,
   fits,
   totalMemoryBytes,
-  installable,
 }: {
   model: ModelInfo;
   fits: boolean;
   totalMemoryBytes: number;
-  installable: boolean;
 }) {
   return (
     <Tooltip>
@@ -99,11 +105,6 @@ function ModelHelp({
               fail to load.
             </p>
           )}
-          {installable ? null : (
-            <p className="text-[11px] leading-relaxed">
-              Ships as multiple files, which the downloader can't fetch yet.
-            </p>
-          )}
         </div>
       </TooltipContent>
     </Tooltip>
@@ -113,6 +114,7 @@ function ModelHelp({
 export function LocalModels() {
   const queryClient = useQueryClient();
   const [downloading, setDownloading] = useState<GgufLlmModel | null>(null);
+  const [confirming, setConfirming] = useState<ModelInfo | null>(null);
   const { current_llm_provider, current_llm_model } = useConfigValues([
     "current_llm_provider",
     "current_llm_model",
@@ -219,7 +221,6 @@ export function LocalModels() {
             current_llm_provider === "on_device" &&
             current_llm_model === model.key;
           const fits = fitsInMemory(model, totalMemoryBytes);
-          const installable = model.key !== "deepseek-v4-flash";
 
           return (
             <div
@@ -233,7 +234,6 @@ export function LocalModels() {
                     model={model}
                     fits={fits}
                     totalMemoryBytes={totalMemoryBytes}
-                    installable={installable}
                   />
                 </div>
                 <p
@@ -266,8 +266,10 @@ export function LocalModels() {
                   size="sm"
                   variant="outline"
                   className="h-7 shrink-0 px-3 text-xs"
-                  disabled={busy || !installable}
-                  onClick={() => download.mutate(model)}
+                  disabled={busy}
+                  onClick={() =>
+                    fits ? download.mutate(model) : setConfirming(model)
+                  }
                 >
                   {downloading === model.key ? (
                     <Loader2 className="size-3.5 animate-spin" />
@@ -280,6 +282,53 @@ export function LocalModels() {
           );
         })}
       </div>
+
+      <Dialog
+        open={confirming !== null}
+        onOpenChange={(open) => (open ? null : setConfirming(null))}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {confirming?.name} needs more memory than this Mac has
+            </DialogTitle>
+            <DialogDescription className="flex flex-col gap-2 pt-1 text-left">
+              <span>
+                It wants about{" "}
+                {confirming ? formatMemoryGb(confirming.min_memory_bytes) : 0}{" "}
+                GB and this Mac has {formatMemoryGb(totalMemoryBytes)} GB, so it
+                will swap heavily or fail to load.
+              </span>
+              <span>{confirming?.description}</span>
+              <span>
+                The download is{" "}
+                {confirming ? formatGb(confirming.size_bytes) : 0} GB. You can
+                proceed anyway.
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setConfirming(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => {
+                if (confirming) {
+                  download.mutate(confirming);
+                }
+                setConfirming(null);
+              }}
+            >
+              Download anyway
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

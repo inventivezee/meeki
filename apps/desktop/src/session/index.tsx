@@ -297,14 +297,18 @@ function SessionContentLoading() {
 }
 
 function usePendingUpload(sessionId: string) {
-  const { processFile } = useUploadFile(sessionId);
+  const { processFile, processAudioFile } = useUploadFile(sessionId);
   const processFileRef = useRef(processFile);
   processFileRef.current = processFile;
+  const processAudioFileRef = useRef(processAudioFile);
+  processAudioFileRef.current = processAudioFile;
 
   useEffect(() => {
     const pending = consumePendingUpload(sessionId);
-    if (pending) {
+    if (pending?.filePath) {
       processFileRef.current(pending.filePath, pending.kind);
+    } else if (pending?.file) {
+      processAudioFileRef.current(pending.file);
     }
   }, [sessionId]);
 }

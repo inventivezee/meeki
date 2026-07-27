@@ -20,6 +20,8 @@ vi.mock("~/shared/main", () => ({
 vi.mock("~/shared/useNewNote", () => ({
   useNewNote: () => vi.fn(),
   useNewNoteAndListen: () => vi.fn(),
+  useNewNoteAndUpload: () => vi.fn(),
+  useNewNoteFromDroppedAudio: () => vi.fn(),
 }));
 
 vi.mock("~/contexts/shell", () => ({
