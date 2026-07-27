@@ -185,7 +185,7 @@ jobs:
       - if: ${{ inputs.channel == 'staging' }}
         uses: actions/upload-artifact@v4
         with:
-          name: hyprnote-staging-macos-${{ matrix.artifact_name }}
+          name: meeki-staging-macos-${{ matrix.artifact_name }}
           path: apps/desktop/src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
           retention-days: 3
       - if: ${{ inputs.channel == 'staging' }}
@@ -193,10 +193,10 @@ jobs:
           TIMESTAMP=$(date -u +"%Y%m%d%H%M%S")
           COMMIT_HASH=$(git rev-parse --short HEAD)
           DMG_FILE=$(find "apps/desktop/src-tauri/target/${{ matrix.target }}/release/bundle/dmg/" -name "*.dmg" -type f)
-          FILENAME="hyprnote-staging-${TIMESTAMP}-${COMMIT_HASH}-macos-${{ matrix.arch }}.dmg"
+          FILENAME="meeki-staging-${TIMESTAMP}-${COMMIT_HASH}-macos-${{ matrix.arch }}.dmg"
           cp "$DMG_FILE" "$FILENAME"
           aws s3 cp "$FILENAME" \
-            "s3://hyprnote-build/desktop/staging/$FILENAME" \
+            "s3://meeki-build/desktop/staging/$FILENAME" \
             --endpoint-url ${{ secrets.CLOUDFLARE_R2_ENDPOINT_URL }} \
             --region auto
         env:

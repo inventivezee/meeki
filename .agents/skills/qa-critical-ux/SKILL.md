@@ -127,7 +127,7 @@ waived by the user) before running the release-new-version skill.
 3. Download the artifact from that specific run:
 
    ```bash
-   gh run download <run-id> --name hyprnote-staging-macos-silicon
+   gh run download <run-id> --name meeki-staging-macos-silicon
    ```
 
    Do not use a “latest staging” download for release evidence. Record the
