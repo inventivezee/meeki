@@ -2,7 +2,7 @@
 
 ## Scope
 
-- This is the Mintlify project published at `https://docs.meeki.so`.
+- This is the Mintlify project published at `https://docs.meeki.org`.
 - Write for Meeki users, developers, and agents using the CLI or MCP server.
 - Configuration lives in `docs.json`; content pages are MDX.
 - The public agent skill is maintained in `../skills/meeki/`.
@@ -20,7 +20,7 @@
 - Keep headings and sentences concise.
 - Put the result before implementation detail.
 - Use `Meeki` for the product and `meeki` for the executable.
-- Use root-relative links between Mintlify pages. Use `https://docs.meeki.so` in external instructions and agent metadata.
+- Use root-relative links between Mintlify pages. Use `https://docs.meeki.org` in external instructions and agent metadata.
 
 ## Accuracy boundaries
 

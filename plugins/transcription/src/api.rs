@@ -429,7 +429,7 @@ mod tests {
     #[test]
     fn defaults_meeki_cloud_en_ko_capture_to_live_mode() {
         let params = capture_params_with_languages(
-            "https://api.meeki.so/stt",
+            "https://api.meeki.org/stt",
             "cloud",
             vec![ISO639::En.into(), ISO639::Ko.into()],
         );

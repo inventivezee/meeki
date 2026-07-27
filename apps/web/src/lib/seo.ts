@@ -1,4 +1,4 @@
-export const MEEKI_SITE_URL = "https://meeki.so";
+export const MEEKI_SITE_URL = "https://meeki.org";
 export const DEFAULT_OG_IMAGE_URL = `${MEEKI_SITE_URL}/og.jpg`;
 export const ROOT_TITLE = "AI notepad for private meetings.";
 export const ROOT_DESCRIPTION =

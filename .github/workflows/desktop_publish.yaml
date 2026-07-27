@@ -111,7 +111,7 @@ jobs:
             char-macos-x86_64.dmg
       - id: release-body
         run: |
-          echo "value=https://meeki.so/changelog/${{ needs.parse.outputs.version }}" >> "$GITHUB_OUTPUT"
+          echo "value=https://meeki.org/changelog/${{ needs.parse.outputs.version }}" >> "$GITHUB_OUTPUT"
       - uses: ncipollo/release-action@v1
         with:
           tag: desktop_v${{ needs.parse.outputs.version }}

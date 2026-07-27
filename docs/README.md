@@ -1,16 +1,16 @@
 # Meeki documentation
 
-This Mintlify project is published at [docs.meeki.so](https://docs.meeki.so).
+This Mintlify project is published at [docs.meeki.org](https://docs.meeki.org).
 
 ## Deployment
 
-Configure the Mintlify project with `docs/` as its documentation directory and `docs.meeki.so` as its custom domain. In Mintlify's domain setup:
+Configure the Mintlify project with `docs/` as its documentation directory and `docs.meeki.org` as its custom domain. In Mintlify's domain setup:
 
 1. Add the verification records shown in the dashboard.
 2. Wait for both records and TLS provisioning to verify.
 3. Point the `docs` CNAME to the target shown by Mintlify.
 
-The website redirects the previous `meeki.so/docs/*` routes to the matching path on the custom domain.
+The website redirects the previous `meeki.org/docs/*` routes to the matching path on the custom domain.
 
 ## Local preview
 

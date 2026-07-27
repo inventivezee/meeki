@@ -152,7 +152,7 @@ export function ConnectFlow() {
             and{" "}
             <a
               className="underline"
-              href="https://docs.meeki.so/calendar#manage-or-delete-connected-calendar-data"
+              href="https://docs.meeki.org/calendar#manage-or-delete-connected-calendar-data"
             >
               calendar data instructions
             </a>

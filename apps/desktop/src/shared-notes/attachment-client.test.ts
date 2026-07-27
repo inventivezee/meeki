@@ -34,7 +34,7 @@ describe("shared attachment client", () => {
   it("requests a short-lived download grant with the current session", async () => {
     const fetcher = vi.fn().mockResolvedValue(response());
     const client = createSharedAttachmentClient({
-      apiBaseUrl: "https://api.meeki.so",
+      apiBaseUrl: "https://api.meeki.org",
       session,
       fetcher,
     });
@@ -47,7 +47,7 @@ describe("shared attachment client", () => {
     );
     expect(fetcher).toHaveBeenCalledWith(
       new URL(
-        `https://api.meeki.so/shared-notes/access/${shareId}/attachments/${attachmentId}/download`,
+        `https://api.meeki.org/shared-notes/access/${shareId}/attachments/${attachmentId}/download`,
       ),
       expect.objectContaining({
         method: "POST",
@@ -67,7 +67,7 @@ describe("shared attachment client", () => {
       "https://project.supabase.co/storage/file#fragment",
     ]) {
       const client = createSharedAttachmentClient({
-        apiBaseUrl: "https://api.meeki.so",
+        apiBaseUrl: "https://api.meeki.org",
         session,
         fetcher: vi.fn().mockResolvedValue(response({ signedUrl })),
       });
@@ -79,7 +79,7 @@ describe("shared attachment client", () => {
 
   it("preserves gateway status for revocation handling", async () => {
     const client = createSharedAttachmentClient({
-      apiBaseUrl: "https://api.meeki.so",
+      apiBaseUrl: "https://api.meeki.org",
       session,
       fetcher: vi.fn().mockResolvedValue(new Response(null, { status: 404 })),
     });

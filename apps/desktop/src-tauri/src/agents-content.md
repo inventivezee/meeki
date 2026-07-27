@@ -30,6 +30,6 @@ provides a non-default database path; do not crawl the filesystem to find one.
 Never guess a meeting ID. Keep transcript requests bounded and continue from
 `pagination.next_offset` only when more context is needed.
 
-Documentation: https://docs.meeki.so
+Documentation: https://docs.meeki.org
 
-Agent skill: https://docs.meeki.so/skill.md
+Agent skill: https://docs.meeki.org/skill.md

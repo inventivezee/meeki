@@ -54,18 +54,21 @@ it("creates a welcome note without the hosted demo meeting", async () => {
 
   const [title, , initial] = mocks.createSession.mock.calls[0];
   const event = JSON.parse(initial.event_json);
-  expect(title).toBe("Welcome to Meeki");
+  expect(title).toBe("Meeki - your personal meeting note-taker");
+  expect(event.title).toBe(title);
   expect(event.meeting_link).toBeUndefined();
   expect(event.tracking_id).toBe("meeki-onboarding-demo-v1");
   expect(initial.raw_md).toContain("Record");
+  expect(initial.raw_md).toContain("Download on-device models");
   expect(initial.raw_md).not.toContain("prerecorded demo meeting");
   expect(initial.raw_md).not.toContain("Join & record");
 
   const note = JSON.parse(initial.raw_md);
-  expect(note.content).toHaveLength(7);
+  expect(note.content).toHaveLength(9);
   expect(note.content[1]).toEqual({ type: "paragraph" });
   expect(note.content[3]).toEqual({ type: "paragraph" });
   expect(note.content[5]).toEqual({ type: "paragraph" });
+  expect(note.content[7]).toEqual({ type: "paragraph" });
 });
 
 it("guards empty event metadata before reading its tracking ID", async () => {

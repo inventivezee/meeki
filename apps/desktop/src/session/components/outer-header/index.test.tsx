@@ -475,7 +475,7 @@ describe("OuterHeader", () => {
     mocks.sessionEvents = {
       "session-1": {
         tracking_id: "meeki-onboarding-demo-v1",
-        meeting_link: "https://meeki.so/onboarding-demo/",
+        meeting_link: "https://meeki.org/onboarding-demo/",
       },
     };
 

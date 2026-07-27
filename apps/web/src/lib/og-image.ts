@@ -119,7 +119,7 @@ function createBlogOgSvg(input: BlogOgImageInput) {
         `<text x="90" y="${descriptionStartY + index * 42}" fill="#57534e" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="500">${escapeXml(line)}</text>`,
     )
     .join("")}
-  <text x="86" y="552" fill="#756b5d" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="600">${escapeXml(meta || "meeki.so")}</text>
+  <text x="86" y="552" fill="#756b5d" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="600">${escapeXml(meta || "meeki.org")}</text>
 </svg>`;
 }
 
@@ -180,7 +180,7 @@ export function createSharedNoteOgSvg(input: SharedNoteOgImageInput) {
   <path d="M112 501 H1088" stroke="#e8e0d4" stroke-width="2"/>
   <g fill="#756b5d" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="600">
     <text x="112" y="548">${escapeXml(date ? `Published ${date}` : "Shared note")}</text>
-    <text x="1088" y="548" text-anchor="end">Read on meeki.so</text>
+    <text x="1088" y="548" text-anchor="end">Read on meeki.org</text>
   </g>
 </svg>`;
 }

@@ -11,7 +11,7 @@ SQLite is the primary data store (schema and migrations in `crates/db-app/`, des
 - Typecheck (Rust): `cargo check`
 - Desktop dev: `pnpm -F @meeki/desktop tauri:dev`
 - Web dev: `pnpm -F @meeki/web dev`
-- Dev docs: https://docs.meeki.so
+- Dev docs: https://docs.meeki.org
 
 ## Guidelines
 

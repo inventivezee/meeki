@@ -8,6 +8,8 @@ import { DEFAULT_USER_ID } from "~/shared/utils";
 
 const PENDING_WELCOME_SESSION_KEY = "meeki.pending-welcome-session";
 
+const WELCOME_NOTE_TITLE = "Meeki - your personal meeting note-taker";
+
 const WELCOME_NOTE = `Welcome to Meeki 👋
 
 
@@ -15,6 +17,9 @@ This note is a quick way to see how Meeki works.
 
 
 Click **Record** in the top-right corner. Meeki will listen to your microphone and system audio, transcribe what it hears, and turn it into notes.
+
+
+Your first recording downloads Meeki's on-device transcription models (about 2 GB), so everything stays private on your Mac. To get them ready ahead of time, open **Settings → Transcription** and click **Download on-device models**.
 
 
 When you stop recording, Meeki can start creating your summary.`;
@@ -110,7 +115,7 @@ async function findOrCreateWelcomeSession(): Promise<string> {
   const event: SessionEvent = {
     tracking_id: WELCOME_NOTE_TRACKING_ID,
     calendar_id: "",
-    title: "Welcome to Meeki",
+    title: WELCOME_NOTE_TITLE,
     started_at: now,
     ended_at: "",
     is_all_day: false,
@@ -118,7 +123,7 @@ async function findOrCreateWelcomeSession(): Promise<string> {
     description: "A quick introduction to recording with Meeki.",
   };
 
-  return createSession("Welcome to Meeki", DEFAULT_USER_ID, {
+  return createSession(WELCOME_NOTE_TITLE, DEFAULT_USER_ID, {
     event_json: JSON.stringify(event),
     raw_md: JSON.stringify(md2json(WELCOME_NOTE)),
   });

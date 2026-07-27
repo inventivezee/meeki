@@ -148,8 +148,8 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-          VITE_APP_URL: "https://meeki.so"
-          VITE_API_URL: "https://api.meeki.so"
+          VITE_APP_URL: "https://meeki.org"
+          VITE_API_URL: "https://api.meeki.org"
           VITE_PRO_PRODUCT_ID: ${{ secrets.VITE_PRO_PRODUCT_ID }}
           VITE_APP_VERSION: ${{ needs.compute-version.outputs.version }}
       - id: find-dmg
@@ -297,7 +297,7 @@ jobs:
           echo "list=$ARTIFACTS" >> $GITHUB_OUTPUT
       - id: release-body
         run: |
-          echo "value=https://meeki.so/changelog/${{ needs.compute-version.outputs.version }}" >> "$GITHUB_OUTPUT"
+          echo "value=https://meeki.org/changelog/${{ needs.compute-version.outputs.version }}" >> "$GITHUB_OUTPUT"
       - uses: ncipollo/release-action@v1
         with:
           tag: desktop_v${{ needs.compute-version.outputs.version }}

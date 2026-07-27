@@ -5,8 +5,8 @@ import { env } from "@/env";
 const PUBLIC_APP_HOSTS = new Set([
   "char.com",
   "www.char.com",
-  "meeki.so",
-  "www.meeki.so",
+  "meeki.org",
+  "www.meeki.org",
 ]);
 
 const LOCAL_APP_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);

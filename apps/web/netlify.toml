@@ -6,7 +6,7 @@ publish = "apps/web/dist/client"
 ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF apps/web packages/api-client packages/changelog packages/ui packages/utils package.json pnpm-lock.yaml"
 
 [build.environment]
-VITE_APP_URL = "https://meeki.so"
+VITE_APP_URL = "https://meeki.org"
 NODE_OPTIONS = "--max-old-space-size=4096"
 NODE_VERSION = "22"
 
@@ -27,47 +27,47 @@ force = true
 
 [[redirects]]
 from = "/skill.md"
-to = "https://docs.meeki.so/skill.md"
+to = "https://docs.meeki.org/skill.md"
 status = 200
 force = true
-headers = { Origin = "docs.meeki.so" }
+headers = { Origin = "docs.meeki.org" }
 
 [[redirects]]
 from = "/skills"
-to = "https://docs.meeki.so/agents/skills"
+to = "https://docs.meeki.org/agents/skills"
 status = 301
 force = true
 
 [[redirects]]
 from = "/.well-known/skills/*"
-to = "https://docs.meeki.so/.well-known/skills/:splat"
+to = "https://docs.meeki.org/.well-known/skills/:splat"
 status = 200
 force = true
-headers = { Origin = "docs.meeki.so" }
+headers = { Origin = "docs.meeki.org" }
 
 [[redirects]]
 from = "/.well-known/agent-skills/*"
-to = "https://docs.meeki.so/.well-known/agent-skills/:splat"
+to = "https://docs.meeki.org/.well-known/agent-skills/:splat"
 status = 200
 force = true
-headers = { Origin = "docs.meeki.so" }
+headers = { Origin = "docs.meeki.org" }
 
 [[redirects]]
 from = "/.well-known/vercel/*"
-to = "https://docs.meeki.so/.well-known/vercel/:splat"
+to = "https://docs.meeki.org/.well-known/vercel/:splat"
 status = 200
 force = true
-headers = { Origin = "docs.meeki.so" }
+headers = { Origin = "docs.meeki.org" }
 
 [[redirects]]
 from = "/docs"
-to = "https://docs.meeki.so"
+to = "https://docs.meeki.org"
 status = 301
 force = true
 
 [[redirects]]
 from = "/docs/*"
-to = "https://docs.meeki.so/:splat"
+to = "https://docs.meeki.org/:splat"
 status = 301
 force = true
 
@@ -95,7 +95,7 @@ force = true
 
 [[redirects]]
 from = "https://hyprnote.com/docs/*"
-to = "https://docs.meeki.so"
+to = "https://docs.meeki.org"
 status = 301
 force = true
 
@@ -119,7 +119,7 @@ force = true
 
 [[redirects]]
 from = "https://hyprnote.com/legal/*"
-to = "https://meeki.so/:splat"
+to = "https://meeki.org/:splat"
 status = 301
 force = true
 
@@ -255,18 +255,18 @@ to = "https://char.com/:splat"
 status = 301
 force = true
 
-# Domain migration: char.com -> meeki.so (301 for SEO)
-# Char is shut down except for /blog/* and root legal pages which redirect to meeki.so
+# Domain migration: char.com -> meeki.org (301 for SEO)
+# Char is shut down except for /blog/* and root legal pages which redirect to meeki.org
 
 [[redirects]]
 from = "https://char.com/blog/*"
-to = "https://meeki.so/blog/:splat"
+to = "https://meeki.org/blog/:splat"
 status = 301
 force = true
 
 [[redirects]]
 from = "https://www.char.com/blog/*"
-to = "https://meeki.so/blog/:splat"
+to = "https://meeki.org/blog/:splat"
 status = 301
 force = true
 
@@ -278,36 +278,36 @@ force = true
 
 [[redirects]]
 from = "https://char.com/legal/*"
-to = "https://meeki.so/:splat"
+to = "https://meeki.org/:splat"
 status = 301
 force = true
 
 [[redirects]]
 from = "https://www.char.com/legal/*"
-to = "https://meeki.so/:splat"
+to = "https://meeki.org/:splat"
 status = 301
 force = true
 
 [[redirects]]
 from = "https://char.com/privacy"
-to = "https://meeki.so/privacy"
+to = "https://meeki.org/privacy"
 status = 301
 force = true
 
 [[redirects]]
 from = "https://www.char.com/privacy"
-to = "https://meeki.so/privacy"
+to = "https://meeki.org/privacy"
 status = 301
 force = true
 
 [[redirects]]
 from = "https://char.com/terms"
-to = "https://meeki.so/terms"
+to = "https://meeki.org/terms"
 status = 301
 force = true
 
 [[redirects]]
 from = "https://www.char.com/terms"
-to = "https://meeki.so/terms"
+to = "https://meeki.org/terms"
 status = 301
 force = true
