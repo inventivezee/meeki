@@ -102,7 +102,13 @@ export function setAiProvider(
 ): Promise<void> {
   const storageId = providerStorageId(type, providerId);
   return enqueueDatabaseWrite(storageId, async () => {
-    const previousApiKey = await getProviderApiKey(type, providerId);
+    // Only consult the Keychain when the caller wants the existing key kept.
+    // Reading unconditionally is what surfaced a password prompt on machines
+    // that had never configured a cloud provider.
+    const previousApiKey =
+      changes.api_key === undefined
+        ? await getProviderApiKey(type, providerId)
+        : null;
 
     try {
       for (let attempt = 0; attempt < 5; attempt += 1) {
@@ -331,6 +337,18 @@ function parseObjectValue(value: unknown): Record<string, unknown> {
     : {};
 }
 
+/**
+ * The OpenAI-compatible client requires a non-empty key, so the on-device
+ * provider is configured with this placeholder. It is not a secret and must
+ * never reach the Keychain — storing it made a fully local setup prompt for a
+ * Keychain password, which is precisely the wrong place for friction.
+ */
+export const LOCAL_PLACEHOLDER_API_KEY = "local";
+
+function isStorableSecret(apiKey: string) {
+  return apiKey !== "" && apiKey !== LOCAL_PLACEHOLDER_API_KEY;
+}
+
 async function getProviderApiKey(
   type: AiProviderType,
   providerId: string,
@@ -351,7 +369,8 @@ async function setProviderApiKey(
   apiKey: string,
 ): Promise<void> {
   const key = providerRowId(type, providerId);
-  const result = apiKey
+  // Deleting on a placeholder also clears any entry an older build stored.
+  const result = isStorableSecret(apiKey)
     ? await store2Commands.setSecret(PROVIDER_SECRET_SCOPE, key, apiKey)
     : await store2Commands.deleteSecret(PROVIDER_SECRET_SCOPE, key);
   if (result.status === "error") {

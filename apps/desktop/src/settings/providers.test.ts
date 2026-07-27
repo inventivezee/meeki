@@ -181,6 +181,24 @@ describe("SQLite AI providers", () => {
     );
   });
 
+  it("keeps the on-device placeholder key out of the Keychain", async () => {
+    mocks.execute.mockResolvedValue([]);
+
+    await setAiProvider("llm", "on_device", {
+      base_url: "http://127.0.0.1:1234/v1",
+      api_key: "local",
+    });
+
+    // Storing it made a fully local install prompt for a Keychain password.
+    expect(mocks.setSecret).not.toHaveBeenCalled();
+    expect(mocks.deleteSecret).toHaveBeenCalledWith(
+      "ai-provider-api-keys",
+      "llm:on_device",
+    );
+    // And no read either, so a machine with no stored secret is never asked.
+    expect(mocks.getSecret).not.toHaveBeenCalled();
+  });
+
   it("retries partial writes without dropping a concurrent field", async () => {
     mocks.execute
       .mockResolvedValueOnce([
