@@ -10,7 +10,6 @@ import { SettingsTodo } from "./todo";
 
 import { LLM } from "~/settings/ai/llm";
 import { STT } from "~/settings/ai/stt";
-import { SettingsDevelopers } from "~/settings/developers";
 import { SettingsDictionary } from "~/settings/dictionary";
 import { SettingsHydrationBoundary } from "~/settings/hydration-boundary";
 import { SettingsSync } from "~/settings/sync";
@@ -52,8 +51,6 @@ function SettingsView({ tab }: { tab: Extract<Tab, { type: "settings" }> }) {
         return <SettingsSync />;
       case "permissions":
         return <SettingsPermissions />;
-      case "developers":
-        return <SettingsDevelopers />;
       case "dictionary":
         return <SettingsDictionary />;
       case "transcription":

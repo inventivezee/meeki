@@ -7,7 +7,6 @@ import {
   BookOpenIcon,
   BookText,
   CalendarIcon,
-  Code2Icon,
   CogIcon,
   RefreshCwIcon,
   LockIcon,
@@ -81,7 +80,6 @@ export function SettingsNav() {
         { id: "account", label: t`Account`, icon: UserIcon },
         { id: "sync", label: t`Sync`, icon: RefreshCwIcon },
         { id: "notifications", label: t`Notifications`, icon: BellIcon },
-        { id: "developers", label: t`Developers`, icon: Code2Icon },
       ],
     },
     {

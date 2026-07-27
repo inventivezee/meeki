@@ -118,7 +118,6 @@ describe("SettingsNav", () => {
       "Account",
       "Sync",
       "Notifications",
-      "Developers",
       "Permissions",
       "Context",
       "Calendar",
