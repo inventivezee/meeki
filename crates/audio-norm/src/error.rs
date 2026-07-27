@@ -18,4 +18,6 @@ pub enum Error {
     Mp3Encode(String),
     #[error("audio_import_afconvert_failed: {0}")]
     AfconvertFailed(String),
+    #[error("audio_import_webm_remux_failed: {0}")]
+    WebmRemuxFailed(String),
 }

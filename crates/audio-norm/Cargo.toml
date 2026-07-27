@@ -10,7 +10,11 @@ meeki-audio-utils = { workspace = true }
 meeki-mp3 = { workspace = true }
 meeki-resampler = { workspace = true }
 
+ogg = "0.9"
 rodio = { workspace = true, features = ["symphonia-all"] }
+# Demuxing WebM to lift its Opus stream out; macOS decodes Opus but cannot
+# open a Matroska container.
+symphonia = { version = "0.5.5", default-features = false, features = ["mkv"] }
 thiserror = { workspace = true }
 
 [dev-dependencies]

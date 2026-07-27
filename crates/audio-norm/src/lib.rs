@@ -1,6 +1,7 @@
 mod encode;
 mod error;
 mod file_move;
+mod webm_opus;
 
 use std::fs::File;
 use std::io::{BufWriter, Write};
@@ -74,6 +75,38 @@ where
     ) {
         Ok(val) => Ok(val),
         Err(_first_err) => {
+            // WebM holds Opus, which symphonia cannot decode and CoreAudio
+            // cannot open in a Matroska container. Lift it into Ogg first and
+            // the rest of the chain works unchanged.
+            if let Ok(Some(ogg_path)) = webm_opus::remux_to_ogg(source_path) {
+                let result = try_fn(
+                    &ogg_path,
+                    on_progress.as_mut().map(|p| p as &mut dyn FnMut(f64)),
+                );
+                if result.is_ok() {
+                    let _ = std::fs::remove_file(&ogg_path);
+                    return result;
+                }
+
+                #[cfg(target_os = "macos")]
+                {
+                    let converted = meeki_afconvert::to_wav(&ogg_path);
+                    let _ = std::fs::remove_file(&ogg_path);
+                    let wav_path = converted.map_err(|e| Error::AfconvertFailed(e.to_string()))?;
+                    let result = try_fn(
+                        &wav_path,
+                        on_progress.as_mut().map(|p| p as &mut dyn FnMut(f64)),
+                    );
+                    let _ = std::fs::remove_file(&wav_path);
+                    return result;
+                }
+                #[cfg(not(target_os = "macos"))]
+                {
+                    let _ = std::fs::remove_file(&ogg_path);
+                    return result;
+                }
+            }
+
             #[cfg(target_os = "macos")]
             {
                 let wav_path = meeki_afconvert::to_wav(source_path)
@@ -147,6 +180,10 @@ mod tests {
         test_import_aac: meeki_data::english_1::AUDIO_AAC_PATH,
         test_import_aiff: meeki_data::english_1::AUDIO_AIFF_PATH,
         test_import_caf: meeki_data::english_1::AUDIO_CAF_PATH,
+        // Both reach the decoder only via a fallback: .opus through afconvert,
+        // .webm through the Ogg remux that precedes it.
+        test_import_opus: meeki_data::english_1::AUDIO_OPUS_PATH,
+        test_import_webm: meeki_data::english_1::AUDIO_WEBM_PATH,
     }
 
     #[test]

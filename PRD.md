@@ -441,7 +441,7 @@ re-encoded to a 16 kHz `audio.mp3`.
 | Format | Decodes | Note |
 |--------|---------|------|
 | wav, mp3, ogg (Vorbis), mp4, m4a, flac, aac, aiff, caf | yes | each covered by a `test_import_*` case in `crates/audio-norm/src/lib.rs` |
-| webm | **usually not** | listed and advertised, but WebM audio is nearly always Opus and this build has no Opus decoder; only Vorbis-in-WebM works |
+| webm | yes (macOS) | Opus is lifted out of the Matroska container into Ogg (`crates/audio-norm/src/webm_opus.rs`) and then decoded by `afconvert`; symphonia has no Opus decoder and CoreAudio cannot open Matroska, so neither works alone |
 | opus | macOS only | falls through to the `afconvert` shim (`crates/afconvert`); fails on other platforms |
 
 Drop and paste are wider than the picker: `isAudioUploadFile` also accepts `.qta` and any

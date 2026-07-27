@@ -39,6 +39,7 @@ export const AUDIO_EXTENSIONS = [
   "aac",
   "aiff",
   "caf",
+  "opus",
 ];
 const AUDIO_TRANSFER_EXTENSIONS = [...AUDIO_EXTENSIONS, "qta"];
 const TRANSCRIPT_EXTENSIONS = ["vtt", "srt"];
