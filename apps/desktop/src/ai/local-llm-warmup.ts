@@ -17,6 +17,7 @@ const WARMUP_SUSPICION_MS = 900;
 const FALLBACK_ESTIMATE_SECONDS = 10;
 
 let state: WarmupState = null;
+let active = 0;
 let estimateSeconds = FALLBACK_ESTIMATE_SECONDS;
 const listeners = new Set<() => void>();
 
@@ -61,7 +62,9 @@ export function useLocalLlmWarmup() {
 function beginWarmup(startedAt: number) {
   // Enhance and title generation run concurrently against one server, and both
   // stall on the same reload. Keep the first request's clock so the second
-  // doesn't restart the countdown.
+  // doesn't restart the countdown, and refcount so whichever finishes first
+  // doesn't clear the indicator out from under the other.
+  active += 1;
   if (state) {
     return;
   }
@@ -70,10 +73,26 @@ function beginWarmup(startedAt: number) {
 }
 
 function endWarmup() {
-  if (state) {
+  if (active > 0) {
+    active -= 1;
+  }
+  if (active === 0 && state) {
     state = null;
     emit();
   }
+}
+
+/**
+ * The initial weight load, which happens before any request is made. Without
+ * this the UI looks idle for the whole boot and only starts explaining itself
+ * once a request is already stalling.
+ */
+export function markWarmupStarted() {
+  beginWarmup(Date.now());
+}
+
+export function markWarmupFinished() {
+  endWarmup();
 }
 
 /**
@@ -84,13 +103,19 @@ function endWarmup() {
 export function createWarmupFetch(baseFetch: typeof fetch): typeof fetch {
   return async (input, init) => {
     const startedAt = Date.now();
-    const timer = setTimeout(() => beginWarmup(startedAt), WARMUP_SUSPICION_MS);
+    let began = false;
+    const timer = setTimeout(() => {
+      began = true;
+      beginWarmup(startedAt);
+    }, WARMUP_SUSPICION_MS);
 
     try {
       return await baseFetch(input, init);
     } finally {
       clearTimeout(timer);
-      endWarmup();
+      if (began) {
+        endWarmup();
+      }
     }
   };
 }
@@ -98,6 +123,7 @@ export function createWarmupFetch(baseFetch: typeof fetch): typeof fetch {
 export const WARMUP_TEST_ONLY = {
   reset() {
     state = null;
+    active = 0;
     estimateSeconds = FALLBACK_ESTIMATE_SECONDS;
     listeners.clear();
   },

@@ -4,6 +4,7 @@ import type { ChatEditorHandle, JSONContent } from "@meeki/editor/chat";
 import { EMPTY_DOC } from "@meeki/editor/markdown";
 import { commands as analyticsCommands } from "@meeki/plugin-analytics";
 
+import { claimLocalLlm, ENGAGED_GRACE_MS } from "~/ai/local-llm-demand";
 import type { ContextRef } from "~/chat/context/entities";
 
 const draftsByKey = new Map<string, JSONContent>();
@@ -28,6 +29,14 @@ export function useDraftState({
       extractContextRefsFromTiptapJson(initialContent.current),
     );
   }, [onDraftContentChange, onContextRefsChange]);
+
+  // Opening chat only buys the model a short reprieve. Someone who has started
+  // typing is about to send, so extend it — even if they never hit enter.
+  useEffect(() => {
+    if (hasContent) {
+      claimLocalLlm("chat", ENGAGED_GRACE_MS);
+    }
+  }, [hasContent]);
 
   const handleEditorUpdate = useCallback(
     (json: JSONContent) => {

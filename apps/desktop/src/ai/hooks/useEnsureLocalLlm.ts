@@ -6,14 +6,15 @@ import {
   type GgufLlmModel,
 } from "@meeki/plugin-local-llm";
 
-import { useLocalLlmWanted } from "~/ai/local-llm-demand";
-import { setWarmupEstimateSeconds } from "~/ai/local-llm-warmup";
+import { getLocalLlmGraceMs, useLocalLlmWanted } from "~/ai/local-llm-demand";
+import {
+  markWarmupFinished,
+  markWarmupStarted,
+  setWarmupEstimateSeconds,
+} from "~/ai/local-llm-warmup";
 import { getStoredAiProvider, setAiProvider } from "~/settings/providers";
 import { getStoredSettingValues } from "~/settings/queries";
 import { useConfigValues } from "~/shared/config";
-
-/** Matches the server's own --sleep-idle-seconds so the two agree. */
-const IDLE_SHUTDOWN_MS = 5 * 60 * 1000;
 
 /**
  * Keeps the local llama-server running when On device is selected.
@@ -62,12 +63,19 @@ export function useEnsureLocalLlm() {
     queryFn: async () => {
       const model = current_llm_model as GgufLlmModel;
       // start_server reuses a live server for the same model, so this doubles
-      // as the liveness check.
-      const started = await localLlmCommands.startServer(model);
-      if (started.status === "error") {
-        throw new Error(started.error);
+      // as the liveness check. The first call loads the weights, which is the
+      // long wait the user sees if they send a message straight away.
+      markWarmupStarted();
+      let url: string;
+      try {
+        const started = await localLlmCommands.startServer(model);
+        if (started.status === "error") {
+          throw new Error(started.error);
+        }
+        url = started.data;
+      } finally {
+        markWarmupFinished();
       }
-      const url = started.data;
 
       // Loading weights can take a while; the user may have moved to a cloud
       // provider in the meantime.
@@ -108,7 +116,7 @@ export function useEnsureLocalLlm() {
 
     const timer = setTimeout(() => {
       void localLlmCommands.stopServer();
-    }, IDLE_SHUTDOWN_MS);
+    }, getLocalLlmGraceMs());
     return () => clearTimeout(timer);
   }, [selected, save_memory, wanted]);
 }

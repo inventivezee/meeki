@@ -3,7 +3,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 
 import { useChatContext } from "./chat-context";
 
-import { claimLocalLlm } from "~/ai/local-llm-demand";
+import { BROWSING_GRACE_MS, claimLocalLlm } from "~/ai/local-llm-demand";
 import { useTabs } from "~/store/zustand/tabs";
 
 export type { ChatEvent, ChatMode } from "~/store/zustand/tabs";
@@ -13,12 +13,13 @@ export function useChatMode() {
 
   // Opening chat is the earliest reliable signal that the local model is
   // about to be asked something, which gives it time to load before the
-  // first message rather than stalling on it.
+  // first message rather than stalling on it. Only a short grace though:
+  // opening the panel and wandering off shouldn't pin the weights.
   useEffect(() => {
     if (mode === "FloatingClosed") {
       return;
     }
-    return claimLocalLlm("chat");
+    return claimLocalLlm("chat", BROWSING_GRACE_MS);
   }, [mode]);
   const transitionChatMode = useTabs((state) => state.transitionChatMode);
 

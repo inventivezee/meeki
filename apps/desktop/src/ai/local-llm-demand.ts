@@ -6,10 +6,19 @@ import { useSyncExternalStore } from "react";
  * Starting llama-server at launch made the app slow to become usable and held
  * the weights for a whole session even if the user never asked for a summary.
  * Surfaces that need the model claim it; when the last claim is released the
- * server is free to be stopped.
+ * server is free to be stopped — after the grace period the claim asked for.
+ * Merely opening chat buys a short one, because glancing at a note and moving
+ * on shouldn't hold several GB; typing buys the long one, because someone
+ * mid-sentence is very likely about to send.
  */
-const claims = new Set<string>();
+export const BROWSING_GRACE_MS = 60_000;
+export const ENGAGED_GRACE_MS = 5 * 60_000;
+
+const claims = new Map<string, number>();
 const listeners = new Set<() => void>();
+
+/** Peak grace across the claims held during the current run of demand. */
+let graceMs = ENGAGED_GRACE_MS;
 
 function emit() {
   for (const listener of listeners) {
@@ -17,13 +26,23 @@ function emit() {
   }
 }
 
-export function claimLocalLlm(reason: string) {
-  if (claims.has(reason)) {
-    return () => releaseLocalLlm(reason);
+export function claimLocalLlm(
+  reason: string,
+  claimGraceMs: number = ENGAGED_GRACE_MS,
+) {
+  const release = () => releaseLocalLlm(reason);
+  if (claims.get(reason) === claimGraceMs) {
+    return release;
   }
-  claims.add(reason);
+  const wasEmpty = claims.size === 0;
+  claims.set(reason, claimGraceMs);
+  // Recompute from the live set on the first claim so a previous run's long
+  // grace doesn't leak into this one; afterwards only ever ratchet up.
+  graceMs = wasEmpty
+    ? claimGraceMs
+    : Math.max(...Array.from(claims.values()), graceMs);
   emit();
-  return () => releaseLocalLlm(reason);
+  return release;
 }
 
 export function releaseLocalLlm(reason: string) {
@@ -34,6 +53,11 @@ export function releaseLocalLlm(reason: string) {
 
 export function isLocalLlmWanted() {
   return claims.size > 0;
+}
+
+/** Grace to honour once the last claim drops. Read when the timer is armed. */
+export function getLocalLlmGraceMs() {
+  return graceMs;
 }
 
 export function useLocalLlmWanted() {
@@ -51,5 +75,6 @@ export const LOCAL_LLM_DEMAND_TEST_ONLY = {
   reset() {
     claims.clear();
     listeners.clear();
+    graceMs = ENGAGED_GRACE_MS;
   },
 };

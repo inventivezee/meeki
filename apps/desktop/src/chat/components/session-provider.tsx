@@ -202,16 +202,34 @@ function ChatSessionLifecycle({
   );
   initialMessagesRef.current = persistedVisibleMessages;
 
+  // The transport identity churns — the provider config is rebuilt each render
+  // and the system prompt arrives asynchronously. Delegating through a ref
+  // keeps `chat` below stable: recreating it mid-request orphans the in-flight
+  // stream on an instance the UI no longer reads, so the reply never appears.
+  const transportRef = useRef(transport);
+  transportRef.current = transport;
+  const stableTransport = useMemo<ChatTransport<HyprUIMessage>>(
+    () => ({
+      sendMessages: (options) =>
+        (transportRef.current ?? unavailableChatTransport).sendMessages(
+          options,
+        ),
+      reconnectToStream: (options) =>
+        (transportRef.current ?? unavailableChatTransport).reconnectToStream(
+          options,
+        ),
+    }),
+    [],
+  );
+
   const chat = useMemo(
     () =>
       new Chat<HyprUIMessage>({
         id: sessionId,
         messages: initialMessagesRef.current,
-        transport: guardChatTransport(
-          transport ?? unavailableChatTransport,
-          chatCloudsyncActivity,
-          { beforeSend: takeTransportPreflight },
-        ),
+        transport: guardChatTransport(stableTransport, chatCloudsyncActivity, {
+          beforeSend: takeTransportPreflight,
+        }),
         onFinish: ({ message, messages, isAbort, isError }) => {
           const currentUserId = latestUserIdRef.current;
           const messageIndex = messages.findIndex((m) => m.id === message.id);
@@ -376,7 +394,7 @@ function ChatSessionLifecycle({
           }
         },
       }),
-    [chatCloudsyncActivity, sessionId, takeTransportPreflight, transport],
+    [chatCloudsyncActivity, sessionId, stableTransport, takeTransportPreflight],
   );
 
   const {

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 import { commands as store2Commands } from "@meeki/plugin-store2";
 
@@ -39,8 +40,11 @@ export function useAiProvidersState(type: AiProviderType): {
     sql: `SELECT id, value_json FROM app_settings ORDER BY id`,
     mapRows: (rows) => rows,
   });
-  const providers = parseAiProviders(rows, type);
-  const providerIds = Object.keys(providers).sort();
+  // Rebuilt identities here propagate all the way to the chat transport, so
+  // memoize: an unstable provider config used to recreate the `Chat` instance
+  // on every render.
+  const providers = useMemo(() => parseAiProviders(rows, type), [rows, type]);
+  const providerIds = useMemo(() => Object.keys(providers).sort(), [providers]);
   const secureApiKeysQuery = useQuery({
     queryKey: ["ai-provider-api-keys", type, providerIds],
     queryFn: () => loadSecureAiProviderApiKeys(providerIds, type),
@@ -49,18 +53,23 @@ export function useAiProvidersState(type: AiProviderType): {
   });
   const secureApiKeys = secureApiKeysQuery.data ?? EMPTY_PROVIDER_API_KEYS;
 
-  return {
-    providers: Object.fromEntries(
-      Object.entries(providers).map(([rowId, provider]) => [
-        rowId,
-        {
-          ...provider,
-          api_key: secureApiKeys[rowId] ?? provider.api_key,
-        },
-      ]),
-    ),
-    isReady: !isLoading && secureApiKeysQuery.data !== undefined,
-  };
+  const isReady = !isLoading && secureApiKeysQuery.data !== undefined;
+
+  return useMemo(
+    () => ({
+      providers: Object.fromEntries(
+        Object.entries(providers).map(([rowId, provider]) => [
+          rowId,
+          {
+            ...provider,
+            api_key: secureApiKeys[rowId] ?? provider.api_key,
+          },
+        ]),
+      ),
+      isReady,
+    }),
+    [providers, secureApiKeys, isReady],
+  );
 }
 
 export function useAiProvider(

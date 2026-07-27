@@ -10,6 +10,9 @@ import {
 } from "@meeki/ui/components/ui/select";
 import { Switch } from "@meeki/ui/components/ui/switch";
 
+import { setSettingValue } from "~/settings/queries";
+import { useConfigValue } from "~/shared/config";
+
 interface SettingItem {
   value: boolean;
   onChange: (value: boolean) => void;
@@ -64,6 +67,7 @@ export function AppSettingsView({
             checked={autostart.value}
             onChange={autostart.onChange}
           />
+          <SaveMemorySettingRow />
           <SettingRow
             title={<Trans>Share usage data</Trans>}
             description={
@@ -300,6 +304,32 @@ function AudioRetentionRow({
         </SelectContent>
       </Select>
     </div>
+  );
+}
+
+/**
+ * Self-contained rather than threaded through the settings form: the value is
+ * read and written directly, which keeps the render-prop pyramid above from
+ * growing another level for a setting the form never needs to validate.
+ */
+function SaveMemorySettingRow() {
+  const enabled = useConfigValue("save_memory");
+
+  return (
+    <SettingRow
+      title={<Trans>Save memory when possible</Trans>}
+      description={
+        <Trans>
+          Load the language model only when you ask for a summary or open chat,
+          and unload it after five minutes idle. Turn this off to keep it in
+          memory so the first answer is instant.
+        </Trans>
+      }
+      checked={enabled !== false}
+      onChange={(checked) => {
+        void setSettingValue("save_memory", checked);
+      }}
+    />
   );
 }
 

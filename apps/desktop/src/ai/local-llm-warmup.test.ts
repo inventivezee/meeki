@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   createWarmupFetch,
+  markWarmupFinished,
+  markWarmupStarted,
   getWarmupGraceMs,
   getWarmupState,
   setWarmupEstimateSeconds,
@@ -145,5 +147,25 @@ describe("local llm warmup", () => {
 
     release(new Response("ok"));
     await pending;
+  });
+
+  it("reports warming while the server is still loading its weights", () => {
+    markWarmupStarted();
+    expect(getWarmupState()).not.toBeNull();
+    markWarmupFinished();
+    expect(getWarmupState()).toBeNull();
+  });
+
+  it("keeps warming while a boot and a stalled request overlap", async () => {
+    markWarmupStarted();
+    const fetchImpl = createWarmupFetch(
+      vi.fn(async () => new Response("ok")) as unknown as typeof fetch,
+    );
+
+    await fetchImpl("http://127.0.0.1:1/v1/chat/completions");
+    expect(getWarmupState()).not.toBeNull();
+
+    markWarmupFinished();
+    expect(getWarmupState()).toBeNull();
   });
 });

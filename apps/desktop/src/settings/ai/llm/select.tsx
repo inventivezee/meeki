@@ -19,7 +19,6 @@ import { useLlmSettings } from "./context";
 import { HealthStatusIndicator, useConnectionHealth } from "./health";
 import { LocalModels } from "./local-models";
 import { OnDeviceLlmCard } from "./on-device";
-import { SaveMemoryToggle } from "./save-memory-toggle";
 import {
   getDefaultLlmSelection,
   getPreferredProviderModel,
@@ -355,7 +354,6 @@ export function SelectProviderAndModel() {
       <OnDeviceSetupCard />
       {localModelInUse ? null : <OnDeviceLlmCard />}
       <ThinkingToggle />
-      <SaveMemoryToggle />
       <SettingsAlertToast
         id="llm-settings-alert"
         description={alertDescription}

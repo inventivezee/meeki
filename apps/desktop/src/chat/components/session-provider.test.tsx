@@ -949,7 +949,7 @@ describe("ChatSession", () => {
     expect(mocks.beginCloudsyncActivity).toHaveBeenCalledOnce();
   });
 
-  it("recreates the SDK chat when transport becomes ready", () => {
+  it("keeps one SDK chat and routes it to the latest transport", async () => {
     const initialTransport = {
       sendMessages: vi.fn(),
       reconnectToStream: vi.fn(),
@@ -966,23 +966,33 @@ describe("ChatSession", () => {
       </ChatSession>,
     );
 
-    mocks.transport = readyTransport;
-    rerender(
-      <ChatSession chatGroupId="group-1" sessionId="session-1">
-        {() => null}
-      </ChatSession>,
-    );
+    for (let i = 0; i < 10; i++) {
+      mocks.transport = i === 0 ? readyTransport : { ...readyTransport };
+      rerender(
+        <ChatSession chatGroupId="group-1" sessionId="session-1">
+          {() => null}
+        </ChatSession>,
+      );
+    }
 
-    expect(mocks.chatInits).toHaveLength(2);
-    expect((mocks.chatInits[0] as { transport: unknown }).transport).not.toBe(
-      initialTransport,
-    );
-    expect((mocks.chatInits[1] as { transport: unknown }).transport).not.toBe(
-      readyTransport,
-    );
-    expect((mocks.chatInits[0] as { transport: unknown }).transport).not.toBe(
-      (mocks.chatInits[1] as { transport: unknown }).transport,
-    );
+    // Recreating it would strand an in-flight request on an instance the UI no
+    // longer reads from, which is why a reply never appeared.
+    expect(mocks.chatInits).toHaveLength(1);
+
+    const { transport } = mocks.chatInits[0] as {
+      transport: { sendMessages: (options: unknown) => unknown };
+    };
+    await transport.sendMessages({
+      chatId: "session-1",
+      messages: [
+        { id: "user-1", role: "user", parts: [{ type: "text", text: "hi" }] },
+      ],
+    });
+    expect(initialTransport.sendMessages).not.toHaveBeenCalled();
+    expect(
+      (mocks.transport as { sendMessages: ReturnType<typeof vi.fn> })
+        .sendMessages,
+    ).toHaveBeenCalled();
   });
 
   it("syncs SDK messages when SQLite rows load later", async () => {
