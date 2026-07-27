@@ -8,7 +8,13 @@ import {
   loadCaptureLifecycleMarkers,
 } from "./capture-lifecycle-storage";
 import { listenCaptureRecoveryRequests } from "./capture-recovery-requests";
+import {
+  hasMicrophone,
+  NO_MICROPHONE_MESSAGE,
+} from "./microphone-availability";
 import { useResumeListeningLifecycle } from "./useStartListening";
+
+import { reportCaptureErrorOnce } from "~/store/zustand/capture-errors";
 
 const CAPTURE_RECOVERY_RETRY_MS = 2_000;
 const MAX_CAPTURE_RECOVERY_RETRIES = 3;
@@ -158,6 +164,15 @@ function LiveCaptureSessionRecovery({
           "[listener] giving up capture recovery after repeated failures",
           { sessionId, attempts },
         );
+        // A vanished input device is the common cause; without this the only
+        // thing the user ever sees is a transcription failure after the fact.
+        if (!(await hasMicrophone())) {
+          reportCaptureErrorOnce({
+            id: `capture-no-microphone:${sessionId}`,
+            message: NO_MICROPHONE_MESSAGE,
+            variant: "error",
+          });
+        }
         try {
           const marker = await loadCaptureLifecycleMarker(sessionId);
           if (marker) {

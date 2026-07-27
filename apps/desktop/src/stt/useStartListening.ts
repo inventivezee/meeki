@@ -8,6 +8,10 @@ import { sonnerToast } from "@meeki/ui/components/ui/toast";
 
 import { useListener } from "./contexts";
 import { startMeetingChatCapture } from "./meeting-chat-capture";
+import {
+  hasMicrophone,
+  NO_MICROPHONE_MESSAGE,
+} from "./microphone-availability";
 import { persistTranscriptWrite } from "./persist-retry";
 import { getSessionKeywords } from "./useKeywords";
 import {
@@ -1108,6 +1112,10 @@ export function useStartListening(sessionId: string) {
 
   const startListening = useCallback(async () => {
     if (!canStartLiveSession(sessionId)) {
+      return;
+    }
+    if (!(await hasMicrophone())) {
+      sonnerToast.error(NO_MICROPHONE_MESSAGE, { id: "capture-no-microphone" });
       return;
     }
     await stopMeetingChatTasks();
