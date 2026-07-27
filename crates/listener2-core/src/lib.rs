@@ -91,7 +91,9 @@ pub fn is_supported_languages_batch(
     Ok(adapter_kind.is_supported_languages_batch(languages, model))
 }
 
-pub fn suggest_providers_for_languages_batch(languages: &[meeki_language::Language]) -> Vec<String> {
+pub fn suggest_providers_for_languages_batch(
+    languages: &[meeki_language::Language],
+) -> Vec<String> {
     let all_providers = [
         AdapterKind::Argmax,
         AdapterKind::Soniox,

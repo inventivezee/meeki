@@ -33,7 +33,9 @@ pub(super) fn single_language_support_live(language: &meeki_language::Language) 
     }
 }
 
-pub(super) fn single_language_support_batch(language: &meeki_language::Language) -> LanguageSupport {
+pub(super) fn single_language_support_batch(
+    language: &meeki_language::Language,
+) -> LanguageSupport {
     let code = language.iso639().code();
     if BATCH_LANGUAGES.contains(&code) {
         LanguageSupport::Supported {

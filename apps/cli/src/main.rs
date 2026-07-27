@@ -1,8 +1,8 @@
 use std::process::ExitCode;
 
-use meeki_cli::Args;
 use clap::Parser;
 use clap::error::ErrorKind;
+use meeki_cli::Args;
 
 #[tokio::main]
 async fn main() -> ExitCode {

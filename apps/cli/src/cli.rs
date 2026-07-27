@@ -205,8 +205,7 @@ mod tests {
     #[test]
     fn export_force_requires_an_output_path() {
         assert!(
-            Args::try_parse_from(["meeki", "meetings", "export", "meeting-1", "--force"])
-                .is_err()
+            Args::try_parse_from(["meeki", "meetings", "export", "meeting-1", "--force"]).is_err()
         );
     }
 

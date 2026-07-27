@@ -93,13 +93,31 @@ Currently **disabled**: `tauri.conf.stable.json` has `"endpoints": []` and no
 2. Host a `latest.json` updater manifest — GitHub Releases is the simplest.
 3. Fill `plugins.updater.endpoints` + `pubkey` in `tauri.conf.stable.json`.
 
-## 8. Leftover upstream links to sweep when convenient
+## 8. External contracts the rebrand renamed (audit-confirmed)
+
+Every one of these has its other half outside this repo. The repo now uses the
+NEW name; create the external side under that name (do not revert the repo).
+
+| Repo side (new name) | External side to create/update |
+|---|---|
+| `.github/workflows/{api_cd,stripe_cd,llm_e2e,stt_e2e}.yaml` read Infisical paths `/meeki/{cloudsync,ai,web,llm,stt}` | Your Infisical project needs folders with those names (upstream's used `/anarlog/*`) |
+| `api_cd.yaml` + `verify_cloudsync_e2ee.py` + `crates/api-sync` require secrets named `MEEKI_CLOUDSYNC_DATABASE_ID`, `MEEKI_CLOUDSYNC_E2EE_DATABASE_ID`, `MEEKI_CLOUDSYNC_PROTOCOL_MODE`, `MEEKI_CLOUDSYNC_TOKEN_TTL_SECONDS` | Create the secrets under these exact keys |
+| `api_cd.yaml` deploys Fly app `hyprnote-ai`; `apps/api/fly.toml` says the same | Create your own Fly app and change both |
+| Test-only env vars `MEEKI_CLOUDSYNC_*` in `crates/db-app/tests` | Set with the new names when running those ignored E2EE tests |
+| `apps/web/src/functions/github.ts` → `inventivezee/Meety` (this checkout's real remote) | Update again when you rename the GitHub repo to Meeki |
+| `apps/web/src/lib/download.ts` now points at GitHub Releases; `.github/workflows/desktop_cd.yaml` still names CrabNebula app `fastrepl/hyprnote2` | Create your own CrabNebula Cloud app (or publish DMGs as GitHub release assets) and update both together |
+| E2EE recovery keys are minted with prefix `meeki-e2ee-v1:` | Fine for a fresh product; there are no old keys to parse |
+
+## 9. Leftover upstream links to sweep when convenient
 
 - `hyprnote.com/x`, Discord invite links in docs/UI copy — point at your own
   socials or delete.
-- `.github/workflows/*` reference repo secrets by name; any secret renamed to
-  `MEEKI_*` must also be renamed in GitHub → Settings → Secrets before those
-  workflows run.
-- GitHub OAuth apps / Google & Outlook OAuth (Nango) redirect URLs are
-  registered on the provider side under upstream's domains — re-register under
-  meeki.org when enabling those integrations.
+- `hello@meeki.org` is now the legal-contact address in privacy/terms — set up
+  MX records + a mailbox before publishing those pages.
+- Google & Outlook OAuth (Nango) callback flows go through
+  `meeki.org/oauth/callback` (Netlify edge function) — register that redirect
+  URL with each provider when enabling calendar integrations.
+- Deliberately frozen OLD names (do not "fix"): the importer reads
+  `com.hyprnote.stable`/`com.hyprnote.nightly` to import Hyprnote v0 data; the
+  CLI and storage crates check `anarlog`/`hyprnote` data dirs as legacy
+  fallbacks; `hypr-llm.gguf` is a remote artifact name.

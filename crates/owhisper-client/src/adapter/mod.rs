@@ -305,7 +305,9 @@ pub fn is_hyprnote_proxy(base_url: &str) -> bool {
     is_hyprnote_cloud(base_url) || is_hyprnote_local_proxy(base_url)
 }
 
-pub fn normalize_languages(languages: &[meeki_language::Language]) -> Vec<meeki_language::Language> {
+pub fn normalize_languages(
+    languages: &[meeki_language::Language],
+) -> Vec<meeki_language::Language> {
     let mut seen = HashSet::new();
     let mut result = Vec::with_capacity(languages.len());
 

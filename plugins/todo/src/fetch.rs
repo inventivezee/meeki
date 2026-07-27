@@ -9,7 +9,10 @@ fn make_client(api_base_url: &str, access_token: &str) -> Result<meeki_api_clien
     let http = reqwest::Client::builder()
         .default_headers(headers)
         .build()?;
-    Ok(meeki_api_client::Client::new_with_client(api_base_url, http))
+    Ok(meeki_api_client::Client::new_with_client(
+        api_base_url,
+        http,
+    ))
 }
 
 pub async fn linear_list_teams(

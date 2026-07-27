@@ -121,7 +121,11 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Settings<'a, R, M> {
 
     pub async fn set_vault_base(&self, new_path: Utf8PathBuf) -> Result<(), crate::Error> {
         let settings_base = self.settings_base_path()?;
-        meeki_storage::vault::persist_vault_path(&settings_base, &settings_base, new_path.as_ref())?;
+        meeki_storage::vault::persist_vault_path(
+            &settings_base,
+            &settings_base,
+            new_path.as_ref(),
+        )?;
         Ok(())
     }
 }

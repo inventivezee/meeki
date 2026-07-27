@@ -1610,8 +1610,12 @@ impl PluginDbRuntime {
                             Ok(CloudsyncRecoveryStep::Progressed)
                         }
                         meeki_db_app::CloudsyncRecoveryPhase::NeedBarrierInsert => {
-                            meeki_db_app::insert_cloudsync_recovery_barrier(db.pool(), &state, &key)
-                                .await?;
+                            meeki_db_app::insert_cloudsync_recovery_barrier(
+                                db.pool(),
+                                &state,
+                                &key,
+                            )
+                            .await?;
                             if cloudsync_recovery_cancelled(&recovery_cancelled) {
                                 return Ok(CloudsyncRecoveryStep::Deferred);
                             }
@@ -1624,7 +1628,7 @@ impl PluginDbRuntime {
                             .await?
                             {
                                 return Err(
-                                    meeki_db_app::CloudsyncWorkspaceError::RecoveryConflict.into()
+                                    meeki_db_app::CloudsyncWorkspaceError::RecoveryConflict.into(),
                                 );
                             }
                             Ok(CloudsyncRecoveryStep::Progressed)
@@ -1668,7 +1672,7 @@ impl PluginDbRuntime {
                             .await?
                             {
                                 return Err(
-                                    meeki_db_app::CloudsyncWorkspaceError::RecoveryConflict.into()
+                                    meeki_db_app::CloudsyncWorkspaceError::RecoveryConflict.into(),
                                 );
                             }
                             clean_receive_attempt_started = false;
@@ -1932,7 +1936,7 @@ impl PluginDbRuntime {
                             .await?
                             {
                                 return Err(
-                                    meeki_db_app::CloudsyncWorkspaceError::RecoveryConflict.into()
+                                    meeki_db_app::CloudsyncWorkspaceError::RecoveryConflict.into(),
                                 );
                             }
                             Ok(CloudsyncRecoveryStep::Progressed)
@@ -1985,7 +1989,7 @@ impl PluginDbRuntime {
                             .await?
                             {
                                 return Err(
-                                    meeki_db_app::CloudsyncWorkspaceError::RecoveryConflict.into()
+                                    meeki_db_app::CloudsyncWorkspaceError::RecoveryConflict.into(),
                                 );
                             }
                             Ok(CloudsyncRecoveryStep::Progressed)
@@ -2002,7 +2006,7 @@ impl PluginDbRuntime {
                                 .await?
                             {
                                 return Err(
-                                    meeki_db_app::CloudsyncWorkspaceError::RecoveryConflict.into()
+                                    meeki_db_app::CloudsyncWorkspaceError::RecoveryConflict.into(),
                                 );
                             }
                             Ok(CloudsyncRecoveryStep::Complete)
@@ -3323,10 +3327,13 @@ mod tests {
             0
         );
 
-        let final_outcome =
-            meeki_db_core::CloudsyncSyncHook::after_sync(&hook, db.pool(), &receive_result(0, true))
-                .await
-                .unwrap();
+        let final_outcome = meeki_db_core::CloudsyncSyncHook::after_sync(
+            &hook,
+            db.pool(),
+            &receive_result(0, true),
+        )
+        .await
+        .unwrap();
         assert!(!final_outcome.local_work_remaining);
         assert_eq!(
             sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM e2ee_records WHERE id = ?")
@@ -3368,10 +3375,13 @@ mod tests {
             0
         );
 
-        let retry_outcome =
-            meeki_db_core::CloudsyncSyncHook::after_sync(&hook, db.pool(), &receive_result(0, true))
-                .await
-                .unwrap();
+        let retry_outcome = meeki_db_core::CloudsyncSyncHook::after_sync(
+            &hook,
+            db.pool(),
+            &receive_result(0, true),
+        )
+        .await
+        .unwrap();
         assert!(!retry_outcome.local_work_remaining);
         assert_eq!(
             sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM e2ee_records WHERE id = ?")

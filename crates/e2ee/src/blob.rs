@@ -31,8 +31,7 @@ const CHUNK_KEY_INFO: &[u8] = b"meeki-e2ee-attachment-blob-chunk-key-v1";
 const HEADER_AAD_DOMAIN: &[u8] = b"meeki-e2ee-attachment-blob-header-aad-v1";
 const CHUNK_AAD_DOMAIN: &[u8] = b"meeki-e2ee-attachment-blob-chunk-aad-v1";
 const ATTACHMENT_BACKUP_REF_DOMAIN: &[u8] = b"meeki-e2ee-attachment-backup-ref-v1";
-const ATTACHMENT_BACKUP_VERSION_REF_DOMAIN: &[u8] =
-    b"meeki-e2ee-attachment-backup-version-ref-v1";
+const ATTACHMENT_BACKUP_VERSION_REF_DOMAIN: &[u8] = b"meeki-e2ee-attachment-backup-version-ref-v1";
 
 #[derive(Debug, thiserror::Error)]
 pub enum AttachmentBlobError {
@@ -870,14 +869,29 @@ mod tests {
 
     const OBJECT_ID: &str = "019f6b9d-5ca3-7e61-8414-2be0ad5d9712";
 
+    /// Key-derivation and AAD inputs for attachment blobs. Frozen: renaming any
+    /// of these after real blobs exist makes them undecryptable. The magic is
+    /// deliberately brand-free.
+    #[test]
+    fn blob_crypto_constants_are_frozen() {
+        assert_eq!(MAGIC, b"ANABLB01");
+        assert_eq!(BLOB_KEY_SALT, b"meeki-e2ee-attachment-blob-key-v1");
+        assert_eq!(
+            BLOB_KEY_INFO_DOMAIN,
+            b"meeki-e2ee-attachment-blob-object-v1"
+        );
+        assert_eq!(
+            HEADER_AAD_DOMAIN,
+            b"meeki-e2ee-attachment-blob-header-aad-v1"
+        );
+        assert_eq!(CHUNK_AAD_DOMAIN, b"meeki-e2ee-attachment-blob-chunk-aad-v1");
+    }
+
     fn key(seed: u8) -> WorkspaceKey {
-        RecoveryKey::parse(&format!(
-            "meeki-e2ee-v1:{}",
-            base64_url_no_pad(&[seed; 32])
-        ))
-        .unwrap()
-        .workspace_key("workspace-a")
-        .unwrap()
+        RecoveryKey::parse(&format!("meeki-e2ee-v1:{}", base64_url_no_pad(&[seed; 32])))
+            .unwrap()
+            .workspace_key("workspace-a")
+            .unwrap()
     }
 
     fn context() -> AttachmentBlobContext {

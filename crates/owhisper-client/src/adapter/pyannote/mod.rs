@@ -42,7 +42,9 @@ impl PyannoteAdapter {
         }
     }
 
-    pub fn find_model(languages: &[meeki_language::Language]) -> Option<PyannoteTranscriptionModel> {
+    pub fn find_model(
+        languages: &[meeki_language::Language],
+    ) -> Option<PyannoteTranscriptionModel> {
         TRANSCRIPTION_MODELS
             .iter()
             .find(|model| languages.iter().all(|lang| model.supports_language(lang)))

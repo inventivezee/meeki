@@ -50,14 +50,13 @@ fn resolve_default_path_for_command(data_dir: &Path, command_name: Option<&OsStr
         return current;
     }
 
-    let legacy = data_dir.join("hyprnote").join("app.db");
-    if legacy.is_file() {
-        return legacy;
-    }
-
-    let identifier = data_dir.join("com.meeki.stable").join("app.db");
-    if identifier.is_file() {
-        return identifier;
+    // Pre-rebrand desktop installs: this fork wrote to "anarlog", upstream to
+    // "hyprnote" or its stable bundle id.
+    for legacy in ["anarlog", "hyprnote", "com.hyprnote.stable"] {
+        let candidate = data_dir.join(legacy).join("app.db");
+        if candidate.is_file() {
+            return candidate;
+        }
     }
 
     current
@@ -71,8 +70,9 @@ mod tests {
     fn default_path_prefers_current_then_legacy_then_identifier() {
         let dir = tempfile::tempdir().unwrap();
         let current = dir.path().join("meeki/app.db");
-        let legacy = dir.path().join("hyprnote/app.db");
-        let identifier = dir.path().join("com.meeki.stable/app.db");
+        let anarlog = dir.path().join("anarlog/app.db");
+        let hyprnote = dir.path().join("hyprnote/app.db");
+        let identifier = dir.path().join("com.hyprnote.stable/app.db");
 
         std::fs::create_dir_all(identifier.parent().unwrap()).unwrap();
         std::fs::write(&identifier, "").unwrap();
@@ -81,11 +81,18 @@ mod tests {
             identifier
         );
 
-        std::fs::create_dir_all(legacy.parent().unwrap()).unwrap();
-        std::fs::write(&legacy, "").unwrap();
+        std::fs::create_dir_all(hyprnote.parent().unwrap()).unwrap();
+        std::fs::write(&hyprnote, "").unwrap();
         assert_eq!(
             resolve_default_path_for_command(dir.path(), Some(OsStr::new("meeki"))),
-            legacy
+            hyprnote
+        );
+
+        std::fs::create_dir_all(anarlog.parent().unwrap()).unwrap();
+        std::fs::write(&anarlog, "").unwrap();
+        assert_eq!(
+            resolve_default_path_for_command(dir.path(), Some(OsStr::new("meeki"))),
+            anarlog
         );
 
         std::fs::create_dir_all(current.parent().unwrap()).unwrap();

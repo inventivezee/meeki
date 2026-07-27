@@ -83,9 +83,9 @@ impl ListenerRuntime for TauriRuntime {
                     degraded: error,
                 }
             }
-            meeki_transcription_core::listener::SessionLifecycleEvent::Finalizing { session_id } => {
-                CaptureLifecycleEvent::Finalizing { session_id }
-            }
+            meeki_transcription_core::listener::SessionLifecycleEvent::Finalizing {
+                session_id,
+            } => CaptureLifecycleEvent::Finalizing { session_id },
             meeki_transcription_core::listener::SessionLifecycleEvent::Inactive {
                 session_id,
                 audio_path,

@@ -44,16 +44,13 @@ fn cloudsync_runtime_config(
     }
 
     let database_id = database_id.ok_or_else(|| {
-        "MEEKI_CLOUDSYNC_E2EE_DATABASE_ID is required when CloudSync auth is configured"
-            .to_string()
+        "MEEKI_CLOUDSYNC_E2EE_DATABASE_ID is required when CloudSync auth is configured".to_string()
     })?;
     let auth = match (api_key, token) {
         (Some(api_key), None) => meeki_db_core::CloudsyncAuth::ApiKey { api_key },
         (None, Some(token)) => meeki_db_core::CloudsyncAuth::Token { token },
         (None, None) => {
-            return Err(
-                "MEEKI_CLOUDSYNC_API_KEY or MEEKI_CLOUDSYNC_TOKEN is required".to_string(),
-            );
+            return Err("MEEKI_CLOUDSYNC_API_KEY or MEEKI_CLOUDSYNC_TOKEN is required".to_string());
         }
         (Some(_), Some(_)) => {
             return Err(
@@ -69,9 +66,7 @@ fn cloudsync_runtime_config(
                 .parse::<u64>()
                 .ok()
                 .filter(|value| *value > 0)
-                .ok_or_else(|| {
-                    "MEEKI_CLOUDSYNC_INTERVAL_MS must be a positive integer".to_string()
-                })
+                .ok_or_else(|| "MEEKI_CLOUDSYNC_INTERVAL_MS must be a positive integer".to_string())
         })
         .transpose()?
         .unwrap_or(DEFAULT_CLOUDSYNC_INTERVAL_MS);
@@ -101,8 +96,8 @@ fn parse_env_flag(value: String) -> Result<bool, String> {
 
 fn desktop_db_dir(identifier: &str) -> Option<std::path::PathBuf> {
     let data_dir = dirs::data_dir().expect("data_dir must be available");
-    let default_dir =
-        meeki_storage::global::compute_default_base(identifier).expect("data_dir must be available");
+    let default_dir = meeki_storage::global::compute_default_base(identifier)
+        .expect("data_dir must be available");
     let identifier_dir = data_dir.join(identifier);
 
     if identifier_dir.join(DB_FILENAME).is_file() && !default_dir.join(DB_FILENAME).is_file() {

@@ -2,7 +2,7 @@
 
 ![meeki](https://repository-images.githubusercontent.com/900550981/a4267a9f-414b-4c36-965c-419313ce2417)
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/fastrepl/meeki)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/inventivezee/Meety)
 
 # meeki
 
@@ -14,7 +14,7 @@ Granola, rearranged.
 
 Download the latest release for your platform:
 
-→ [github.com/fastrepl/meeki/releases/latest](https://github.com/fastrepl/meeki/releases/latest)
+→ [github.com/inventivezee/Meety/releases/latest](https://github.com/inventivezee/Meety/releases/latest)
 
 Open it and join a meeting. meeki records, transcribes locally, and stores its canonical meeting data in a local SQLite database. Export Markdown when it fits your workflow. Bring your own LLM: OpenAI, Anthropic, Gemini, OpenRouter, Ollama, LM Studio, or anything OpenAI-compatible.
 

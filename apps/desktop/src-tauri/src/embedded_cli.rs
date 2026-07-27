@@ -567,9 +567,7 @@ mod tests {
     fn classifies_legacy_app_resource_symlink_as_missing() {
         let dir = tempfile::tempdir().unwrap();
         let managed_path = dir.path().join("managed-meeki-cli");
-        let app_resource_path = dir
-            .path()
-            .join("Meeki.app/Contents/Resources/meeki-cli");
+        let app_resource_path = dir.path().join("Meeki.app/Contents/Resources/meeki-cli");
         let install_path = dir.path().join("meeki");
         std::fs::create_dir_all(app_resource_path.parent().unwrap()).unwrap();
         std::fs::write(&app_resource_path, "cli").unwrap();

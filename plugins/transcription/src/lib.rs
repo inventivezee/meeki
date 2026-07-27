@@ -14,6 +14,8 @@ mod listener2;
 
 pub use api::*;
 pub use error::{Error, Result};
+pub use listener::{Listener, ListenerPluginExt};
+pub use listener2::{Listener2, Listener2PluginExt};
 pub use meeki_transcription_core::listener::{
     DegradedError, ListenerRuntime, LiveTranscriptDelta, LiveTranscriptEngine,
     LiveTranscriptSegment, LiveTranscriptSegmentDelta, LiveTranscriptUpdate,
@@ -24,8 +26,6 @@ pub use meeki_transcription_core::listener2::{
     is_supported_languages_batch, list_documented_language_codes_batch, parse_subtitle_from_path,
     run_denoise, suggest_providers_for_languages_batch,
 };
-pub use listener::{Listener, ListenerPluginExt};
-pub use listener2::{Listener2, Listener2PluginExt};
 
 use meeki_audio::AudioProvider;
 use meeki_transcription_core::listener::actors::{RootActor, RootArgs};

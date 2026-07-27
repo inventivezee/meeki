@@ -27,11 +27,12 @@ fn validate_secret_coordinate(caller: SecretCaller, scope: &str, key: &str) -> R
     Ok(())
 }
 
+// The flatpak build shares the stable channel's secret namespace; upstream's
+// legacy Hyprnote bundle-id mapping is gone because Meeki has no pre-rebrand
+// installs to migrate.
 fn secure_store_service(identifier: &str) -> String {
     let identifier = match identifier {
-        "com.meeki.dev" => "com.meeki.dev",
-        "com.meeki.staging" => "com.meeki.staging",
-        "com.meeki.stable" | "com.meeki.Meeki" => "com.meeki.stable",
+        "com.meeki.Meeki" => "com.meeki.stable",
         identifier => identifier,
     };
 
@@ -107,14 +108,10 @@ fn legacy_secret_locations(identifier: &str, scope: &str, key: &str) -> Vec<(Str
     let service = secure_store_service(identifier);
     let account = format!("{scope}:{key}");
     let current_account = secure_store_account(identifier, scope, key);
-    let legacy_service = format!("{identifier}.{SECURE_STORE_SUFFIX}");
     let mut locations = Vec::new();
 
     if account != current_account {
-        locations.push((service.clone(), account.clone()));
-    }
-    if legacy_service != service {
-        locations.push((legacy_service, account));
+        locations.push((service, account));
     }
 
     locations
@@ -435,16 +432,10 @@ mod tests {
     fn migrates_all_previous_dev_secret_locations() {
         assert_eq!(
             legacy_secret_locations("com.meeki.dev", "provider", "deepgram"),
-            vec![
-                (
-                    "com.meeki.dev.secure-store".to_string(),
-                    "provider:deepgram".to_string(),
-                ),
-                (
-                    "com.meeki.dev.secure-store".to_string(),
-                    "provider:deepgram".to_string(),
-                ),
-            ]
+            vec![(
+                "com.meeki.dev.secure-store".to_string(),
+                "provider:deepgram".to_string(),
+            )]
         );
     }
 

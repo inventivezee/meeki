@@ -113,7 +113,8 @@ impl MobileDbBridge {
             .block_on(live_query_runtime.subscribe(sql, params, ListenerSink::new(listener)))
             .map_err(reactive_error)?;
 
-        if let meeki_db_reactive::DependencyAnalysis::NonReactive { reason } = &registration.analysis
+        if let meeki_db_reactive::DependencyAnalysis::NonReactive { reason } =
+            &registration.analysis
         {
             eprintln!(
                 "[mobile-bridge] live query subscription is non-reactive for SQL {:?}: {}",
@@ -521,7 +522,8 @@ mod tests {
                 "all".to_string(),
             )
             .unwrap();
-        let result: meeki_db_execute::ProxyQueryResult = serde_json::from_str(&result_json).unwrap();
+        let result: meeki_db_execute::ProxyQueryResult =
+            serde_json::from_str(&result_json).unwrap();
 
         assert_eq!(
             result.rows,

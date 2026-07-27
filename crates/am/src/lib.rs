@@ -13,6 +13,7 @@ mod tests {
     use super::*;
 
     #[tokio::test]
+    #[ignore = "requires a live AM server on localhost:50060"]
     async fn test_client_creation() {
         let client = Client::new("http://localhost:50060/v1");
         let status = client.status().await;

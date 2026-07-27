@@ -177,18 +177,20 @@ impl From<CloudsyncWorkspaceProjection> for meeki_db_app::CloudsyncWorkspaceProj
             workspaces: projection
                 .workspaces
                 .into_iter()
-                .map(|workspace| meeki_db_app::CloudsyncWorkspaceProjectionEntry {
-                    id: workspace.id,
-                    owner_user_id: workspace.owner_user_id,
-                    kind: workspace.kind,
-                    name: workspace.name,
-                    membership_id: workspace.membership_id,
-                    role: workspace.role,
-                    membership_created_at: workspace.membership_created_at,
-                    membership_updated_at: workspace.membership_updated_at,
-                    created_at: workspace.created_at,
-                    updated_at: workspace.updated_at,
-                })
+                .map(
+                    |workspace| meeki_db_app::CloudsyncWorkspaceProjectionEntry {
+                        id: workspace.id,
+                        owner_user_id: workspace.owner_user_id,
+                        kind: workspace.kind,
+                        name: workspace.name,
+                        membership_id: workspace.membership_id,
+                        role: workspace.role,
+                        membership_created_at: workspace.membership_created_at,
+                        membership_updated_at: workspace.membership_updated_at,
+                        created_at: workspace.created_at,
+                        updated_at: workspace.updated_at,
+                    },
+                )
                 .collect(),
         }
     }

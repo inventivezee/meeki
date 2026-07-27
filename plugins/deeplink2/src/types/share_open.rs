@@ -15,12 +15,7 @@ impl ShareOpenRequest {
     pub(crate) fn parse(parsed: &url::Url) -> Result<Self, crate::Error> {
         if !matches!(
             parsed.scheme(),
-            "meeki"
-                | "meeki-staging"
-                | "meeki-dev"
-                | "hyprnote"
-                | "hyprnote-staging"
-                | "hypr"
+            "meeki" | "meeki-staging" | "meeki-dev" | "hyprnote" | "hyprnote-staging" | "hypr"
         ) || parsed.host_str() != Some("share")
             || parsed.path() != "/open"
             || !parsed.username().is_empty()

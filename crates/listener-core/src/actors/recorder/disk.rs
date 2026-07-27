@@ -338,7 +338,11 @@ mod tests {
         let dir = tempdir().unwrap();
         let session_dir = dir.path().join("session");
         std::fs::create_dir_all(&session_dir).unwrap();
-        std::fs::copy(meeki_data::english_1::AUDIO_PATH, session_dir.join(WAV_FILE)).unwrap();
+        std::fs::copy(
+            meeki_data::english_1::AUDIO_PATH,
+            session_dir.join(WAV_FILE),
+        )
+        .unwrap();
 
         let _sink = create_disk_sink(&session_dir).unwrap();
 

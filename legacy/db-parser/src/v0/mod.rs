@@ -1,8 +1,8 @@
 mod convert;
 
-use meeki_importer_core::ir::CollectionStats;
 use legacy_db_core::libsql;
 use legacy_db_user::UserDatabase;
+use meeki_importer_core::ir::CollectionStats;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 

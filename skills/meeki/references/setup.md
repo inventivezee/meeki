@@ -28,7 +28,7 @@ Restart the client after changing its MCP configuration.
 The CLI currently installs from source:
 
 ```bash
-git clone https://github.com/fastrepl/meeki.git
+git clone https://github.com/inventivezee/Meety.git
 cd meeki
 cargo install --locked --path apps/cli
 meeki --version

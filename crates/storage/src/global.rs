@@ -3,7 +3,9 @@ use std::path::{Path, PathBuf};
 pub const VAULT_CONFIG_FILENAME: &str = "global.json";
 const STAGING_BUNDLE_ID: &str = "com.meeki.staging";
 const RELEASE_APP_FOLDER: &str = "meeki";
-const LEGACY_RELEASE_APP_FOLDER: &str = "hyprnote";
+/// Most-recent first: this fork shipped as "anarlog" before the Meeki rebrand,
+/// and as "hyprnote" upstream before that.
+const LEGACY_RELEASE_APP_FOLDERS: &[&str] = &["anarlog", "hyprnote"];
 
 pub fn compute_vault_config_path(base: &Path) -> PathBuf {
     base.join(VAULT_CONFIG_FILENAME)
@@ -17,14 +19,18 @@ pub fn compute_default_base(bundle_id: &str) -> Option<PathBuf> {
 
 fn resolve_app_folder<'a>(data_dir: &Path, bundle_id: &'a str, is_debug: bool) -> &'a str {
     if is_debug || bundle_id == STAGING_BUNDLE_ID {
-        bundle_id
-    } else if has_app_data(&data_dir.join(LEGACY_RELEASE_APP_FOLDER))
-        && !has_app_data(&data_dir.join(RELEASE_APP_FOLDER))
-    {
-        LEGACY_RELEASE_APP_FOLDER
-    } else {
-        RELEASE_APP_FOLDER
+        return bundle_id;
     }
+
+    if !has_app_data(&data_dir.join(RELEASE_APP_FOLDER))
+        && let Some(legacy) = LEGACY_RELEASE_APP_FOLDERS
+            .iter()
+            .find(|folder| has_app_data(&data_dir.join(folder)))
+    {
+        return legacy;
+    }
+
+    RELEASE_APP_FOLDER
 }
 
 fn has_app_data(path: &Path) -> bool {
@@ -50,21 +56,38 @@ mod tests {
 
     #[test]
     fn resolve_app_folder_keeps_legacy_stable_folder_when_it_has_data() {
+        for legacy in LEGACY_RELEASE_APP_FOLDERS {
+            let temp = tempdir().unwrap();
+            let legacy_base = temp.path().join(legacy);
+            std::fs::create_dir_all(&legacy_base).unwrap();
+            std::fs::write(legacy_base.join("store.json"), "{}").unwrap();
+
+            assert_eq!(
+                resolve_app_folder(temp.path(), "com.meeki.stable", false),
+                *legacy
+            );
+        }
+    }
+
+    #[test]
+    fn resolve_app_folder_prefers_newest_legacy_generation() {
         let temp = tempdir().unwrap();
-        let legacy_base = temp.path().join(LEGACY_RELEASE_APP_FOLDER);
-        std::fs::create_dir_all(&legacy_base).unwrap();
-        std::fs::write(legacy_base.join("store.json"), "{}").unwrap();
+        for legacy in LEGACY_RELEASE_APP_FOLDERS {
+            let base = temp.path().join(legacy);
+            std::fs::create_dir_all(&base).unwrap();
+            std::fs::write(base.join("store.json"), "{}").unwrap();
+        }
 
         assert_eq!(
             resolve_app_folder(temp.path(), "com.meeki.stable", false),
-            LEGACY_RELEASE_APP_FOLDER
+            "anarlog"
         );
     }
 
     #[test]
     fn resolve_app_folder_prefers_meeki_when_new_folder_has_data() {
         let temp = tempdir().unwrap();
-        let legacy_base = temp.path().join(LEGACY_RELEASE_APP_FOLDER);
+        let legacy_base = temp.path().join(LEGACY_RELEASE_APP_FOLDERS[0]);
         let new_base = temp.path().join(RELEASE_APP_FOLDER);
         std::fs::create_dir_all(&legacy_base).unwrap();
         std::fs::create_dir_all(&new_base).unwrap();
@@ -80,7 +103,9 @@ mod tests {
     #[test]
     fn resolve_app_folder_ignores_empty_legacy_stable_folder() {
         let temp = tempdir().unwrap();
-        std::fs::create_dir_all(temp.path().join(LEGACY_RELEASE_APP_FOLDER)).unwrap();
+        for legacy in LEGACY_RELEASE_APP_FOLDERS {
+            std::fs::create_dir_all(temp.path().join(legacy)).unwrap();
+        }
 
         assert_eq!(
             resolve_app_folder(temp.path(), "com.meeki.stable", false),

@@ -48,7 +48,9 @@ fn should_force_quit() -> bool {
     false
 }
 
-fn create_audio_provider(_bundle_id: &str) -> std::sync::Arc<dyn meeki_audio_actual::AudioProvider> {
+fn create_audio_provider(
+    _bundle_id: &str,
+) -> std::sync::Arc<dyn meeki_audio_actual::AudioProvider> {
     #[cfg(any(feature = "dev", feature = "devtools"))]
     {
         let bundle_id = _bundle_id;

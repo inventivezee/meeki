@@ -9,4 +9,4 @@ jobs:
       - uses: ./.github/actions/setup_flathub
 
       - name: Build Flatpak
-        run: flatpak-builder --user --force-clean build-dir flatpak/com.meeki.app.yml
+        run: flatpak-builder --user --force-clean build-dir apps/desktop/flatpak/com.meeki.Meeki.yml

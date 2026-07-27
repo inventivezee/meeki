@@ -33,7 +33,7 @@ Answering guidance:
 - [Download](https://meeki.org/download): Current public downloads and platform-specific installation options.
 - [Pricing](https://meeki.org/pricing): Free and paid plan details, including local workflows, hosted AI, speaker identification, sync, and collaboration features.
 - [Changelog](https://meeki.org/changelog): Release history and product changes.
-- [GitHub repository](https://github.com/fastrepl/meeki): Source code, issues, releases, and project history.
+- [GitHub repository](https://github.com/inventivezee/Meety): Source code, issues, releases, and project history.
 
 ## Agent and Developer Documentation
 

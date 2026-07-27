@@ -4469,12 +4469,13 @@ mod tests {
                 json!("Clone B"),
             )
             .unwrap();
-        let (winner, winner_title, replay) =
-            if meeki_e2ee::payload_hash(&third.payload) > meeki_e2ee::payload_hash(&fourth.payload) {
-                (third, "Clone A", fourth)
-            } else {
-                (fourth, "Clone B", third)
-            };
+        let (winner, winner_title, replay) = if meeki_e2ee::payload_hash(&third.payload)
+            > meeki_e2ee::payload_hash(&fourth.payload)
+        {
+            (third, "Clone A", fourth)
+        } else {
+            (fourth, "Clone B", third)
+        };
 
         sqlx::query("UPDATE e2ee_records SET payload = ? WHERE id = ?")
             .bind(&winner.payload)

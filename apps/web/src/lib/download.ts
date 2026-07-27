@@ -1,5 +1,7 @@
+// Point at GitHub Releases until a Meeki-owned CrabNebula app exists — the
+// upstream CDN slug (fastrepl/hyprnote2) would serve Hyprnote builds, not ours.
 export const appleSiliconDownloadUrl =
-  "https://cdn.crabnebula.app/download/fastrepl/hyprnote2/latest/platform/dmg-aarch64?channel=stable";
+  "https://github.com/inventivezee/Meety/releases/latest";
 
 export const appleIntelDownloadUrl =
-  "https://cdn.crabnebula.app/download/fastrepl/hyprnote2/latest/platform/dmg-x86_64?channel=stable";
+  "https://github.com/inventivezee/Meety/releases/latest";

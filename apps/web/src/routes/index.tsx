@@ -623,7 +623,7 @@ function OpenSourceSection({
         </p>
 
         <a
-          href="https://github.com/fastrepl/meeki"
+          href="https://github.com/inventivezee/Meety"
           target="_blank"
           rel="noopener noreferrer"
           className="mt-6 inline-flex items-center gap-2 rounded-full border border-neutral-300 bg-white px-5 py-3 text-sm font-medium text-neutral-900 transition-colors hover:border-neutral-900 hover:bg-neutral-900 hover:text-white"

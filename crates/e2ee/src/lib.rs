@@ -481,4 +481,17 @@ mod tests {
         assert_ne!(first, changed);
         assert_ne!(first, "A");
     }
+
+    /// These strings are HKDF/HMAC/AAD inputs. Renaming any of them after the
+    /// first real recovery key or ciphertext exists makes that data unreadable,
+    /// so they are frozen here: a rebrand must never touch this test.
+    #[test]
+    fn crypto_domain_constants_are_frozen() {
+        assert_eq!(RECOVERY_KEY_PREFIX, "meeki-e2ee-v1:");
+        assert_eq!(RECOVERY_KEY_ID_DOMAIN, b"meeki-e2ee-recovery-key-id-v1");
+        assert_eq!(WORKSPACE_KEY_SALT, b"meeki-e2ee-workspace-key-v1");
+        assert_eq!(FIELD_ID_DOMAIN, b"meeki-e2ee-field-id-v1");
+        assert_eq!(VALUE_TAG_DOMAIN, b"meeki-e2ee-value-tag-v1");
+        assert_eq!(PAYLOAD_AAD_DOMAIN, b"meeki-e2ee-payload-v1");
+    }
 }

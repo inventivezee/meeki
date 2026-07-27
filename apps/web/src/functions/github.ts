@@ -3,7 +3,8 @@ import { createServerFn } from "@tanstack/react-start";
 
 import { env } from "../env";
 
-const GITHUB_ORG_REPO = "fastrepl/meeki";
+// This checkout's actual remote; update when the repo is renamed to Meeki.
+const GITHUB_ORG_REPO = "inventivezee/Meety";
 const GITHUB_REPO_URL = `https://github.com/${GITHUB_ORG_REPO}`;
 const GITHUB_REPO_API_URL = `https://api.github.com/repos/${GITHUB_ORG_REPO}`;
 const CACHE_TTL = HOUR;

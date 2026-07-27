@@ -1,9 +1,9 @@
 use std::{error::Error as StdError, future::Future};
 
+use json_patch::{Patch, patch as apply_json_patch};
 use meeki_template_app::{
     Template, TranscriptPatchSystem, TranscriptPatchUser, render as render_template,
 };
-use json_patch::{Patch, patch as apply_json_patch};
 use serde::{Deserialize, Serialize};
 
 use crate::{FinalizedWord, WordState};

@@ -43,7 +43,7 @@ impl ImportSource {
 
     pub fn hyprnote_stable() -> Option<Self> {
         let path = dirs::data_dir()?
-            .join("com.meeki.stable")
+            .join("com.hyprnote.stable")
             .join("db.sqlite");
         Some(Self {
             kind: Some(ImportSourceKind::HyprnoteV0Stable),
@@ -55,7 +55,7 @@ impl ImportSource {
 
     pub fn hyprnote_nightly() -> Option<Self> {
         let path = dirs::data_dir()?
-            .join("com.meeki.nightly")
+            .join("com.hyprnote.nightly")
             .join("db.sqlite");
         Some(Self {
             kind: Some(ImportSourceKind::HyprnoteV0Nightly),

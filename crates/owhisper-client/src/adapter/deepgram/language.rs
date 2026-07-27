@@ -70,7 +70,10 @@ impl LanguageQueryStrategy for DeepgramLanguageStrategy {
     }
 }
 
-fn single_language_query_code(params: &ListenParams, language: &meeki_language::Language) -> String {
+fn single_language_query_code(
+    params: &ListenParams,
+    language: &meeki_language::Language,
+) -> String {
     let Some(region) = language.region() else {
         return language.iso639().code().to_string();
     };

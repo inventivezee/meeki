@@ -264,12 +264,14 @@ mod tests {
             height: 300,
             strategy: meeki_screen_core::CaptureStrategy::Display,
             crop: rect(),
-            subject: meeki_screen_core::CaptureSubject::Display(meeki_screen_core::DisplayMetadata {
-                id: 3,
-                name: "Built-in Retina Display".to_string(),
-                rect: rect(),
-                is_primary: true,
-            }),
+            subject: meeki_screen_core::CaptureSubject::Display(
+                meeki_screen_core::DisplayMetadata {
+                    id: 3,
+                    name: "Built-in Retina Display".to_string(),
+                    rect: rect(),
+                    is_primary: true,
+                },
+            ),
         });
 
         assert!(matches!(capture.strategy, CaptureStrategy::Display));

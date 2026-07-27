@@ -515,7 +515,10 @@ mod tests {
     }
 
     impl AudioProvider for TestRuntime {
-        fn open_capture(&self, _config: CaptureConfig) -> Result<CaptureStream, meeki_audio::Error> {
+        fn open_capture(
+            &self,
+            _config: CaptureConfig,
+        ) -> Result<CaptureStream, meeki_audio::Error> {
             unimplemented!()
         }
         fn open_speaker_capture(

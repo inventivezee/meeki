@@ -386,8 +386,7 @@ mod tests {
             }
         );
         assert_eq!(
-            parse_resource_uri("meeki://meetings/meeting-1/transcript?offset=4&limit=900")
-                .unwrap(),
+            parse_resource_uri("meeki://meetings/meeting-1/transcript?offset=4&limit=900").unwrap(),
             ResourceRequest::Transcript {
                 meeting_id: "meeting-1".to_string(),
                 offset: 4,

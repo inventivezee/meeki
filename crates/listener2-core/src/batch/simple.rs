@@ -585,7 +585,8 @@ fn transcribe_soniqo_samples(
         writer.finalize().map_err(|e| e.to_string())?;
     }
 
-    meeki_transcribe_soniqo::transcribe_file(model, file.path(), language).map_err(|e| e.to_string())
+    meeki_transcribe_soniqo::transcribe_file(model, file.path(), language)
+        .map_err(|e| e.to_string())
 }
 
 fn soniqo_channel_chunks(
@@ -831,9 +832,11 @@ mod tests {
     fn parakeet_batch_uses_fixed_audio_windows() {
         let samples =
             vec![0.0; SONIQO_PARAKEET_MAX_CHUNK_SAMPLES * 2 + TARGET_SAMPLE_RATE as usize];
-        let chunks =
-            soniqo_channel_chunks(meeki_transcribe_soniqo::SoniqoModel::ParakeetBatch, &samples)
-                .unwrap();
+        let chunks = soniqo_channel_chunks(
+            meeki_transcribe_soniqo::SoniqoModel::ParakeetBatch,
+            &samples,
+        )
+        .unwrap();
 
         assert_eq!(chunks.len(), 3);
         assert_eq!(chunks[0].sample_start, 0);
