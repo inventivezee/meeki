@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { Kbd } from "@meeki/ui/components/ui/kbd";
 import { cn } from "@meeki/utils";
 
-import { FloatingChatCTA } from "~/shared/chat-cta";
+import { FloatingChatSphere } from "~/shared/chat-cta";
 import { StandardContentWrapper } from "~/shared/main";
 import {
   useNewNote,
@@ -20,7 +20,7 @@ export function TabContentEmpty({
   tab: Extract<Tab, { type: "empty" }>;
 }) {
   return (
-    <StandardContentWrapper floatingButton={<FloatingChatCTA />}>
+    <StandardContentWrapper floatingButton={<FloatingChatSphere />}>
       <EmptyView />
     </StandardContentWrapper>
   );

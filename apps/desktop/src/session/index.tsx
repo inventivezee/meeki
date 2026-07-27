@@ -35,6 +35,7 @@ import {
   subscribeCanonicalSessionImportLocks,
 } from "~/session-sharing/editor-activity";
 import { useSession } from "~/session/queries";
+import { FloatingChatSphere } from "~/shared/chat-cta";
 import { type Tab, useTabs } from "~/store/zustand/tabs";
 import { useListener } from "~/stt/contexts";
 import { consumePendingUpload } from "~/stt/pending-upload";
@@ -243,13 +244,16 @@ function TabContentNoteInner({
           />
         }
         floatingButton={
-          <FloatingActionButton
-            allowListening={!standaloneWindow}
-            audioExists={audioExists}
-            currentView={currentView}
-            skipReason={skipReason}
-            tab={tab}
-          />
+          <>
+            <FloatingActionButton
+              allowListening={!standaloneWindow}
+              audioExists={audioExists}
+              currentView={currentView}
+              skipReason={skipReason}
+              tab={tab}
+            />
+            <FloatingChatSphere />
+          </>
         }
       >
         <div className="flex h-full min-h-0 flex-col">

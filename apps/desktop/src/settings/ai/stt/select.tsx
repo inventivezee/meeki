@@ -61,13 +61,13 @@ import {
   getProviderSelectionBlockers,
   requiresEntitlement,
 } from "~/settings/ai/shared/eligibility";
-import { OnDeviceSetupCard } from "~/settings/ai/shared/on-device-setup";
 import { PersistAiSelection } from "~/settings/ai/shared/persist-selection";
 import {
   getConfiguredProviderIds,
   getConfiguredProviders,
   getVisibleModelSelection,
 } from "~/settings/ai/shared/selection";
+import { LocalTranscriptionSetup } from "~/settings/ai/stt/local-setup";
 import { getBaseLanguageDisplayName } from "~/settings/general/language";
 import { useAiProvidersState } from "~/settings/providers";
 import { useSetSettingValues } from "~/settings/queries";
@@ -236,10 +236,11 @@ export function SelectProviderAndModel() {
       />
       {!alertDescription && <TranscriptionLanguageWarningToast />}
 
+      <LocalTranscriptionSetup />
+
       <h3 className="text-md font-sans font-semibold">
         <Trans>Model being used</Trans>
       </h3>
-      <OnDeviceSetupCard />
       <div className="flex flex-row items-center gap-4">
         <div className="min-w-0 flex-2" data-stt-provider-selector>
           <Select value={visibleProvider} onValueChange={handleProviderChange}>

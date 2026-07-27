@@ -19,6 +19,7 @@ import {
 } from "./config";
 import { FinalDescription, FinalSection, finishOnboarding } from "./final";
 import { FolderLocationSection } from "./folder-location";
+import { ModelsSection } from "./models";
 import { PermissionsSection } from "./permissions";
 import { OnboardingSection } from "./shared";
 
@@ -281,6 +282,19 @@ function OnboardingScreenContent({
               onContinue={goNext}
               onSignIn={handleCalendarSignIn}
             />
+          </OnboardingSection>
+
+          <OnboardingSection
+            title={<Trans>Models</Trans>}
+            description={
+              <Trans>Choose between on-device models and the cloud</Trans>
+            }
+            completedTitle={<Trans>Models chosen</Trans>}
+            status={getStepStatus("models", currentStep)}
+            onBack={goBack}
+            onNext={goNext}
+          >
+            <ModelsSection onContinue={goNext} />
           </OnboardingSection>
 
           <OnboardingSection

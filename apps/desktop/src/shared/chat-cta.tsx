@@ -1,4 +1,5 @@
 import { useLingui } from "@lingui/react/macro";
+import { SparklesIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { cn } from "@meeki/utils";
@@ -68,6 +69,48 @@ export function FloatingChatCTA({ label }: { label?: ReactNode }) {
     <div className="pointer-events-none absolute bottom-3 left-1/2 z-20 flex h-10 w-[180px] max-w-[calc(100%-2rem)] -translate-x-1/2 items-end justify-center pb-0">
       <div className="pointer-events-auto max-w-full">
         <ChatCTA label={label} />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * A round, always-visible entry point. The previous CTA was a 2px sliver that
+ * only became a control on hover, so most people never found it.
+ */
+export function ChatSphere({ ariaLabel }: { ariaLabel?: string }) {
+  const { t } = useLingui();
+  const { chat } = useShell();
+
+  if (chat.mode !== "FloatingClosed") {
+    return null;
+  }
+
+  return (
+    <button
+      type="button"
+      data-chat-sphere-trigger
+      aria-label={ariaLabel ?? t`Ask Meeki about your notes`}
+      onClick={() => chat.sendEvent({ type: "OPEN" })}
+      className={cn([
+        "group/meeki-sphere flex size-12 items-center justify-center rounded-full",
+        "bg-[radial-gradient(circle_at_30%_25%,#4a7c59_0%,#2f5d43_55%,#22432f_100%)]",
+        "shadow-[0_6px_18px_rgba(0,0,0,0.22),inset_0_1px_0_rgba(255,255,255,0.28)]",
+        "transition-transform duration-150 ease-out",
+        "hover:-translate-y-0.5 hover:shadow-[0_10px_26px_rgba(0,0,0,0.28)]",
+        "focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+      ])}
+    >
+      <SparklesIcon className="size-5 text-white/90" />
+    </button>
+  );
+}
+
+export function FloatingChatSphere({ ariaLabel }: { ariaLabel?: string }) {
+  return (
+    <div className="pointer-events-none absolute bottom-4 left-1/2 z-20 -translate-x-1/2">
+      <div className="pointer-events-auto">
+        <ChatSphere ariaLabel={ariaLabel} />
       </div>
     </div>
   );
