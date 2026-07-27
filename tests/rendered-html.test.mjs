@@ -22,17 +22,22 @@ async function render() {
   );
 }
 
-test("server-renders the Meeki design study", async () => {
+test("server-renders the Meeki landing page", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
-  assert.match(html, /<title>Meeki — Your private meeting note-taker<\/title>/i);
-  assert.match(html, /Meeki design study/i);
-  assert.match(html, /Private Notebook/i);
-  assert.match(html, /Glassbox/i);
-  assert.match(html, /Quiet Companion/i);
+  assert.match(
+    html,
+    /<title>Meeki — Your meetings should stay yours<\/title>/i,
+  );
+  assert.match(html, /Your meetings/i);
+  assert.match(html, /should stay/i);
+  assert.match(html, /Download Meeki/i);
+  assert.match(html, /View on GitHub/i);
   assert.match(html, /https:\/\/github\.com\/inventivezee\/meeki/);
+  assert.match(html, /\/og\.png/i);
+  assert.doesNotMatch(html, /Meeki design study|Glassbox|Quiet Companion/i);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
 });

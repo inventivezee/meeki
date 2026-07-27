@@ -1,14 +1,14 @@
-# Meeki frontend design study
+# Meeki website
 
-Three interactive directions for the Meeki website:
+The frontend for **Meeki**, an MIT-licensed, private meeting note-taker based on
+[Anarlog](https://github.com/fastrepl/anarlog).
 
-- **Private Notebook** — calm, editorial, and trust-first
-- **Glassbox** — technical, auditable, and security-first
-- **Quiet Companion** — warm, approachable, and presence-first
+Meeki supports:
 
-Meeki is an MIT-licensed, local-first meeting note-taker based on
-[Anarlog](https://github.com/fastrepl/anarlog). The product supports on-device
-models, bring-your-own AI, self-hosting, and an optional managed service.
+- fully local capture, transcription, and note generation
+- bring-your-own cloud AI providers
+- self-hosted deployments
+- an optional managed service
 
 ## Run locally
 
@@ -25,5 +25,4 @@ Create a production build with:
 npm run build
 ```
 
-The product repository is
-[inventivezee/meeki](https://github.com/inventivezee/meeki).
+Product source: [inventivezee/meeki](https://github.com/inventivezee/meeki)

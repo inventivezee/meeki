@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import styles from "./PrivateNotebook.module.css";
+import styles from "./MeekiLanding.module.css";
 
-const DOWNLOAD_URL = "https://github.com/inventivezee/meeki/releases/latest";
+const DOWNLOAD_URL = "https://github.com/inventivezee/meeki/releases";
 const GITHUB_URL = "https://github.com/inventivezee/meeki";
 
 type DemoTab = "notes" | "enhanced" | "transcript";
@@ -23,10 +23,11 @@ function formatTime(totalSeconds: number) {
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
-export default function PrivateNotebook() {
+export default function MeekiLanding() {
   const [isRecording, setIsRecording] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [activeTab, setActiveTab] = useState<DemoTab>("notes");
+  const [showPrivacyDetails, setShowPrivacyDetails] = useState(false);
 
   useEffect(() => {
     if (!isRecording) {
@@ -45,7 +46,7 @@ export default function PrivateNotebook() {
   };
 
   return (
-    <main className={styles.site}>
+    <div className={styles.site}>
       <a className={styles.skipLink} href="#main-content">
         Skip to content
       </a>
@@ -77,7 +78,7 @@ export default function PrivateNotebook() {
         </a>
       </nav>
 
-      <div id="main-content">
+      <main id="main-content" tabIndex={-1}>
         <section className={styles.hero} id="top">
           <div className={styles.heroCopy}>
             <div className={styles.eyebrow}>
@@ -90,9 +91,9 @@ export default function PrivateNotebook() {
               should stay <em>yours.</em>
             </h1>
             <p className={styles.heroSubhead}>
-              Meeki is the private meeting notebook that turns conversation
-              into clear, useful notes—without giving up ownership of your
-              memory.
+              The private meeting note-taker for founders, product teams, and
+              privacy-sensitive organizations—local by default, with control
+              over every AI and storage boundary.
             </p>
             <div className={styles.heroActions}>
               <a
@@ -117,9 +118,9 @@ export default function PrivateNotebook() {
               </a>
             </div>
             <div className={styles.heroFootnote}>
-              <span>No meeting bot</span>
-              <span>No hidden training</span>
-              <span>Your choice of AI</span>
+              <span>Local by default</span>
+              <span>Bring your own AI</span>
+              <span>Self-host or use managed</span>
             </div>
           </div>
 
@@ -133,28 +134,28 @@ export default function PrivateNotebook() {
                   <span />
                 </div>
                 <span className={styles.demoTitle}>meeki / my notebook</span>
-                <button className={styles.moreButton} type="button" aria-label="More options">
+                <span className={styles.moreButton} aria-hidden="true">
                   ···
-                </button>
+                </span>
               </div>
 
               <div className={styles.demoBody}>
                 <aside className={styles.demoSidebar}>
                   <div className={styles.sidebarLabel}>Today</div>
-                  <button className={styles.meetingItemActive} type="button">
+                  <div className={styles.meetingItemActive}>
                     <span className={styles.meetingTime}>10:00</span>
                     <span>
-                      Product check-in
+                      Launch review
                       <small>In progress</small>
                     </span>
-                  </button>
-                  <button className={styles.meetingItem} type="button">
+                  </div>
+                  <div className={styles.meetingItem}>
                     <span className={styles.meetingTime}>14:30</span>
                     <span>
-                      Design review
+                      Customer debrief
                       <small>45 min</small>
                     </span>
-                  </button>
+                  </div>
                   <div className={styles.sidebarRule} />
                   <div className={styles.localBadge}>
                     <span aria-hidden="true">●</span>
@@ -166,7 +167,7 @@ export default function PrivateNotebook() {
                   <div className={styles.meetingHeading}>
                     <div>
                       <span className={styles.dateLine}>Tuesday, 26 July</span>
-                      <h2>Product check-in</h2>
+                      <h2>Launch review</h2>
                     </div>
                     <div className={styles.avatars} aria-label="Meeting participants">
                       <span title="Maya">M</span>
@@ -221,8 +222,7 @@ export default function PrivateNotebook() {
                         type="button"
                         role="tab"
                         aria-selected={activeTab === tab.id}
-                        aria-controls={`private-notebook-panel-${tab.id}`}
-                        tabIndex={activeTab === tab.id ? 0 : -1}
+                        aria-controls="private-notebook-panel"
                         onClick={() => setActiveTab(tab.id)}
                       >
                         {tab.label}
@@ -237,16 +237,16 @@ export default function PrivateNotebook() {
 
                   <div
                     className={styles.notePanel}
-                    id={`private-notebook-panel-${activeTab}`}
+                    id="private-notebook-panel"
                     role="tabpanel"
                     aria-labelledby={`private-notebook-tab-${activeTab}`}
                   >
                     {activeTab === "notes" && (
                       <div className={styles.rawNotes}>
-                        <p>Launch plan — keep the first release small</p>
-                        <p>Desktop first, mobile later?</p>
-                        <p>Need privacy FAQ before beta</p>
-                        <p>Theo to test the local model build</p>
+                        <p>Northstar security review — approved</p>
+                        <p>Managed pilot opens Monday · 8 teams</p>
+                        <p>Keep local mode as the default</p>
+                        <p>Maya to send the onboarding plan Thursday</p>
                         {isRecording && (
                           <p className={styles.liveNote}>
                             <span aria-hidden="true" />
@@ -261,17 +261,17 @@ export default function PrivateNotebook() {
                         <div className={styles.summaryBlock}>
                           <span>Summary</span>
                           <p>
-                            The team agreed to keep the beta focused on a
-                            private, desktop-first experience before expanding
-                            to mobile.
+                            The Northstar review is complete. The team will
+                            open the managed pilot to eight design partners on
+                            Monday while keeping local mode as the default.
                           </p>
                         </div>
                         <div className={styles.noteColumns}>
                           <div>
                             <h3>Decisions</h3>
                             <ul>
-                              <li>Ship the smallest useful beta</li>
-                              <li>Prioritize desktop and local processing</li>
+                              <li>Open the managed pilot on Monday</li>
+                              <li>Keep local mode as the default path</li>
                             </ul>
                           </div>
                           <div>
@@ -279,11 +279,11 @@ export default function PrivateNotebook() {
                             <ul>
                               <li>
                                 <span className={styles.personTag}>T</span>
-                                Test local model build
+                                Finalize deployment checklist
                               </li>
                               <li>
                                 <span className={styles.personTag}>M</span>
-                                Draft privacy FAQ
+                                Send partner onboarding plan
                               </li>
                             </ul>
                           </div>
@@ -297,16 +297,16 @@ export default function PrivateNotebook() {
                           <span className={styles.speaker}>Maya</span>
                           <span className={styles.transcriptTime}>10:08</span>
                           <p>
-                            I&apos;d rather make the first release small and
-                            genuinely private than add every integration.
+                            Northstar signed off on the security review. We can
+                            open the pilot to all eight design partners Monday.
                           </p>
                         </div>
                         <div>
                           <span className={styles.speaker}>Theo</span>
                           <span className={styles.transcriptTime}>10:09</span>
                           <p>
-                            Agreed. I&apos;ll test the local model build this
-                            afternoon and document what works.
+                            I&apos;ll finalize the deployment checklist. Local
+                            mode stays the default, and managed remains opt-in.
                           </p>
                         </div>
                         {isRecording && (
@@ -323,10 +323,24 @@ export default function PrivateNotebook() {
                     <span className={styles.shield} aria-hidden="true">
                       ✓
                     </span>
-                    Audio stays on this device
-                    <button type="button" aria-label="Learn about local processing">
-                      How?
+                    Local mode · audio stays on this device
+                    <button
+                      type="button"
+                      aria-expanded={showPrivacyDetails}
+                      aria-controls="local-processing-details"
+                      onClick={() => setShowPrivacyDetails((current) => !current)}
+                    >
+                      {showPrivacyDetails ? "Hide" : "Details"}
                     </button>
+                    {showPrivacyDetails && (
+                      <span
+                        className={styles.privacyDetails}
+                        id="local-processing-details"
+                      >
+                        Capture, transcription, AI, and storage run locally in
+                        this mode.
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -357,10 +371,10 @@ export default function PrivateNotebook() {
             </span>
           </div>
           <div className={styles.proofItem}>
-            <strong>100%</strong>
+            <strong>MIT</strong>
             <span>
               inspectable
-              <small>Every line is open source</small>
+              <small>Code you can audit and fork</small>
             </span>
           </div>
         </section>
@@ -419,27 +433,10 @@ export default function PrivateNotebook() {
           </div>
 
           <div className={styles.boundaryOptions}>
-            <article>
-              <div className={styles.optionTopline}>
-                <span>Managed</span>
-                <small>Easy start</small>
-              </div>
-              <h3>Ready when you are.</h3>
-              <p>
-                Use Meeki&apos;s managed service with clear controls for model
-                providers, sync, and retention.
-              </p>
-              <div className={styles.optionDiagram} aria-hidden="true">
-                <span>Your device</span>
-                <i>→</i>
-                <span>Meeki</span>
-              </div>
-            </article>
-
             <article className={styles.featuredOption}>
               <div className={styles.optionTopline}>
                 <span>Local</span>
-                <small>Most private</small>
+                <small>Default</small>
               </div>
               <h3>Never leave your desk.</h3>
               <p>
@@ -450,6 +447,23 @@ export default function PrivateNotebook() {
                 <span>Your device</span>
                 <i>↻</i>
                 <span>Your notes</span>
+              </div>
+            </article>
+
+            <article>
+              <div className={styles.optionTopline}>
+                <span>Bring your own AI</span>
+                <small>Your provider</small>
+              </div>
+              <h3>Your keys, your choice.</h3>
+              <p>
+                Connect the cloud transcription or AI provider you already
+                trust. You decide which service receives meeting data.
+              </p>
+              <div className={styles.optionDiagram} aria-hidden="true">
+                <span>Your device</span>
+                <i>↔</i>
+                <span>Your AI</span>
               </div>
             </article>
 
@@ -469,6 +483,23 @@ export default function PrivateNotebook() {
                 <span>Your team</span>
               </div>
             </article>
+
+            <article>
+              <div className={styles.optionTopline}>
+                <span>Managed</span>
+                <small>Optional</small>
+              </div>
+              <h3>Convenience when you want it.</h3>
+              <p>
+                Opt into Meeki-managed transcription and AI when your team
+                wants a ready-to-use service instead of running the stack.
+              </p>
+              <div className={styles.optionDiagram} aria-hidden="true">
+                <span>Your device</span>
+                <i>→</i>
+                <span>Meeki managed</span>
+              </div>
+            </article>
           </div>
         </section>
 
@@ -477,9 +508,8 @@ export default function PrivateNotebook() {
             <span className={styles.sectionNumber}>03 / OPEN SOURCE</span>
             <h2>Trust is better<br />when it&apos;s verifiable.</h2>
             <p>
-              Meeki is free and open source under the MIT license. Read the
-              code, run it yourself, improve it, or build something entirely
-              new.
+              Meeki&apos;s codebase is open source under the MIT license. Read
+              it, run it yourself, improve it, or build something entirely new.
             </p>
             <div className={styles.licenseRow}>
               <span>MIT</span>
@@ -500,35 +530,36 @@ export default function PrivateNotebook() {
             </a>
           </div>
 
-          <div className={styles.codeCard} aria-label="Example Meeki configuration">
+          <div
+            className={styles.codeCard}
+            aria-label="Illustrative Meeki local-mode settings"
+          >
             <div className={styles.codeCardHeader}>
               <div className={styles.windowDots} aria-hidden="true">
                 <span />
                 <span />
                 <span />
               </div>
-              <span>meeki.config.ts</span>
-              <span className={styles.publicLabel}>public</span>
+              <span>Local mode · example</span>
+              <span className={styles.publicLabel}>illustrative</span>
             </div>
             <pre>
               <code>
-                <span className={styles.codeMuted}>{"// Your meeting memory, your rules."}</span>
+                <span className={styles.codeMuted}>
+                  {"// An illustrative privacy profile."}
+                </span>
                 {"\n"}
-                <span className={styles.codePurple}>export default</span>
-                {" defineConfig({\n"}
-                {"  capture: "}
-                <span className={styles.codeGreen}>&quot;local&quot;</span>
+                <span className={styles.codePurple}>const</span>
+                {" privacy = {\n"}
+                {"  processing: "}
+                <span className={styles.codeGreen}>&quot;on-device&quot;</span>
                 {",\n"}
                 {"  model: "}
-                <span className={styles.codeGreen}>&quot;ollama/llama3&quot;</span>
+                <span className={styles.codeGreen}>&quot;local&quot;</span>
                 {",\n"}
-                {"  storage: {\n"}
-                {"    encrypted: "}
-                <span className={styles.codePurple}>true</span>
-                {",\n"}
-                {"    retention: "}
-                <span className={styles.codeGreen}>&quot;30d&quot;</span>
-                {"\n  }\n});"}
+                {"  storage: "}
+                <span className={styles.codeGreen}>&quot;your-device&quot;</span>
+                {"\n};"}
               </code>
             </pre>
             <div className={styles.codeFooter}>
@@ -568,7 +599,7 @@ export default function PrivateNotebook() {
             </a>
           </div>
         </section>
-      </div>
+      </main>
 
       <footer className={styles.footer}>
         <a className={styles.brand} href="#top" aria-label="Meeki home">
@@ -589,6 +620,6 @@ export default function PrivateNotebook() {
         </div>
         <span className={styles.copyright}>© {new Date().getFullYear()} Meeki</span>
       </footer>
-    </main>
+    </div>
   );
 }

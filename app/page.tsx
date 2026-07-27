@@ -1,5 +1,5 @@
-import DesignShowcase from "./DesignShowcase";
+import MeekiLanding from "./MeekiLanding";
 
 export default function Home() {
-  return <DesignShowcase />;
+  return <MeekiLanding />;
 }
