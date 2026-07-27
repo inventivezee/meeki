@@ -205,6 +205,10 @@ msgid "Ask anything"
 msgstr "Ask anything"
 
 #: src/shared/chat-cta.tsx
+msgid "Ask Meeki about your notes"
+msgstr "Ask Meeki about your notes"
+
+#: src/shared/chat-cta.tsx
 msgid "Ask Meeki anything"
 msgstr "Ask Meeki anything"
 
@@ -326,6 +330,10 @@ msgstr "Checking trial eligibility..."
 msgid "Choose a file format and what to include."
 msgstr "Choose a file format and what to include."
 
+#: src/onboarding/index.tsx
+msgid "Choose between on-device models and the cloud"
+msgstr "Choose between on-device models and the cloud"
+
 #: src/templates/template-icon-picker.tsx
 msgid "Choose custom color"
 msgstr "Choose custom color"
@@ -333,6 +341,10 @@ msgstr "Choose custom color"
 #: src/settings/general/theme.tsx
 msgid "Choose light, dark, or match your system setting."
 msgstr "Choose light, dark, or match your system setting."
+
+#: src/onboarding/models.tsx
+msgid "Choose models myself…"
+msgstr "Choose models myself…"
 
 #: src/onboarding/folder-location.tsx
 msgid "Choose storage location"
@@ -384,6 +396,10 @@ msgstr "Close chat"
 #: src/task/resource-view.tsx
 msgid "Closed"
 msgstr "Closed"
+
+#: src/settings/ai/llm/select.tsx
+msgid "Cloud"
+msgstr "Cloud"
 
 #: src/settings/sync/index.tsx
 msgid "Cloud sync"
@@ -664,8 +680,8 @@ msgid "Detection delay"
 msgstr "Detection delay"
 
 #: src/sidebar/settings.tsx
-msgid "Developers"
-msgstr "Developers"
+#~ msgid "Developers"
+#~ msgstr "Developers"
 
 #: src/main/sync-status.tsx
 msgid "Device limit reached"
@@ -700,9 +716,17 @@ msgstr "Done"
 msgid "Download"
 msgstr "Download"
 
+#: src/onboarding/models.tsx
+msgid "Download local & private models (about {totalGb} GB)"
+msgstr "Download local & private models (about {totalGb} GB)"
+
 #: src/settings/general/e2ee-setup.tsx
 msgid "Download recovery key (.txt)"
 msgstr "Download recovery key (.txt)"
+
+#: src/main/empty.tsx
+msgid "Drop an audio file to transcribe it"
+msgstr "Drop an audio file to transcribe it"
 
 #: src/templates/details.tsx
 #: src/templates/template-form.tsx
@@ -1027,6 +1051,10 @@ msgstr "Keep desktop edits"
 msgid "Keep Meeki available from the menu bar."
 msgstr "Keep Meeki available from the menu bar."
 
+#: src/onboarding/models.tsx
+msgid "Keep Meeki open and your Mac awake until it finishes. You can carry on using the app while it downloads."
+msgstr "Keep Meeki open and your Mac awake until it finishes. You can carry on using the app while it downloads."
+
 #: src/settings/sync/index.tsx
 msgid "Keep notes end-to-end encrypted and up to date across your signed-in devices."
 msgstr "Keep notes end-to-end encrypted and up to date across your signed-in devices."
@@ -1137,6 +1165,10 @@ msgstr "Meeki can hear your voice"
 #: src/onboarding/permissions.tsx
 msgid "Meeki can read meeting details"
 msgstr "Meeki can read meeting details"
+
+#: src/onboarding/models.tsx
+msgid "Meeki can transcribe and summarise entirely on this Mac, so nothing you record leaves the device. That needs a one-time download."
+msgstr "Meeki can transcribe and summarise entirely on this Mac, so nothing you record leaves the device. That needs a one-time download."
 
 #: src/session/components/note-input/enhanced/enhance-error.tsx
 msgid "Meeki could not generate this summary because you were not signed in. Sign in, then try again."
@@ -1277,10 +1309,17 @@ msgstr "Migration needs attention"
 msgid "Migration status unavailable"
 msgstr "Migration status unavailable"
 
-#: src/settings/ai/llm/select.tsx
 #: src/settings/ai/stt/select.tsx
 msgid "Model being used"
 msgstr "Model being used"
+
+#: src/onboarding/index.tsx
+msgid "Models"
+msgstr "Models"
+
+#: src/onboarding/index.tsx
+msgid "Models chosen"
+msgstr "Models chosen"
 
 #: src/settings/general/week-start.tsx
 msgid "Monday"
@@ -2462,6 +2501,10 @@ msgstr "Upgrade to Pro to use this provider."
 msgid "Upgrade to use"
 msgstr "Upgrade to use"
 
+#: src/main/empty.tsx
+msgid "Upload a Recording"
+msgstr "Upload a Recording"
+
 #: src/session/components/floating/options-menu.tsx
 #: src/session/components/outer-header/overflow/index.tsx
 msgid "Upload audio"
@@ -2475,6 +2518,10 @@ msgstr "Upload transcript"
 #: src/settings/general/e2ee-setup.tsx
 msgid "Use an existing key"
 msgstr "Use an existing key"
+
+#: src/onboarding/models.tsx
+msgid "Use cloud models instead (skip the download)"
+msgstr "Use cloud models instead (skip the download)"
 
 #: src/onboarding/permissions.tsx
 msgid "Use system audio to capture other speakers"

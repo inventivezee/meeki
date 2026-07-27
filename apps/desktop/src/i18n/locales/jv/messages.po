@@ -205,6 +205,10 @@ msgid "Ask anything"
 msgstr ""
 
 #: src/shared/chat-cta.tsx
+msgid "Ask Meeki about your notes"
+msgstr ""
+
+#: src/shared/chat-cta.tsx
 msgid "Ask Meeki anything"
 msgstr ""
 
@@ -326,12 +330,20 @@ msgstr ""
 msgid "Choose a file format and what to include."
 msgstr ""
 
+#: src/onboarding/index.tsx
+msgid "Choose between on-device models and the cloud"
+msgstr ""
+
 #: src/templates/template-icon-picker.tsx
 msgid "Choose custom color"
 msgstr ""
 
 #: src/settings/general/theme.tsx
 msgid "Choose light, dark, or match your system setting."
+msgstr ""
+
+#: src/onboarding/models.tsx
+msgid "Choose models myself…"
 msgstr ""
 
 #: src/onboarding/folder-location.tsx
@@ -383,6 +395,10 @@ msgstr ""
 
 #: src/task/resource-view.tsx
 msgid "Closed"
+msgstr ""
+
+#: src/settings/ai/llm/select.tsx
+msgid "Cloud"
 msgstr ""
 
 #: src/settings/sync/index.tsx
@@ -664,8 +680,8 @@ msgid "Detection delay"
 msgstr ""
 
 #: src/sidebar/settings.tsx
-msgid "Developers"
-msgstr ""
+#~ msgid "Developers"
+#~ msgstr ""
 
 #: src/main/sync-status.tsx
 msgid "Device limit reached"
@@ -700,8 +716,16 @@ msgstr ""
 msgid "Download"
 msgstr ""
 
+#: src/onboarding/models.tsx
+msgid "Download local & private models (about {totalGb} GB)"
+msgstr ""
+
 #: src/settings/general/e2ee-setup.tsx
 msgid "Download recovery key (.txt)"
+msgstr ""
+
+#: src/main/empty.tsx
+msgid "Drop an audio file to transcribe it"
 msgstr ""
 
 #: src/templates/details.tsx
@@ -1027,6 +1051,10 @@ msgstr ""
 msgid "Keep Meeki available from the menu bar."
 msgstr ""
 
+#: src/onboarding/models.tsx
+msgid "Keep Meeki open and your Mac awake until it finishes. You can carry on using the app while it downloads."
+msgstr ""
+
 #: src/settings/sync/index.tsx
 msgid "Keep notes end-to-end encrypted and up to date across your signed-in devices."
 msgstr ""
@@ -1136,6 +1164,10 @@ msgstr ""
 
 #: src/onboarding/permissions.tsx
 msgid "Meeki can read meeting details"
+msgstr ""
+
+#: src/onboarding/models.tsx
+msgid "Meeki can transcribe and summarise entirely on this Mac, so nothing you record leaves the device. That needs a one-time download."
 msgstr ""
 
 #: src/session/components/note-input/enhanced/enhance-error.tsx
@@ -1277,9 +1309,16 @@ msgstr ""
 msgid "Migration status unavailable"
 msgstr ""
 
-#: src/settings/ai/llm/select.tsx
 #: src/settings/ai/stt/select.tsx
 msgid "Model being used"
+msgstr ""
+
+#: src/onboarding/index.tsx
+msgid "Models"
+msgstr ""
+
+#: src/onboarding/index.tsx
+msgid "Models chosen"
 msgstr ""
 
 #: src/settings/general/week-start.tsx
@@ -2462,6 +2501,10 @@ msgstr ""
 msgid "Upgrade to use"
 msgstr ""
 
+#: src/main/empty.tsx
+msgid "Upload a Recording"
+msgstr ""
+
 #: src/session/components/floating/options-menu.tsx
 #: src/session/components/outer-header/overflow/index.tsx
 msgid "Upload audio"
@@ -2474,6 +2517,10 @@ msgstr ""
 
 #: src/settings/general/e2ee-setup.tsx
 msgid "Use an existing key"
+msgstr ""
+
+#: src/onboarding/models.tsx
+msgid "Use cloud models instead (skip the download)"
 msgstr ""
 
 #: src/onboarding/permissions.tsx
