@@ -20,12 +20,17 @@ pub fn fingerprint() -> String {
 pub enum ProcessMatcher {
     Name(String),
     Sidecar,
+    /// Model servers we spawn as direct children. `kill_on_drop` does not fire
+    /// on Tauri's exit path, so without an explicit sweep every launch leaves a
+    /// llama-server behind still holding its weights.
+    ModelServer,
 }
 
 pub fn kill_processes_by_matcher(matcher: ProcessMatcher) -> u16 {
     let targets = match matcher {
         ProcessMatcher::Name(name) => vec![name],
         ProcessMatcher::Sidecar => vec!["char-sidecar".to_string(), "hyprnote-sidecar".to_string()],
+        ProcessMatcher::ModelServer => vec!["llama-server".to_string()],
     };
 
     let mut sys = sysinfo::System::new();

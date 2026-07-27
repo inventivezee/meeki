@@ -10,6 +10,7 @@ import {
   type TaskType,
 } from "./task-configs";
 
+import { claimLocalLlm } from "~/ai/local-llm-demand";
 import { getWarmupGraceMs } from "~/ai/local-llm-warmup";
 import { getStoredSettingValues } from "~/settings/queries";
 
@@ -287,6 +288,9 @@ export const createTasksSlice = <T extends TasksState & TasksActions>(
 
     const abortController = new AbortController();
     const taskConfig = TASK_CONFIGS[config.taskType];
+    // With save_memory on, the local server is not running until something
+    // asks for it. Claim it for the duration of the task.
+    const releaseLocalLlm = claimLocalLlm(`ai-task:${taskId}`);
 
     try {
       set((state) =>
@@ -492,6 +496,8 @@ export const createTasksSlice = <T extends TasksState & TasksActions>(
           }),
         );
       }
+    } finally {
+      releaseLocalLlm();
     }
   },
 });

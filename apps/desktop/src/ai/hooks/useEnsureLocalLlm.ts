@@ -6,20 +6,35 @@ import {
   type GgufLlmModel,
 } from "@meeki/plugin-local-llm";
 
+import { useLocalLlmWanted } from "~/ai/local-llm-demand";
 import { setWarmupEstimateSeconds } from "~/ai/local-llm-warmup";
 import { getStoredAiProvider, setAiProvider } from "~/settings/providers";
 import { getStoredSettingValues } from "~/settings/queries";
 import { useConfigValues } from "~/shared/config";
 
-/** Keep the local llama-server running when On device is selected. */
-export function useEnsureLocalLlm() {
-  const { current_llm_provider, current_llm_model } = useConfigValues([
-    "current_llm_provider",
-    "current_llm_model",
-  ] as const);
+/** Matches the server's own --sleep-idle-seconds so the two agree. */
+const IDLE_SHUTDOWN_MS = 5 * 60 * 1000;
 
-  const enabled =
+/**
+ * Keeps the local llama-server running when On device is selected.
+ *
+ * With `save_memory` on (the default) the server is only started once
+ * something actually wants it — opening chat, or running a summary. Starting
+ * it at launch delayed the first paint and held several GB for a session the
+ * user might never ask anything of.
+ */
+export function useEnsureLocalLlm() {
+  const { current_llm_provider, current_llm_model, save_memory } =
+    useConfigValues([
+      "current_llm_provider",
+      "current_llm_model",
+      "save_memory",
+    ] as const);
+  const wanted = useLocalLlmWanted();
+
+  const selected =
     current_llm_provider === "on_device" && Boolean(current_llm_model);
+  const enabled = selected && (save_memory === false || wanted);
 
   // Shares the catalog cache with the settings cards; only used to pace the
   // warm-up indicator, so a miss just falls back to a generic estimate.
@@ -82,4 +97,18 @@ export function useEnsureLocalLlm() {
       console.warn("[local-llm] failed to ensure server", server.error);
     }
   }, [server.error]);
+
+  // Nothing wants the model any more: shut the server down rather than leave
+  // it resident. The weights would eventually unload on their own via
+  // --sleep-idle-seconds, but the process would keep its port and mapping.
+  useEffect(() => {
+    if (!selected || save_memory === false || wanted) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      void localLlmCommands.stopServer();
+    }, IDLE_SHUTDOWN_MS);
+    return () => clearTimeout(timer);
+  }, [selected, save_memory, wanted]);
 }

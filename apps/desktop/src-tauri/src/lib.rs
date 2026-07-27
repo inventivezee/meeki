@@ -256,6 +256,14 @@ pub async fn main() {
         .setup(move |app| {
             let app_handle = app.handle().clone();
 
+            // A crash or force-quit leaves the model server running, and each
+            // launch would otherwise stack another copy of the weights in RAM.
+            let stranded =
+                meeki_host::kill_processes_by_matcher(meeki_host::ProcessMatcher::ModelServer);
+            if stranded > 0 {
+                tracing::info!(count = stranded, "reaped model servers from a previous run");
+            }
+
             specta_builder.mount_events(&app_handle);
 
             #[cfg(any(windows, target_os = "linux"))]
@@ -395,6 +403,13 @@ pub async fn main() {
             }
 
             meeki_host::kill_processes_by_matcher(meeki_host::ProcessMatcher::Sidecar);
+            // Direct children, not sidecars: kill_on_drop never runs here, so
+            // each quit used to strand a server holding several GB.
+            let stranded =
+                meeki_host::kill_processes_by_matcher(meeki_host::ProcessMatcher::ModelServer);
+            if stranded > 0 {
+                tracing::info!(count = stranded, "stopped model servers on exit");
+            }
         }
         _ => {}
     });

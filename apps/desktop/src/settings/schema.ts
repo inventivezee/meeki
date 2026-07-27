@@ -169,6 +169,11 @@ export const SETTING_DEFINITIONS = {
     path: ["ai", "llm_thinking"],
     default: false as boolean,
   },
+  save_memory: {
+    type: "boolean",
+    path: ["ai", "save_memory"],
+    default: true as boolean,
+  },
   current_llm_provider: {
     type: "string",
     path: ["ai", "current_llm_provider"],
