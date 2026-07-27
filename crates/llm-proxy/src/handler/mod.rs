@@ -79,7 +79,7 @@ impl IntoResponse for ProxyError {
                 let error_type = status_code
                     .map(|code| code.to_string())
                     .unwrap_or_else(|| "llm_upstream_request_failed".to_string());
-                hypr_observability::mark_current_span_as_error(&error_type);
+                meeki_observability::mark_current_span_as_error(&error_type);
                 if let Some(code) = status_code {
                     tracing::Span::current().record("http.response.status_code", code as i64);
                 }
@@ -99,7 +99,7 @@ impl IntoResponse for ProxyError {
                 (StatusCode::BAD_GATEWAY, e.to_string())
             }
             Self::Timeout => {
-                hypr_observability::mark_current_span_as_error("llm_upstream_timeout");
+                meeki_observability::mark_current_span_as_error("llm_upstream_timeout");
                 tracing::error!("upstream_request_timeout");
                 sentry::configure_scope(|scope| {
                     scope.set_tag("error.type", "llm_upstream_timeout");
@@ -109,7 +109,7 @@ impl IntoResponse for ProxyError {
             Self::BodyRead(e) => {
                 let is_timeout = e.is_timeout();
                 let is_decode = e.is_decode();
-                hypr_observability::mark_current_span_as_error("response_body_read_failed");
+                meeki_observability::mark_current_span_as_error("response_body_read_failed");
                 tracing::error!(
                     error.type = "response_body_read_failed",
                     error = %e,
@@ -159,7 +159,7 @@ pub fn chat_completions_router(config: LlmProxyConfig) -> Router {
         .with_state(state)
 }
 
-use hypr_analytics::{AuthenticatedUserId, DeviceFingerprint};
+use meeki_analytics::{AuthenticatedUserId, DeviceFingerprint};
 
 pub struct AnalyticsContext {
     pub fingerprint: Option<String>,
@@ -328,7 +328,7 @@ async fn completions_handler(
     let provider_request = match provider.build_request(&request, models, stream) {
         Ok(req) => req,
         Err(e) => {
-            hypr_observability::mark_current_span_as_error("provider_request_build_failed");
+            meeki_observability::mark_current_span_as_error("provider_request_build_failed");
             tracing::error!(
                 error.type = "provider_request_build_failed",
                 error = %e,
@@ -365,7 +365,7 @@ async fn completions_handler(
                 req_builder = req_builder.header(key, value);
             }
 
-            hypr_observability::with_current_trace_context(req_builder)
+            meeki_observability::with_current_trace_context(req_builder)
                 .json(&provider_request)
                 .send()
                 .await
@@ -399,7 +399,7 @@ async fn completions_handler(
                 .status()
                 .map(|status| status.as_u16().to_string())
                 .unwrap_or_else(|| "llm_upstream_request_failed".to_string());
-            hypr_observability::mark_current_span_as_error(&error_type);
+            meeki_observability::mark_current_span_as_error(&error_type);
             tracing::error!(
                 error.type = %error_type,
                 service.peer.name = %provider_name,
@@ -409,7 +409,7 @@ async fn completions_handler(
             return ProxyError::UpstreamRequest(e).into_response();
         }
         Err(_) => {
-            hypr_observability::mark_current_span_as_error("llm_upstream_timeout");
+            meeki_observability::mark_current_span_as_error("llm_upstream_timeout");
             tracing::error!(
                 error.type = "llm_upstream_timeout",
                 service.peer.name = %provider_name,

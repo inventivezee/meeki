@@ -8,18 +8,18 @@ import {
   useState,
 } from "react";
 
-import { canStartTrial as canStartTrialApi } from "@hypr/api-client";
-import { createClient } from "@hypr/api-client/client";
-import { commands as analyticsCommands } from "@hypr/plugin-analytics";
-import { commands as authCommands } from "@hypr/plugin-auth";
-import { commands as openerCommands } from "@hypr/plugin-opener2";
-import { openUrlWithInstruction } from "@hypr/plugin-windows";
+import { canStartTrial as canStartTrialApi } from "@meeki/api-client";
+import { createClient } from "@meeki/api-client/client";
+import { commands as analyticsCommands } from "@meeki/plugin-analytics";
+import { commands as authCommands } from "@meeki/plugin-auth";
+import { commands as openerCommands } from "@meeki/plugin-opener2";
+import { openUrlWithInstruction } from "@meeki/plugin-windows";
 import {
   applyClientProGrant,
   deriveBillingInfo,
   parseProGrantEmails,
   type SupabaseJwtPayload,
-} from "@hypr/supabase";
+} from "@meeki/supabase";
 
 import { TrialEndedDialog } from "../billing/trial-ended-dialog";
 import { TrialPaymentReminderDialog } from "../billing/trial-payment-reminder-dialog";
@@ -53,10 +53,9 @@ async function getClaimsFromToken(
 /** Legacy id of the removed hosted "Pro" LLM provider. */
 const RETIRED_HOSTED_LLM_PROVIDER = "hyprnote";
 
-const TRIAL_STARTED_SEEN_PREFIX = "anarlog:trial_started_seen:";
-const TRIAL_ENDED_SEEN_PREFIX = "anarlog:trial_ended_seen:";
-const TRIAL_PAYMENT_REMINDER_SEEN_PREFIX =
-  "anarlog:trial_payment_reminder_seen:";
+const TRIAL_STARTED_SEEN_PREFIX = "meeki:trial_started_seen:";
+const TRIAL_ENDED_SEEN_PREFIX = "meeki:trial_ended_seen:";
+const TRIAL_PAYMENT_REMINDER_SEEN_PREFIX = "meeki:trial_payment_reminder_seen:";
 
 function readSeen(key: string): boolean {
   try {

@@ -1,7 +1,7 @@
 mod commands;
 mod ext;
 pub use ext::*;
-pub use hypr_export_core::{
+pub use meeki_export_core::{
     Error, ExportInput, ExportMetadata, Result, Transcript, TranscriptItem,
 };
 
@@ -47,7 +47,7 @@ mod test {
 
     fn create_app<R: tauri::Runtime>(builder: tauri::Builder<R>) -> tauri::App<R> {
         let mut ctx = tauri::test::mock_context(tauri::test::noop_assets());
-        ctx.config_mut().identifier = "com.hyprnote.dev".to_string();
+        ctx.config_mut().identifier = "com.meeki.dev".to_string();
         ctx.config_mut().version = Some("0.0.1".to_string());
 
         builder.plugin(init()).build(ctx).unwrap()

@@ -1,4 +1,4 @@
-use hypr_calendar::runtime::CalendarRuntime;
+use meeki_calendar::runtime::CalendarRuntime;
 use tauri_specta::Event as _;
 
 use crate::events::CalendarChangedEvent;

@@ -4254,7 +4254,7 @@ mod tests {
         let bundle_ids = vec![
             "com.tinyspeck.slackmacgap".to_string(),
             "com.tinyspeck.slackmacgap".to_string(),
-            "com.hyprnote.dev".to_string(),
+            "com.meeki.dev".to_string(),
         ];
 
         assert_eq!(

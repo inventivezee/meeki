@@ -11,7 +11,7 @@ pub async fn models_dir<R: tauri::Runtime>(app: tauri::AppHandle<R>) -> Result<S
 #[tauri::command]
 #[specta::specta]
 pub async fn list_supported_model() -> Result<Vec<ModelInfo>, String> {
-    Ok(hypr_local_llm_core::list_supported_models())
+    Ok(meeki_local_llm_core::list_supported_models())
 }
 
 #[tauri::command]
@@ -98,7 +98,7 @@ pub async fn list_custom_models<R: tauri::Runtime>(
 #[specta::specta]
 pub async fn recommended_model<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
-) -> Result<hypr_local_llm_core::ModelRecommendation, String> {
+) -> Result<meeki_local_llm_core::ModelRecommendation, String> {
     app.local_llm()
         .recommended_model()
         .await

@@ -1,6 +1,6 @@
 use std::sync::atomic::Ordering;
 
-use hypr_ws_client::client::Message;
+use meeki_ws_client::client::Message;
 use owhisper_interface::ListenParams;
 use owhisper_interface::stream::{Alternatives, Channel, Metadata, StreamResponse};
 use serde::{Deserialize, Serialize};
@@ -16,7 +16,7 @@ impl RealtimeSttAdapter for MistralAdapter {
 
     fn is_supported_languages(
         &self,
-        languages: &[hypr_language::Language],
+        languages: &[meeki_language::Language],
         _model: Option<&str>,
     ) -> bool {
         MistralAdapter::is_supported_languages_live(languages)
@@ -342,7 +342,7 @@ impl MistralAdapter {
 
 #[cfg(test)]
 mod tests {
-    use hypr_language::ISO639;
+    use meeki_language::ISO639;
 
     use super::MistralAdapter;
     use crate::ListenClient;
@@ -378,7 +378,7 @@ mod tests {
             .api_base("wss://api.mistral.ai")
             .api_key(std::env::var("MISTRAL_API_KEY").expect("MISTRAL_API_KEY not set"))
             .params(owhisper_interface::ListenParams {
-                languages: vec![hypr_language::ISO639::En.into()],
+                languages: vec![meeki_language::ISO639::En.into()],
                 sample_rate: MISTRAL_SAMPLE_RATE,
                 ..Default::default()
             })
@@ -396,7 +396,7 @@ mod tests {
             .api_base("wss://api.mistral.ai")
             .api_key(std::env::var("MISTRAL_API_KEY").expect("MISTRAL_API_KEY not set"))
             .params(owhisper_interface::ListenParams {
-                languages: vec![hypr_language::ISO639::En.into()],
+                languages: vec![meeki_language::ISO639::En.into()],
                 sample_rate: MISTRAL_SAMPLE_RATE,
                 ..Default::default()
             })

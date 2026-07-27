@@ -14,7 +14,7 @@ vi.mock("@tauri-apps/api/event", () => ({
   }),
 }));
 
-vi.mock("@hypr/plugin-store2", () => ({
+vi.mock("@meeki/plugin-store2", () => ({
   commands: { save: mocks.save },
 }));
 

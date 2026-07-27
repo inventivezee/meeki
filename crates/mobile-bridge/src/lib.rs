@@ -16,8 +16,8 @@ use listener::{ListenerSink, QueryEventListener};
 uniffi::setup_scaffolding!();
 
 struct BridgeState {
-    executor: hypr_db_execute::DbExecutor,
-    live_query_runtime: Arc<hypr_db_reactive::LiveQueryRuntime<ListenerSink>>,
+    executor: meeki_db_execute::DbExecutor,
+    live_query_runtime: Arc<meeki_db_reactive::LiveQueryRuntime<ListenerSink>>,
     runtime: Arc<tokio::runtime::Runtime>,
     subscription_ids: HashSet<String>,
 }
@@ -48,10 +48,10 @@ impl MobileDbBridge {
                 reason: error.to_string(),
             })?;
         let db = std::sync::Arc::new(db);
-        let executor = hypr_db_execute::DbExecutor::new(std::sync::Arc::clone(&db));
+        let executor = meeki_db_execute::DbExecutor::new(std::sync::Arc::clone(&db));
         let live_query_runtime = {
             let _guard = runtime.enter();
-            Arc::new(hypr_db_reactive::LiveQueryRuntime::new(db))
+            Arc::new(meeki_db_reactive::LiveQueryRuntime::new(db))
         };
 
         Ok(Self {
@@ -83,7 +83,7 @@ impl MobileDbBridge {
     ) -> Result<String, BridgeError> {
         let params = parse_params_json(&params_json)?;
         let method = method
-            .parse::<hypr_db_execute::ProxyQueryMethod>()
+            .parse::<meeki_db_execute::ProxyQueryMethod>()
             .map_err(execute_error)?;
         let (runtime, executor) =
             self.with_state(|state| Ok((Arc::clone(&state.runtime), state.executor.clone())))?;
@@ -113,7 +113,7 @@ impl MobileDbBridge {
             .block_on(live_query_runtime.subscribe(sql, params, ListenerSink::new(listener)))
             .map_err(reactive_error)?;
 
-        if let hypr_db_reactive::DependencyAnalysis::NonReactive { reason } = &registration.analysis
+        if let meeki_db_reactive::DependencyAnalysis::NonReactive { reason } = &registration.analysis
         {
             eprintln!(
                 "[mobile-bridge] live query subscription is non-reactive for SQL {:?}: {}",
@@ -260,7 +260,7 @@ impl MobileDbBridge {
     }
 
     pub fn configure_cloudsync(&self, config_json: String) -> Result<(), BridgeError> {
-        let config: hypr_db_core::CloudsyncRuntimeConfig = serde_json::from_str(&config_json)
+        let config: meeki_db_core::CloudsyncRuntimeConfig = serde_json::from_str(&config_json)
             .map_err(|error| BridgeError::InvalidCloudsyncConfigJson {
                 reason: error.to_string(),
             })?;
@@ -521,7 +521,7 @@ mod tests {
                 "all".to_string(),
             )
             .unwrap();
-        let result: hypr_db_execute::ProxyQueryResult = serde_json::from_str(&result_json).unwrap();
+        let result: meeki_db_execute::ProxyQueryResult = serde_json::from_str(&result_json).unwrap();
 
         assert_eq!(
             result.rows,

@@ -1,8 +1,8 @@
 use std::path::{Path, PathBuf};
 
 pub const VAULT_CONFIG_FILENAME: &str = "global.json";
-const STAGING_BUNDLE_ID: &str = "com.hyprnote.staging";
-const RELEASE_APP_FOLDER: &str = "anarlog";
+const STAGING_BUNDLE_ID: &str = "com.meeki.staging";
+const RELEASE_APP_FOLDER: &str = "meeki";
 const LEGACY_RELEASE_APP_FOLDER: &str = "hyprnote";
 
 pub fn compute_vault_config_path(base: &Path) -> PathBuf {
@@ -39,11 +39,11 @@ mod tests {
     use tempfile::tempdir;
 
     #[test]
-    fn resolve_app_folder_uses_anarlog_for_new_stable_installs() {
+    fn resolve_app_folder_uses_meeki_for_new_stable_installs() {
         let temp = tempdir().unwrap();
 
         assert_eq!(
-            resolve_app_folder(temp.path(), "com.hyprnote.stable", false),
+            resolve_app_folder(temp.path(), "com.meeki.stable", false),
             RELEASE_APP_FOLDER
         );
     }
@@ -56,13 +56,13 @@ mod tests {
         std::fs::write(legacy_base.join("store.json"), "{}").unwrap();
 
         assert_eq!(
-            resolve_app_folder(temp.path(), "com.hyprnote.stable", false),
+            resolve_app_folder(temp.path(), "com.meeki.stable", false),
             LEGACY_RELEASE_APP_FOLDER
         );
     }
 
     #[test]
-    fn resolve_app_folder_prefers_anarlog_when_new_folder_has_data() {
+    fn resolve_app_folder_prefers_meeki_when_new_folder_has_data() {
         let temp = tempdir().unwrap();
         let legacy_base = temp.path().join(LEGACY_RELEASE_APP_FOLDER);
         let new_base = temp.path().join(RELEASE_APP_FOLDER);
@@ -72,7 +72,7 @@ mod tests {
         std::fs::write(new_base.join("app.db"), "").unwrap();
 
         assert_eq!(
-            resolve_app_folder(temp.path(), "com.hyprnote.stable", false),
+            resolve_app_folder(temp.path(), "com.meeki.stable", false),
             RELEASE_APP_FOLDER
         );
     }
@@ -83,17 +83,17 @@ mod tests {
         std::fs::create_dir_all(temp.path().join(LEGACY_RELEASE_APP_FOLDER)).unwrap();
 
         assert_eq!(
-            resolve_app_folder(temp.path(), "com.hyprnote.stable", false),
+            resolve_app_folder(temp.path(), "com.meeki.stable", false),
             RELEASE_APP_FOLDER
         );
     }
 
     #[test]
-    fn resolve_app_folder_uses_anarlog_for_other_release_bundle_ids() {
+    fn resolve_app_folder_uses_meeki_for_other_release_bundle_ids() {
         let temp = tempdir().unwrap();
 
         assert_eq!(
-            resolve_app_folder(temp.path(), "com.hyprnote.Hyprnote", false),
+            resolve_app_folder(temp.path(), "com.meeki.Meeki", false),
             RELEASE_APP_FOLDER
         );
     }
@@ -109,8 +109,8 @@ mod tests {
     #[test]
     fn resolve_app_folder_returns_bundle_id_in_debug_builds() {
         assert_eq!(
-            resolve_app_folder(Path::new("/tmp"), "com.hyprnote.stable", true),
-            "com.hyprnote.stable"
+            resolve_app_folder(Path::new("/tmp"), "com.meeki.stable", true),
+            "com.meeki.stable"
         );
     }
 }

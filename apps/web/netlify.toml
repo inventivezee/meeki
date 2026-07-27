@@ -1,12 +1,12 @@
 # https://docs.netlify.com/build/configure-builds/overview/#definitions
 # We must set package="apps/web" in the UI
 [build]
-command = "VITE_APP_VERSION=${VITE_APP_VERSION:-$COMMIT_REF} pnpm -F @hypr/web build"
+command = "VITE_APP_VERSION=${VITE_APP_VERSION:-$COMMIT_REF} pnpm -F @meeki/web build"
 publish = "apps/web/dist/client"
 ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF apps/web packages/api-client packages/changelog packages/ui packages/utils package.json pnpm-lock.yaml"
 
 [build.environment]
-VITE_APP_URL = "https://anarlog.so"
+VITE_APP_URL = "https://meeki.so"
 NODE_OPTIONS = "--max-old-space-size=4096"
 NODE_VERSION = "22"
 
@@ -18,7 +18,7 @@ remote_images = [
   "https://ijoptyyjrfqwaqhyxkxj\\.supabase\\.co/.*",
 ]
 
-# Anarlog documentation and agent discovery
+# Meeki documentation and agent discovery
 [[redirects]]
 from = "/skill"
 to = "/skill.md"
@@ -27,47 +27,47 @@ force = true
 
 [[redirects]]
 from = "/skill.md"
-to = "https://docs.anarlog.so/skill.md"
+to = "https://docs.meeki.so/skill.md"
 status = 200
 force = true
-headers = { Origin = "docs.anarlog.so" }
+headers = { Origin = "docs.meeki.so" }
 
 [[redirects]]
 from = "/skills"
-to = "https://docs.anarlog.so/agents/skills"
+to = "https://docs.meeki.so/agents/skills"
 status = 301
 force = true
 
 [[redirects]]
 from = "/.well-known/skills/*"
-to = "https://docs.anarlog.so/.well-known/skills/:splat"
+to = "https://docs.meeki.so/.well-known/skills/:splat"
 status = 200
 force = true
-headers = { Origin = "docs.anarlog.so" }
+headers = { Origin = "docs.meeki.so" }
 
 [[redirects]]
 from = "/.well-known/agent-skills/*"
-to = "https://docs.anarlog.so/.well-known/agent-skills/:splat"
+to = "https://docs.meeki.so/.well-known/agent-skills/:splat"
 status = 200
 force = true
-headers = { Origin = "docs.anarlog.so" }
+headers = { Origin = "docs.meeki.so" }
 
 [[redirects]]
 from = "/.well-known/vercel/*"
-to = "https://docs.anarlog.so/.well-known/vercel/:splat"
+to = "https://docs.meeki.so/.well-known/vercel/:splat"
 status = 200
 force = true
-headers = { Origin = "docs.anarlog.so" }
+headers = { Origin = "docs.meeki.so" }
 
 [[redirects]]
 from = "/docs"
-to = "https://docs.anarlog.so"
+to = "https://docs.meeki.so"
 status = 301
 force = true
 
 [[redirects]]
 from = "/docs/*"
-to = "https://docs.anarlog.so/:splat"
+to = "https://docs.meeki.so/:splat"
 status = 301
 force = true
 
@@ -95,7 +95,7 @@ force = true
 
 [[redirects]]
 from = "https://hyprnote.com/docs/*"
-to = "https://docs.anarlog.so"
+to = "https://docs.meeki.so"
 status = 301
 force = true
 
@@ -119,7 +119,7 @@ force = true
 
 [[redirects]]
 from = "https://hyprnote.com/legal/*"
-to = "https://anarlog.so/:splat"
+to = "https://meeki.so/:splat"
 status = 301
 force = true
 
@@ -255,18 +255,18 @@ to = "https://char.com/:splat"
 status = 301
 force = true
 
-# Domain migration: char.com -> anarlog.so (301 for SEO)
-# Char is shut down except for /blog/* and root legal pages which redirect to anarlog.so
+# Domain migration: char.com -> meeki.so (301 for SEO)
+# Char is shut down except for /blog/* and root legal pages which redirect to meeki.so
 
 [[redirects]]
 from = "https://char.com/blog/*"
-to = "https://anarlog.so/blog/:splat"
+to = "https://meeki.so/blog/:splat"
 status = 301
 force = true
 
 [[redirects]]
 from = "https://www.char.com/blog/*"
-to = "https://anarlog.so/blog/:splat"
+to = "https://meeki.so/blog/:splat"
 status = 301
 force = true
 
@@ -278,36 +278,36 @@ force = true
 
 [[redirects]]
 from = "https://char.com/legal/*"
-to = "https://anarlog.so/:splat"
+to = "https://meeki.so/:splat"
 status = 301
 force = true
 
 [[redirects]]
 from = "https://www.char.com/legal/*"
-to = "https://anarlog.so/:splat"
+to = "https://meeki.so/:splat"
 status = 301
 force = true
 
 [[redirects]]
 from = "https://char.com/privacy"
-to = "https://anarlog.so/privacy"
+to = "https://meeki.so/privacy"
 status = 301
 force = true
 
 [[redirects]]
 from = "https://www.char.com/privacy"
-to = "https://anarlog.so/privacy"
+to = "https://meeki.so/privacy"
 status = 301
 force = true
 
 [[redirects]]
 from = "https://char.com/terms"
-to = "https://anarlog.so/terms"
+to = "https://meeki.so/terms"
 status = 301
 force = true
 
 [[redirects]]
 from = "https://www.char.com/terms"
-to = "https://anarlog.so/terms"
+to = "https://meeki.so/terms"
 status = 301
 force = true

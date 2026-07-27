@@ -52,8 +52,8 @@ pub(crate) async fn submit_bug_report(
     let redacted_description = redact::redact_pii(input.description);
     let (description, title) = make_title(&redacted_description, "Bug Report");
 
-    let body = hypr_template_support::render(hypr_template_support::SupportTemplate::BugReport(
-        hypr_template_support::BugReport {
+    let body = meeki_template_support::render(meeki_template_support::SupportTemplate::BugReport(
+        meeki_template_support::BugReport {
             description,
             platform: input.platform.to_string(),
             arch: input.arch.to_string(),
@@ -91,8 +91,8 @@ pub(crate) async fn submit_feature_request(
     let (description, title) = make_title(&redacted_description, "Feature Request");
 
     let body =
-        hypr_template_support::render(hypr_template_support::SupportTemplate::FeatureRequest(
-            hypr_template_support::FeatureRequest {
+        meeki_template_support::render(meeki_template_support::SupportTemplate::FeatureRequest(
+            meeki_template_support::FeatureRequest {
                 description,
                 platform: input.platform.to_string(),
                 arch: input.arch.to_string(),
@@ -303,8 +303,8 @@ async fn attach_log_analysis(state: &AppState, issue_number: u64, log_text: &str
     };
 
     let tail = logs::safe_tail(&clean_logs, 10000);
-    let log_comment = hypr_template_support::render(
-        hypr_template_support::SupportTemplate::LogAnalysis(hypr_template_support::LogAnalysis {
+    let log_comment = meeki_template_support::render(
+        meeki_template_support::SupportTemplate::LogAnalysis(meeki_template_support::LogAnalysis {
             summary_section,
             tail: tail.to_string(),
         }),

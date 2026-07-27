@@ -13,7 +13,7 @@ use tokio::time::{Duration, MissedTickBehavior};
 use tokio_stream::wrappers::ReceiverStream;
 use tokio_util::sync::CancellationToken;
 
-pub use hypr_audio::{AudioProvider, CaptureConfig, CaptureFrame, CaptureStream, Error};
+pub use meeki_audio::{AudioProvider, CaptureConfig, CaptureFrame, CaptureStream, Error};
 
 const MOCK_MIC_DEVICE_NAME: &str = "mock-mic";
 const MOCK_MIC_AUDIO_ENV: &str = "HYPR_MOCK_MIC_AUDIO";
@@ -29,14 +29,14 @@ fn audio_paths_for_selection(selection: u32) -> AudioPaths {
     match selection {
         // MOCK_AUDIO=1
         1 => AudioPaths {
-            mic: hypr_data::english_10::AUDIO_MIC_MP3_PATH,
-            spk: hypr_data::english_10::AUDIO_SPK_MP3_PATH,
+            mic: meeki_data::english_10::AUDIO_MIC_MP3_PATH,
+            spk: meeki_data::english_10::AUDIO_SPK_MP3_PATH,
         },
         // Future selections go here:
         // 2 => AudioPaths { ... },
         _ => AudioPaths {
-            mic: hypr_data::english_10::AUDIO_MIC_MP3_PATH,
-            spk: hypr_data::english_10::AUDIO_SPK_MP3_PATH,
+            mic: meeki_data::english_10::AUDIO_MIC_MP3_PATH,
+            spk: meeki_data::english_10::AUDIO_SPK_MP3_PATH,
         },
     }
 }

@@ -69,7 +69,7 @@ pub struct BatchParams {
     pub base_url: String,
     pub api_key: String,
     #[serde(default)]
-    pub languages: Vec<hypr_language::Language>,
+    pub languages: Vec<meeki_language::Language>,
     #[serde(default)]
     pub keywords: Vec<String>,
     #[serde(default)]
@@ -162,7 +162,7 @@ async fn run_batch_inner(
 ) -> crate::Result<BatchRunOutput> {
     let metadata_joined = tokio::task::spawn_blocking({
         let path = params.file_path.clone();
-        move || hypr_audio_utils::audio_file_metadata(path)
+        move || meeki_audio_utils::audio_file_metadata(path)
     })
     .await;
 
@@ -312,7 +312,7 @@ mod tests {
     fn listen_params(model: Option<&str>) -> owhisper_interface::ListenParams {
         owhisper_interface::ListenParams {
             model: model.map(ToOwned::to_owned),
-            languages: vec![hypr_language::ISO639::En.into()],
+            languages: vec![meeki_language::ISO639::En.into()],
             ..Default::default()
         }
     }
@@ -325,7 +325,7 @@ mod tests {
             model: None,
             base_url: base_url.to_string(),
             api_key: "key".to_string(),
-            languages: vec![hypr_language::ISO639::En.into()],
+            languages: vec![meeki_language::ISO639::En.into()],
             keywords: vec![],
             num_speakers: None,
             min_speakers: None,

@@ -2,7 +2,7 @@ use std::pin::Pin;
 use std::task::{Context, Poll};
 
 use futures_util::{Stream, pin_mut};
-use hypr_audio_interface::AsyncSource;
+use meeki_audio_interface::AsyncSource;
 use pin_project::pin_project;
 
 use crate::{Async, FixedAsync, PolynomialDegree, RubatoChunkResampler};

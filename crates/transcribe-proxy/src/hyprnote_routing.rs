@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use hypr_language::Language;
+use meeki_language::Language;
 use owhisper_client::{AdapterKind, LanguageSupport, Provider};
 
 const DEFAULT_NUM_RETRIES: usize = 2;
@@ -207,7 +207,7 @@ pub fn should_use_hyprnote_routing(provider_param: Option<&str>) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use hypr_language::ISO639;
+    use meeki_language::ISO639;
 
     fn langs(codes: &[ISO639]) -> Vec<Language> {
         codes.iter().map(|&c| Language::new(c)).collect()

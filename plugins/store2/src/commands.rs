@@ -29,9 +29,9 @@ fn validate_secret_coordinate(caller: SecretCaller, scope: &str, key: &str) -> R
 
 fn secure_store_service(identifier: &str) -> String {
     let identifier = match identifier {
-        "com.hyprnote.dev" => "com.anarlog.dev",
-        "com.hyprnote.staging" => "com.anarlog.staging",
-        "com.hyprnote.stable" | "com.hyprnote.Hyprnote" => "com.anarlog.stable",
+        "com.meeki.dev" => "com.meeki.dev",
+        "com.meeki.staging" => "com.meeki.staging",
+        "com.meeki.stable" | "com.meeki.Meeki" => "com.meeki.stable",
         identifier => identifier,
     };
 
@@ -40,7 +40,7 @@ fn secure_store_service(identifier: &str) -> String {
 
 fn secure_store_account(identifier: &str, scope: &str, key: &str) -> String {
     let account = format!("{scope}:{key}");
-    if identifier == "com.hyprnote.dev" {
+    if identifier == "com.meeki.dev" {
         // Rotate away from dev items whose ACLs captured unstable ad-hoc signatures.
         format!("v2:{account}")
     } else {
@@ -392,22 +392,22 @@ mod tests {
     use super::*;
 
     #[test]
-    fn uses_anarlog_service_names_for_legacy_bundle_identifiers() {
+    fn uses_meeki_service_names_for_legacy_bundle_identifiers() {
         assert_eq!(
-            secure_store_service("com.hyprnote.dev"),
-            "com.anarlog.dev.secure-store"
+            secure_store_service("com.meeki.dev"),
+            "com.meeki.dev.secure-store"
         );
         assert_eq!(
-            secure_store_service("com.hyprnote.staging"),
-            "com.anarlog.staging.secure-store"
+            secure_store_service("com.meeki.staging"),
+            "com.meeki.staging.secure-store"
         );
         assert_eq!(
-            secure_store_service("com.hyprnote.stable"),
-            "com.anarlog.stable.secure-store"
+            secure_store_service("com.meeki.stable"),
+            "com.meeki.stable.secure-store"
         );
         assert_eq!(
-            secure_store_service("com.hyprnote.Hyprnote"),
-            "com.anarlog.stable.secure-store"
+            secure_store_service("com.meeki.Meeki"),
+            "com.meeki.stable.secure-store"
         );
     }
 
@@ -422,11 +422,11 @@ mod tests {
     #[test]
     fn versions_dev_accounts_across_signing_changes() {
         assert_eq!(
-            secure_store_account("com.hyprnote.dev", "provider", "deepgram"),
+            secure_store_account("com.meeki.dev", "provider", "deepgram"),
             "v2:provider:deepgram"
         );
         assert_eq!(
-            secure_store_account("com.hyprnote.stable", "provider", "deepgram"),
+            secure_store_account("com.meeki.stable", "provider", "deepgram"),
             "provider:deepgram"
         );
     }
@@ -434,14 +434,14 @@ mod tests {
     #[test]
     fn migrates_all_previous_dev_secret_locations() {
         assert_eq!(
-            legacy_secret_locations("com.hyprnote.dev", "provider", "deepgram"),
+            legacy_secret_locations("com.meeki.dev", "provider", "deepgram"),
             vec![
                 (
-                    "com.anarlog.dev.secure-store".to_string(),
+                    "com.meeki.dev.secure-store".to_string(),
                     "provider:deepgram".to_string(),
                 ),
                 (
-                    "com.hyprnote.dev.secure-store".to_string(),
+                    "com.meeki.dev.secure-store".to_string(),
                     "provider:deepgram".to_string(),
                 ),
             ]

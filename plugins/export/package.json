@@ -1,5 +1,5 @@
 {
-  "name": "@hypr/plugin-export",
+  "name": "@meeki/plugin-export",
   "private": true,
   "main": "./js/index.ts",
   "scripts": {

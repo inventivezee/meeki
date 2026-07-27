@@ -18,9 +18,9 @@ import uuid
 
 CLOUDSYNC_MANAGEMENT_URL = "https://cloudsync.sqlite.ai"
 REQUIRED_SECRETS = (
-    "ANARLOG_CLOUDSYNC_DATABASE_ID",
-    "ANARLOG_CLOUDSYNC_E2EE_DATABASE_ID",
-    "ANARLOG_CLOUDSYNC_PROTOCOL_MODE",
+    "MEEKI_CLOUDSYNC_DATABASE_ID",
+    "MEEKI_CLOUDSYNC_E2EE_DATABASE_ID",
+    "MEEKI_CLOUDSYNC_PROTOCOL_MODE",
     "SQLITECLOUD_CLOUDSYNC_MANAGEMENT_API_KEY",
     "SQLITECLOUD_PROJECT_URL",
     "SQLITECLOUD_TOKEN_ISSUER_API_KEY",
@@ -70,10 +70,10 @@ def load_secrets(path: str) -> dict[str, str]:
 
 
 def protocol_mode(values: dict[str, str]) -> str:
-    mode = values["ANARLOG_CLOUDSYNC_PROTOCOL_MODE"].strip()
+    mode = values["MEEKI_CLOUDSYNC_PROTOCOL_MODE"].strip()
     if mode not in PROTOCOL_MODES:
         raise ValueError(
-            "ANARLOG_CLOUDSYNC_PROTOCOL_MODE must be dual, e2ee_only, or e2ee_enforced"
+            "MEEKI_CLOUDSYNC_PROTOCOL_MODE must be dual, e2ee_only, or e2ee_enforced"
         )
     return mode
 
@@ -246,8 +246,8 @@ def run_sql(
 
 def verify_remote_database(values: dict[str, str]) -> None:
     mode = protocol_mode(values)
-    legacy_id = values["ANARLOG_CLOUDSYNC_DATABASE_ID"].strip()
-    database_id = values["ANARLOG_CLOUDSYNC_E2EE_DATABASE_ID"].strip()
+    legacy_id = values["MEEKI_CLOUDSYNC_DATABASE_ID"].strip()
+    database_id = values["MEEKI_CLOUDSYNC_E2EE_DATABASE_ID"].strip()
     if database_id == legacy_id:
         raise ValueError(
             "E2EE CloudSync database reuses the legacy managed database ID"
@@ -405,7 +405,7 @@ def mint_token(
         issuer_key,
         "SQLite Cloud verification token request",
         {
-            "name": "anarlog-cloudsync-deploy-verification",
+            "name": "meeki-cloudsync-deploy-verification",
             "userId": user_id,
             "expiresAt": expires_at.isoformat(timespec="seconds").replace(
                 "+00:00", "Z"
@@ -424,7 +424,7 @@ def mint_token(
 
 def recovery_key() -> str:
     encoded = base64.urlsafe_b64encode(secrets.token_bytes(32)).decode().rstrip("=")
-    return f"anarlog-e2ee-v1:{encoded}"
+    return f"meeki-e2ee-v1:{encoded}"
 
 
 def sanitized_cargo_env() -> dict[str, str]:
@@ -506,21 +506,21 @@ def main() -> None:
 
     project_url = values["SQLITECLOUD_PROJECT_URL"]
     issuer_key = values["SQLITECLOUD_TOKEN_ISSUER_API_KEY"]
-    database_id = values["ANARLOG_CLOUDSYNC_E2EE_DATABASE_ID"]
+    database_id = values["MEEKI_CLOUDSYNC_E2EE_DATABASE_ID"]
 
     sync_workspace_a = f"deploy-e2ee-a-{uuid.uuid4()}"
     sync_workspace_b = f"deploy-e2ee-b-{uuid.uuid4()}"
     sync_env = cargo_env | {
-        "ANARLOG_CLOUDSYNC_E2EE_DATABASE_ID": database_id,
-        "ANARLOG_CLOUDSYNC_WORKSPACE_A": sync_workspace_a,
-        "ANARLOG_CLOUDSYNC_WORKSPACE_B": sync_workspace_b,
-        "ANARLOG_CLOUDSYNC_TOKEN_A": mint_token(
+        "MEEKI_CLOUDSYNC_E2EE_DATABASE_ID": database_id,
+        "MEEKI_CLOUDSYNC_WORKSPACE_A": sync_workspace_a,
+        "MEEKI_CLOUDSYNC_WORKSPACE_B": sync_workspace_b,
+        "MEEKI_CLOUDSYNC_TOKEN_A": mint_token(
             project_url, issuer_key, sync_workspace_a
         ),
-        "ANARLOG_CLOUDSYNC_TOKEN_B": mint_token(
+        "MEEKI_CLOUDSYNC_TOKEN_B": mint_token(
             project_url, issuer_key, sync_workspace_b
         ),
-        "ANARLOG_CLOUDSYNC_RECOVERY_KEY_A": recovery_key(),
+        "MEEKI_CLOUDSYNC_RECOVERY_KEY_A": recovery_key(),
     }
     run_test_with_cleanup(
         "same_personal_workspace_syncs_and_decrypts_a_real_note",
@@ -531,17 +531,17 @@ def main() -> None:
     workspace_b = f"deploy-e2ee-b-{uuid.uuid4()}"
     # Production tokens include shared memberships; personal-only RLS must not trust them yet.
     policy_env = cargo_env | {
-        "ANARLOG_CLOUDSYNC_E2EE_DATABASE_ID": database_id,
-        "ANARLOG_CLOUDSYNC_WORKSPACE_A": workspace_a,
-        "ANARLOG_CLOUDSYNC_WORKSPACE_B": workspace_b,
-        "ANARLOG_CLOUDSYNC_TOKEN_A": mint_token(
+        "MEEKI_CLOUDSYNC_E2EE_DATABASE_ID": database_id,
+        "MEEKI_CLOUDSYNC_WORKSPACE_A": workspace_a,
+        "MEEKI_CLOUDSYNC_WORKSPACE_B": workspace_b,
+        "MEEKI_CLOUDSYNC_TOKEN_A": mint_token(
             project_url,
             issuer_key,
             workspace_a,
             [workspace_a, workspace_b],
         ),
-        "ANARLOG_CLOUDSYNC_TOKEN_B": mint_token(project_url, issuer_key, workspace_b),
-        "ANARLOG_CLOUDSYNC_RECOVERY_KEY_B": recovery_key(),
+        "MEEKI_CLOUDSYNC_TOKEN_B": mint_token(project_url, issuer_key, workspace_b),
+        "MEEKI_CLOUDSYNC_RECOVERY_KEY_B": recovery_key(),
     }
     run_test_with_cleanup(
         "personal_workspace_tokens_block_foreign_encrypted_writes",

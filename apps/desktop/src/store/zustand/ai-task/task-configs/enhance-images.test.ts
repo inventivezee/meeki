@@ -11,7 +11,7 @@ const fsSyncMocks = vi.hoisted(() => ({
   attachmentRead: vi.fn(),
 }));
 
-vi.mock("@hypr/plugin-fs-sync", () => ({
+vi.mock("@meeki/plugin-fs-sync", () => ({
   commands: fsSyncMocks,
 }));
 

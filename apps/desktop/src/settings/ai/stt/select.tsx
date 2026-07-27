@@ -18,24 +18,24 @@ import { useRef, useState } from "react";
 import {
   commands as localSttCommands,
   type LocalModel,
-} from "@hypr/plugin-local-stt";
-import { commands as openerCommands } from "@hypr/plugin-opener2";
-import type { AIProviderStorage } from "@hypr/store";
-import { Input } from "@hypr/ui/components/ui/input";
+} from "@meeki/plugin-local-stt";
+import { commands as openerCommands } from "@meeki/plugin-opener2";
+import type { AIProviderStorage } from "@meeki/store";
+import { Input } from "@meeki/ui/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@hypr/ui/components/ui/select";
-import { sonnerToast } from "@hypr/ui/components/ui/toast";
+} from "@meeki/ui/components/ui/select";
+import { sonnerToast } from "@meeki/ui/components/ui/toast";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@hypr/ui/components/ui/tooltip";
-import { cn } from "@hypr/utils";
+} from "@meeki/ui/components/ui/tooltip";
+import { cn } from "@meeki/utils";
 
 import { useSttSettings } from "./context";
 import { HealthStatusIndicator, useConnectionHealth } from "./health";
@@ -143,7 +143,7 @@ export function SelectProviderAndModel() {
   const alertDescription = !providerSettingsReady
     ? undefined
     : !isConfigured
-      ? t`Transcription model is needed to make Anarlog listen to your conversations.`
+      ? t`Transcription model is needed to make Meeki listen to your conversations.`
       : hasError
         ? health.message
         : undefined;

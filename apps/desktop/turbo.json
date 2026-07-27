@@ -3,17 +3,17 @@
   "extends": ["//"],
   "tasks": {
     "dev": {
-      "dependsOn": ["@hypr/ui#build"]
+      "dependsOn": ["@meeki/ui#build"]
     },
     "build": {
-      "dependsOn": ["@hypr/ui#build"],
+      "dependsOn": ["@meeki/ui#build"],
       "outputs": ["dist/**"]
     },
     "tauri:dev": {
-      "dependsOn": ["@hypr/ui#build"]
+      "dependsOn": ["@meeki/ui#build"]
     },
     "tauri:build": {
-      "dependsOn": ["@hypr/ui#build"]
+      "dependsOn": ["@meeki/ui#build"]
     }
   }
 }

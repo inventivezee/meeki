@@ -17,7 +17,7 @@ describe("configurePaidSettings", () => {
     vi.clearAllMocks();
   });
 
-  it("does not auto-select Anarlog Pro STT or LLM", async () => {
+  it("does not auto-select Meeki Pro STT or LLM", async () => {
     mocks.getStoredSettingValues.mockResolvedValue({
       values: {},
       hasValues: new Set(),

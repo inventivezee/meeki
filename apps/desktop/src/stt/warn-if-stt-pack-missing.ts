@@ -1,5 +1,5 @@
-import { commands as localSttCommands } from "@hypr/plugin-local-stt";
-import { sonnerToast } from "@hypr/ui/components/ui/toast";
+import { commands as localSttCommands } from "@meeki/plugin-local-stt";
+import { sonnerToast } from "@meeki/ui/components/ui/toast";
 
 import { ON_DEVICE_STT_PACK } from "~/stt/on-device-pack";
 

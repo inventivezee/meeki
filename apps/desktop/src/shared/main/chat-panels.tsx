@@ -1,12 +1,12 @@
 import { isTauri } from "@tauri-apps/api/core";
 import { useCallback, useLayoutEffect, useRef } from "react";
 
-import { commands as windowsCommands } from "@hypr/plugin-windows";
+import { commands as windowsCommands } from "@meeki/plugin-windows";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "@hypr/ui/components/ui/resizable";
+} from "@meeki/ui/components/ui/resizable";
 
 import {
   NOTE_SURFACE_MIN_WIDTH_PX,

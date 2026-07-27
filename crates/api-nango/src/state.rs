@@ -1,4 +1,4 @@
-use hypr_nango::NangoClient;
+use meeki_nango::NangoClient;
 
 use crate::config::{NangoConfig, build_nango_client};
 use crate::routes::webhook::ForwardHandlerRegistry;

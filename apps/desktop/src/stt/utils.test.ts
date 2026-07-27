@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { LiveTranscriptDelta } from "@hypr/plugin-transcription";
+import type { LiveTranscriptDelta } from "@meeki/plugin-transcription";
 
 import {
   createTranscriptAccumulator,

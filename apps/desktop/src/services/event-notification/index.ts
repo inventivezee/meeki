@@ -1,4 +1,4 @@
-import { commands as notificationCommands } from "@hypr/plugin-notification";
+import { commands as notificationCommands } from "@meeki/plugin-notification";
 
 import { getIgnoredEventSets } from "~/calendar/ignored-events";
 import { liveQueryClient } from "~/db";
@@ -73,7 +73,7 @@ export async function checkEventNotifications(
         start_time: Math.floor(startTime.getTime() / 1000),
         participants: null,
         event_details: null,
-        action_label: "Open Anarlog",
+        action_label: "Open Meeki",
         action_variant: null,
         options: null,
         footer: null,

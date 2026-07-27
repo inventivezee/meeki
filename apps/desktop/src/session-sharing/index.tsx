@@ -16,15 +16,15 @@ import {
 } from "lucide-react";
 import { type MutableRefObject, useCallback, useRef, useState } from "react";
 
-import { commands as openerCommands } from "@hypr/plugin-opener2";
-import { Button } from "@hypr/ui/components/ui/button";
-import { Input } from "@hypr/ui/components/ui/input";
+import { commands as openerCommands } from "@meeki/plugin-opener2";
+import { Button } from "@meeki/ui/components/ui/button";
+import { Input } from "@meeki/ui/components/ui/input";
 import {
   AppFloatingPanel,
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@hypr/ui/components/ui/popover";
+} from "@meeki/ui/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -32,9 +32,9 @@ import {
   SelectSeparator,
   SelectTrigger,
   SelectValue,
-} from "@hypr/ui/components/ui/select";
-import { sonnerToast } from "@hypr/ui/components/ui/toast";
-import { cn } from "@hypr/utils";
+} from "@meeki/ui/components/ui/select";
+import { sonnerToast } from "@meeki/ui/components/ui/toast";
+import { cn } from "@meeki/utils";
 
 import { SessionAttachmentControls } from "./attachment-controls";
 import {
@@ -1885,7 +1885,7 @@ function AccessEntryRow({
   contactName?: string;
   onMutate: (mutation: AccessMutation) => void;
 }) {
-  const label = contactName || entry.userEmail || "Anarlog user";
+  const label = contactName || entry.userEmail || "Meeki user";
   return (
     <div className="hover:bg-accent/50 flex min-h-9 items-center gap-2 rounded-lg px-1.5 py-1">
       <ContactFacehash name={label} size={24} />
@@ -1895,7 +1895,7 @@ function AccessEntryRow({
           {contactName && entry.userEmail
             ? entry.userEmail
             : entry.entryType === "grant"
-              ? "Anarlog member"
+              ? "Meeki member"
               : entry.entryType === "invitation"
                 ? "Invitation pending"
                 : `Requested ${capabilityLabels[entry.capability].toLowerCase()}`}

@@ -31,35 +31,35 @@ const mocks = vi.hoisted(() => ({
   windowShow: vi.fn(() => Promise.resolve({ status: "ok", data: null })),
 }));
 
-vi.mock("@hypr/plugin-fs-sync", () => ({
+vi.mock("@meeki/plugin-fs-sync", () => ({
   commands: {
     sessionDir: vi.fn(() => Promise.resolve({ status: "ok", data: "" })),
   },
 }));
 
-vi.mock("@hypr/plugin-opener2", () => ({
+vi.mock("@meeki/plugin-opener2", () => ({
   commands: {
     openPath: vi.fn(() => Promise.resolve()),
   },
 }));
 
-vi.mock("@hypr/plugin-windows", () => ({
+vi.mock("@meeki/plugin-windows", () => ({
   commands: {
     windowShow: mocks.windowShow,
   },
 }));
 
-vi.mock("@hypr/ui/components/ui/dancing-sticks", () => ({
+vi.mock("@meeki/ui/components/ui/dancing-sticks", () => ({
   DancingSticks: ({ amplitude }: { amplitude: number }) => (
     <span data-amplitude={amplitude} data-testid="dancing-sticks" />
   ),
 }));
 
-vi.mock("@hypr/ui/components/ui/spinner", () => ({
+vi.mock("@meeki/ui/components/ui/spinner", () => ({
   Spinner: () => <span data-testid="spinner" />,
 }));
 
-vi.mock("@hypr/ui/components/ui/tooltip", () => ({
+vi.mock("@meeki/ui/components/ui/tooltip", () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipContent: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipTrigger: ({ children }: { children: ReactNode }) => <>{children}</>,

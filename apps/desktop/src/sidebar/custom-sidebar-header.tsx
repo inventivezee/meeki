@@ -2,7 +2,7 @@ import { useLingui } from "@lingui/react/macro";
 import { ArrowLeftIcon } from "lucide-react";
 import { type ReactNode, useCallback } from "react";
 
-import { cn } from "@hypr/utils";
+import { cn } from "@meeki/utils";
 
 import { useShell } from "~/contexts/shell";
 import { useTabs } from "~/store/zustand/tabs";

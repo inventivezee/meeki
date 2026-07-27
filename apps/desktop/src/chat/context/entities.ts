@@ -1,5 +1,5 @@
-import type { AccountInfo } from "@hypr/plugin-auth";
-import type { DeviceInfo } from "@hypr/plugin-misc";
+import type { AccountInfo } from "@meeki/plugin-auth";
+import type { DeviceInfo } from "@meeki/plugin-misc";
 
 import type { HyprUIMessage } from "../types";
 

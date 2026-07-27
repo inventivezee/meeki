@@ -7,8 +7,8 @@ import {
 } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 
-import { commands as openerCommands } from "@hypr/plugin-opener2";
-import { cn, safeParseDate } from "@hypr/utils";
+import { commands as openerCommands } from "@meeki/plugin-opener2";
+import { cn, safeParseDate } from "@meeki/utils";
 
 import { RecordingIcon, useHasTranscript } from "../shared";
 import { MetadataButton } from "./metadata";

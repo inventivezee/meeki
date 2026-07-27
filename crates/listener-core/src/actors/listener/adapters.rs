@@ -7,7 +7,7 @@ use ractor::{ActorProcessingErr, ActorRef};
 use owhisper_client::{
     AdapterKind, ArgmaxAdapter, AssemblyAIAdapter, CartesiaAdapter, DashScopeAdapter,
     DeepgramAdapter, ElevenLabsAdapter, FireworksAdapter, GladiaAdapter, HyprnoteAdapter,
-    MistralAdapter, RealtimeSttAdapter, SonioxAdapter, hypr_ws_client,
+    MistralAdapter, RealtimeSttAdapter, SonioxAdapter, meeki_ws_client,
 };
 use owhisper_interface::stream::Extra;
 use owhisper_interface::{ControlMessage, MixedMessage};
@@ -109,15 +109,15 @@ pub(super) async fn spawn_rx_task(
 
 fn soniqo_model_for_args(
     args: &ListenerArgs,
-) -> Result<Option<hypr_transcribe_soniqo::SoniqoModel>, ActorProcessingErr> {
+) -> Result<Option<meeki_transcribe_soniqo::SoniqoModel>, ActorProcessingErr> {
     if let Some(model) =
-        hypr_transcribe_soniqo::local_model_from_request(&args.base_url, &args.model)
+        meeki_transcribe_soniqo::local_model_from_request(&args.base_url, &args.model)
     {
         return Ok(Some(model));
     }
 
-    if hypr_transcribe_soniqo::is_local_base_url(&args.base_url) {
-        return hypr_transcribe_soniqo::SoniqoModel::from_str(&args.model)
+    if meeki_transcribe_soniqo::is_local_base_url(&args.base_url) {
+        return meeki_transcribe_soniqo::SoniqoModel::from_str(&args.model)
             .map(Some)
             .map_err(|e| actor_error(format!("soniqo_model_invalid: {e}")));
     }
@@ -126,7 +126,7 @@ fn soniqo_model_for_args(
 }
 
 async fn spawn_soniqo_rx_task(
-    model: hypr_transcribe_soniqo::SoniqoModel,
+    model: meeki_transcribe_soniqo::SoniqoModel,
     args: ListenerArgs,
     myself: ActorRef<ListenerMsg>,
 ) -> Result<
@@ -177,9 +177,9 @@ async fn spawn_soniqo_rx_task(
         Ok((ChannelSender::Dual(tx), rx_task, shutdown_tx))
     } else {
         let source = if matches!(args.mode, crate::actors::ChannelMode::SpeakerOnly) {
-            hypr_transcribe_soniqo::TranscriptSource::System
+            meeki_transcribe_soniqo::TranscriptSource::System
         } else {
-            hypr_transcribe_soniqo::TranscriptSource::Microphone
+            meeki_transcribe_soniqo::TranscriptSource::Microphone
         };
 
         let (tx, rx) = tokio::sync::mpsc::channel::<MixedMessage<Bytes, ControlMessage>>(32);
@@ -254,14 +254,14 @@ fn expected_speakers(args: &ListenerArgs) -> Option<u32> {
     (participants.len() > 1).then_some(participants.len() as u32)
 }
 
-fn format_languages(languages: &[hypr_language::Language]) -> String {
+fn format_languages(languages: &[meeki_language::Language]) -> String {
     if languages.is_empty() {
         return "none".to_string();
     }
 
     languages
         .iter()
-        .map(hypr_language::Language::bcp47_code)
+        .map(meeki_language::Language::bcp47_code)
         .collect::<Vec<_>>()
         .join(", ")
 }
@@ -284,8 +284,8 @@ fn build_extra(args: &ListenerArgs) -> (f64, Extra) {
     (session_offset_secs, extra)
 }
 
-fn desktop_connect_policy() -> hypr_ws_client::client::WebSocketConnectPolicy {
-    hypr_ws_client::client::WebSocketConnectPolicy {
+fn desktop_connect_policy() -> meeki_ws_client::client::WebSocketConnectPolicy {
+    meeki_ws_client::client::WebSocketConnectPolicy {
         connect_timeout: Duration::from_secs(4),
         max_attempts: 2,
         retry_delay: Duration::from_secs(1),
@@ -314,7 +314,7 @@ async fn spawn_rx_task_single_with_adapter<A: RealtimeSttAdapter>(
         .api_key(args.api_key.clone())
         .params(build_listen_params(&args))
         .connect_policy(desktop_connect_policy())
-        .extra_header(DEVICE_FINGERPRINT_HEADER, hypr_host::fingerprint())
+        .extra_header(DEVICE_FINGERPRINT_HEADER, meeki_host::fingerprint())
         .build_single()
         .await;
 
@@ -374,7 +374,7 @@ async fn spawn_rx_task_dual_with_adapter<A: RealtimeSttAdapter>(
         .api_key(args.api_key.clone())
         .params(build_listen_params(&args))
         .connect_policy(desktop_connect_policy())
-        .extra_header(DEVICE_FINGERPRINT_HEADER, hypr_host::fingerprint())
+        .extra_header(DEVICE_FINGERPRINT_HEADER, meeki_host::fingerprint())
         .build_dual()
         .await;
 
@@ -421,12 +421,12 @@ mod tests {
 
     struct NoopRuntime;
 
-    impl hypr_storage::StorageRuntime for NoopRuntime {
-        fn global_base(&self) -> Result<std::path::PathBuf, hypr_storage::Error> {
+    impl meeki_storage::StorageRuntime for NoopRuntime {
+        fn global_base(&self) -> Result<std::path::PathBuf, meeki_storage::Error> {
             Ok(std::path::PathBuf::from("/tmp"))
         }
 
-        fn vault_base(&self) -> Result<std::path::PathBuf, hypr_storage::Error> {
+        fn vault_base(&self) -> Result<std::path::PathBuf, meeki_storage::Error> {
             Ok(std::path::PathBuf::from("/tmp"))
         }
     }
@@ -444,7 +444,7 @@ mod tests {
     fn listener_args(base_url: &str, model: &str) -> ListenerArgs {
         ListenerArgs {
             runtime: Arc::new(NoopRuntime),
-            languages: vec![hypr_language::ISO639::En.into()],
+            languages: vec![meeki_language::ISO639::En.into()],
             onboarding: false,
             model: model.to_string(),
             base_url: base_url.to_string(),
@@ -516,7 +516,7 @@ mod tests {
 
         assert_eq!(
             soniqo_model_for_args(&args).unwrap(),
-            Some(hypr_transcribe_soniqo::SoniqoModel::ParakeetStreaming)
+            Some(meeki_transcribe_soniqo::SoniqoModel::ParakeetStreaming)
         );
     }
 
@@ -529,7 +529,7 @@ mod tests {
 
     #[test]
     fn format_languages_uses_bcp47_codes() {
-        let languages = vec!["en-US".parse().unwrap(), hypr_language::ISO639::Fr.into()];
+        let languages = vec!["en-US".parse().unwrap(), meeki_language::ISO639::Fr.into()];
 
         assert_eq!(format_languages(&languages), "en-US, fr");
     }

@@ -2,7 +2,7 @@ import { resolveIsDarkMode, type ThemePreference } from "./resolve";
 
 import { getStoredSettingValues } from "~/settings/queries";
 
-const THEME_STORAGE_KEY = "hypr-theme";
+const THEME_STORAGE_KEY = "meeki-theme";
 const THEME_BOOTSTRAP_TIMEOUT_MS = 150;
 
 /** Keep `public/theme-boot.js` aligned with normalizeThemePreference + resolveIsDarkMode. */

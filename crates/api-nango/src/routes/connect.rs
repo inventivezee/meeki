@@ -1,5 +1,5 @@
 use axum::{Extension, Json, extract::State};
-use hypr_api_auth::AuthContext;
+use meeki_api_auth::AuthContext;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
@@ -81,7 +81,7 @@ pub async fn create_session(
                 ));
             }
 
-            let reconnect_req = hypr_nango::ReconnectSessionRequest {
+            let reconnect_req = meeki_nango::ReconnectSessionRequest {
                 connection_id: connection_id.to_string(),
                 integration_id: body.integration_id.clone(),
             };
@@ -101,7 +101,7 @@ pub async fn create_session(
                 .lookup_connection(&auth.token, &user_id, &body.integration_id)
                 .await?
             {
-                let reconnect_req = hypr_nango::ReconnectSessionRequest {
+                let reconnect_req = meeki_nango::ReconnectSessionRequest {
                     connection_id: existing.connection_id.clone(),
                     integration_id: body.integration_id.clone(),
                 };
@@ -115,7 +115,7 @@ pub async fn create_session(
                             connection_id: Some(existing.connection_id),
                         }));
                     }
-                    Err(hypr_nango::Error::Api(404, response_body)) => {
+                    Err(meeki_nango::Error::Api(404, response_body)) => {
                         tracing::warn!(
                             enduser.id = %user_id,
                             hyprnote.integration.id = %body.integration_id,
@@ -145,8 +145,8 @@ pub async fn create_session(
         tags.insert("end_user_email".to_string(), e.clone());
     }
 
-    let req = hypr_nango::CreateConnectSessionRequest {
-        end_user: hypr_nango::EndUser {
+    let req = meeki_nango::CreateConnectSessionRequest {
+        end_user: meeki_nango::EndUser {
             id: user_id,
             display_name: None,
             email,

@@ -1,4 +1,4 @@
-use hypr_hooks::{HookEvent, HookResult};
+use meeki_hooks::{HookEvent, HookResult};
 
 use crate::HooksPluginExt;
 

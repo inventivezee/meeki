@@ -2,7 +2,7 @@ import { Trans } from "@lingui/react/macro";
 import { useMutation } from "@tanstack/react-query";
 import { AlertCircleIcon, RefreshCwIcon } from "lucide-react";
 
-import { Button } from "@hypr/ui/components/ui/button";
+import { Button } from "@meeki/ui/components/ui/button";
 
 import { useAITask } from "~/ai/contexts";
 import { useLanguageModel } from "~/ai/hooks";
@@ -58,8 +58,8 @@ export function EnhanceError({
         <p className="text-muted-foreground text-sm leading-relaxed">
           {isUnauthenticated ? (
             <Trans>
-              Anarlog could not generate this summary because you were not
-              signed in. Sign in, then try again.
+              Meeki could not generate this summary because you were not signed
+              in. Sign in, then try again.
             </Trans>
           ) : (
             error?.message || (

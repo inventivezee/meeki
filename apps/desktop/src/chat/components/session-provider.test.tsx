@@ -31,7 +31,7 @@ const mocks = vi.hoisted(() => ({
   upsertChatMessage: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock("@hypr/plugin-db", () => ({
+vi.mock("@meeki/plugin-db", () => ({
   beginCloudsyncActivity: mocks.beginCloudsyncActivity,
   endCloudsyncActivity: mocks.endCloudsyncActivity,
 }));

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import type { ChatEditorHandle, JSONContent } from "@hypr/editor/chat";
-import { EMPTY_DOC } from "@hypr/editor/markdown";
-import { commands as analyticsCommands } from "@hypr/plugin-analytics";
+import type { ChatEditorHandle, JSONContent } from "@meeki/editor/chat";
+import { EMPTY_DOC } from "@meeki/editor/markdown";
+import { commands as analyticsCommands } from "@meeki/plugin-analytics";
 
 import type { ContextRef } from "~/chat/context/entities";
 

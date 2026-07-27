@@ -16,11 +16,11 @@ vi.mock("~/types/tauri.gen", () => ({
   },
 }));
 
-vi.mock("@hypr/plugin-opener2", () => ({
+vi.mock("@meeki/plugin-opener2", () => ({
   commands: { openUrl: vi.fn() },
 }));
 
-vi.mock("@hypr/ui/components/ui/toast", () => ({
+vi.mock("@meeki/ui/components/ui/toast", () => ({
   sonnerToast: { error: mocks.toastError, success: mocks.toastSuccess },
 }));
 
@@ -33,13 +33,13 @@ import {
 describe("buildMcpConfiguration", () => {
   it("uses the exact installed CLI path", () => {
     const configuration = JSON.parse(
-      buildMcpConfiguration("/Users/test/.local/bin/anarlog"),
+      buildMcpConfiguration("/Users/test/.local/bin/meeki"),
     );
 
     expect(configuration).toEqual({
       mcpServers: {
-        anarlog: {
-          command: "/Users/test/.local/bin/anarlog",
+        meeki: {
+          command: "/Users/test/.local/bin/meeki",
           args: ["mcp"],
         },
       },
@@ -52,12 +52,12 @@ describe("getCliInstallNotification", () => {
     expect(
       getCliInstallNotification({
         supported: true,
-        commandName: "anarlog",
-        installPath: "/Users/test/.local/bin/anarlog",
+        commandName: "meeki",
+        installPath: "/Users/test/.local/bin/meeki",
         state: "installed",
         details: "Installed.",
       }),
-    ).toEqual({ type: "success", message: "anarlog is ready to use" });
+    ).toEqual({ type: "success", message: "meeki is ready to use" });
   });
 
   it.each(["resource_missing", "unsupported"] as const)(
@@ -66,8 +66,8 @@ describe("getCliInstallNotification", () => {
       expect(
         getCliInstallNotification({
           supported: false,
-          commandName: "anarlog",
-          installPath: "/Users/test/.local/bin/anarlog",
+          commandName: "meeki",
+          installPath: "/Users/test/.local/bin/meeki",
           state,
           details: "The CLI is unavailable in this build.",
         }),
@@ -96,11 +96,11 @@ describe("SettingsDevelopers", () => {
       status: "ok",
       data: {
         supported: true,
-        commandName: "anarlog",
-        installPath: "/Users/test/.local/bin/anarlog",
+        commandName: "meeki",
+        installPath: "/Users/test/.local/bin/meeki",
         state: "installed",
         details:
-          "Installed at /Users/test/.local/bin/anarlog and managed by Anarlog.",
+          "Installed at /Users/test/.local/bin/meeki and managed by Meeki.",
       },
     });
 
@@ -115,7 +115,7 @@ describe("SettingsDevelopers", () => {
 
     expect(await screen.findByText("Reinstall")).toBeTruthy();
     expect(
-      screen.getAllByText(/\/Users\/test\/\.local\/bin\/anarlog/).length,
+      screen.getAllByText(/\/Users\/test\/\.local\/bin\/meeki/).length,
     ).toBeGreaterThan(0);
   });
 
@@ -124,8 +124,8 @@ describe("SettingsDevelopers", () => {
       status: "ok",
       data: {
         supported: false,
-        commandName: "anarlog-dev",
-        installPath: "/Users/test/.local/bin/anarlog-dev",
+        commandName: "meeki-dev",
+        installPath: "/Users/test/.local/bin/meeki-dev",
         state: "unsupported",
         details: "Bundled CLI installation is currently available on macOS.",
       },
@@ -143,7 +143,7 @@ describe("SettingsDevelopers", () => {
     const copyButton = await screen.findByRole("button", { name: "Copy" });
     expect(copyButton.hasAttribute("disabled")).toBe(true);
     expect(
-      screen.queryByText(/\/Users\/test\/\.local\/bin\/anarlog-dev/),
+      screen.queryByText(/\/Users\/test\/\.local\/bin\/meeki-dev/),
     ).toBeNull();
   });
 });

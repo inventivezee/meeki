@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import type {
   IdentityAssignment,
   RenderTranscriptRequest,
-} from "@hypr/plugin-transcription";
+} from "@meeki/plugin-transcription";
 
 import {
   applyRenderRequestIdentitiesToSegments,

@@ -61,8 +61,8 @@ describe("PermissionsSection", () => {
   it("shows optional Accessibility permission on macOS", () => {
     const { container } = render(<PermissionsSection />);
 
-    expect(screen.getByText("Help Anarlog listen to you")).toBeTruthy();
-    expect(screen.getByText("Help Anarlog listen to others")).toBeTruthy();
+    expect(screen.getByText("Help Meeki listen to you")).toBeTruthy();
+    expect(screen.getByText("Help Meeki listen to others")).toBeTruthy();
     expect(screen.getByText("Optional: read meeting activity")).toBeTruthy();
     expect(
       screen

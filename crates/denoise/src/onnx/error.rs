@@ -3,16 +3,16 @@ use serde::{Serialize, ser::Serializer};
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error(transparent)]
-    HyprOnnxError(#[from] hypr_onnx::Error),
+    HyprOnnxError(#[from] meeki_onnx::Error),
 
     #[error(transparent)]
-    OrtError(#[from] hypr_onnx::ort::Error),
+    OrtError(#[from] meeki_onnx::ort::Error),
 
     #[error(transparent)]
     FftError(#[from] realfft::FftError),
 
     #[error(transparent)]
-    ShapeError(#[from] hypr_onnx::ndarray::ShapeError),
+    ShapeError(#[from] meeki_onnx::ndarray::ShapeError),
 
     #[error("Missing output tensor: {0}")]
     MissingOutput(String),

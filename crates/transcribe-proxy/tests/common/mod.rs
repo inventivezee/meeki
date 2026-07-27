@@ -47,8 +47,8 @@ use transcribe_proxy::{
     HyprnoteRoutingConfig, SttAnalyticsReporter, SttEvent, SttProxyConfig, router,
 };
 
-fn test_supabase_env() -> hypr_api_env::SupabaseEnv {
-    hypr_api_env::SupabaseEnv {
+fn test_supabase_env() -> meeki_api_env::SupabaseEnv {
+    meeki_api_env::SupabaseEnv {
         supabase_url: String::new(),
         supabase_anon_key: String::new(),
         supabase_service_role_key: String::new(),
@@ -135,13 +135,13 @@ pub fn test_audio_stream_with_rate(
 > + Send
 + Unpin
 + 'static {
-    use hypr_audio_utils::AudioFormatExt;
+    use meeki_audio_utils::AudioFormatExt;
 
     // chunk_samples should be proportional to sample_rate to maintain 100ms chunks
     let chunk_samples = (sample_rate / 10) as usize;
 
     let audio = rodio::Decoder::new(std::io::BufReader::new(
-        std::fs::File::open(hypr_data::english_1::AUDIO_PATH).unwrap(),
+        std::fs::File::open(meeki_data::english_1::AUDIO_PATH).unwrap(),
     ))
     .unwrap()
     .to_i16_le_chunks(sample_rate, chunk_samples);

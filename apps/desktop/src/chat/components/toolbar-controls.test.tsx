@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@hypr/ui/components/ui/button", () => ({
+vi.mock("@meeki/ui/components/ui/button", () => ({
   Button: ({
     children,
     className,
@@ -14,7 +14,7 @@ vi.mock("@hypr/ui/components/ui/button", () => ({
   ),
 }));
 
-vi.mock("@hypr/ui/components/ui/dropdown-menu", () => ({
+vi.mock("@meeki/ui/components/ui/dropdown-menu", () => ({
   AppFloatingPanel: ({
     children,
     className,
@@ -88,7 +88,7 @@ describe("ChatToolbarControls", () => {
     expect(historyButton.className).toContain("w-auto");
     expect(historyButton.className).toContain("gap-1.5");
     expect(historyButton.className).toContain("hover:bg-primary-foreground/14");
-    expect(screen.queryByText("Ask Anarlog AI anything")).toBeNull();
+    expect(screen.queryByText("Ask Meeki AI anything")).toBeNull();
   });
 
   it("renders the light chat history trigger without title text", () => {
@@ -113,7 +113,7 @@ describe("ChatToolbarControls", () => {
     expect(historyButton.className).toContain("text-muted-foreground");
     expect(historyButton.className).toContain("hover:bg-muted/80");
     expect(historyButton.textContent).toBe("");
-    expect(screen.queryByText("Ask Anarlog AI anything")).toBeNull();
+    expect(screen.queryByText("Ask Meeki AI anything")).toBeNull();
   });
 
   it("opens floating chat history to the right and adapts to viewport collisions", () => {
@@ -250,7 +250,7 @@ describe("ChatToolbarControls", () => {
     expect(historyButton.className).toContain("-ml-2");
     expect(historyButton.className).toContain("h-8");
     expect(historyButton.className).toContain("w-auto");
-    expect(screen.queryByText("Ask Anarlog AI anything")).toBeNull();
+    expect(screen.queryByText("Ask Meeki AI anything")).toBeNull();
     const floatButton = screen.getByRole("button", { name: "Float chat" });
     const closeButton = screen.getByRole("button", { name: "Close chat" });
     expect(floatButton.className).toContain("hover:!bg-muted/80");

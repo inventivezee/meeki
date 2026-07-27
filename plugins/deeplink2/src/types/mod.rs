@@ -15,9 +15,9 @@ use specta::Type;
 use std::str::FromStr;
 
 const SHARE_OPEN_PREFIXES: [&str; 6] = [
-    "anarlog://share/open",
-    "anarlog-staging://share/open",
-    "anarlog-dev://share/open",
+    "meeki://share/open",
+    "meeki-staging://share/open",
+    "meeki-dev://share/open",
     "hyprnote://share/open",
     "hyprnote-staging://share/open",
     "hypr://share/open",
@@ -129,7 +129,7 @@ impl FromStr for DeepLink {
             "auth/callback" => Ok(DeepLink::AuthCallback(serde_qs::from_str(query)?)),
             "billing/refresh" => Ok(DeepLink::BillingRefresh(serde_qs::from_str(query)?)),
             "integration/callback" => Ok(DeepLink::IntegrationCallback(serde_qs::from_str(query)?)),
-            // Legacy Anarlog demo completion links are intentionally rejected.
+            // Legacy Meeki demo completion links are intentionally rejected.
             "onboarding-demo/complete" => Err(crate::Error::UnknownPath(full_path)),
             _ => Err(crate::Error::UnknownPath(full_path)),
         }
@@ -143,7 +143,7 @@ mod tests {
     #[test]
     fn rejects_legacy_onboarding_demo_completion() {
         assert!(matches!(
-            DeepLink::from_str("anarlog://onboarding-demo/complete"),
+            DeepLink::from_str("meeki://onboarding-demo/complete"),
             Err(crate::Error::UnknownPath(_))
         ));
     }

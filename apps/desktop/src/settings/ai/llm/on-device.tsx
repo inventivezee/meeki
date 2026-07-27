@@ -6,10 +6,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   commands as localLlmCommands,
   type GgufLlmModel,
-} from "@hypr/plugin-local-llm";
-import { Button } from "@hypr/ui/components/ui/button";
-import { sonnerToast } from "@hypr/ui/components/ui/toast";
-import { cn } from "@hypr/utils";
+} from "@meeki/plugin-local-llm";
+import { Button } from "@meeki/ui/components/ui/button";
+import { sonnerToast } from "@meeki/ui/components/ui/toast";
+import { cn } from "@meeki/utils";
 
 import { OtherLocalModels } from "./other-models";
 
@@ -255,7 +255,7 @@ export function OnDeviceLlmCard() {
       <div className="border-border/60 bg-card/70 flex flex-col gap-1 rounded-2xl border px-4 py-3">
         <p className="text-sm font-medium">On-device interpretation</p>
         <p className="text-muted-foreground text-xs leading-relaxed">
-          Couldn’t read the local model catalog. Restart Anarlog and try again.
+          Couldn’t read the local model catalog. Restart Meeki and try again.
         </p>
       </div>
     );

@@ -113,8 +113,8 @@ fn migrate_from_store_json(store_json_path: &Path, auth_path: &Path) -> std::io:
 
     let _: HashMap<String, String> = serde_json::from_str(&auth_str).map_err(invalid_data)?;
 
-    hypr_storage::fs::atomic_write(auth_path, &auth_str)?;
-    hypr_storage::fs::atomic_write(
+    meeki_storage::fs::atomic_write(auth_path, &auth_str)?;
+    meeki_storage::fs::atomic_write(
         store_json_path,
         &serde_json::to_string(&store).map_err(invalid_data)?,
     )?;
@@ -136,7 +136,7 @@ mod test {
         let temp = tempdir().unwrap();
         let legacy_auth_path = temp.path().join("hyprnote").join(FILENAME);
         let legacy_store_json_path = temp.path().join("hyprnote").join("store.json");
-        let new_auth_path = temp.path().join("com.hyprnote.stable").join(FILENAME);
+        let new_auth_path = temp.path().join("com.meeki.stable").join(FILENAME);
 
         std::fs::create_dir_all(legacy_auth_path.parent().unwrap()).unwrap();
         std::fs::write(&legacy_auth_path, auth_json("legacy-token")).unwrap();
@@ -155,7 +155,7 @@ mod test {
         let temp = tempdir().unwrap();
         let legacy_auth_path = temp.path().join("hyprnote").join(FILENAME);
         let legacy_store_json_path = temp.path().join("hyprnote").join("store.json");
-        let new_auth_path = temp.path().join("com.hyprnote.stable").join(FILENAME);
+        let new_auth_path = temp.path().join("com.meeki.stable").join(FILENAME);
 
         std::fs::create_dir_all(legacy_auth_path.parent().unwrap()).unwrap();
         std::fs::create_dir_all(new_auth_path.parent().unwrap()).unwrap();
@@ -176,7 +176,7 @@ mod test {
         let temp = tempdir().unwrap();
         let legacy_auth_path = temp.path().join("hyprnote").join(FILENAME);
         let legacy_store_json_path = temp.path().join("hyprnote").join("store.json");
-        let new_auth_path = temp.path().join("com.hyprnote.stable").join(FILENAME);
+        let new_auth_path = temp.path().join("com.meeki.stable").join(FILENAME);
 
         std::fs::create_dir_all(new_auth_path.parent().unwrap()).unwrap();
         std::fs::create_dir_all(legacy_store_json_path.parent().unwrap()).unwrap();
@@ -196,7 +196,7 @@ mod test {
         let temp = tempdir().unwrap();
         let legacy_auth_path = temp.path().join("hyprnote").join(FILENAME);
         let legacy_store_json_path = temp.path().join("hyprnote").join("store.json");
-        let new_auth_path = temp.path().join("com.hyprnote.stable").join(FILENAME);
+        let new_auth_path = temp.path().join("com.meeki.stable").join(FILENAME);
 
         std::fs::create_dir_all(legacy_store_json_path.parent().unwrap()).unwrap();
         std::fs::write(
@@ -232,7 +232,7 @@ mod test {
         let new_auth_path = temp
             .path()
             .join("nested")
-            .join("com.hyprnote.stable")
+            .join("com.meeki.stable")
             .join(FILENAME);
 
         std::fs::create_dir_all(legacy_auth_path.parent().unwrap()).unwrap();
@@ -248,8 +248,8 @@ mod test {
         let temp = tempdir().unwrap();
         let legacy_auth_path = temp.path().join("hyprnote").join(FILENAME);
         let legacy_store_json_path = temp.path().join("hyprnote").join("store.json");
-        let stable_auth_path = temp.path().join("com.hyprnote.stable").join(FILENAME);
-        let nightly_auth_path = temp.path().join("com.hyprnote.nightly").join(FILENAME);
+        let stable_auth_path = temp.path().join("com.meeki.stable").join(FILENAME);
+        let nightly_auth_path = temp.path().join("com.meeki.nightly").join(FILENAME);
 
         std::fs::create_dir_all(legacy_auth_path.parent().unwrap()).unwrap();
         std::fs::write(&legacy_auth_path, auth_json("legacy-token")).unwrap();
@@ -276,7 +276,7 @@ mod test {
         let temp = tempdir().unwrap();
         let legacy_auth_path = temp.path().join("hyprnote").join(FILENAME);
         let legacy_store_json_path = temp.path().join("hyprnote").join("store.json");
-        let new_auth_path = temp.path().join("com.hyprnote.stable").join(FILENAME);
+        let new_auth_path = temp.path().join("com.meeki.stable").join(FILENAME);
 
         std::fs::create_dir_all(legacy_store_json_path.parent().unwrap()).unwrap();
         std::fs::write(&legacy_store_json_path, "{ invalid json").unwrap();
@@ -297,7 +297,7 @@ mod test {
         let temp = tempdir().unwrap();
         let legacy_auth_path = temp.path().join("hyprnote").join(FILENAME);
         let legacy_store_json_path = temp.path().join("hyprnote").join("store.json");
-        let new_auth_path = temp.path().join("com.hyprnote.stable").join(FILENAME);
+        let new_auth_path = temp.path().join("com.meeki.stable").join(FILENAME);
 
         std::fs::create_dir_all(legacy_auth_path.parent().unwrap()).unwrap();
         std::fs::create_dir_all(&new_auth_path).unwrap();

@@ -35,7 +35,7 @@ export function getSitemap(): Sitemap<TRoutes> {
   const changelogVersions = getChangelogVersions();
 
   return {
-    siteUrl: "https://anarlog.so",
+    siteUrl: "https://meeki.so",
     defaultPriority: 0.5,
     defaultChangeFreq: "monthly",
     routes: {

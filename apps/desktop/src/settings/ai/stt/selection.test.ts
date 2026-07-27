@@ -15,7 +15,7 @@ describe("getDefaultSttModel", () => {
     expect(getDefaultSttModel("assemblyai")).toBe("u3-rt-pro");
   });
 
-  test("does not invent a model for custom or Anarlog providers", () => {
+  test("does not invent a model for custom or Meeki providers", () => {
     expect(getDefaultSttModel("custom")).toBeUndefined();
     expect(getDefaultSttModel("hyprnote")).toBeUndefined();
   });

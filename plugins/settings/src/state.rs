@@ -15,7 +15,7 @@ impl StartupSnapshot {
     }
 
     fn settings_path(&self) -> PathBuf {
-        hypr_storage::vault::compute_settings_path(&self.startup_vault_base)
+        meeki_storage::vault::compute_settings_path(&self.startup_vault_base)
     }
 
     pub fn startup_vault_base(&self) -> &PathBuf {
@@ -54,7 +54,7 @@ impl StartupSnapshot {
             return Ok(settings);
         }
 
-        let legacy_path = hypr_storage::vault::compute_settings_path(legacy_base);
+        let legacy_path = meeki_storage::vault::compute_settings_path(legacy_base);
         if legacy_path == self.settings_path() {
             return Ok(serde_json::json!({}));
         }
@@ -72,12 +72,12 @@ impl StartupSnapshot {
         let merged = merge_settings(existing, settings);
         let content = serde_json::to_string_pretty(&merged)?;
 
-        hypr_storage::fs::atomic_write_async(&self.settings_path(), &content).await?;
+        meeki_storage::fs::atomic_write_async(&self.settings_path(), &content).await?;
         Ok(())
     }
 
     pub fn reset(&self) -> crate::Result<()> {
-        hypr_storage::fs::atomic_write(&self.settings_path(), "{}")?;
+        meeki_storage::fs::atomic_write(&self.settings_path(), "{}")?;
         Ok(())
     }
 }
@@ -112,7 +112,7 @@ mod tests {
         std::fs::create_dir_all(&vault_base).unwrap();
         std::fs::create_dir_all(&global_base).unwrap();
         std::fs::write(
-            hypr_storage::vault::compute_settings_path(&global_base),
+            meeki_storage::vault::compute_settings_path(&global_base),
             r#"{"ai":{"current_llm_provider":"hyprnote"}}"#,
         )
         .unwrap();
@@ -136,12 +136,12 @@ mod tests {
         std::fs::create_dir_all(&vault_base).unwrap();
         std::fs::create_dir_all(&global_base).unwrap();
         std::fs::write(
-            hypr_storage::vault::compute_settings_path(&vault_base),
+            meeki_storage::vault::compute_settings_path(&vault_base),
             "{}",
         )
         .unwrap();
         std::fs::write(
-            hypr_storage::vault::compute_settings_path(&global_base),
+            meeki_storage::vault::compute_settings_path(&global_base),
             r#"{"general":{"theme":"light"}}"#,
         )
         .unwrap();
@@ -165,12 +165,12 @@ mod tests {
         std::fs::create_dir_all(&vault_base).unwrap();
         std::fs::create_dir_all(&global_base).unwrap();
         std::fs::write(
-            hypr_storage::vault::compute_settings_path(&vault_base),
+            meeki_storage::vault::compute_settings_path(&vault_base),
             r#"{"general":{"theme":"dark"}}"#,
         )
         .unwrap();
         std::fs::write(
-            hypr_storage::vault::compute_settings_path(&global_base),
+            meeki_storage::vault::compute_settings_path(&global_base),
             r#"{"general":{"theme":"light"}}"#,
         )
         .unwrap();

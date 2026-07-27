@@ -5,6 +5,6 @@ edition = "2024"
 
 [dependencies]
 hidapi = { workspace = true }
-hypr-hid-interface = { workspace = true }
+meeki-hid-interface = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }

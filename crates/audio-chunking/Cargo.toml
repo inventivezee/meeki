@@ -7,9 +7,9 @@ edition = "2024"
 default = ["vad"]
 vad = [
   "dep:futures-util",
-  "dep:hypr-audio-interface",
-  "dep:hypr-onnx",
-  "dep:hypr-vad",
+  "dep:meeki-audio-interface",
+  "dep:meeki-onnx",
+  "dep:meeki-vad",
   "dep:pin-project",
 ]
 segmentation = []
@@ -17,7 +17,7 @@ segmentation = []
 [dev-dependencies]
 futures-util = { workspace = true }
 hound = { workspace = true }
-hypr-data = { workspace = true }
+meeki-data = { workspace = true }
 rodio = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 
@@ -26,9 +26,9 @@ name = "chunking"
 required-features = ["vad"]
 
 [dependencies]
-hypr-audio-interface = { workspace = true, optional = true }
-hypr-onnx = { workspace = true, optional = true }
-hypr-vad = { workspace = true, features = ["silero-onnx"], optional = true }
+meeki-audio-interface = { workspace = true, optional = true }
+meeki-onnx = { workspace = true, optional = true }
+meeki-vad = { workspace = true, features = ["silero-onnx"], optional = true }
 
 futures-util = { workspace = true, optional = true }
 pin-project = { workspace = true, optional = true }

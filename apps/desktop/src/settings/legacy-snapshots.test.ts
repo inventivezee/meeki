@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
   ),
 }));
 
-vi.mock("@hypr/plugin-settings", () => ({
+vi.mock("@meeki/plugin-settings", () => ({
   commands: { load: mocks.load },
 }));
 

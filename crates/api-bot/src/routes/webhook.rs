@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use axum::{Extension, Json};
-use hypr_recall::{BotStatusCode, BotStatusWebhook, RecallClient, TranscriptWebhook};
+use meeki_recall::{BotStatusCode, BotStatusWebhook, RecallClient, TranscriptWebhook};
 
 use crate::error::Result;
 

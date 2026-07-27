@@ -4,7 +4,7 @@ import { Building2Icon, StickyNoteIcon, UserIcon } from "lucide-react";
 import type { NodeSpec } from "prosemirror-model";
 import { forwardRef, useCallback } from "react";
 
-import { cn } from "@hypr/utils";
+import { cn } from "@meeki/utils";
 
 export const mentionNodeSpec: NodeSpec = {
   group: "inline",

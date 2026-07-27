@@ -8,12 +8,12 @@ import {
   useRouterState,
 } from "@tanstack/react-router";
 
-import { Toaster } from "@hypr/ui/components/ui/toast";
+import { Toaster } from "@meeki/ui/components/ui/toast";
 
 import { WebProviders } from "@/components/web-providers";
 import { isTelemetryPrivateLocation } from "@/lib/auth-route-privacy";
 import {
-  ANARLOG_SITE_URL,
+  MEEKI_SITE_URL,
   DEFAULT_OG_IMAGE_URL,
   ROOT_DESCRIPTION,
   ROOT_KEYWORDS,
@@ -40,14 +40,14 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       { title: ROOT_TITLE },
       { name: "description", content: ROOT_DESCRIPTION },
       { name: "keywords", content: ROOT_KEYWORDS },
-      { name: "ai-sitemap", content: `${ANARLOG_SITE_URL}/llms.txt` },
+      { name: "ai-sitemap", content: `${MEEKI_SITE_URL}/llms.txt` },
       { name: "ai-content", content: "public" },
-      { name: "apple-mobile-web-app-title", content: "Anarlog" },
+      { name: "apple-mobile-web-app-title", content: "Meeki" },
       { name: "theme-color", content: "#ffe09d" },
       { property: "og:type", content: "website" },
       { property: "og:title", content: ROOT_TITLE },
       { property: "og:description", content: ROOT_DESCRIPTION },
-      { property: "og:url", content: ANARLOG_SITE_URL },
+      { property: "og:url", content: MEEKI_SITE_URL },
       {
         property: "og:image",
         content: DEFAULT_OG_IMAGE_URL,
@@ -55,11 +55,11 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@anarlog" },
-      { name: "twitter:creator", content: "@anarlog" },
+      { name: "twitter:site", content: "@meeki" },
+      { name: "twitter:creator", content: "@meeki" },
       { name: "twitter:title", content: ROOT_TITLE },
       { name: "twitter:description", content: ROOT_DESCRIPTION },
-      { name: "twitter:url", content: ANARLOG_SITE_URL },
+      { name: "twitter:url", content: MEEKI_SITE_URL },
       {
         name: "twitter:image",
         content: DEFAULT_OG_IMAGE_URL,
@@ -152,7 +152,7 @@ function NotFound() {
           to="/"
           className="mt-6 inline-flex rounded-full bg-[#181613] px-5 py-3 text-sm font-medium text-white"
         >
-          Back to Anarlog
+          Back to Meeki
         </Link>
       </div>
     </main>

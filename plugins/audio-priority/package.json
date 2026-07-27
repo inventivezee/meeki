@@ -1,5 +1,5 @@
 {
-  "name": "@hypr/plugin-audio-priority",
+  "name": "@meeki/plugin-audio-priority",
   "private": true,
   "main": "./js/index.ts",
   "scripts": {

@@ -1,6 +1,6 @@
 import { type ReactNode } from "react";
 
-import { cn } from "@hypr/utils";
+import { cn } from "@meeki/utils";
 
 import { CalendarNav } from "./calendar";
 import { ContactsNav } from "./contacts";

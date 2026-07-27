@@ -1,6 +1,6 @@
 ---
 name: release-new-version
-description: Release a new desktop stable version for Anarlog. Use when asked to cut, publish, or prepare a new stable desktop release after checking and merging the changelog.
+description: Release a new desktop stable version for Meeki. Use when asked to cut, publish, or prepare a new stable desktop release after checking and merging the changelog.
 metadata:
   internal: true
 ---
@@ -19,7 +19,7 @@ After the changelog is merged to `main`, read and run
 `../qa-critical-ux/SKILL.md` against that final commit. Require a recorded PASS
 for both:
 
-- native Dev QA pinned with `ANARLOG_QA_GIT_SHA` and a helper manifest with
+- native Dev QA pinned with `MEEKI_QA_GIT_SHA` and a helper manifest with
   `git_dirty=false`
 - the run-scoped staging artifact whose Actions head SHA exactly matches the
   Dev manifest's `git_head_sha`
@@ -90,7 +90,7 @@ After editing the changelog, run:
 
 ```bash
 pnpm exec dprint fmt
-pnpm -F @hypr/changelog typecheck
+pnpm -F @meeki/changelog typecheck
 ```
 
 ## Merge to Main
@@ -147,7 +147,7 @@ The stable workflow should:
 - build both Apple Silicon and Intel macOS artifacts
 - draft, upload, and publish the CrabNebula release when `publish=true`
 - create or update `desktop_v<version>`
-- create the GitHub release pointing to `https://anarlog.so/changelog/<version>`
+- create the GitHub release pointing to `https://meeki.so/changelog/<version>`
 
 ## Final Checks
 

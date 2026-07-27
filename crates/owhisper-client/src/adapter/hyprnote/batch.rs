@@ -15,7 +15,7 @@ impl BatchSttAdapter for HyprnoteAdapter {
 
     fn is_supported_languages(
         &self,
-        languages: &[hypr_language::Language],
+        languages: &[meeki_language::Language],
         model: Option<&str>,
     ) -> bool {
         HyprnoteAdapter::is_supported_languages_batch(languages, model)

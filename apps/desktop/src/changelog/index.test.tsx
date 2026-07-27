@@ -12,11 +12,11 @@ const mocks = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("@hypr/changelog", () => ({
+vi.mock("@meeki/changelog", () => ({
   ChangelogContent: ({ content }: { content: string }) => <div>{content}</div>,
 }));
 
-vi.mock("@hypr/plugin-opener2", () => ({
+vi.mock("@meeki/plugin-opener2", () => ({
   commands: {
     openUrl: vi.fn(),
   },

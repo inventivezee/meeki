@@ -15,9 +15,9 @@ impl ShareOpenRequest {
     pub(crate) fn parse(parsed: &url::Url) -> Result<Self, crate::Error> {
         if !matches!(
             parsed.scheme(),
-            "anarlog"
-                | "anarlog-staging"
-                | "anarlog-dev"
+            "meeki"
+                | "meeki-staging"
+                | "meeki-dev"
                 | "hyprnote"
                 | "hyprnote-staging"
                 | "hypr"
@@ -113,9 +113,9 @@ mod tests {
     #[test]
     fn parses_only_account_and_handoff_routes() {
         for scheme in [
-            "anarlog",
-            "anarlog-staging",
-            "anarlog-dev",
+            "meeki",
+            "meeki-staging",
+            "meeki-dev",
             "hyprnote",
             "hyprnote-staging",
             "hypr",
@@ -165,11 +165,11 @@ mod tests {
     #[test]
     fn debug_output_redacts_external_identifiers() {
         let account = parse(&format!(
-            "anarlog://share/open?mode=account&share_id={SHARE_ID}"
+            "meeki://share/open?mode=account&share_id={SHARE_ID}"
         ))
         .unwrap();
         let handoff = parse(&format!(
-            "anarlog://share/open?mode=handoff&request_id={REQUEST_ID}"
+            "meeki://share/open?mode=handoff&request_id={REQUEST_ID}"
         ))
         .unwrap();
 

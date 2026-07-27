@@ -13,15 +13,15 @@ import {
 } from "lucide-react";
 import { useSyncExternalStore } from "react";
 
-import { getCloudsyncStatus, syncCloudsyncNow } from "@hypr/plugin-db";
+import { getCloudsyncStatus, syncCloudsyncNow } from "@meeki/plugin-db";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@hypr/ui/components/ui/dropdown-menu";
-import { cn, formatDistanceToNow } from "@hypr/utils";
+} from "@meeki/ui/components/ui/dropdown-menu";
+import { cn, formatDistanceToNow } from "@meeki/utils";
 
 import { useAuth } from "~/auth";
 import { useBillingAccess } from "~/auth/billing-context";
@@ -133,8 +133,8 @@ export function SyncStatusIndicator() {
       case "not_entitled":
         return {
           kind: "error" as const,
-          label: t`Anarlog Pro required`,
-          description: t`Anarlog Pro is required to use cloud sync.`,
+          label: t`Meeki Pro required`,
+          description: t`Meeki Pro is required to use cloud sync.`,
         };
       case "reauth_required":
         return {
@@ -162,7 +162,7 @@ export function SyncStatusIndicator() {
       return {
         kind: "error" as const,
         label: t`Sync status unavailable`,
-        description: t`Anarlog couldn't read cloud sync status. Your notes are still available locally.`,
+        description: t`Meeki couldn't read cloud sync status. Your notes are still available locally.`,
       };
     }
 
@@ -177,8 +177,8 @@ export function SyncStatusIndicator() {
         label: t`Sync issue`,
         description:
           status.last_error_kind === "transient"
-            ? t`Anarlog will retry automatically. This does not affect your notes.`
-            : (status.last_error ?? t`Anarlog will keep retrying`),
+            ? t`Meeki will retry automatically. This does not affect your notes.`
+            : (status.last_error ?? t`Meeki will keep retrying`),
       };
     }
 
@@ -202,7 +202,7 @@ export function SyncStatusIndicator() {
       return {
         kind: "error" as const,
         label: t`Cloud sync delayed`,
-        description: t`Anarlog will keep retrying in the background. Your notes remain available locally.`,
+        description: t`Meeki will keep retrying in the background. Your notes remain available locally.`,
       };
     }
 
@@ -210,7 +210,7 @@ export function SyncStatusIndicator() {
       return {
         kind: "syncing" as const,
         label: t`Restoring cloud sync...`,
-        description: t`Anarlog is repairing cloud sync in the background. Your notes remain available locally.`,
+        description: t`Meeki is repairing cloud sync in the background. Your notes remain available locally.`,
       };
     }
 

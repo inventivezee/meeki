@@ -1,7 +1,7 @@
 use axum::{Json, extract::State};
 use serde::{Deserialize, Serialize};
 
-pub use hypr_template_support::DeviceInfo;
+pub use meeki_template_support::DeviceInfo;
 
 use crate::error::SupportError;
 use crate::github::{self, BugReportInput, FeatureRequestInput};

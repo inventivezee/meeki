@@ -44,7 +44,7 @@ pub async fn init_session(
 
     let config = build_session_config(provider, params)?;
 
-    let resp = hypr_observability::with_current_trace_context(
+    let resp = meeki_observability::with_current_trace_context(
         state
             .client
             .post(init_url)

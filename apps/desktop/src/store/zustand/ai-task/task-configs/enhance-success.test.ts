@@ -1,7 +1,7 @@
 import type { LanguageModel } from "ai";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { json2md } from "@hypr/editor/markdown";
+import { json2md } from "@meeki/editor/markdown";
 
 import type { TaskConfig } from ".";
 import { enhanceSuccess } from "./enhance-success";
@@ -17,8 +17,8 @@ const mocks = vi.hoisted(() => ({
   persistGeneratedTitle: vi.fn().mockResolvedValue(true),
 }));
 
-vi.mock("@hypr/plugin-db", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@hypr/plugin-db")>()),
+vi.mock("@meeki/plugin-db", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@meeki/plugin-db")>()),
   beginCloudsyncActivity: mocks.beginCloudsyncActivity,
   endCloudsyncActivity: mocks.endCloudsyncActivity,
 }));

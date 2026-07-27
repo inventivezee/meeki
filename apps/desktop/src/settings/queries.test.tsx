@@ -11,20 +11,20 @@ const mocks = vi.hoisted(() => ({
   ),
 }));
 
-vi.mock("@hypr/plugin-analytics", () => ({
+vi.mock("@meeki/plugin-analytics", () => ({
   commands: {
     setDisabled: vi.fn(async () => undefined),
     setProperties: mocks.setProperties,
   },
 }));
 
-vi.mock("@hypr/plugin-detect", () => ({
+vi.mock("@meeki/plugin-detect", () => ({
   commands: {
     getPreferredLanguages: mocks.getPreferredLanguages,
   },
 }));
 
-vi.mock("@hypr/plugin-template", () => ({
+vi.mock("@meeki/plugin-template", () => ({
   commands: {
     getTemplateSource: mocks.getTemplateSource,
   },
@@ -339,7 +339,7 @@ Start with decisions.`);
     mocks.execute.mockResolvedValue([
       {
         id: "personalization_dictionary_terms",
-        value_json: JSON.stringify(JSON.stringify(["Anarlog"])),
+        value_json: JSON.stringify(JSON.stringify(["Meeki"])),
       },
     ]);
 
@@ -348,7 +348,7 @@ Start with decisions.`);
       (current) => JSON.stringify([...JSON.parse(current ?? "[]"), "Erebor"]),
     );
 
-    expect(next).toBe(JSON.stringify(["Anarlog", "Erebor"]));
+    expect(next).toBe(JSON.stringify(["Meeki", "Erebor"]));
     const statement = mocks.executeTransaction.mock.calls[0][0][0];
     expect(statement.params.slice(0, 2)).toEqual([
       "personalization_dictionary_terms",

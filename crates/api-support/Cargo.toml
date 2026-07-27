@@ -4,13 +4,13 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-hypr-api-auth = { workspace = true }
-hypr-api-env = { workspace = true }
-hypr-chatwoot = { workspace = true }
-hypr-llm-proxy = { workspace = true }
-hypr-mcp = { workspace = true }
-hypr-openrouter = { workspace = true }
-hypr-template-support = { workspace = true }
+meeki-api-auth = { workspace = true }
+meeki-api-env = { workspace = true }
+meeki-chatwoot = { workspace = true }
+meeki-llm-proxy = { workspace = true }
+meeki-mcp = { workspace = true }
+meeki-openrouter = { workspace = true }
+meeki-template-support = { workspace = true }
 regex = { workspace = true }
 reqwest = { workspace = true }
 urlencoding = { workspace = true }

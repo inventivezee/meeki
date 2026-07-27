@@ -8,7 +8,7 @@ import {
   deriveBillingInfo,
   parseProGrantEmails,
   type SupabaseJwtPayload,
-} from "@hypr/supabase";
+} from "@meeki/supabase";
 
 import { env } from "@/env";
 import { getSupabaseBrowserClient } from "@/functions/supabase";

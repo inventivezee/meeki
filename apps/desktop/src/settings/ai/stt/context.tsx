@@ -10,8 +10,8 @@ import {
 import {
   commands as localSttCommands,
   type LocalModel,
-} from "@hypr/plugin-local-stt";
-import { sonnerToast } from "@hypr/ui/components/ui/toast";
+} from "@meeki/plugin-local-stt";
+import { sonnerToast } from "@meeki/ui/components/ui/toast";
 
 import { useBillingAccess } from "~/auth/billing-context";
 import { useToastAction } from "~/store/zustand/toast-action";

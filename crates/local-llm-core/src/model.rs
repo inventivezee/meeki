@@ -14,7 +14,7 @@ pub static SUPPORTED_MODELS: &[SupportedModel] = &[
 #[cfg(not(target_arch = "aarch64"))]
 pub static SUPPORTED_MODELS: &[SupportedModel] = &[];
 
-pub use hypr_local_model::GgufLlmModel as SupportedModel;
+pub use meeki_local_model::GgufLlmModel as SupportedModel;
 
 #[derive(serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "specta", derive(specta::Type))]

@@ -1,4 +1,4 @@
-const SHARE_TOKEN_STORAGE_KEY = "anarlog.share-route-token";
+const SHARE_TOKEN_STORAGE_KEY = "meeki.share-route-token";
 const SHARE_TOKEN_PATTERN = /^[A-Za-z0-9_-]{43}$/;
 
 let inMemoryToken: { pathname: string; token: string } | null = null;

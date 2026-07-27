@@ -1,6 +1,6 @@
 import { isShareRoutePathname } from "./share-route-privacy.ts";
 
-const AUTH_HANDOFF_STORAGE_KEY = "anarlog.desktop-auth-handoff";
+const AUTH_HANDOFF_STORAGE_KEY = "meeki.desktop-auth-handoff";
 const AUTH_HANDOFF_MAX_AGE_MS = 5 * 60 * 1000;
 const AUTH_CALLBACK_SEARCH_KEYS = [
   "access_token",

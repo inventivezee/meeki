@@ -10,9 +10,9 @@ use owhisper_client::{
 use owhisper_interface::batch_stream::BatchStreamEvent;
 use tracing::Instrument;
 
-use hypr_audio_chunking::AudioChunk;
-use hypr_audio_utils::Source;
-use hypr_transcribe_core::{
+use meeki_audio_chunking::AudioChunk;
+use meeki_audio_utils::Source;
+use meeki_transcribe_core::{
     TARGET_SAMPLE_RATE, channel_duration_sec, chunk_channel_audio, split_resampled_channels,
 };
 
@@ -135,7 +135,7 @@ async fn run_direct_batch_with_timeout<A: BatchSttAdapter>(
 }
 
 fn direct_batch_timeout(file_path: &str) -> Duration {
-    let audio_duration = hypr_audio_utils::source_from_path(file_path)
+    let audio_duration = meeki_audio_utils::source_from_path(file_path)
         .ok()
         .and_then(|source| source.total_duration());
     direct_batch_timeout_for_audio(audio_duration)
@@ -170,7 +170,7 @@ pub(super) async fn run_soniqo_batch(
                 provider: "soniqo".to_string(),
                 message: "Missing Soniqo model.".to_string(),
             })?
-            .parse::<hypr_transcribe_soniqo::SoniqoModel>()
+            .parse::<meeki_transcribe_soniqo::SoniqoModel>()
             .map_err(|e| crate::BatchFailure::DirectRequestFailed {
                 provider: "soniqo".to_string(),
                 message: e.to_string(),
@@ -186,7 +186,7 @@ pub(super) async fn run_soniqo_batch(
         let language = listen_params
             .languages
             .first()
-            .map(hypr_language::Language::bcp47_code);
+            .map(meeki_language::Language::bcp47_code);
         let language_hint = soniqo_language_hint(language.as_deref());
         let language_label = language.as_deref().unwrap_or("auto").to_string();
         let language_hint_label = language_hint.as_deref().unwrap_or("auto").to_string();
@@ -245,7 +245,7 @@ pub(super) async fn run_soniqo_batch(
             "soniqo_batch_completed"
         );
 
-        let response = hypr_transcribe_soniqo::batch_response_from_channels(model, transcribed);
+        let response = meeki_transcribe_soniqo::batch_response_from_channels(model, transcribed);
 
         Ok(BatchRunOutput {
             session_id: params.session_id,
@@ -258,12 +258,12 @@ pub(super) async fn run_soniqo_batch(
 }
 
 fn transcribe_soniqo_file(
-    model: hypr_transcribe_soniqo::SoniqoModel,
+    model: meeki_transcribe_soniqo::SoniqoModel,
     file_path: &str,
     language: Option<&str>,
     progress: Option<&SoniqoProgressReporter>,
-) -> std::result::Result<Vec<hypr_transcribe_soniqo::FileTranscript>, String> {
-    let source = hypr_audio_utils::source_from_path(file_path).map_err(|e| e.to_string())?;
+) -> std::result::Result<Vec<meeki_transcribe_soniqo::FileTranscript>, String> {
+    let source = meeki_audio_utils::source_from_path(file_path).map_err(|e| e.to_string())?;
     let channel_count = u16::from(source.channels()).max(1) as usize;
     let sample_rate = u32::from(source.sample_rate());
     let duration_ms = source
@@ -290,7 +290,7 @@ fn transcribe_soniqo_file(
             hyprnote.stt.model = %model,
             "soniqo_single_channel_native_inference_start"
         );
-        return hypr_transcribe_soniqo::transcribe_file(model, file_path, language)
+        return meeki_transcribe_soniqo::transcribe_file(model, file_path, language)
             .map(|transcript| {
                 if let Some(progress) = progress {
                     progress.emit(SONIQO_PROGRESS_MAX);
@@ -302,7 +302,7 @@ fn transcribe_soniqo_file(
 
     let resample_started_at = Instant::now();
     let samples =
-        hypr_audio_utils::resample_audio(source, TARGET_SAMPLE_RATE).map_err(|e| e.to_string())?;
+        meeki_audio_utils::resample_audio(source, TARGET_SAMPLE_RATE).map_err(|e| e.to_string())?;
     tracing::info!(
         hyprnote.stt.provider.name = "soniqo",
         hyprnote.stt.model = %model,
@@ -381,8 +381,8 @@ fn soniqo_language_hint(language: Option<&str>) -> Option<String> {
         .map(|value| value.to_lowercase())
 }
 
-fn uses_resilient_soniqo_chunking(model: hypr_transcribe_soniqo::SoniqoModel) -> bool {
-    matches!(model, hypr_transcribe_soniqo::SoniqoModel::ParakeetBatch)
+fn uses_resilient_soniqo_chunking(model: meeki_transcribe_soniqo::SoniqoModel) -> bool {
+    matches!(model, meeki_transcribe_soniqo::SoniqoModel::ParakeetBatch)
 }
 
 fn soniqo_batch_progress(completed_chunks: usize, total_chunks: usize) -> f64 {
@@ -396,9 +396,9 @@ fn soniqo_batch_progress(completed_chunks: usize, total_chunks: usize) -> f64 {
 
 fn collect_soniqo_channel_transcripts<I>(
     transcripts: I,
-) -> std::result::Result<Vec<hypr_transcribe_soniqo::FileTranscript>, String>
+) -> std::result::Result<Vec<meeki_transcribe_soniqo::FileTranscript>, String>
 where
-    I: IntoIterator<Item = std::result::Result<hypr_transcribe_soniqo::FileTranscript, String>>,
+    I: IntoIterator<Item = std::result::Result<meeki_transcribe_soniqo::FileTranscript, String>>,
 {
     let mut output = Vec::new();
     let mut successful_channels = 0usize;
@@ -417,7 +417,7 @@ where
                     error = %error,
                     "soniqo_channel_transcription_failed"
                 );
-                output.push(hypr_transcribe_soniqo::FileTranscript::new(
+                output.push(meeki_transcribe_soniqo::FileTranscript::new(
                     String::new(),
                     0.05,
                 ));
@@ -435,7 +435,7 @@ where
 }
 
 fn soniqo_channel_plan(
-    model: hypr_transcribe_soniqo::SoniqoModel,
+    model: meeki_transcribe_soniqo::SoniqoModel,
     channel_index: usize,
     samples: &[f32],
 ) -> std::result::Result<SoniqoChannelPlan, String> {
@@ -459,11 +459,11 @@ fn soniqo_channel_plan(
 }
 
 fn transcribe_soniqo_channel_chunks(
-    model: hypr_transcribe_soniqo::SoniqoModel,
+    model: meeki_transcribe_soniqo::SoniqoModel,
     plan: SoniqoChannelPlan,
     language: Option<&str>,
     mut on_chunk_completed: impl FnMut(),
-) -> std::result::Result<hypr_transcribe_soniqo::FileTranscript, String> {
+) -> std::result::Result<meeki_transcribe_soniqo::FileTranscript, String> {
     let mut texts = Vec::new();
     let mut transcript_chunks = Vec::new();
     let mut successful_chunks = 0usize;
@@ -521,7 +521,7 @@ fn transcribe_soniqo_channel_chunks(
         let text = text.trim();
         if !text.is_empty() {
             texts.push(text.to_string());
-            transcript_chunks.push(hypr_transcribe_soniqo::FileTranscriptChunk {
+            transcript_chunks.push(meeki_transcribe_soniqo::FileTranscriptChunk {
                 text: text.to_string(),
                 start_seconds: chunk.sample_start as f64 / TARGET_SAMPLE_RATE as f64,
                 duration_seconds: (chunk.sample_end - chunk.sample_start) as f64
@@ -548,23 +548,23 @@ fn transcribe_soniqo_channel_chunks(
     }
 
     if transcript_chunks.is_empty() {
-        return Ok(hypr_transcribe_soniqo::FileTranscript::new(
+        return Ok(meeki_transcribe_soniqo::FileTranscript::new(
             texts.join(" "),
             plan.duration_seconds,
         ));
     }
 
-    Ok(hypr_transcribe_soniqo::FileTranscript::from_chunks(
+    Ok(meeki_transcribe_soniqo::FileTranscript::from_chunks(
         transcript_chunks,
         plan.duration_seconds,
     ))
 }
 
 fn transcribe_soniqo_samples(
-    model: hypr_transcribe_soniqo::SoniqoModel,
+    model: meeki_transcribe_soniqo::SoniqoModel,
     samples: &[f32],
     language: Option<&str>,
-) -> std::result::Result<hypr_transcribe_soniqo::FileTranscript, String> {
+) -> std::result::Result<meeki_transcribe_soniqo::FileTranscript, String> {
     let file = tempfile::Builder::new()
         .prefix("soniqo_channel_")
         .suffix(".wav")
@@ -585,21 +585,21 @@ fn transcribe_soniqo_samples(
         writer.finalize().map_err(|e| e.to_string())?;
     }
 
-    hypr_transcribe_soniqo::transcribe_file(model, file.path(), language).map_err(|e| e.to_string())
+    meeki_transcribe_soniqo::transcribe_file(model, file.path(), language).map_err(|e| e.to_string())
 }
 
 fn soniqo_channel_chunks(
-    model: hypr_transcribe_soniqo::SoniqoModel,
+    model: meeki_transcribe_soniqo::SoniqoModel,
     samples: &[f32],
 ) -> std::result::Result<Vec<AudioChunk>, String> {
-    if model == hypr_transcribe_soniqo::SoniqoModel::ParakeetBatch {
+    if model == meeki_transcribe_soniqo::SoniqoModel::ParakeetBatch {
         return Ok(split_audio_samples(
             samples,
             SONIQO_PARAKEET_MAX_CHUNK_SAMPLES,
         ));
     }
 
-    chunk_channel_audio::<hypr_audio_chunking::Error>(samples).map_err(|e| e.to_string())
+    chunk_channel_audio::<meeki_audio_chunking::Error>(samples).map_err(|e| e.to_string())
 }
 
 fn split_audio_samples(samples: &[f32], max_samples: usize) -> Vec<AudioChunk> {
@@ -669,7 +669,7 @@ mod tests {
 
         fn is_supported_languages(
             &self,
-            _languages: &[hypr_language::Language],
+            _languages: &[meeki_language::Language],
             _model: Option<&str>,
         ) -> bool {
             true
@@ -768,7 +768,7 @@ mod tests {
             model: Some("whisper-1".to_string()),
             base_url: format!("http://{address}/v1"),
             api_key: "test".to_string(),
-            languages: vec![hypr_language::ISO639::En.into()],
+            languages: vec![meeki_language::ISO639::En.into()],
             keywords: vec![],
             num_speakers: None,
             min_speakers: None,
@@ -781,7 +781,7 @@ mod tests {
                 model: Some("whisper-1".to_string()),
                 channels: 1,
                 sample_rate: TARGET_SAMPLE_RATE,
-                languages: vec![hypr_language::ISO639::En.into()],
+                languages: vec![meeki_language::ISO639::En.into()],
                 ..Default::default()
             },
             Duration::from_secs(5),
@@ -832,7 +832,7 @@ mod tests {
         let samples =
             vec![0.0; SONIQO_PARAKEET_MAX_CHUNK_SAMPLES * 2 + TARGET_SAMPLE_RATE as usize];
         let chunks =
-            soniqo_channel_chunks(hypr_transcribe_soniqo::SoniqoModel::ParakeetBatch, &samples)
+            soniqo_channel_chunks(meeki_transcribe_soniqo::SoniqoModel::ParakeetBatch, &samples)
                 .unwrap();
 
         assert_eq!(chunks.len(), 3);
@@ -865,10 +865,10 @@ mod tests {
     #[test]
     fn parakeet_batch_uses_resilient_chunking() {
         assert!(uses_resilient_soniqo_chunking(
-            hypr_transcribe_soniqo::SoniqoModel::ParakeetBatch
+            meeki_transcribe_soniqo::SoniqoModel::ParakeetBatch
         ));
         assert!(!uses_resilient_soniqo_chunking(
-            hypr_transcribe_soniqo::SoniqoModel::Omnilingual
+            meeki_transcribe_soniqo::SoniqoModel::Omnilingual
         ));
     }
 
@@ -888,7 +888,7 @@ mod tests {
     #[test]
     fn collect_soniqo_channel_transcripts_keeps_channel_slots() {
         let transcripts = collect_soniqo_channel_transcripts([
-            Ok(hypr_transcribe_soniqo::FileTranscript::new(
+            Ok(meeki_transcribe_soniqo::FileTranscript::new(
                 "hello".to_string(),
                 1.0,
             )),
@@ -905,15 +905,15 @@ mod tests {
     fn collect_soniqo_channel_transcripts_preserves_later_channel_index() {
         let transcripts = collect_soniqo_channel_transcripts([
             Err("first failed".to_string()),
-            Ok(hypr_transcribe_soniqo::FileTranscript::new(
+            Ok(meeki_transcribe_soniqo::FileTranscript::new(
                 "system audio".to_string(),
                 1.0,
             )),
         ])
         .unwrap();
 
-        let response = hypr_transcribe_soniqo::batch_response_from_channels(
-            hypr_transcribe_soniqo::SoniqoModel::ParakeetBatch,
+        let response = meeki_transcribe_soniqo::batch_response_from_channels(
+            meeki_transcribe_soniqo::SoniqoModel::ParakeetBatch,
             transcripts,
         );
         let alternative = &response.results.channels[1].alternatives[0];

@@ -1,8 +1,8 @@
 import { format } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 
-import { safeParseDate } from "@hypr/utils";
-import { TZDate } from "@hypr/utils";
+import { safeParseDate } from "@meeki/utils";
+import { TZDate } from "@meeki/utils";
 
 import { useIgnoredEvents } from "./ignored-events";
 import {

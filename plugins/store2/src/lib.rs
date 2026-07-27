@@ -79,9 +79,9 @@ mod test {
     impl TestVault {
         fn new(label: &str) -> Self {
             let counter = TEST_PATH_COUNTER.fetch_add(1, Ordering::Relaxed);
-            let identifier = format!("com.hyprnote.store2test{}{}", std::process::id(), counter);
+            let identifier = format!("com.meeki.store2test{}{}", std::process::id(), counter);
             let primary = std::env::temp_dir().join(format!(
-                "anarlog-store2-{label}-{}-{counter}",
+                "meeki-store2-{label}-{}-{counter}",
                 std::process::id()
             ));
             std::fs::create_dir_all(&primary).unwrap();
@@ -91,7 +91,7 @@ mod test {
             }
 
             let mut paths = vec![primary.clone()];
-            if let Some(default_base) = hypr_storage::global::compute_default_base(&identifier) {
+            if let Some(default_base) = meeki_storage::global::compute_default_base(&identifier) {
                 paths.push(default_base);
             }
 
@@ -105,7 +105,7 @@ mod test {
 
         fn add_path(&mut self, label: &str) -> PathBuf {
             let path = self.primary.with_file_name(format!(
-                "anarlog-store2-{label}-{}-{}",
+                "meeki-store2-{label}-{}-{}",
                 std::process::id(),
                 TEST_PATH_COUNTER.fetch_add(1, Ordering::Relaxed)
             ));

@@ -8,7 +8,7 @@ default = ["async-source"]
 async-source = [
   "dep:dasp",
   "dep:futures-util",
-  "dep:hypr-audio-interface",
+  "dep:meeki-audio-interface",
   "dep:pin-project",
 ]
 
@@ -16,14 +16,14 @@ async-source = [
 audioadapter-buffers = "2.0"
 dasp = { workspace = true, optional = true }
 futures-util = { workspace = true, optional = true }
-hypr-audio-interface = { workspace = true, optional = true }
+meeki-audio-interface = { workspace = true, optional = true }
 pin-project = { workspace = true, optional = true }
 rubato = "1.0.1"
 thiserror = { workspace = true }
 
 [dev-dependencies]
 hound = { workspace = true }
-hypr-data = { workspace = true }
+meeki-data = { workspace = true }
 rodio = { workspace = true, features = ["symphonia-all"] }
 tokio = { workspace = true, features = ["full"] }
 

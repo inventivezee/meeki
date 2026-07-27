@@ -7,7 +7,7 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use backon::{ExponentialBuilder, Retryable};
-use hypr_api_auth::AuthContext;
+use meeki_api_auth::AuthContext;
 use serde::Serialize;
 use utoipa::ToSchema;
 use uuid::Uuid;
@@ -128,8 +128,8 @@ mod tests {
         body::{Body, to_bytes},
         http::{Method, Request, StatusCode},
     };
-    use hypr_api_auth::{AuthContext, Claims};
-    use hypr_api_env::{LoopsEnv, StripeEnv, SupabaseEnv};
+    use meeki_api_auth::{AuthContext, Claims};
+    use meeki_api_env::{LoopsEnv, StripeEnv, SupabaseEnv};
     use serde_json::{Value, json};
     use tower::ServiceExt;
     use wiremock::{

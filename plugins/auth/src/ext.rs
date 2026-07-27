@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
-use hypr_supabase_auth::{client::store::AuthStore, session::find_session};
-use hypr_template_support::AccountInfo;
+use meeki_supabase_auth::{client::store::AuthStore, session::find_session};
+use meeki_template_support::AccountInfo;
 
 pub(crate) fn parse_account_info(
     data: &HashMap<String, String>,

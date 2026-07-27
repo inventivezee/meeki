@@ -1,20 +1,20 @@
 ---
-title: "Anarlog skill"
-description: "Teach a compatible agent when and how to use Anarlog's MCP and CLI surfaces."
+title: "Meeki skill"
+description: "Teach a compatible agent when and how to use Meeki's MCP and CLI surfaces."
 ---
 
-The public Anarlog skill gives agents one transport-agnostic workflow:
+The public Meeki skill gives agents one transport-agnostic workflow:
 
-1. Prefer connected Anarlog MCP tools.
-2. Fall back to `anarlog --json` when MCP is unavailable.
+1. Prefer connected Meeki MCP tools.
+2. Fall back to `meeki --json` when MCP is unavailable.
 3. Resolve meeting IDs from search results.
 4. Fetch meeting detail before transcript text.
 5. Keep transcript reads bounded and never access SQLite directly.
 
 ## Canonical sources
 
-- Public skill: `https://docs.anarlog.so/skill.md`
-- Repository package: [`skills/anarlog`](https://github.com/fastrepl/anarlog/tree/main/skills/anarlog)
+- Public skill: `https://docs.meeki.so/skill.md`
+- Repository package: [`skills/meeki`](https://github.com/fastrepl/meeki/tree/main/skills/meeki)
 
 The repository package includes concise references for setup, CLI commands, MCP tools, and errors.
 
@@ -23,13 +23,13 @@ The repository package includes concise references for setup, CLI commands, MCP 
 Install from the public documentation with the open skills CLI:
 
 ```bash
-npx skills add https://docs.anarlog.so
+npx skills add https://docs.meeki.so
 ```
 
-For a filesystem-based agent, copy the complete `skills/anarlog` directory into that agent's skills directory. Keep the directory name `anarlog` so relative reference links continue to work.
+For a filesystem-based agent, copy the complete `skills/meeki` directory into that agent's skills directory. Keep the directory name `meeki` so relative reference links continue to work.
 
 <Note>
   Agent skill locations and installer commands vary by client. Follow your agent's skill installation instructions rather than copying only `SKILL.md`.
 </Note>
 
-The contributor skills under `.agents/skills` are internal repository workflows. They are not part of the public Anarlog skill.
+The contributor skills under `.agents/skills` are internal repository workflows. They are not part of the public Meeki skill.

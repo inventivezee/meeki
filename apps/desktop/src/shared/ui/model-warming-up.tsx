@@ -1,7 +1,7 @@
 import { Trans } from "@lingui/react/macro";
 import { useEffect, useState } from "react";
 
-import { cn } from "@hypr/utils";
+import { cn } from "@meeki/utils";
 
 import { useLocalLlmWarmup } from "~/ai/local-llm-warmup";
 

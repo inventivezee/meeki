@@ -1,5 +1,5 @@
 {
-  "name": "@hypr/plugin-tantivy",
+  "name": "@meeki/plugin-tantivy",
   "private": true,
   "main": "./js/index.ts",
   "scripts": {

@@ -8,16 +8,16 @@ import { env } from "~/env";
 
 export const id = () => crypto.randomUUID() as string;
 
-export type DesktopScheme = "anarlog" | "anarlog-staging" | "anarlog-dev";
+export type DesktopScheme = "meeki" | "meeki-staging" | "meeki-dev";
 
 export const getScheme = async (): Promise<DesktopScheme> => {
   const id = await getIdentifier();
   const schemes: Record<string, DesktopScheme> = {
-    "com.hyprnote.stable": "anarlog",
-    "com.hyprnote.staging": "anarlog-staging",
-    "com.hyprnote.dev": "anarlog-dev",
+    "com.meeki.stable": "meeki",
+    "com.meeki.staging": "meeki-staging",
+    "com.meeki.dev": "meeki-dev",
   };
-  return schemes[id] ?? "anarlog-dev";
+  return schemes[id] ?? "meeki-dev";
 };
 
 type DesktopFlowPath =

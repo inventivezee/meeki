@@ -31,13 +31,13 @@ vi.mock("@tauri-apps/api/window", () => ({
   }),
 }));
 
-vi.mock("@hypr/plugin-notification", () => ({
+vi.mock("@meeki/plugin-notification", () => ({
   commands: {
     showNotification: showNotificationMock,
   },
 }));
 
-vi.mock("@hypr/plugin-transcription", () => ({
+vi.mock("@meeki/plugin-transcription", () => ({
   events: {
     transcriptionEvent: {
       listen: listenMock,
@@ -492,7 +492,7 @@ describe("runBatchSession", () => {
       expect.objectContaining({
         title: "Transcription complete",
         message: "Your transcript is ready.",
-        action_label: "Open Anarlog",
+        action_label: "Open Meeki",
         source: { type: "session", session_id: "session-1" },
       }),
     );

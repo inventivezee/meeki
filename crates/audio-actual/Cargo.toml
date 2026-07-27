@@ -4,12 +4,12 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-hypr-aec = { workspace = true }
-hypr-audio = { workspace = true }
-hypr-audio-interface = { workspace = true }
-hypr-audio-sync = { workspace = true }
-hypr-audio-utils = { workspace = true }
-hypr-resampler = { workspace = true }
+meeki-aec = { workspace = true }
+meeki-audio = { workspace = true }
+meeki-audio-interface = { workspace = true }
+meeki-audio-sync = { workspace = true }
+meeki-audio-utils = { workspace = true }
+meeki-resampler = { workspace = true }
 
 anyhow = { workspace = true }
 thiserror = { workspace = true }
@@ -45,8 +45,8 @@ pipewire = "0.9.2"
 
 [dev-dependencies]
 hound = { workspace = true }
-hypr-audio-utils = { workspace = true }
-hypr-data = { workspace = true }
-hypr-resampler = { workspace = true }
+meeki-audio-utils = { workspace = true }
+meeki-data = { workspace = true }
+meeki-resampler = { workspace = true }
 rodio = { workspace = true }
 serial_test = { workspace = true }

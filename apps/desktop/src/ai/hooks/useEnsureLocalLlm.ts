@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import {
   commands as localLlmCommands,
   type GgufLlmModel,
-} from "@hypr/plugin-local-llm";
+} from "@meeki/plugin-local-llm";
 
 import { setWarmupEstimateSeconds } from "~/ai/local-llm-warmup";
 import { getStoredAiProvider, setAiProvider } from "~/settings/providers";

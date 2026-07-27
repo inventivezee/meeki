@@ -1,4 +1,4 @@
-pub use hypr_language::PARAKEET_TDT_V3_LANGUAGE_CODES as PARAKEET_V3_LANGS;
+pub use meeki_language::PARAKEET_TDT_V3_LANGUAGE_CODES as PARAKEET_V3_LANGS;
 
 #[derive(
     Debug,
@@ -56,13 +56,13 @@ impl AmModel {
         }
     }
 
-    pub fn supported_languages(&self) -> Vec<hypr_language::Language> {
-        use hypr_language::ISO639;
+    pub fn supported_languages(&self) -> Vec<meeki_language::Language> {
+        use meeki_language::ISO639;
 
         match self {
             AmModel::ParakeetV2 => vec![ISO639::En.into()],
-            AmModel::ParakeetV3 => hypr_language::parakeet_tdt_v3_languages(),
-            AmModel::WhisperLargeV3 => hypr_language::whisper_multilingual(),
+            AmModel::ParakeetV3 => meeki_language::parakeet_tdt_v3_languages(),
+            AmModel::WhisperLargeV3 => meeki_language::whisper_multilingual(),
         }
     }
 
@@ -95,12 +95,12 @@ impl AmModel {
     }
 
     pub fn tar_url(&self) -> &str {
-        // Argmax model packs were hosted on hyprnote S3. Meety does not phone home there;
-        // set MEETY_AM_*_URL at build time to your own CDN when you re-host the packs.
+        // Argmax model packs were hosted on hyprnote S3. Meeki does not phone home there;
+        // set MEEKI_AM_*_URL at build time to your own CDN when you re-host the packs.
         match self {
-            AmModel::ParakeetV2 => option_env!("MEETY_AM_PARAKEET_V2_URL").unwrap_or(""),
-            AmModel::ParakeetV3 => option_env!("MEETY_AM_PARAKEET_V3_URL").unwrap_or(""),
-            AmModel::WhisperLargeV3 => option_env!("MEETY_AM_WHISPER_LARGE_V3_URL").unwrap_or(""),
+            AmModel::ParakeetV2 => option_env!("MEEKI_AM_PARAKEET_V2_URL").unwrap_or(""),
+            AmModel::ParakeetV3 => option_env!("MEEKI_AM_PARAKEET_V3_URL").unwrap_or(""),
+            AmModel::WhisperLargeV3 => option_env!("MEEKI_AM_WHISPER_LARGE_V3_URL").unwrap_or(""),
         }
     }
 
@@ -126,7 +126,7 @@ impl AmModel {
         Ok(())
     }
 
-    pub async fn download<F: Fn(hypr_download_interface::DownloadProgress) + Send + Sync>(
+    pub async fn download<F: Fn(meeki_download_interface::DownloadProgress) + Send + Sync>(
         &self,
         output_path: impl AsRef<std::path::Path>,
         progress_callback: F,
@@ -135,7 +135,7 @@ impl AmModel {
         if url.is_empty() {
             return Err(crate::Error::TarFileNotFound);
         }
-        hypr_file::download_file_parallel(url, output_path, progress_callback).await?;
+        meeki_file::download_file_parallel(url, output_path, progress_callback).await?;
         Ok(())
     }
 }

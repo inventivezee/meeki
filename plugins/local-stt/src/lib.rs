@@ -1,5 +1,5 @@
-use hypr_model_downloader::ModelDownloadManager;
-use hypr_supervisor::dynamic::DynamicSupervisorMsg;
+use meeki_model_downloader::ModelDownloadManager;
+use meeki_supervisor::dynamic::DynamicSupervisorMsg;
 use ractor::{ActorCell, ActorRef};
 use tauri::{Manager, Wry};
 
@@ -54,7 +54,7 @@ fn make_specta_builder<R: tauri::Runtime>() -> tauri_specta::Builder<R> {
         .events(tauri_specta::collect_events![
             types::DownloadProgressPayload,
         ])
-        .typ::<hypr_whisper_local_model::WhisperModel>()
+        .typ::<meeki_whisper_local_model::WhisperModel>()
         .error_handling(tauri_specta::ErrorHandlingMode::Result)
 }
 
@@ -83,7 +83,7 @@ pub fn init<R: tauri::Runtime>(options: InitOptions) -> tauri::plugin::TauriPlug
             {
                 use tauri::path::BaseDirectory;
                 if let Ok(bundled) = app.path().resolve("soniqo-models", BaseDirectory::Resource) {
-                    match hypr_transcribe_soniqo::seed_bundled_models(&bundled) {
+                    match meeki_transcribe_soniqo::seed_bundled_models(&bundled) {
                         Ok(seeded) if !seeded.is_empty() => {
                             tracing::info!(
                                 count = seeded.len(),

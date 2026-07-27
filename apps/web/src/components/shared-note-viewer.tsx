@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { useSyncExternalStore } from "react";
 
-import { cn } from "@hypr/utils";
+import { cn } from "@meeki/utils";
 
 import { SharedNoteAudioPlayer } from "@/components/shared-note-audio-player";
 import {
@@ -155,7 +155,7 @@ export function SharedNoteTransientError({ retry }: { retry?: () => void }) {
     <SharedNotePrompt
       icon={<AlertCircleIcon className="size-6" aria-hidden="true" />}
       title="We couldn’t load this shared note"
-      description="Anarlog had a temporary problem loading the note. Please try again."
+      description="Meeki had a temporary problem loading the note. Please try again."
       actions={
         <button
           type="button"
@@ -227,13 +227,13 @@ function SharedNoteShell({
       >
         <a
           href="/"
-          aria-label="Anarlog home"
+          aria-label="Meeki home"
           className="font-hand text-[27px] leading-none font-semibold text-stone-900"
         >
-          anarlog
+          meeki
         </a>
         {topActions ?? (
-          <span className="text-xs text-stone-500">Shared with Anarlog</span>
+          <span className="text-xs text-stone-500">Shared with Meeki</span>
         )}
       </header>
       <div

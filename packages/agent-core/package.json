@@ -1,5 +1,5 @@
 {
-  "name": "@hypr/agent-core",
+  "name": "@meeki/agent-core",
   "private": true,
   "type": "module",
   "exports": {

@@ -1,4 +1,4 @@
-import { cn } from "@hypr/utils";
+import { cn } from "@meeki/utils";
 
 import { SpeakerAssignPopover } from "./speaker-assign";
 import { useSegmentColorVars } from "./utils";

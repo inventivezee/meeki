@@ -16,7 +16,7 @@ describe("session share URLs", () => {
   it("places bearer link tokens only in the fragment", () => {
     const url = new URL(
       buildSessionShareLinkUrl({
-        appBaseUrl: "https://anarlog.so",
+        appBaseUrl: "https://meeki.so",
         shareId,
         linkToken: token,
       }),
@@ -30,7 +30,7 @@ describe("session share URLs", () => {
   it("places invitation tokens only in the fragment", () => {
     const url = new URL(
       buildSessionInvitationUrl({
-        appBaseUrl: "https://anarlog.so",
+        appBaseUrl: "https://meeki.so",
         invitationId,
         inviteToken: token,
       }),
@@ -44,44 +44,44 @@ describe("session share URLs", () => {
   it("builds token-free account and public URLs", () => {
     expect(
       buildAccountSessionShareUrl({
-        appBaseUrl: "https://anarlog.so",
+        appBaseUrl: "https://meeki.so",
         shareId,
       }),
-    ).toBe(`https://anarlog.so/share/${shareId}/`);
+    ).toBe(`https://meeki.so/share/${shareId}/`);
     expect(
       buildPublicSessionShareUrl({
-        appBaseUrl: "https://anarlog.so",
+        appBaseUrl: "https://meeki.so",
         publicSlug,
       }),
-    ).toBe(`https://anarlog.so/share/public/${publicSlug}/`);
+    ).toBe(`https://meeki.so/share/public/${publicSlug}/`);
   });
 
   it("targets non-stable builds without changing stable canonical URLs", () => {
     const linkUrl = new URL(
       buildSessionShareLinkUrl({
-        appBaseUrl: "https://anarlog.so",
+        appBaseUrl: "https://meeki.so",
         shareId,
         linkToken: token,
-        desktopScheme: "anarlog-staging",
+        desktopScheme: "meeki-staging",
       }),
     );
-    expect(linkUrl.searchParams.get("scheme")).toBe("anarlog-staging");
+    expect(linkUrl.searchParams.get("scheme")).toBe("meeki-staging");
     expect(linkUrl.hash).toBe(`#token=${token}`);
 
     const publicUrl = new URL(
       buildPublicSessionShareUrl({
-        appBaseUrl: "https://anarlog.so",
+        appBaseUrl: "https://meeki.so",
         publicSlug,
-        desktopScheme: "anarlog-dev",
+        desktopScheme: "meeki-dev",
       }),
     );
-    expect(publicUrl.searchParams.get("scheme")).toBe("anarlog-dev");
+    expect(publicUrl.searchParams.get("scheme")).toBe("meeki-dev");
 
     const stableUrl = new URL(
       buildAccountSessionShareUrl({
-        appBaseUrl: "https://anarlog.so",
+        appBaseUrl: "https://meeki.so",
         shareId,
-        desktopScheme: "anarlog",
+        desktopScheme: "meeki",
       }),
     );
     expect(stableUrl.search).toBe("");
@@ -97,14 +97,14 @@ describe("session share URLs", () => {
     ).toThrow("Share URL is unavailable");
     expect(() =>
       buildSessionShareLinkUrl({
-        appBaseUrl: "https://anarlog.so?token=old",
+        appBaseUrl: "https://meeki.so?token=old",
         shareId,
         linkToken: token,
       }),
     ).toThrow("Share URL is unavailable");
     expect(() =>
       buildSessionShareLinkUrl({
-        appBaseUrl: "https://anarlog.so",
+        appBaseUrl: "https://meeki.so",
         shareId,
         linkToken: "bad?token",
       }),

@@ -12,11 +12,11 @@ vi.mock("@lingui/react/macro", () => ({
   }),
 }));
 
-vi.mock("@hypr/ui/components/ui/kbd", () => ({
+vi.mock("@meeki/ui/components/ui/kbd", () => ({
   Kbd: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-vi.mock("@hypr/ui/components/ui/tooltip", () => ({
+vi.mock("@meeki/ui/components/ui/tooltip", () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   TooltipContent: ({ children }: { children: React.ReactNode }) => (
     <>{children}</>

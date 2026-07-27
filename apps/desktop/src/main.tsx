@@ -12,12 +12,12 @@ import {
   useCreateManager,
 } from "tinytick/ui-react";
 
-import "@hypr/ui/globals.css";
+import "@meeki/ui/globals.css";
 import {
   getCurrentWebviewWindowLabel,
   init as initWindowsPlugin,
-} from "@hypr/plugin-windows";
-import { Toaster } from "@hypr/ui/components/ui/toast";
+} from "@meeki/plugin-windows";
+import { Toaster } from "@meeki/ui/components/ui/toast";
 
 import { AITaskWindowSyncBridge } from "./ai/task-window-sync";
 import { createToolRegistry } from "./contexts/tool-registry/core";

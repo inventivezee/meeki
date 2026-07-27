@@ -78,7 +78,7 @@ if (!target || process.argv.length !== 3) {
 
 const expected = new Map();
 for (const key of expectedKeys) {
-  const value = process.env[`ANARLOG_QA_EXPECTED_${key}`];
+  const value = process.env[`MEEKI_QA_EXPECTED_${key}`];
   if (!value) {
     fail(`Missing expected public configuration: ${key}.`);
   }

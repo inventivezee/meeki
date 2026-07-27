@@ -5,33 +5,33 @@ edition = "2024"
 
 [features]
 default = []
-coreml = ["hypr-whisper-local/coreml"]
-directml = ["hypr-pyannote-local/directml"]
-cuda = ["hypr-whisper-local/cuda"]
-hipblas = ["hypr-whisper-local/hipblas"]
-openblas = ["hypr-whisper-local/openblas"]
-metal = ["hypr-whisper-local/metal"]
-vulkan = ["hypr-whisper-local/vulkan"]
-openmp = ["hypr-whisper-local/openmp"]
+coreml = ["meeki-whisper-local/coreml"]
+directml = ["meeki-pyannote-local/directml"]
+cuda = ["meeki-whisper-local/cuda"]
+hipblas = ["meeki-whisper-local/hipblas"]
+openblas = ["meeki-whisper-local/openblas"]
+metal = ["meeki-whisper-local/metal"]
+vulkan = ["meeki-whisper-local/vulkan"]
+openmp = ["meeki-whisper-local/openmp"]
 [dev-dependencies]
 bytes = { workspace = true }
 dirs = { workspace = true }
 futures-util = { workspace = true }
-hypr-data = { workspace = true }
+meeki-data = { workspace = true }
 owhisper-client = { workspace = true }
 reqwest = { workspace = true, features = ["json", "stream"] }
 tokio-tungstenite = { workspace = true }
 
 [dependencies]
-hypr-audio-chunking = { workspace = true }
-hypr-audio-interface = { workspace = true }
-hypr-audio-utils = { workspace = true }
-hypr-model-manager = { workspace = true, features = ["whisper-local"] }
-hypr-pyannote-local = { workspace = true }
-hypr-transcribe-core = { workspace = true }
-hypr-whisper = { workspace = true }
-hypr-whisper-local = { workspace = true }
-hypr-ws-utils = { workspace = true }
+meeki-audio-chunking = { workspace = true }
+meeki-audio-interface = { workspace = true }
+meeki-audio-utils = { workspace = true }
+meeki-model-manager = { workspace = true, features = ["whisper-local"] }
+meeki-pyannote-local = { workspace = true }
+meeki-transcribe-core = { workspace = true }
+meeki-whisper = { workspace = true }
+meeki-whisper-local = { workspace = true }
+meeki-ws-utils = { workspace = true }
 owhisper-interface = { workspace = true }
 
 bytes = { workspace = true }

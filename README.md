@@ -1,10 +1,10 @@
-> **Note:** The team is now building **[char](https://char.com)**. **anarlog** remains open-source, MIT-licensed, and maintained as the local-first meeting notetaker in this repo.
+> **Note:** The team is now building **[char](https://char.com)**. **meeki** remains open-source, MIT-licensed, and maintained as the local-first meeting notetaker in this repo.
 
-![anarlog](https://repository-images.githubusercontent.com/900550981/a4267a9f-414b-4c36-965c-419313ce2417)
+![meeki](https://repository-images.githubusercontent.com/900550981/a4267a9f-414b-4c36-965c-419313ce2417)
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/fastrepl/anarlog)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/fastrepl/meeki)
 
-# anarlog
+# meeki
 
 An open-source AI meeting notetaker that is local-first, privacy-first, and yours to fork.
 
@@ -14,9 +14,9 @@ Granola, rearranged.
 
 Download the latest release for your platform:
 
-→ [github.com/fastrepl/anarlog/releases/latest](https://github.com/fastrepl/anarlog/releases/latest)
+→ [github.com/fastrepl/meeki/releases/latest](https://github.com/fastrepl/meeki/releases/latest)
 
-Open it and join a meeting. anarlog records, transcribes locally, and stores its canonical meeting data in a local SQLite database. Export Markdown when it fits your workflow. Bring your own LLM: OpenAI, Anthropic, Gemini, OpenRouter, Ollama, LM Studio, or anything OpenAI-compatible.
+Open it and join a meeting. meeki records, transcribes locally, and stores its canonical meeting data in a local SQLite database. Export Markdown when it fits your workflow. Bring your own LLM: OpenAI, Anthropic, Gemini, OpenRouter, Ollama, LM Studio, or anything OpenAI-compatible.
 
 To self-host, clone the repo, build it, and run it.
 
@@ -30,11 +30,11 @@ To self-host, clone the repo, build it, and run it.
 
 ## Name history
 
-**anarlog** started as **Hyprnote**, then briefly used the **char** name.
+**meeki** started as **Hyprnote**, then briefly used the **char** name.
 
-We later split the work into two projects. **[char](https://char.com)** is the team's current productivity app. **anarlog** is this open-source, local-first meeting notetaker.
+We later split the work into two projects. **[char](https://char.com)** is the team's current productivity app. **meeki** is this open-source, local-first meeting notetaker.
 
-This repository is not the current char codebase, and anarlog is not being retired. It keeps the open-source path: MIT-licensed, forkable, self-hostable, and built for local notes you control.
+This repository is not the current char codebase, and meeki is not being retired. It keeps the open-source path: MIT-licensed, forkable, self-hostable, and built for local notes you control.
 
 If you came here from Granola, welcome. If you came here from Hyprnote, welcome back.
 

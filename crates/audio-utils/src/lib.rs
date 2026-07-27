@@ -2,7 +2,7 @@ use std::convert::TryFrom;
 
 use bytes::{BufMut, Bytes, BytesMut};
 use futures_util::{Stream, StreamExt};
-use hypr_audio_interface::AsyncSource;
+use meeki_audio_interface::AsyncSource;
 
 mod error;
 mod pcm;
@@ -52,7 +52,7 @@ pub trait AudioFormatExt: AsyncSource {
     where
         Self: Sized + Send + Unpin + 'static,
     {
-        hypr_resampler::ResamplerDynamicOld::new(self, sample_rate)
+        meeki_resampler::ResamplerDynamicOld::new(self, sample_rate)
             .chunks(chunk_size)
             .map(|chunk| {
                 let n = std::mem::size_of::<f32>() * chunk.len();
@@ -183,7 +183,7 @@ pub fn mix_audio_pcm16le(mic: &[u8], speaker: &[u8]) -> Vec<u8> {
     mixed
 }
 
-pub use hypr_audio_mime::content_type_to_extension;
+pub use meeki_audio_mime::content_type_to_extension;
 
 pub fn source_from_path(
     path: impl AsRef<std::path::Path>,
@@ -363,14 +363,14 @@ mod tests {
     }
 
     test_audio_file_metadata! {
-        test_audio_file_metadata_wav: hypr_data::english_1::AUDIO_PATH,
-        test_audio_file_metadata_mp3: hypr_data::english_1::AUDIO_MP3_PATH,
-        test_audio_file_metadata_mp4: hypr_data::english_1::AUDIO_MP4_PATH,
-        test_audio_file_metadata_m4a: hypr_data::english_1::AUDIO_M4A_PATH,
-        test_audio_file_metadata_ogg: hypr_data::english_1::AUDIO_OGG_PATH,
-        test_audio_file_metadata_flac: hypr_data::english_1::AUDIO_FLAC_PATH,
-        test_audio_file_metadata_aac: hypr_data::english_1::AUDIO_AAC_PATH,
-        test_audio_file_metadata_aiff: hypr_data::english_1::AUDIO_AIFF_PATH,
+        test_audio_file_metadata_wav: meeki_data::english_1::AUDIO_PATH,
+        test_audio_file_metadata_mp3: meeki_data::english_1::AUDIO_MP3_PATH,
+        test_audio_file_metadata_mp4: meeki_data::english_1::AUDIO_MP4_PATH,
+        test_audio_file_metadata_m4a: meeki_data::english_1::AUDIO_M4A_PATH,
+        test_audio_file_metadata_ogg: meeki_data::english_1::AUDIO_OGG_PATH,
+        test_audio_file_metadata_flac: meeki_data::english_1::AUDIO_FLAC_PATH,
+        test_audio_file_metadata_aac: meeki_data::english_1::AUDIO_AAC_PATH,
+        test_audio_file_metadata_aiff: meeki_data::english_1::AUDIO_AIFF_PATH,
     }
 
     #[test]

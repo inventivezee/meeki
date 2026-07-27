@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, MutexGuard};
 use std::time::{Duration, Instant};
 
-use hypr_transcription_core::listener2 as core;
+use meeki_transcription_core::listener2 as core;
 use tauri_specta::Event;
 use tokio::task::JoinHandle;
 
@@ -482,7 +482,7 @@ mod tests {
             model: model.map(ToOwned::to_owned),
             base_url: base_url.to_string(),
             api_key: "key".to_string(),
-            languages: vec![hypr_language::ISO639::En.into()],
+            languages: vec![meeki_language::ISO639::En.into()],
             keywords: vec![],
             num_speakers: None,
             min_speakers: None,

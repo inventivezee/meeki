@@ -1,4 +1,4 @@
-use hypr_api_auth::AuthContext;
+use meeki_api_auth::AuthContext;
 use rmcp::{
     ErrorData as McpError,
     model::*,

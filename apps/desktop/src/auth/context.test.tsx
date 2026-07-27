@@ -77,20 +77,20 @@ vi.mock("./errors", () => ({
   isFatalSessionError: mocks.isFatalSessionError,
 }));
 
-vi.mock("@hypr/plugin-analytics", () => ({
+vi.mock("@meeki/plugin-analytics", () => ({
   commands: {
     event: vi.fn(),
     identify: vi.fn(),
   },
 }));
 
-vi.mock("@hypr/plugin-auth", () => ({
+vi.mock("@meeki/plugin-auth", () => ({
   commands: {
     decodeClaims: vi.fn().mockResolvedValue({ status: "error" }),
   },
 }));
 
-vi.mock("@hypr/plugin-misc", () => ({
+vi.mock("@meeki/plugin-misc", () => ({
   commands: {
     getFingerprint: vi
       .fn()
@@ -98,17 +98,17 @@ vi.mock("@hypr/plugin-misc", () => ({
   },
 }));
 
-vi.mock("@hypr/plugin-opener2", () => ({
+vi.mock("@meeki/plugin-opener2", () => ({
   commands: {
     openUrl: vi.fn(),
   },
 }));
 
-vi.mock("@hypr/plugin-windows", () => ({
+vi.mock("@meeki/plugin-windows", () => ({
   openUrlWithInstruction: vi.fn(),
 }));
 
-vi.mock("@hypr/supabase", () => ({
+vi.mock("@meeki/supabase", () => ({
   deriveBillingInfo: vi.fn(() => ({ plan: "free", trialEnd: null })),
 }));
 

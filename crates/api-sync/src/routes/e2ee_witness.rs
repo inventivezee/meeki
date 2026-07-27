@@ -4,7 +4,7 @@ use axum::{
     http::{HeaderValue, header},
     routing::get,
 };
-use hypr_api_auth::AuthContext;
+use meeki_api_auth::AuthContext;
 use reqwest::StatusCode as HttpStatusCode;
 use serde::{Deserialize, Serialize};
 use utoipa::OpenApi;
@@ -523,7 +523,7 @@ mod tests {
         body::{Body, to_bytes},
         http::{Method, Request, StatusCode},
     };
-    use hypr_api_auth::Claims;
+    use meeki_api_auth::Claims;
     use serde_json::{Value, json};
     use tower::ServiceExt;
     use wiremock::{

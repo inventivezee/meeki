@@ -5,15 +5,15 @@ import { useMemo, useRef, useState } from "react";
 import {
   commands as localLlmCommands,
   type GgufLlmModel,
-} from "@hypr/plugin-local-llm";
+} from "@meeki/plugin-local-llm";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@hypr/ui/components/ui/select";
-import { cn } from "@hypr/utils";
+} from "@meeki/ui/components/ui/select";
+import { cn } from "@meeki/utils";
 
 import { useLlmSettings } from "./context";
 import { HealthStatusIndicator, useConnectionHealth } from "./health";
@@ -240,7 +240,7 @@ export function SelectProviderAndModel() {
     settingsReady,
   });
   const alertDescription = showMissingModelWarning
-    ? t`Language model is needed to make Anarlog summarize and chat about your conversations.`
+    ? t`Language model is needed to make Meeki summarize and chat about your conversations.`
     : providerSettingsReady &&
         settingsReady &&
         !isResolvingSelection &&

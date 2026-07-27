@@ -1,5 +1,5 @@
 use axum::{Extension, Json, extract::State};
-use hypr_api_auth::AuthContext;
+use meeki_api_auth::AuthContext;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
@@ -62,7 +62,7 @@ pub async fn delete_connection(
         .await
     {
         Ok(()) => {}
-        Err(hypr_nango::Error::Api(404, response_body)) => {
+        Err(meeki_nango::Error::Api(404, response_body)) => {
             tracing::warn!(
                 enduser.id = %auth.claims.sub,
                 hyprnote.connection.id = %body.connection_id,

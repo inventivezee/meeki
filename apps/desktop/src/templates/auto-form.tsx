@@ -8,11 +8,11 @@ import {
   PromptEditor,
   type PromptEditorHandle,
   type PromptTokenDefinition,
-} from "@hypr/editor/prompt";
-import { commands as templateCommands } from "@hypr/plugin-template";
-import { Badge } from "@hypr/ui/components/ui/badge";
-import { Button } from "@hypr/ui/components/ui/button";
-import { cn } from "@hypr/utils";
+} from "@meeki/editor/prompt";
+import { commands as templateCommands } from "@meeki/plugin-template";
+import { Badge } from "@meeki/ui/components/ui/badge";
+import { Button } from "@meeki/ui/components/ui/button";
+import { cn } from "@meeki/utils";
 
 import { setSettingValue } from "~/settings/queries";
 import { useConfigValue } from "~/shared/config";
@@ -207,7 +207,7 @@ export function AutoPromptForm({
             </p>
             <p className="text-muted-foreground mt-1 text-sm">
               <Trans>
-                Anarlog sends these separately, so editing the prompt cannot
+                Meeki sends these separately, so editing the prompt cannot
                 remove the meeting source material.
               </Trans>
             </p>
@@ -248,7 +248,7 @@ export function AutoPromptForm({
                     void resetToDefault().catch(() => {});
                   }}
                 >
-                  <Trans>Reset to Anarlog default</Trans>
+                  <Trans>Reset to Meeki default</Trans>
                 </Button>
               )}
             </form.Subscribe>

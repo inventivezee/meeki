@@ -10,19 +10,19 @@ use super::LanguageSupport;
 pub struct GladiaAdapter;
 
 impl GladiaAdapter {
-    pub fn language_support_live(languages: &[hypr_language::Language]) -> LanguageSupport {
+    pub fn language_support_live(languages: &[meeki_language::Language]) -> LanguageSupport {
         LanguageSupport::min(languages.iter().map(language::single_language_support))
     }
 
-    pub fn language_support_batch(languages: &[hypr_language::Language]) -> LanguageSupport {
+    pub fn language_support_batch(languages: &[meeki_language::Language]) -> LanguageSupport {
         Self::language_support_live(languages)
     }
 
-    pub fn is_supported_languages_live(languages: &[hypr_language::Language]) -> bool {
+    pub fn is_supported_languages_live(languages: &[meeki_language::Language]) -> bool {
         Self::language_support_live(languages).is_supported()
     }
 
-    pub fn is_supported_languages_batch(languages: &[hypr_language::Language]) -> bool {
+    pub fn is_supported_languages_batch(languages: &[meeki_language::Language]) -> bool {
         Self::language_support_batch(languages).is_supported()
     }
 

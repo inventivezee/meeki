@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 // @ts-ignore virtual module provided by ./vite.ts
 import { latestContent, latestVersion } from "virtual:changelog";
 
-import { processContent } from "@hypr/changelog";
+import { processContent } from "@meeki/changelog";
 
 export function getLatestVersion(): string | null {
   return latestVersion;

@@ -1,1 +1,1 @@
-https://docs.anarlog.so
+https://docs.meeki.so

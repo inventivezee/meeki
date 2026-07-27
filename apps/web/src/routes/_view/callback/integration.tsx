@@ -124,7 +124,7 @@ function Component() {
         title={isSuccess ? "You’re connected" : "Connection didn’t work"}
         description={
           isSuccess
-            ? "Return to Anarlog to keep going."
+            ? "Return to Meeki to keep going."
             : "Something went wrong while connecting."
         }
       >
@@ -134,7 +134,7 @@ function Component() {
               onClick={handleDeeplink}
               className={authPrimaryButtonClassName}
             >
-              Open Anarlog
+              Open Meeki
             </button>
 
             <div className="rounded-xl border border-[#e5ddcf] bg-[#fbfaf7] p-4 text-center">
@@ -162,7 +162,7 @@ function Component() {
         ) : (
           <div className={authNoticeClassName}>
             <p className="text-sm font-medium text-[#4f4940]">
-              Close this window and try again from Anarlog.
+              Close this window and try again from Meeki.
             </p>
           </div>
         )}

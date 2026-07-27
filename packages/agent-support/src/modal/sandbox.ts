@@ -3,7 +3,7 @@ import type { App, Image } from "modal";
 import { env } from "../env";
 import { getModalClient } from "./client";
 
-const APP_NAME = "hypr-slack-internal";
+const APP_NAME = "meeki-slack-internal";
 const DEFAULT_TIMEOUT_MS = 5 * 60 * 1000;
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 1000;

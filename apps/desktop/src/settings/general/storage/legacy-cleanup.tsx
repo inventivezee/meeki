@@ -15,8 +15,8 @@ import {
   getLegacyCleanupStatus,
   getLegacyImportReport,
   runLegacyImport,
-} from "@hypr/plugin-db";
-import { Button } from "@hypr/ui/components/ui/button";
+} from "@meeki/plugin-db";
+import { Button } from "@meeki/ui/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -24,7 +24,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@hypr/ui/components/ui/dialog";
+} from "@meeki/ui/components/ui/dialog";
 
 const QUERY_KEY = ["legacy-migration"] as const;
 
@@ -127,7 +127,7 @@ export function LegacyMigrationCleanupRow() {
     return {
       state: "unavailable" as const,
       label: t`Migration status unavailable`,
-      description: t`Anarlog will retry automatically. This does not affect your notes.`,
+      description: t`Meeki will retry automatically. This does not affect your notes.`,
     };
   })();
 

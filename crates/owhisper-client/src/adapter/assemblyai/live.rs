@@ -1,4 +1,4 @@
-use hypr_ws_client::client::Message;
+use meeki_ws_client::client::Message;
 use owhisper_interface::ListenParams;
 use owhisper_interface::stream::{Alternatives, Channel, Metadata, StreamResponse};
 use serde::Deserialize;
@@ -16,7 +16,7 @@ impl RealtimeSttAdapter for AssemblyAIAdapter {
 
     fn is_supported_languages(
         &self,
-        languages: &[hypr_language::Language],
+        languages: &[meeki_language::Language],
         _model: Option<&str>,
     ) -> bool {
         languages.is_empty() || Self::language_support_live(languages).is_supported()
@@ -355,7 +355,7 @@ impl ResolvedLiveModel {
 
 #[cfg(test)]
 mod tests {
-    use hypr_language::ISO639;
+    use meeki_language::ISO639;
     use owhisper_interface::ListenParams;
     use owhisper_interface::stream::StreamResponse;
 
@@ -574,7 +574,7 @@ mod tests {
         test_build_single,
         owhisper_interface::ListenParams {
             model: Some("u3-rt-pro".to_string()),
-            languages: vec![hypr_language::ISO639::En.into()],
+            languages: vec![meeki_language::ISO639::En.into()],
             ..Default::default()
         }
     );
@@ -583,7 +583,7 @@ mod tests {
         test_single_with_keywords,
         owhisper_interface::ListenParams {
             model: Some("u3-rt-pro".to_string()),
-            languages: vec![hypr_language::ISO639::En.into()],
+            languages: vec![meeki_language::ISO639::En.into()],
             keywords: vec!["Hyprnote".to_string(), "transcription".to_string()],
             ..Default::default()
         }
@@ -594,8 +594,8 @@ mod tests {
         owhisper_interface::ListenParams {
             model: Some("u3-rt-pro".to_string()),
             languages: vec![
-                hypr_language::ISO639::En.into(),
-                hypr_language::ISO639::Es.into(),
+                meeki_language::ISO639::En.into(),
+                meeki_language::ISO639::Es.into(),
             ],
             ..Default::default()
         }
@@ -606,8 +606,8 @@ mod tests {
         owhisper_interface::ListenParams {
             model: Some("whisper-rt".to_string()),
             languages: vec![
-                hypr_language::ISO639::En.into(),
-                hypr_language::ISO639::Ko.into(),
+                meeki_language::ISO639::En.into(),
+                meeki_language::ISO639::Ko.into(),
             ],
             ..Default::default()
         }
@@ -622,7 +622,7 @@ mod tests {
             .api_key(std::env::var("ASSEMBLYAI_API_KEY").expect("ASSEMBLYAI_API_KEY not set"))
             .params(owhisper_interface::ListenParams {
                 model: Some("u3-rt-pro".to_string()),
-                languages: vec![hypr_language::ISO639::En.into()],
+                languages: vec![meeki_language::ISO639::En.into()],
                 ..Default::default()
             })
             .build_dual()

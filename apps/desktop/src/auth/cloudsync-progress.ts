@@ -1,10 +1,10 @@
 import { useSyncExternalStore } from "react";
 
-import { getCloudsyncStatus } from "@hypr/plugin-db";
-import { commands as notificationCommands } from "@hypr/plugin-notification";
+import { getCloudsyncStatus } from "@meeki/plugin-db";
+import { commands as notificationCommands } from "@meeki/plugin-notification";
 
 const POLL_INTERVAL_MS = 2_000;
-const COMPLETED_KEY_PREFIX = "anarlog:cloudsync_initial_sync_completed:";
+const COMPLETED_KEY_PREFIX = "meeki:cloudsync_initial_sync_completed:";
 
 type CloudsyncInitialSyncProgress =
   | { state: "idle" }
@@ -53,13 +53,13 @@ async function showCompletionNotification(userId: string) {
     const result = await notificationCommands.showNotification({
       key: `cloudsync-initial-sync-complete-${userId}`,
       title: "Cloud sync complete",
-      message: "Your Anarlog data is ready on this device.",
+      message: "Your Meeki data is ready on this device.",
       timeout: null,
       source: null,
       start_time: null,
       participants: null,
       event_details: null,
-      action_label: "Open Anarlog",
+      action_label: "Open Meeki",
       action_variant: null,
       options: null,
       footer: null,

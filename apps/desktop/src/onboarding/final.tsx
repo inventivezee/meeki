@@ -3,8 +3,8 @@ import { Trans } from "@lingui/react/macro";
 import { Loader2Icon } from "lucide-react";
 import { useRef, useState } from "react";
 
-import { commands as analyticsCommands } from "@hypr/plugin-analytics";
-import { commands as sfxCommands } from "@hypr/plugin-sfx";
+import { commands as analyticsCommands } from "@meeki/plugin-analytics";
+import { commands as sfxCommands } from "@meeki/plugin-sfx";
 
 import { OnboardingButton } from "./shared";
 import {
@@ -66,17 +66,17 @@ export function FinalSection({
         {status === "loading" ? (
           <span className="flex items-center gap-2">
             <Loader2Icon className="size-4 animate-spin" />
-            <Trans>Open Anarlog</Trans>
+            <Trans>Open Meeki</Trans>
           </span>
         ) : (
-          <Trans>Open Anarlog</Trans>
+          <Trans>Open Meeki</Trans>
         )}
       </OnboardingButton>
       {status === "error" && (
         <p className="text-sm text-red-500" role="alert">
           {translate({
             id: "onboarding.finish-error",
-            message: "Couldn't open Anarlog. Please try again.",
+            message: "Couldn't open Meeki. Please try again.",
           })}
         </p>
       )}

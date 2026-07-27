@@ -3,13 +3,13 @@ use std::path::{Path, PathBuf};
 
 use crate::{Args, Error, Result};
 
-pub async fn open(args: &Args) -> Result<hypr_db_core::Db> {
+pub async fn open(args: &Args) -> Result<meeki_db_core::Db> {
     let path = resolve_path(args)?;
     if !path.is_file() {
         return Err(Error::DatabaseNotFound(path));
     }
 
-    hypr_db_core::Db::connect_local_read_only(&path)
+    meeki_db_core::Db::connect_local_read_only(&path)
         .await
         .map_err(|error| Error::operation("open database", error.to_string()))
 }
@@ -37,15 +37,15 @@ fn resolve_default_path(data_dir: &Path) -> PathBuf {
 
 fn resolve_default_path_for_command(data_dir: &Path, command_name: Option<&OsStr>) -> PathBuf {
     let channel_identifier = match command_name.and_then(OsStr::to_str) {
-        Some("anarlog-dev") => Some("com.hyprnote.dev"),
-        Some("anarlog-staging") => Some("com.hyprnote.staging"),
+        Some("meeki-dev") => Some("com.meeki.dev"),
+        Some("meeki-staging") => Some("com.meeki.staging"),
         _ => None,
     };
     if let Some(identifier) = channel_identifier {
         return data_dir.join(identifier).join("app.db");
     }
 
-    let current = data_dir.join("anarlog").join("app.db");
+    let current = data_dir.join("meeki").join("app.db");
     if current.is_file() {
         return current;
     }
@@ -55,7 +55,7 @@ fn resolve_default_path_for_command(data_dir: &Path, command_name: Option<&OsStr
         return legacy;
     }
 
-    let identifier = data_dir.join("com.hyprnote.stable").join("app.db");
+    let identifier = data_dir.join("com.meeki.stable").join("app.db");
     if identifier.is_file() {
         return identifier;
     }
@@ -70,28 +70,28 @@ mod tests {
     #[test]
     fn default_path_prefers_current_then_legacy_then_identifier() {
         let dir = tempfile::tempdir().unwrap();
-        let current = dir.path().join("anarlog/app.db");
+        let current = dir.path().join("meeki/app.db");
         let legacy = dir.path().join("hyprnote/app.db");
-        let identifier = dir.path().join("com.hyprnote.stable/app.db");
+        let identifier = dir.path().join("com.meeki.stable/app.db");
 
         std::fs::create_dir_all(identifier.parent().unwrap()).unwrap();
         std::fs::write(&identifier, "").unwrap();
         assert_eq!(
-            resolve_default_path_for_command(dir.path(), Some(OsStr::new("anarlog"))),
+            resolve_default_path_for_command(dir.path(), Some(OsStr::new("meeki"))),
             identifier
         );
 
         std::fs::create_dir_all(legacy.parent().unwrap()).unwrap();
         std::fs::write(&legacy, "").unwrap();
         assert_eq!(
-            resolve_default_path_for_command(dir.path(), Some(OsStr::new("anarlog"))),
+            resolve_default_path_for_command(dir.path(), Some(OsStr::new("meeki"))),
             legacy
         );
 
         std::fs::create_dir_all(current.parent().unwrap()).unwrap();
         std::fs::write(&current, "").unwrap();
         assert_eq!(
-            resolve_default_path_for_command(dir.path(), Some(OsStr::new("anarlog"))),
+            resolve_default_path_for_command(dir.path(), Some(OsStr::new("meeki"))),
             current
         );
     }
@@ -100,25 +100,25 @@ mod tests {
     fn default_path_targets_current_location_for_new_installs() {
         let dir = tempfile::tempdir().unwrap();
         assert_eq!(
-            resolve_default_path_for_command(dir.path(), Some(OsStr::new("anarlog"))),
-            dir.path().join("anarlog/app.db")
+            resolve_default_path_for_command(dir.path(), Some(OsStr::new("meeki"))),
+            dir.path().join("meeki/app.db")
         );
     }
 
     #[test]
     fn channel_commands_target_their_channel_database() {
         let dir = tempfile::tempdir().unwrap();
-        let stable = dir.path().join("anarlog/app.db");
+        let stable = dir.path().join("meeki/app.db");
         std::fs::create_dir_all(stable.parent().unwrap()).unwrap();
         std::fs::write(stable, "").unwrap();
 
         assert_eq!(
-            resolve_default_path_for_command(dir.path(), Some(OsStr::new("anarlog-dev"))),
-            dir.path().join("com.hyprnote.dev/app.db")
+            resolve_default_path_for_command(dir.path(), Some(OsStr::new("meeki-dev"))),
+            dir.path().join("com.meeki.dev/app.db")
         );
         assert_eq!(
-            resolve_default_path_for_command(dir.path(), Some(OsStr::new("anarlog-staging"))),
-            dir.path().join("com.hyprnote.staging/app.db")
+            resolve_default_path_for_command(dir.path(), Some(OsStr::new("meeki-staging"))),
+            dir.path().join("com.meeki.staging/app.db")
         );
     }
 }

@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 export const DESKTOP_SCHEMES = [
-  "anarlog",
-  "anarlog-staging",
-  "anarlog-dev",
+  "meeki",
+  "meeki-staging",
+  "meeki-dev",
   "hypr",
   "hyprnote",
   "hyprnote-staging",
@@ -11,7 +11,7 @@ export const DESKTOP_SCHEMES = [
   "char-staging",
 ] as const;
 
-export const DEFAULT_DESKTOP_SCHEME = "anarlog";
+export const DEFAULT_DESKTOP_SCHEME = "meeki";
 export const desktopSchemeSchema = z.enum(DESKTOP_SCHEMES);
 export type DesktopScheme = z.infer<typeof desktopSchemeSchema>;
 

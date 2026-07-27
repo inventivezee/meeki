@@ -33,5 +33,5 @@ pub enum Error {
     Io(#[from] std::io::Error),
 
     #[error(transparent)]
-    AudioUtils(#[from] hypr_audio_utils::Error),
+    AudioUtils(#[from] meeki_audio_utils::Error),
 }

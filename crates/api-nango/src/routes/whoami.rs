@@ -1,6 +1,6 @@
 use axum::{Extension, Json, extract::State};
-use hypr_api_auth::AuthContext;
-use hypr_nango::ListConnectionsParams;
+use meeki_api_auth::AuthContext;
+use meeki_nango::ListConnectionsParams;
 use serde::Serialize;
 use utoipa::ToSchema;
 

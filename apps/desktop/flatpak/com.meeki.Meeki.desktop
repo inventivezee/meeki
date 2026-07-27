@@ -1,9 +1,9 @@
 [Desktop Entry]
-Name=Anarlog
+Name=Meeki
 GenericName=AI Meeting Notes
 Comment=The AI notepad for private meetings
 Exec=hyprnote %U
-Icon=com.hyprnote.Hyprnote
+Icon=com.meeki.Meeki
 Terminal=false
 Type=Application
 Categories=Office;AudioVideo;Recorder;

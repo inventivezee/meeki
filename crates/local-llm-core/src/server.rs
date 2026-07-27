@@ -16,12 +16,12 @@ use crate::Error;
 const DEFAULT_CTX_SIZE: u32 = 65_536;
 const MIN_CTX_SIZE: u32 = 8_192;
 const MAX_CTX_SIZE: u32 = 262_144;
-const CTX_SIZE_ENV: &str = "ANARLOG_LLM_CTX_SIZE";
+const CTX_SIZE_ENV: &str = "MEEKI_LLM_CTX_SIZE";
 
 /// -1 lets a reasoning model think for as long as it needs, bounded only by the
 /// per-request output budget.
 const DEFAULT_THINK_BUDGET: i32 = -1;
-const THINK_BUDGET_ENV: &str = "ANARLOG_LLM_THINK_BUDGET";
+const THINK_BUDGET_ENV: &str = "MEEKI_LLM_THINK_BUDGET";
 
 /// llama-server unloads the weights after this long without a request and
 /// reloads them on the next one, so an idle app stops holding 7-14 GB. Five
@@ -32,7 +32,7 @@ const THINK_BUDGET_ENV: &str = "ANARLOG_LLM_THINK_BUDGET";
 const DEFAULT_SLEEP_IDLE_SECONDS: i64 = 300;
 /// Below this the server thrashes: a reload costs more than the memory it frees.
 const MIN_SLEEP_IDLE_SECONDS: i64 = 30;
-const SLEEP_IDLE_ENV: &str = "ANARLOG_LLM_SLEEP_IDLE_SECONDS";
+const SLEEP_IDLE_ENV: &str = "MEEKI_LLM_SLEEP_IDLE_SECONDS";
 
 fn parse_ctx_size(raw: Option<&str>) -> u32 {
     raw.and_then(|value| value.trim().parse::<u32>().ok())

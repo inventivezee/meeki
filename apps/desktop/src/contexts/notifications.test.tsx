@@ -15,7 +15,7 @@ const mocks = vi.hoisted(() => ({
   toastError: vi.fn(),
 }));
 
-vi.mock("@hypr/plugin-local-stt", () => ({
+vi.mock("@meeki/plugin-local-stt", () => ({
   commands: { getServerForModel: vi.fn() },
   events: {
     downloadProgressPayload: {
@@ -24,7 +24,7 @@ vi.mock("@hypr/plugin-local-stt", () => ({
   },
 }));
 
-vi.mock("@hypr/ui/components/ui/toast", () => ({
+vi.mock("@meeki/ui/components/ui/toast", () => ({
   sonnerToast: { error: mocks.toastError },
 }));
 

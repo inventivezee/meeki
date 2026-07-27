@@ -2,7 +2,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@hypr/ui/components/ui/resizable", () => {
+vi.mock("@meeki/ui/components/ui/resizable", () => {
   return {
     ResizablePanelGroup: ({
       children,

@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
-import { commands as localSttCommands } from "@hypr/plugin-local-stt";
-import type { AIProviderStorage } from "@hypr/store";
+import { commands as localSttCommands } from "@meeki/plugin-local-stt";
+import type { AIProviderStorage } from "@meeki/store";
 
 import { useAuth } from "~/auth";
 import { useBillingAccess } from "~/auth/billing-context";

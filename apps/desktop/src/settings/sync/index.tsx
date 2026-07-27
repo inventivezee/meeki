@@ -15,10 +15,10 @@ import {
   getCloudsyncStatus,
   getE2eeIdentityStatus,
   syncCloudsyncNow,
-} from "@hypr/plugin-db";
-import { Button } from "@hypr/ui/components/ui/button";
-import { Switch } from "@hypr/ui/components/ui/switch";
-import { cn, formatDistanceToNow } from "@hypr/utils";
+} from "@meeki/plugin-db";
+import { Button } from "@meeki/ui/components/ui/button";
+import { Switch } from "@meeki/ui/components/ui/switch";
+import { cn, formatDistanceToNow } from "@meeki/utils";
 
 import { E2eeSetupDialog } from "../general/e2ee-setup";
 
@@ -142,7 +142,7 @@ export function SettingsSync() {
             <div>
               <h3 className="text-sm font-medium">
                 {session ? (
-                  <Trans>Cloud sync is available with Anarlog Pro</Trans>
+                  <Trans>Cloud sync is available with Meeki Pro</Trans>
                 ) : (
                   <Trans>Sign in to use cloud sync</Trans>
                 )}
@@ -179,7 +179,7 @@ export function SettingsSync() {
         description:
           credentialBlock === "setup_required"
             ? t`Set up your recovery key to start encrypted cloud sync.`
-            : t`Anarlog could not start cloud sync on this device.`,
+            : t`Meeki could not start cloud sync on this device.`,
       };
     }
     if (statusQuery.isError) {
@@ -200,8 +200,8 @@ export function SettingsSync() {
         label: t`Sync needs attention`,
         description:
           status.last_error_kind === "transient"
-            ? t`Anarlog will retry automatically.`
-            : (status.last_error ?? t`Anarlog will keep retrying.`),
+            ? t`Meeki will retry automatically.`
+            : (status.last_error ?? t`Meeki will keep retrying.`),
       };
     }
     if (status?.activity_paused) {
@@ -354,7 +354,7 @@ export function SettingsSync() {
               {e2eeIdentityQuery.data?.configured ? (
                 <Trans>
                   Your recovery key encrypts synced notes before they leave this
-                  device. Anarlog cannot read them.
+                  device. Meeki cannot read them.
                 </Trans>
               ) : (
                 <Trans>

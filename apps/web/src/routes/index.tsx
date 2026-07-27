@@ -16,10 +16,10 @@ import {
   PRO_TRIAL_DAYS,
   type MarketingPlanData,
   PlanFeatureList,
-} from "@hypr/pricing";
-import { DancingSticks } from "@hypr/ui/components/ui/dancing-sticks";
-import { Spinner } from "@hypr/ui/components/ui/spinner";
-import { cn } from "@hypr/utils";
+} from "@meeki/pricing";
+import { DancingSticks } from "@meeki/ui/components/ui/dancing-sticks";
+import { Spinner } from "@meeki/ui/components/ui/spinner";
+import { cn } from "@meeki/utils";
 
 import { SiteFooter } from "@/components/site-footer";
 import {
@@ -30,7 +30,7 @@ import { getGitHubStats } from "@/functions/github";
 import { useMountEffect } from "@/hooks/useMountEffect";
 import { appleIntelDownloadUrl, appleSiliconDownloadUrl } from "@/lib/download";
 import {
-  ANARLOG_SITE_URL,
+  MEEKI_SITE_URL,
   ROOT_DESCRIPTION,
   getOrganizationJsonLd,
   getSoftwareApplicationJsonLd,
@@ -43,7 +43,7 @@ const manifestoLetter = [
   "Notetaking matters more than note-takers. A note-taker is passive. A notepad is something you use. You stay present and in control while the room is still alive.",
   "Most AI tools ask you to move your memory into their ecosystem and rules. Meeting notes should stay in software you control, with a local record that can work offline.",
   "Interfaces change. Your meeting record should remain yours. Use on-device models or your own keys, not a service you cannot inspect.",
-  "Anarlog is our attempt to build that meeting notepad.",
+  "Meeki is our attempt to build that meeting notepad.",
 ];
 
 const manifestoSigners = MANIFESTO_SIGNERS;
@@ -98,28 +98,28 @@ const credibilityLogos = [
 
 const testimonials = [
   {
-    quote: "Anarlog is great and local.",
+    quote: "Meeki is great and local.",
     author: "Tobi Lutke",
     username: "tobi",
     avatar: "/api/assets/blog/testimonials/tobi.jpg/",
     url: "https://x.com/tobi/status/1983892259230699921",
   },
   {
-    quote: "Anarlog is worth a look.",
+    quote: "Meeki is worth a look.",
     author: "Anand Chowdhary",
     username: "AnandChowdhary",
     avatar: "/api/assets/blog/testimonials/anand.jpg/",
     url: "https://x.com/AnandChowdhary/status/1997980479698723119",
   },
   {
-    quote: "Anarlog is one of my favorite AI secret weapons.",
+    quote: "Meeki is one of my favorite AI secret weapons.",
     author: "James Koshigoe",
     username: "JamesKoshigoe",
     avatar: "/api/assets/blog/testimonials/james-k.jpg/",
     url: "https://x.com/JamesKoshigoe/status/2024676687980671195",
   },
   {
-    quote: "Really liking Anarlog. Open access to my data and a GPL codebase!",
+    quote: "Really liking Meeki. Open access to my data and a GPL codebase!",
     author: "James LePage",
     username: "jameswlepage",
     avatar: "/api/assets/blog/testimonials/james-l.jpg/",
@@ -127,7 +127,7 @@ const testimonials = [
   },
   {
     quote:
-      "I love the flexibility that Anarlog gives me to integrate personal notes with AI summaries.",
+      "I love the flexibility that Meeki gives me to integrate personal notes with AI summaries.",
     author: "Tom Yang",
     username: "tomyang11_",
     avatar: "/api/assets/blog/testimonials/tom.jpg/",
@@ -176,15 +176,15 @@ const desktopTestimonialSidePositions: TestimonialCardPosition[] = [
 
 const testimonialDeckStateVersion = 3;
 const testimonialNameContext =
-  "Name context: Hyprnote became Char, then Anarlog.";
+  "Name context: Hyprnote became Char, then Meeki.";
 
 function formatTestimonialOffset(offset: TestimonialCardPosition["x"]) {
   return typeof offset === "number" ? `${offset}px` : offset;
 }
 
 function renderPullQuote(quote: string) {
-  return quote.split(/(Anarlog)/g).map((part, index) => {
-    if (part !== "Anarlog") return part;
+  return quote.split(/(Meeki)/g).map((part, index) => {
+    if (part !== "Meeki") return part;
 
     return (
       <mark
@@ -346,7 +346,7 @@ export const Route = createFileRoute("/")({
     };
   },
   head: () => ({
-    links: [{ rel: "canonical", href: ANARLOG_SITE_URL }],
+    links: [{ rel: "canonical", href: MEEKI_SITE_URL }],
     scripts: [
       {
         type: "application/ld+json",
@@ -374,7 +374,7 @@ function Component() {
         <div className="min-w-0 text-center">
           <section className="pt-10 pb-2 md:pt-12 md:pb-4">
             <h1 className="font-hand mx-auto max-w-3xl text-5xl leading-[0.98] font-semibold tracking-normal text-balance md:text-7xl lg:relative lg:left-1/2 lg:w-max lg:max-w-none lg:-translate-x-1/2 lg:whitespace-nowrap">
-              <span className="font-hand block lg:inline">Anarlog is</span>{" "}
+              <span className="font-hand block lg:inline">Meeki is</span>{" "}
               <span className="font-hand block lg:inline">
                 the AI notepad for
               </span>{" "}
@@ -580,7 +580,7 @@ function FinalCtaSection() {
           Keep your meeting notes yours.
         </h2>
         <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-[#4f4940]">
-          Try Anarlog today and be present in meetings.
+          Try Meeki today and be present in meetings.
         </p>
         <a
           href={appleSiliconDownloadUrl}
@@ -618,12 +618,12 @@ function OpenSourceSection({
           Open source by default
         </h2>
         <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-[#4f4940]">
-          We deeply care about transparency. Anarlog is open source so anyone
-          can inspect how meeting memory is handled.
+          We deeply care about transparency. Meeki is open source so anyone can
+          inspect how meeting memory is handled.
         </p>
 
         <a
-          href="https://github.com/fastrepl/anarlog"
+          href="https://github.com/fastrepl/meeki"
           target="_blank"
           rel="noopener noreferrer"
           className="mt-6 inline-flex items-center gap-2 rounded-full border border-neutral-300 bg-white px-5 py-3 text-sm font-medium text-neutral-900 transition-colors hover:border-neutral-900 hover:bg-neutral-900 hover:text-white"
@@ -762,7 +762,7 @@ function TestimonialsSection() {
           What people say
         </h2>
         <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-[#4f4940]">
-          It's clear they love Anarlog.
+          It's clear they love Meeki.
         </p>
       </div>
 
@@ -870,7 +870,7 @@ function PrivacySection() {
           Your data stays yours
         </h2>
         <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-[#4f4940]">
-          Anarlog is built around data you own, privacy you control, and notes
+          Meeki is built around data you own, privacy you control, and notes
           that stay useful outside our app.
         </p>
       </div>

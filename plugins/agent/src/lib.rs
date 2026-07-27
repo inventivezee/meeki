@@ -6,7 +6,7 @@ mod ext;
 
 pub use error::{Error, Result};
 pub use ext::AgentPluginExt;
-pub use hypr_agent_core::*;
+pub use meeki_agent_core::*;
 
 const PLUGIN_NAME: &str = "agent";
 
@@ -18,15 +18,15 @@ fn make_specta_builder<R: tauri::Runtime>() -> tauri_specta::Builder<R> {
             commands::install_cli::<Wry>,
             commands::uninstall_cli::<Wry>,
         ])
-        .typ::<hypr_agent_core::ProviderKind>()
-        .typ::<hypr_agent_core::ProviderHealthStatus>()
-        .typ::<hypr_agent_core::ProviderAuthStatus>()
-        .typ::<hypr_agent_core::ProviderHealth>()
-        .typ::<hypr_agent_core::HealthCheckResponse>()
-        .typ::<hypr_agent_core::InstallCliRequest>()
-        .typ::<hypr_agent_core::InstallCliResponse>()
-        .typ::<hypr_agent_core::UninstallCliRequest>()
-        .typ::<hypr_agent_core::UninstallCliResponse>()
+        .typ::<meeki_agent_core::ProviderKind>()
+        .typ::<meeki_agent_core::ProviderHealthStatus>()
+        .typ::<meeki_agent_core::ProviderAuthStatus>()
+        .typ::<meeki_agent_core::ProviderHealth>()
+        .typ::<meeki_agent_core::HealthCheckResponse>()
+        .typ::<meeki_agent_core::InstallCliRequest>()
+        .typ::<meeki_agent_core::InstallCliResponse>()
+        .typ::<meeki_agent_core::UninstallCliRequest>()
+        .typ::<meeki_agent_core::UninstallCliResponse>()
         .error_handling(tauri_specta::ErrorHandlingMode::Result)
 }
 
@@ -36,7 +36,7 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
     tauri::plugin::Builder::new(PLUGIN_NAME)
         .invoke_handler(specta_builder.invoke_handler())
         .setup(|_app, _api| {
-            hypr_agent_core::upgrade_hooks();
+            meeki_agent_core::upgrade_hooks();
             Ok(())
         })
         .build()

@@ -39,7 +39,7 @@ vi.mock("@lingui/react/macro", () => ({
   }),
 }));
 
-vi.mock("@hypr/editor/prompt", async () => {
+vi.mock("@meeki/editor/prompt", async () => {
   const React = await import("react");
 
   return {
@@ -83,7 +83,7 @@ vi.mock("@hypr/editor/prompt", async () => {
   };
 });
 
-vi.mock("@hypr/plugin-template", () => ({
+vi.mock("@meeki/plugin-template", () => ({
   commands: {
     getTemplateSource: mocks.getTemplateSource,
     render: mocks.renderTemplate,
@@ -229,7 +229,7 @@ describe("Auto prompt editor", () => {
     );
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Reset to Anarlog default" }),
+      screen.getByRole("button", { name: "Reset to Meeki default" }),
     );
 
     await waitFor(() =>

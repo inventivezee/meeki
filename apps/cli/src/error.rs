@@ -2,7 +2,7 @@
 pub enum Error {
     #[error("{0} not found")]
     NotFound(String),
-    #[error("Anarlog database not found at {0}; start Anarlog once or pass --db-path")]
+    #[error("Meeki database not found at {0}; start Meeki once or pass --db-path")]
     DatabaseNotFound(std::path::PathBuf),
     #[error("output file already exists at {0}; pass --force to overwrite it")]
     OutputExists(std::path::PathBuf),
@@ -15,11 +15,11 @@ pub enum Error {
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-impl From<hypr_agent_access::Error> for Error {
-    fn from(error: hypr_agent_access::Error) -> Self {
+impl From<meeki_agent_access::Error> for Error {
+    fn from(error: meeki_agent_access::Error) -> Self {
         match error {
-            hypr_agent_access::Error::NotFound(what) => Self::NotFound(what),
-            hypr_agent_access::Error::Database { action, source } => {
+            meeki_agent_access::Error::NotFound(what) => Self::NotFound(what),
+            meeki_agent_access::Error::Database { action, source } => {
                 Self::operation(action, source.to_string())
             }
         }

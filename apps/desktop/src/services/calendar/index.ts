@@ -1,6 +1,6 @@
 import type { Manager } from "tinytick";
 
-import type { CalendarProviderType } from "@hypr/plugin-calendar";
+import type { CalendarProviderType } from "@meeki/plugin-calendar";
 
 import {
   type CalendarSyncRange,

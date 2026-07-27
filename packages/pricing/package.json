@@ -1,5 +1,5 @@
 {
-  "name": "@hypr/pricing",
+  "name": "@meeki/pricing",
   "private": true,
   "type": "module",
   "exports": {
@@ -8,8 +8,8 @@
     "./ui": "./src/plan-feature-list.tsx"
   },
   "dependencies": {
-    "@hypr/ui": "workspace:^",
-    "@hypr/utils": "workspace:^"
+    "@meeki/ui": "workspace:^",
+    "@meeki/utils": "workspace:^"
   },
   "devDependencies": {
     "@types/react": "^19.2.14"

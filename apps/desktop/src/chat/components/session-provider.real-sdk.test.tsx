@@ -1,7 +1,7 @@
 import { cleanup, render, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { beginCloudsyncActivity, endCloudsyncActivity } from "@hypr/plugin-db";
+import { beginCloudsyncActivity, endCloudsyncActivity } from "@meeki/plugin-db";
 
 import { ChatSession, type ChatSessionRenderProps } from "./session-provider";
 
@@ -34,7 +34,7 @@ vi.mock("~/ai/hooks", () => ({
   useLanguageModel: () => undefined,
 }));
 
-vi.mock("@hypr/ui/components/ui/toast", () => ({
+vi.mock("@meeki/ui/components/ui/toast", () => ({
   sonnerToast: { error: vi.fn() },
 }));
 

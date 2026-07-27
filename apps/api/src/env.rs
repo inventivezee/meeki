@@ -12,45 +12,45 @@ fn default_port() -> u16 {
 pub struct Env {
     #[serde(default = "default_port")]
     pub port: u16,
-    #[serde(default, deserialize_with = "hypr_api_env::filter_empty")]
+    #[serde(default, deserialize_with = "meeki_api_env::filter_empty")]
     pub sentry_dsn: Option<String>,
-    #[serde(default, deserialize_with = "hypr_api_env::filter_empty")]
+    #[serde(default, deserialize_with = "meeki_api_env::filter_empty")]
     pub posthog_api_key: Option<String>,
     #[serde(default)]
-    pub anarlog_attachment_backup_gc_enabled: bool,
-    #[serde(default, deserialize_with = "hypr_api_env::filter_empty")]
+    pub meeki_attachment_backup_gc_enabled: bool,
+    #[serde(default, deserialize_with = "meeki_api_env::filter_empty")]
     pub sqlitecloud_cloudsync_management_api_key: Option<String>,
 
     #[serde(flatten)]
     pub observability: crate::observability::Env,
 
     #[serde(flatten)]
-    pub supabase: hypr_api_env::SupabaseEnv,
+    pub supabase: meeki_api_env::SupabaseEnv,
     #[serde(flatten)]
-    pub sync: hypr_api_sync::SyncEnv,
+    pub sync: meeki_api_sync::SyncEnv,
     #[serde(flatten)]
-    pub nango: hypr_api_env::NangoEnv,
+    pub nango: meeki_api_env::NangoEnv,
     #[serde(flatten)]
-    pub stripe: hypr_api_env::StripeEnv,
+    pub stripe: meeki_api_env::StripeEnv,
     #[serde(flatten)]
-    pub pyannote: hypr_api_env::PyannoteEnv,
+    pub pyannote: meeki_api_env::PyannoteEnv,
     #[serde(flatten)]
-    pub github_app: hypr_api_support::GitHubAppEnv,
+    pub github_app: meeki_api_support::GitHubAppEnv,
     #[serde(flatten)]
-    pub support_database: hypr_api_support::SupportDatabaseEnv,
+    pub support_database: meeki_api_support::SupportDatabaseEnv,
     #[serde(flatten)]
-    pub chatwoot: hypr_api_support::ChatwootEnv,
+    pub chatwoot: meeki_api_support::ChatwootEnv,
 
     pub exa_api_key: String,
     pub jina_api_key: String,
 
     #[serde(flatten)]
-    pub loops: hypr_api_env::LoopsEnv,
+    pub loops: meeki_api_env::LoopsEnv,
 
     #[serde(flatten)]
-    pub llm: hypr_llm_proxy::Env,
+    pub llm: meeki_llm_proxy::Env,
     #[serde(flatten)]
-    pub stt: hypr_transcribe_proxy::Env,
+    pub stt: meeki_transcribe_proxy::Env,
 }
 
 static ENV: OnceLock<Env> = OnceLock::new();
@@ -106,18 +106,18 @@ mod tests {
     #[derive(Deserialize)]
     struct SyncOnlyEnv {
         #[serde(flatten)]
-        sync: hypr_api_sync::SyncEnv,
+        sync: meeki_api_sync::SyncEnv,
     }
 
     #[test]
     fn deserializes_cloudsync_ttl_from_environment_string() {
         let env: SyncOnlyEnv = envy::from_iter([(
-            "ANARLOG_CLOUDSYNC_TOKEN_TTL_SECONDS".to_string(),
+            "MEEKI_CLOUDSYNC_TOKEN_TTL_SECONDS".to_string(),
             "300".to_string(),
         )])
         .unwrap();
 
-        assert_eq!(env.sync.anarlog_cloudsync_token_ttl_seconds, Some(300));
+        assert_eq!(env.sync.meeki_cloudsync_token_ttl_seconds, Some(300));
     }
 
     #[test]
@@ -125,17 +125,17 @@ mod tests {
         #[derive(Deserialize)]
         struct CleanupOnlyEnv {
             #[serde(default)]
-            anarlog_attachment_backup_gc_enabled: bool,
+            meeki_attachment_backup_gc_enabled: bool,
         }
 
         let disabled: CleanupOnlyEnv = envy::from_iter(Vec::<(String, String)>::new()).unwrap();
         let enabled: CleanupOnlyEnv = envy::from_iter([(
-            "ANARLOG_ATTACHMENT_BACKUP_GC_ENABLED".to_string(),
+            "MEEKI_ATTACHMENT_BACKUP_GC_ENABLED".to_string(),
             "true".to_string(),
         )])
         .unwrap();
 
-        assert!(!disabled.anarlog_attachment_backup_gc_enabled);
-        assert!(enabled.anarlog_attachment_backup_gc_enabled);
+        assert!(!disabled.meeki_attachment_backup_gc_enabled);
+        assert!(enabled.meeki_attachment_backup_gc_enabled);
     }
 }

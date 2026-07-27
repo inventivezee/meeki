@@ -1,4 +1,4 @@
-import type { JSONContent } from "@hypr/editor/note";
+import type { JSONContent } from "@meeki/editor/note";
 
 import {
   addSharedAttachmentIds,
@@ -81,7 +81,7 @@ export async function createSessionShareMutationId(input: {
     await crypto.subtle.digest(
       "SHA-256",
       new TextEncoder().encode(
-        `anarlog-session-share-mutation-v1\0${input.shareId}\0${input.baseRevision}\0${input.sourceHash}\0${canonicalJson(input.attachmentIds ?? [])}`,
+        `meeki-session-share-mutation-v1\0${input.shareId}\0${input.baseRevision}\0${input.sourceHash}\0${canonicalJson(input.attachmentIds ?? [])}`,
       ),
     ),
   );

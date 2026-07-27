@@ -32,7 +32,7 @@ vi.mock("@lingui/react/macro", () => ({
   }),
 }));
 
-vi.mock("@hypr/plugin-opener2", () => ({
+vi.mock("@meeki/plugin-opener2", () => ({
   commands: {
     openUrl: mocks.openUrl,
   },
@@ -95,19 +95,19 @@ describe("Metadata controls", () => {
     render(
       <EventDisplay
         event={{
-          title: "Welcome to Anarlog",
+          title: "Welcome to Meeki",
           startedAt: "2026-07-25T19:38:00.000Z",
           endedAt: undefined,
           location: undefined,
-          meetingLink: "https://anarlog.so/onboarding-demo/",
-          description: "A private, prerecorded introduction to Anarlog.",
+          meetingLink: "https://meeki.so/onboarding-demo/",
+          description: "A private, prerecorded introduction to Meeki.",
           calendarId: undefined,
         }}
       />,
     );
 
     expect(screen.queryByRole("button", { name: "Join" })).toBeNull();
-    expect(screen.queryByText("anarlog.so")).toBeNull();
+    expect(screen.queryByText("meeki.so")).toBeNull();
   });
 
   it("keeps Join for real meeting links", () => {

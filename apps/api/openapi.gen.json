@@ -1984,7 +1984,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "Anarlog Pro subscription or backup access required"
+            "description": "Meeki Pro subscription or backup access required"
           },
           "404": {
             "description": "Backup unavailable"
@@ -2037,7 +2037,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "Anarlog Pro subscription or backup access required"
+            "description": "Meeki Pro subscription or backup access required"
           },
           "409": {
             "description": "Backup changed or deletion is already being collected"
@@ -2087,7 +2087,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "Anarlog Pro subscription or backup access required"
+            "description": "Meeki Pro subscription or backup access required"
           },
           "404": {
             "description": "Current backup unavailable"
@@ -2140,7 +2140,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "Anarlog Pro subscription or backup access required"
+            "description": "Meeki Pro subscription or backup access required"
           },
           "404": {
             "description": "Backup unavailable"
@@ -2196,7 +2196,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "Anarlog Pro subscription or backup access required"
+            "description": "Meeki Pro subscription or backup access required"
           },
           "404": {
             "description": "Backup unavailable"
@@ -2250,7 +2250,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "Anarlog Pro subscription or backup access required"
+            "description": "Meeki Pro subscription or backup access required"
           },
           "404": {
             "description": "Current backup unavailable"
@@ -2300,7 +2300,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "Anarlog Pro subscription or backup access required"
+            "description": "Meeki Pro subscription or backup access required"
           },
           "409": {
             "description": "Backup reservation conflict"
@@ -2353,7 +2353,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "Anarlog Pro subscription or backup access required"
+            "description": "Meeki Pro subscription or backup access required"
           },
           "404": {
             "description": "Backup reservation unavailable"
@@ -2406,7 +2406,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "Anarlog Pro subscription required"
+            "description": "Meeki Pro subscription required"
           },
           "409": {
             "description": "Account already uses a different recovery key"
@@ -2791,7 +2791,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "Anarlog Pro or share-manager access required"
+            "description": "Meeki Pro or share-manager access required"
           },
           "409": {
             "description": "Shared note changed since the supplied base revision"
@@ -2882,7 +2882,7 @@
         "operationId": "create_credentials",
         "parameters": [
           {
-            "name": "x-anarlog-e2ee-key-id",
+            "name": "x-meeki-e2ee-key-id",
             "in": "header",
             "description": "Local recovery-key identity",
             "required": false,
@@ -2909,7 +2909,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "Anarlog Pro subscription required"
+            "description": "Meeki Pro subscription required"
           },
           "426": {
             "description": "Desktop upgrade required"

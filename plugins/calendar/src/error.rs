@@ -1,7 +1,7 @@
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error(transparent)]
-    Calendar(#[from] hypr_calendar::Error),
+    Calendar(#[from] meeki_calendar::Error),
     #[error("auth error: {0}")]
     Auth(String),
 }

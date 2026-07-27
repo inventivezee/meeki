@@ -1,4 +1,4 @@
-import { ANARLOG_SITE_URL, getPublicSharedNoteOgImageUrl } from "./seo.ts";
+import { MEEKI_SITE_URL, getPublicSharedNoteOgImageUrl } from "./seo.ts";
 import {
   getSharedNoteDescription,
   type SharedNoteSnapshot,
@@ -18,7 +18,7 @@ export const publicShareHeaders = {
 export function getPrivateShareHead() {
   return {
     meta: [
-      { title: "Shared note · Anarlog" },
+      { title: "Shared note · Meeki" },
       {
         name: "robots",
         content: "noindex, nofollow, noarchive, nosnippet",
@@ -40,14 +40,14 @@ export function getPublicShareHead(
   const title = snapshot.title || "Shared note";
   const description =
     getSharedNoteDescription(snapshot.body) ||
-    "A public note shared with Anarlog.";
-  const url = `${ANARLOG_SITE_URL}/share/public/${publicSlug}/`;
+    "A public note shared with Meeki.";
+  const url = `${MEEKI_SITE_URL}/share/public/${publicSlug}/`;
   const imageUrl = getPublicSharedNoteOgImageUrl(publicSlug);
 
   return {
     links: [{ rel: "canonical", href: url }],
     meta: [
-      { title: `${title} · Anarlog` },
+      { title: `${title} · Meeki` },
       { name: "description", content: description },
       { name: "robots", content: "index, follow" },
       { name: "referrer", content: "no-referrer" },

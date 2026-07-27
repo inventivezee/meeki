@@ -2,15 +2,15 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import { HeartIcon, MoreHorizontalIcon, PlusIcon } from "lucide-react";
 import { useState } from "react";
 
-import { Button } from "@hypr/ui/components/ui/button";
+import { Button } from "@meeki/ui/components/ui/button";
 import {
   AppFloatingPanel,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@hypr/ui/components/ui/dropdown-menu";
-import { cn } from "@hypr/utils";
+} from "@meeki/ui/components/ui/dropdown-menu";
+import { cn } from "@meeki/utils";
 
 import { AutoTemplateDetails } from "./auto-form";
 import { type WebTemplate } from "./codec";

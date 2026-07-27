@@ -4,9 +4,9 @@ use axum::{
     middleware::Next,
     response::{IntoResponse, Response},
 };
-use hypr_supabase_auth::server::{Error as SupabaseAuthError, SupabaseAuth};
+use meeki_supabase_auth::server::{Error as SupabaseAuthError, SupabaseAuth};
 
-pub use hypr_supabase_auth::Claims;
+pub use meeki_supabase_auth::Claims;
 
 #[derive(Clone)]
 pub struct AuthContext {

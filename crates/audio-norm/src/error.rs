@@ -5,9 +5,9 @@ pub enum Error {
     #[error(transparent)]
     Decoder(#[from] rodio::decoder::DecoderError),
     #[error(transparent)]
-    AudioUtils(#[from] hypr_audio_utils::Error),
+    AudioUtils(#[from] meeki_audio_utils::Error),
     #[error(transparent)]
-    Resampler(#[from] hypr_resampler::Error),
+    Resampler(#[from] meeki_resampler::Error),
     #[error("audio_import_unsupported_channel_count")]
     UnsupportedChannelCount { count: u16 },
     #[error("audio_import_invalid_channel_count")]

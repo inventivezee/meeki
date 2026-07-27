@@ -3,21 +3,21 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteFooter } from "@/components/site-footer";
 import { changelogEntries, formatChangelogDate } from "@/lib/changelog";
 import { getEntrySummary } from "@/lib/changelog-summary";
-import { ANARLOG_SITE_URL } from "@/lib/seo";
+import { MEEKI_SITE_URL } from "@/lib/seo";
 
 export const Route = createFileRoute("/changelog/")({
   component: Component,
   head: () => ({
-    links: [{ rel: "canonical", href: `${ANARLOG_SITE_URL}/changelog` }],
+    links: [{ rel: "canonical", href: `${MEEKI_SITE_URL}/changelog` }],
     meta: [
-      { title: "Anarlog Changelog" },
+      { title: "Meeki Changelog" },
       {
         name: "description",
         content:
-          "See the latest Anarlog desktop app updates, fixes, and product changes.",
+          "See the latest Meeki desktop app updates, fixes, and product changes.",
       },
-      { property: "og:title", content: "Anarlog Changelog" },
-      { property: "og:url", content: `${ANARLOG_SITE_URL}/changelog` },
+      { property: "og:title", content: "Meeki Changelog" },
+      { property: "og:url", content: `${MEEKI_SITE_URL}/changelog` },
     ],
   }),
 });
@@ -27,8 +27,8 @@ function Component() {
     <main className="min-h-screen bg-white text-[#181613]">
       <div className="mx-auto w-full max-w-[700px] px-5 py-8 md:px-8 md:py-12">
         <header className="flex items-center justify-between gap-6">
-          <Link to="/" aria-label="Anarlog home">
-            <img src="/logo.svg" alt="Anarlog" className="h-9 w-auto" />
+          <Link to="/" aria-label="Meeki home">
+            <img src="/logo.svg" alt="Meeki" className="h-9 w-auto" />
           </Link>
         </header>
 
@@ -37,7 +37,7 @@ function Component() {
             Changelog
           </h1>
           <p className="mt-6 max-w-2xl text-xl leading-9 text-[#363029]">
-            Product updates, fixes, and release notes for Anarlog.
+            Product updates, fixes, and release notes for Meeki.
           </p>
         </section>
 

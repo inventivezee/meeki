@@ -6,7 +6,7 @@ import { pipeline } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const release = process.env.MEETY_LLAMA_CPP_RELEASE ?? "b10067";
+const release = process.env.MEEKI_LLAMA_CPP_RELEASE ?? "b10067";
 const dest = join(__dirname, "../resources/llama-cpp");
 const serverPath = join(dest, "llama-server");
 

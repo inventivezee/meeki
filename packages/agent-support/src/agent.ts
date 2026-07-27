@@ -1,4 +1,4 @@
-import { env } from "@hypr/agent-core";
+import { env } from "@meeki/agent-core";
 
 import { graph } from "./graph";
 

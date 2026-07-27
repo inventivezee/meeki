@@ -9,7 +9,7 @@ import { AlertTriangle, Home, RotateCw, Search } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect } from "react";
 
-import { Button } from "@hypr/ui/components/ui/button";
+import { Button } from "@meeki/ui/components/ui/button";
 
 export const ErrorComponent: ErrorRouteComponent = ({ error }) => {
   useEffect(() => {

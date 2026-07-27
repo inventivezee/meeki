@@ -7,10 +7,10 @@ edition = "2024"
 specta = ["dep:specta"]
 
 [dependencies]
-hypr-file = { workspace = true }
-hypr-gguf = { workspace = true }
-hypr-lmstudio = { workspace = true }
-hypr-local-model = { workspace = true }
+meeki-file = { workspace = true }
+meeki-gguf = { workspace = true }
+meeki-lmstudio = { workspace = true }
+meeki-local-model = { workspace = true }
 
 dirs = { workspace = true }
 reqwest = { workspace = true }

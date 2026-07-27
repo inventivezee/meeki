@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use axum::{Extension, Json, extract::Path, response::Html};
-use hypr_recall::{
+use meeki_recall::{
     AutomaticLeaveConfig, BotStatusCode, BotVariant, CreateBotRequest, EveryoneLeftConfig,
     OutputMedia, OutputMediaConfig, OutputMediaKind, OutputMediaWebpageConfig,
     RealTimeTranscriptionConfig, RecallClient, RecordingConfig, SilenceDetectionConfig,

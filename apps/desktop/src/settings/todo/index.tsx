@@ -8,8 +8,8 @@ import {
   AccordionHeader,
   AccordionItem,
   AccordionTriggerPrimitive,
-} from "@hypr/ui/components/ui/accordion";
-import { cn } from "@hypr/utils";
+} from "@meeki/ui/components/ui/accordion";
+import { cn } from "@meeki/utils";
 
 import { TodoProviderContent } from "./provider-content";
 import { TODO_PROVIDERS } from "./shared";

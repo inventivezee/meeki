@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
   showNotification: vi.fn(),
 }));
 
-vi.mock("@hypr/plugin-notification", () => ({
+vi.mock("@meeki/plugin-notification", () => ({
   commands: { showNotification: mocks.showNotification },
 }));
 
@@ -50,7 +50,7 @@ describe("checkEventNotifications", () => {
     expect(mocks.showNotification).toHaveBeenCalledWith(
       expect.objectContaining({
         source: { type: "calendar_event", event_id: "event-1" },
-        action_label: "Open Anarlog",
+        action_label: "Open Meeki",
         participants: null,
         event_details: null,
         options: null,

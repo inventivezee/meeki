@@ -2,7 +2,7 @@ import { createListenerStore } from "./index";
 
 type ListenerStoreSingleton = ReturnType<typeof createListenerStore>;
 
-const LISTENER_STORE_KEY = "__hypr_listener_store__" as const;
+const LISTENER_STORE_KEY = "__meeki_listener_store__" as const;
 
 const getListenerStore = (): ListenerStoreSingleton => {
   if (!import.meta.hot) {

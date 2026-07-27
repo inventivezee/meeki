@@ -1,4 +1,4 @@
-use hypr_http::HttpClient;
+use meeki_http::HttpClient;
 
 use crate::error::Error;
 use crate::types::{Issue, IssueComment, ListIssuesRequest, ListReposRequest, Repository};

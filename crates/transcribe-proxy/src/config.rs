@@ -36,7 +36,7 @@ pub struct SttProxyConfig {
 }
 
 impl SttProxyConfig {
-    pub fn new(env: &Env, supabase: &hypr_api_env::SupabaseEnv) -> Self {
+    pub fn new(env: &Env, supabase: &meeki_api_env::SupabaseEnv) -> Self {
         Self {
             api_keys: ApiKeys::from(&env.stt).0,
             default_provider: Provider::Deepgram,

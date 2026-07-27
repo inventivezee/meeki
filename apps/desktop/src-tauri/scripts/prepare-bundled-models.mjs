@@ -5,7 +5,7 @@
  *
  * Usage:
  *   node apps/desktop/src-tauri/scripts/prepare-bundled-models.mjs
- *   MEETY_BUNDLE_MODELS=qwen3-small,parakeet-streaming node ...
+ *   MEEKI_BUNDLE_MODELS=qwen3-small,parakeet-streaming node ...
  */
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
@@ -36,7 +36,7 @@ const MODELS = {
 
 // Default STT pack: largest Qwen3 ASR + Parakeet streaming for live capture.
 const selected = (
-  process.env.MEETY_BUNDLE_MODELS ?? "qwen3-large,parakeet-streaming"
+  process.env.MEEKI_BUNDLE_MODELS ?? "qwen3-large,parakeet-streaming"
 )
   .split(",")
   .map((value) => value.trim())

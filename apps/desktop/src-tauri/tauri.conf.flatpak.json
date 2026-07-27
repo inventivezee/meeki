@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Anarlog",
+  "productName": "Meeki",
   "mainBinaryName": "hyprnote",
-  "identifier": "com.hyprnote.Hyprnote",
+  "identifier": "com.meeki.Meeki",
   "plugins": {
     "updater": {
       "active": false

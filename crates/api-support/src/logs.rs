@@ -46,14 +46,14 @@ pub(crate) fn safe_tail(s: &str, max_bytes: usize) -> &str {
 }
 
 pub(crate) async fn analyze_logs(api_key: &str, logs: &str) -> Option<String> {
-    let client = hypr_openrouter::Client::new(api_key);
+    let client = meeki_openrouter::Client::new(api_key);
     let tail = safe_tail(logs, 10000);
 
-    let req = hypr_openrouter::ChatCompletionRequest {
+    let req = meeki_openrouter::ChatCompletionRequest {
         model: Some("google/gemini-2.0-flash-001".to_string()),
         max_tokens: Some(300),
-        messages: vec![hypr_openrouter::ChatMessage::new(
-            hypr_openrouter::Role::User,
+        messages: vec![meeki_openrouter::ChatMessage::new(
+            meeki_openrouter::Role::User,
             format!(
                 "Extract only ERROR and WARNING entries from these logs. Output max 800 chars, no explanation:\n\n{tail}"
             ),

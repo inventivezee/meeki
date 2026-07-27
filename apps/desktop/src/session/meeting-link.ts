@@ -1,4 +1,4 @@
-/** Legacy onboarding opened a hosted anarlog demo video; treat as no meeting. */
+/** Legacy onboarding opened a hosted meeki demo video; treat as no meeting. */
 export function resolveMeetingLink(meetingLink: string | null | undefined) {
   if (!meetingLink) {
     return null;

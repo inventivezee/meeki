@@ -5,11 +5,11 @@ edition = "2024"
 
 [dev-dependencies]
 hound = { workspace = true }
-hypr-data = { workspace = true }
+meeki-data = { workspace = true }
 rodio = { workspace = true }
 
 [dependencies]
-hypr-audio-utils = { workspace = true }
-hypr-vad-masking = { workspace = true }
+meeki-audio-utils = { workspace = true }
+meeki-vad-masking = { workspace = true }
 
 dagc = "0.1.1"

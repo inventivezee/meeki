@@ -2,15 +2,15 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand, ValueEnum};
 
-use hypr_agent_access::{DEFAULT_TRANSCRIPT_LIMIT, MAX_TRANSCRIPT_LIMIT};
+use meeki_agent_access::{DEFAULT_TRANSCRIPT_LIMIT, MAX_TRANSCRIPT_LIMIT};
 
 #[derive(Debug, Parser)]
-#[command(name = "anarlog", version, about = "Query local Anarlog meeting data")]
+#[command(name = "meeki", version, about = "Query local Meeki meeting data")]
 pub struct Args {
     #[arg(
         long,
         global = true,
-        env = "ANARLOG_BASE",
+        env = "MEEKI_BASE",
         hide_env_values = true,
         value_name = "DIR"
     )]
@@ -19,7 +19,7 @@ pub struct Args {
     #[arg(
         long,
         global = true,
-        env = "ANARLOG_DB_PATH",
+        env = "MEEKI_DB_PATH",
         hide_env_values = true,
         value_name = "FILE"
     )]
@@ -41,7 +41,7 @@ pub enum Command {
         #[command(subcommand)]
         command: MeetingCommand,
     },
-    /// Run the read-only Anarlog MCP server over stdio
+    /// Run the read-only Meeki MCP server over stdio
     Mcp,
 }
 
@@ -117,7 +117,7 @@ mod tests {
     #[test]
     fn parses_meeting_list_filters() {
         let args = Args::parse_from([
-            "anarlog", "--json", "meetings", "list", "--query", "planning", "--limit", "10",
+            "meeki", "--json", "meetings", "list", "--query", "planning", "--limit", "10",
         ]);
 
         assert!(args.json);
@@ -139,7 +139,7 @@ mod tests {
         assert!(help.contains("doctor"));
 
         let Command::Meetings { command } = Args::parse_from([
-            "anarlog",
+            "meeki",
             "meetings",
             "export",
             "meeting-1",
@@ -162,7 +162,7 @@ mod tests {
     #[test]
     fn parses_transcript_and_history_pagination() {
         let Command::Meetings { command } = Args::parse_from([
-            "anarlog",
+            "meeki",
             "meetings",
             "transcript",
             "meeting-1",
@@ -185,7 +185,7 @@ mod tests {
         ));
 
         let Command::Meetings { command } = Args::parse_from([
-            "anarlog",
+            "meeki",
             "meetings",
             "history",
             "meeting-1",
@@ -205,7 +205,7 @@ mod tests {
     #[test]
     fn export_force_requires_an_output_path() {
         assert!(
-            Args::try_parse_from(["anarlog", "meetings", "export", "meeting-1", "--force"])
+            Args::try_parse_from(["meeki", "meetings", "export", "meeting-1", "--force"])
                 .is_err()
         );
     }
@@ -214,8 +214,8 @@ mod tests {
     fn public_docs_and_skill_cover_the_command_contract() {
         let docs = include_str!("../../../docs/reference/cli.mdx");
         let skill = concat!(
-            include_str!("../../../skills/anarlog/references/cli.md"),
-            include_str!("../../../skills/anarlog/references/setup.md"),
+            include_str!("../../../skills/meeki/references/cli.md"),
+            include_str!("../../../skills/meeki/references/setup.md"),
         );
         let command = Args::command();
         let mut paths = Vec::new();
@@ -223,7 +223,7 @@ mod tests {
 
         for path in paths {
             assert!(docs.contains(&path), "CLI docs are missing `{path}`");
-            assert!(skill.contains(&path), "Anarlog skill is missing `{path}`");
+            assert!(skill.contains(&path), "Meeki skill is missing `{path}`");
         }
         assert_options_are_documented(&command, docs);
     }

@@ -5,17 +5,17 @@ edition = "2024"
 
 [features]
 default = ["onnx"]
-onnx = ["dep:hypr-onnx"]
+onnx = ["dep:meeki-onnx"]
 
 [dependencies]
-hypr-onnx = { workspace = true, optional = true }
+meeki-onnx = { workspace = true, optional = true }
 thiserror = { workspace = true }
 
 [dev-dependencies]
 approx = { workspace = true }
 criterion = { workspace = true }
 hound = { workspace = true }
-hypr-data = { workspace = true }
+meeki-data = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 

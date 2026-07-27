@@ -1,6 +1,6 @@
 mod convert;
 
-use hypr_importer_core::ir::CollectionStats;
+use meeki_importer_core::ir::CollectionStats;
 use legacy_db_core::libsql;
 use legacy_db_user::UserDatabase;
 use std::ffi::OsStr;

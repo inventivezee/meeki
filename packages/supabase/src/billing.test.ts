@@ -4,7 +4,7 @@ import {
   applyClientProGrant,
   deriveBillingInfo,
   parseProGrantEmails,
-} from "@hypr/supabase/billing";
+} from "@meeki/supabase/billing";
 
 const secondsFromNow = (seconds: number) =>
   Math.floor(Date.now() / 1000) + seconds;
@@ -90,8 +90,8 @@ test("allowlisted email grants Pro on an otherwise free payload", () => {
     applyClientProGrant(
       { entitlements: [], subscription_status: null },
       {
-        grantEmails: ["admin@meety.local"],
-        email: "Admin@Meety.local",
+        grantEmails: ["admin@meeki.local"],
+        email: "Admin@Meeki.local",
       },
     ),
   );
@@ -105,7 +105,7 @@ test("non-allowlisted email does not grant Pro", () => {
     applyClientProGrant(
       { entitlements: [], subscription_status: null },
       {
-        grantEmails: ["admin@meety.local"],
+        grantEmails: ["admin@meeki.local"],
         email: "user@example.com",
       },
     ),

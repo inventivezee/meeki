@@ -6,24 +6,24 @@ import { ExternalLink } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { Streamdown } from "streamdown";
 
-import { commands as analyticsCommands } from "@hypr/plugin-analytics";
-import type { AIProvider } from "@hypr/store";
-import { aiProviderSchema } from "@hypr/store";
+import { commands as analyticsCommands } from "@meeki/plugin-analytics";
+import type { AIProvider } from "@meeki/store";
+import { aiProviderSchema } from "@meeki/store";
 import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@hypr/ui/components/ui/accordion";
+} from "@meeki/ui/components/ui/accordion";
 import {
   InputGroup,
   InputGroupInput,
-} from "@hypr/ui/components/ui/input-group";
+} from "@meeki/ui/components/ui/input-group";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@hypr/ui/components/ui/tooltip";
-import { cn } from "@hypr/utils";
+} from "@meeki/ui/components/ui/tooltip";
+import { cn } from "@meeki/utils";
 
 import {
   getProviderSelectionBlockers,
@@ -42,7 +42,7 @@ import {
 } from "~/settings/providers";
 import { SettingsAlertToast } from "~/shared/ui/settings-alert";
 
-export * from "./hypr-cloud-button";
+export * from "./meeki-cloud-button";
 export * from "./model-combobox";
 
 type ProviderType = "stt" | "llm";
@@ -63,13 +63,13 @@ type ProviderConfig = {
   };
 };
 
-const ANARLOG_ICON_SRC = "/assets/anarlog-icon.png";
+const MEEKI_ICON_SRC = "/assets/meeki-icon.png";
 
-export function AnarlogProviderIcon() {
+export function MeekiProviderIcon() {
   return (
     <img
-      src={ANARLOG_ICON_SRC}
-      alt="Anarlog"
+      src={MEEKI_ICON_SRC}
+      alt="Meeki"
       data-slot="provider-logo"
       className="size-4 object-contain object-center [clip-path:inset(6%_round_18%)]"
     />
@@ -236,9 +236,9 @@ export function NonHyprProviderCard({
     },
   });
   const keychainToastDescription = isKeychainRecoveryInProgress
-    ? t`Unlock your login Keychain in the macOS prompt. Anarlog will retry saving this API key automatically.`
+    ? t`Unlock your login Keychain in the macOS prompt. Meeki will retry saving this API key automatically.`
     : (repairMutation.error?.message ??
-      t`macOS cannot access your login Keychain. Repairing briefly locks it and asks for your Mac password before Anarlog retries this API key.`);
+      t`macOS cannot access your login Keychain. Repairing briefly locks it and asks for your Mac password before Meeki retries this API key.`);
 
   return (
     <AccordionItem

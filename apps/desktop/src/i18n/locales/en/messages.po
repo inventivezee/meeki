@@ -170,87 +170,6 @@ msgstr "Always ready without manually launching."
 msgid "Analyzing structure..."
 msgstr "Analyzing structure..."
 
-#: src/onboarding/permissions.tsx
-msgid "Anarlog can hear others"
-msgstr "Anarlog can hear others"
-
-#: src/onboarding/permissions.tsx
-msgid "Anarlog can hear your voice"
-msgstr "Anarlog can hear your voice"
-
-#: src/onboarding/permissions.tsx
-msgid "Anarlog can read meeting details"
-msgstr "Anarlog can read meeting details"
-
-#: src/session/components/note-input/enhanced/enhance-error.tsx
-msgid "Anarlog could not generate this summary because you were not signed in. Sign in, then try again."
-msgstr "Anarlog could not generate this summary because you were not signed in. Sign in, then try again."
-
-#: src/shared-notes/index.tsx
-msgid "Anarlog could not read the local shared-note cache."
-msgstr "Anarlog could not read the local shared-note cache."
-
-#: src/settings/sync/index.tsx
-msgid "Anarlog could not start cloud sync on this device."
-msgstr "Anarlog could not start cloud sync on this device."
-
-#: src/main/sync-status.tsx
-msgid "Anarlog couldn't read cloud sync status. Your notes are still available locally."
-msgstr "Anarlog couldn't read cloud sync status. Your notes are still available locally."
-
-#: src/settings/general/account.tsx
-msgid "Anarlog couldn't sign you out. Try again."
-msgstr "Anarlog couldn't sign you out. Try again."
-
-#: src/main/sync-status.tsx
-msgid "Anarlog is repairing cloud sync in the background. Your notes remain available locally."
-msgstr "Anarlog is repairing cloud sync in the background. Your notes remain available locally."
-
-#: src/onboarding/index.tsx
-msgid "Anarlog needs access to your microphone and system audio to record and transcribe your meetings"
-msgstr "Anarlog needs access to your microphone and system audio to record and transcribe your meetings"
-
-#: src/onboarding/index.tsx
-#~ msgid "Anarlog needs microphone and system audio to transcribe your meetings, plus Accessibility to read meeting controls, visible chat, and participant status."
-#~ msgstr "Anarlog needs microphone and system audio to transcribe your meetings, plus Accessibility to read meeting controls, visible chat, and participant status."
-
-#: src/main/sync-status.tsx
-msgid "Anarlog Pro is required to use cloud sync."
-msgstr "Anarlog Pro is required to use cloud sync."
-
-#: src/main/sync-status.tsx
-msgid "Anarlog Pro required"
-msgstr "Anarlog Pro required"
-
-#: src/templates/auto-form.tsx
-msgid "Anarlog sends these separately, so editing the prompt cannot remove the meeting source material."
-msgstr "Anarlog sends these separately, so editing the prompt cannot remove the meeting source material."
-
-#: src/main/sync-status.tsx
-msgid "Anarlog will keep retrying"
-msgstr "Anarlog will keep retrying"
-
-#: src/main/sync-status.tsx
-msgid "Anarlog will keep retrying in the background. Your notes remain available locally."
-msgstr "Anarlog will keep retrying in the background. Your notes remain available locally."
-
-#: src/settings/sync/index.tsx
-msgid "Anarlog will keep retrying."
-msgstr "Anarlog will keep retrying."
-
-#: src/settings/sync/index.tsx
-msgid "Anarlog will retry automatically."
-msgstr "Anarlog will retry automatically."
-
-#: src/main/sync-status.tsx
-#: src/settings/general/storage/legacy-cleanup.tsx
-msgid "Anarlog will retry automatically. This does not affect your notes."
-msgstr "Anarlog will retry automatically. This does not affect your notes."
-
-#: src/onboarding/index.tsx
-msgid "Anarlog will sync your calendar to get meeting reminders"
-msgstr "Anarlog will sync your calendar to get meeting reminders"
-
 #: src/templates/template-icon-picker.tsx
 msgid "Animals & Nature"
 msgstr "Animals & Nature"
@@ -280,14 +199,14 @@ msgstr "Approve"
 msgid "Ask & search about anything, or be creative!"
 msgstr "Ask & search about anything, or be creative!"
 
-#: src/shared/chat-cta.tsx
-msgid "Ask Anarlog anything"
-msgstr "Ask Anarlog anything"
-
 #: src/chat/components/input/index.tsx
 #: src/shared/chat-cta.tsx
 msgid "Ask anything"
 msgstr "Ask anything"
+
+#: src/shared/chat-cta.tsx
+msgid "Ask Meeki anything"
+msgstr "Ask Meeki anything"
 
 #: src/task/resource-view.tsx
 msgid "Assignees:"
@@ -302,8 +221,8 @@ msgid "Audio file retention"
 msgstr "Audio file retention"
 
 #: src/instruction/index.tsx
-msgid "Authorize access in your browser, then return to Anarlog."
-msgstr "Authorize access in your browser, then return to Anarlog."
+msgid "Authorize access in your browser, then return to Meeki."
+msgstr "Authorize access in your browser, then return to Meeki."
 
 #: src/templates/auto-form.tsx
 msgid "Auto prompt cannot be empty."
@@ -484,8 +403,8 @@ msgid "Cloud sync identity mismatch"
 msgstr "Cloud sync identity mismatch"
 
 #: src/settings/sync/index.tsx
-msgid "Cloud sync is available with Anarlog Pro"
-msgstr "Cloud sync is available with Anarlog Pro"
+msgid "Cloud sync is available with Meeki Pro"
+msgstr "Cloud sync is available with Meeki Pro"
 
 #: src/auth/cloudsync.ts
 msgid "Cloud sync is limited to 5 devices. Remove another device to sync here."
@@ -553,12 +472,12 @@ msgid "Compare Free and Pro before you sign in."
 msgstr "Compare Free and Pro before you sign in."
 
 #: src/instruction/index.tsx
-msgid "Complete sign-in in your browser, then return to Anarlog."
-msgstr "Complete sign-in in your browser, then return to Anarlog."
+msgid "Complete sign-in in your browser, then return to Meeki."
+msgstr "Complete sign-in in your browser, then return to Meeki."
 
 #: src/settings/general/account.tsx
-msgid "Complete the sign-in flow in your browser, then come back here if Anarlog does not reconnect automatically."
-msgstr "Complete the sign-in flow in your browser, then come back here if Anarlog does not reconnect automatically."
+msgid "Complete the sign-in flow in your browser, then come back here if Meeki does not reconnect automatically."
+msgstr "Complete the sign-in flow in your browser, then come back here if Meeki does not reconnect automatically."
 
 #: src/instruction/index.tsx
 msgid "Complete your purchase"
@@ -844,8 +763,8 @@ msgid "Enter template title"
 msgstr "Enter template title"
 
 #: src/settings/general/e2ee-setup.tsx
-msgid "Enter the recovery key from an existing Anarlog device."
-msgstr "Enter the recovery key from an existing Anarlog device."
+msgid "Enter the recovery key from an existing Meeki device."
+msgstr "Enter the recovery key from an existing Meeki device."
 
 #: src/settings/ai/shared/index.tsx
 msgid "Enter your API key"
@@ -910,8 +829,8 @@ msgid "Find a note..."
 msgstr "Find a note..."
 
 #: src/instruction/index.tsx
-msgid "Finish checkout in your browser, then return to Anarlog."
-msgstr "Finish checkout in your browser, then return to Anarlog."
+msgid "Finish checkout in your browser, then return to Meeki."
+msgstr "Finish checkout in your browser, then return to Meeki."
 
 #: src/settings/general/account.tsx
 msgid "Finish sign-in"
@@ -1008,16 +927,16 @@ msgid "Having trouble?"
 msgstr "Having trouble?"
 
 #: src/onboarding/permissions.tsx
-msgid "Help Anarlog listen to others"
-msgstr "Help Anarlog listen to others"
+msgid "Help Meeki listen to others"
+msgstr "Help Meeki listen to others"
 
 #: src/onboarding/permissions.tsx
-msgid "Help Anarlog listen to you"
-msgstr "Help Anarlog listen to you"
+msgid "Help Meeki listen to you"
+msgstr "Help Meeki listen to you"
 
 #: src/onboarding/permissions.tsx
-#~ msgid "Help Anarlog read meeting activity"
-#~ msgstr "Help Anarlog read meeting activity"
+#~ msgid "Help Meeki read meeting activity"
+#~ msgstr "Help Meeki read meeting activity"
 
 #: src/sidebar/timeline/index.tsx
 msgid "Hide Deleted Events"
@@ -1044,8 +963,8 @@ msgid "Icons"
 msgstr "Icons"
 
 #: src/settings/general/account.tsx
-msgid "If the browser does not reopen Anarlog, use the paste-link fallback in the sign-in instruction window."
-msgstr "If the browser does not reopen Anarlog, use the paste-link fallback in the sign-in instruction window."
+msgid "If the browser does not reopen Meeki, use the paste-link fallback in the sign-in instruction window."
+msgstr "If the browser does not reopen Meeki, use the paste-link fallback in the sign-in instruction window."
 
 #: src/sidebar/timeline/upcoming-meeting.ts
 msgid "In {minutes}m {seconds}s"
@@ -1100,13 +1019,13 @@ msgstr "Join meeting and record"
 msgid "Join scheduled meetings"
 msgstr "Join scheduled meetings"
 
-#: src/settings/general/app-settings.tsx
-msgid "Keep Anarlog available from the menu bar."
-msgstr "Keep Anarlog available from the menu bar."
-
 #: src/session-sharing/index.tsx
 msgid "Keep desktop edits"
 msgstr "Keep desktop edits"
+
+#: src/settings/general/app-settings.tsx
+msgid "Keep Meeki available from the menu bar."
+msgstr "Keep Meeki available from the menu bar."
 
 #: src/settings/sync/index.tsx
 msgid "Keep notes end-to-end encrypted and up to date across your signed-in devices."
@@ -1121,8 +1040,8 @@ msgid "Language for summaries, chats, and AI-generated responses"
 msgstr "Language for summaries, chats, and AI-generated responses"
 
 #: src/settings/ai/llm/select.tsx
-msgid "Language model is needed to make Anarlog summarize and chat about your conversations."
-msgstr "Language model is needed to make Anarlog summarize and chat about your conversations."
+msgid "Language model is needed to make Meeki summarize and chat about your conversations."
+msgstr "Language model is needed to make Meeki summarize and chat about your conversations."
 
 #. placeholder {0}: formatDistanceToNow( new Date(status.last_sync_at_ms), { addSuffix: true }, )
 #: src/main/sync-status.tsx
@@ -1170,6 +1089,14 @@ msgstr "Loading models..."
 msgid "Loading sync settings"
 msgstr "Loading sync settings"
 
+#: src/shared/ui/model-warming-up.tsx
+msgid "Loading the on-device model — about {secondsLeft}s left"
+msgstr "Loading the on-device model — about {secondsLeft}s left"
+
+#: src/shared/ui/model-warming-up.tsx
+msgid "Loading the on-device model — still going..."
+msgstr "Loading the on-device model — still going..."
+
 #: src/changelog/index.tsx
 #: src/task/resource-view.tsx
 msgid "Loading..."
@@ -1180,8 +1107,8 @@ msgid "Login"
 msgstr "Login"
 
 #: src/settings/ai/shared/index.tsx
-msgid "macOS cannot access your login Keychain. Repairing briefly locks it and asks for your Mac password before Anarlog retries this API key."
-msgstr "macOS cannot access your login Keychain. Repairing briefly locks it and asks for your Mac password before Anarlog retries this API key."
+msgid "macOS cannot access your login Keychain. Repairing briefly locks it and asks for your Mac password before Meeki retries this API key."
+msgstr "macOS cannot access your login Keychain. Repairing briefly locks it and asks for your Mac password before Meeki retries this API key."
 
 #: src/settings/general/main-language.tsx
 msgid "Main language"
@@ -1198,6 +1125,87 @@ msgstr "Match case"
 #: src/session/components/note-input/search/bar.tsx
 msgid "Match whole word"
 msgstr "Match whole word"
+
+#: src/onboarding/permissions.tsx
+msgid "Meeki can hear others"
+msgstr "Meeki can hear others"
+
+#: src/onboarding/permissions.tsx
+msgid "Meeki can hear your voice"
+msgstr "Meeki can hear your voice"
+
+#: src/onboarding/permissions.tsx
+msgid "Meeki can read meeting details"
+msgstr "Meeki can read meeting details"
+
+#: src/session/components/note-input/enhanced/enhance-error.tsx
+msgid "Meeki could not generate this summary because you were not signed in. Sign in, then try again."
+msgstr "Meeki could not generate this summary because you were not signed in. Sign in, then try again."
+
+#: src/shared-notes/index.tsx
+msgid "Meeki could not read the local shared-note cache."
+msgstr "Meeki could not read the local shared-note cache."
+
+#: src/settings/sync/index.tsx
+msgid "Meeki could not start cloud sync on this device."
+msgstr "Meeki could not start cloud sync on this device."
+
+#: src/main/sync-status.tsx
+msgid "Meeki couldn't read cloud sync status. Your notes are still available locally."
+msgstr "Meeki couldn't read cloud sync status. Your notes are still available locally."
+
+#: src/settings/general/account.tsx
+msgid "Meeki couldn't sign you out. Try again."
+msgstr "Meeki couldn't sign you out. Try again."
+
+#: src/main/sync-status.tsx
+msgid "Meeki is repairing cloud sync in the background. Your notes remain available locally."
+msgstr "Meeki is repairing cloud sync in the background. Your notes remain available locally."
+
+#: src/onboarding/index.tsx
+msgid "Meeki needs access to your microphone and system audio to record and transcribe your meetings"
+msgstr "Meeki needs access to your microphone and system audio to record and transcribe your meetings"
+
+#: src/onboarding/index.tsx
+#~ msgid "Meeki needs microphone and system audio to transcribe your meetings, plus Accessibility to read meeting controls, visible chat, and participant status."
+#~ msgstr "Meeki needs microphone and system audio to transcribe your meetings, plus Accessibility to read meeting controls, visible chat, and participant status."
+
+#: src/main/sync-status.tsx
+msgid "Meeki Pro is required to use cloud sync."
+msgstr "Meeki Pro is required to use cloud sync."
+
+#: src/main/sync-status.tsx
+msgid "Meeki Pro required"
+msgstr "Meeki Pro required"
+
+#: src/templates/auto-form.tsx
+msgid "Meeki sends these separately, so editing the prompt cannot remove the meeting source material."
+msgstr "Meeki sends these separately, so editing the prompt cannot remove the meeting source material."
+
+#: src/main/sync-status.tsx
+msgid "Meeki will keep retrying"
+msgstr "Meeki will keep retrying"
+
+#: src/main/sync-status.tsx
+msgid "Meeki will keep retrying in the background. Your notes remain available locally."
+msgstr "Meeki will keep retrying in the background. Your notes remain available locally."
+
+#: src/settings/sync/index.tsx
+msgid "Meeki will keep retrying."
+msgstr "Meeki will keep retrying."
+
+#: src/settings/sync/index.tsx
+msgid "Meeki will retry automatically."
+msgstr "Meeki will retry automatically."
+
+#: src/main/sync-status.tsx
+#: src/settings/general/storage/legacy-cleanup.tsx
+msgid "Meeki will retry automatically. This does not affect your notes."
+msgstr "Meeki will retry automatically. This does not affect your notes."
+
+#: src/onboarding/index.tsx
+msgid "Meeki will sync your calendar to get meeting reminders"
+msgstr "Meeki will sync your calendar to get meeting reminders"
 
 #: src/sidebar/timeline/index.tsx
 msgid "Meeting"
@@ -1452,10 +1460,6 @@ msgstr "Open"
 msgid "Open {0} settings"
 msgstr "Open {0} settings"
 
-#: src/onboarding/final.tsx
-msgid "Open Anarlog"
-msgstr "Open Anarlog"
-
 #: src/sidebar/timeline/index.tsx
 msgid "Open calendar"
 msgstr "Open calendar"
@@ -1476,6 +1480,10 @@ msgstr "Open in New Window"
 #: src/chat/components/toolbar-controls.tsx
 msgid "Open in right panel"
 msgstr "Open in right panel"
+
+#: src/onboarding/final.tsx
+msgid "Open Meeki"
+msgstr "Open Meeki"
 
 #: src/task/resource-view.tsx
 msgid "Open on GitHub"
@@ -1530,8 +1538,8 @@ msgid "Participants"
 msgstr "Participants"
 
 #: src/instruction/index.tsx
-msgid "Paste the browser URL here if the browser button did not reopen Anarlog."
-msgstr "Paste the browser URL here if the browser button did not reopen Anarlog."
+msgid "Paste the browser URL here if the browser button did not reopen Meeki."
+msgstr "Paste the browser URL here if the browser button did not reopen Meeki."
 
 #: src/main/sync-status.tsx
 msgid "Pause sync"
@@ -1707,16 +1715,16 @@ msgid "Required to record your voice during meetings and calls"
 msgstr "Required to record your voice during meetings and calls"
 
 #: src/settings/general/permissions.tsx
-msgid "Required to sync Apple Calendar events into Anarlog"
-msgstr "Required to sync Apple Calendar events into Anarlog"
+msgid "Required to sync Apple Calendar events into Meeki"
+msgstr "Required to sync Apple Calendar events into Meeki"
 
 #: src/calendar/components/apple/permission.tsx
 msgid "Reset"
 msgstr "Reset"
 
 #: src/templates/auto-form.tsx
-msgid "Reset to Anarlog default"
-msgstr "Reset to Anarlog default"
+msgid "Reset to Meeki default"
+msgstr "Reset to Meeki default"
 
 #: src/session-sharing/index.tsx
 msgid "Resolve the web and desktop edits before inviting anyone."
@@ -1881,8 +1889,8 @@ msgid "Select..."
 msgstr "Select..."
 
 #: src/settings/general/app-settings.tsx
-#~ msgid "Send anonymous usage analytics to help improve Anarlog."
-#~ msgstr "Send anonymous usage analytics to help improve Anarlog."
+#~ msgid "Send anonymous usage analytics to help improve Meeki."
+#~ msgstr "Send anonymous usage analytics to help improve Meeki."
 
 #: src/contacts/organization-details.tsx
 msgid "Send email"
@@ -1995,10 +2003,6 @@ msgid "Show All Recurring Events"
 msgstr "Show All Recurring Events"
 
 #: src/settings/general/app-settings.tsx
-msgid "Show Anarlog in the Dock and app switcher."
-msgstr "Show Anarlog in the Dock and app switcher."
-
-#: src/settings/general/app-settings.tsx
 msgid "Show app in Dock"
 msgstr "Show app in Dock"
 
@@ -2018,6 +2022,10 @@ msgstr "Show floating bar"
 #: src/sidebar/timeline/item.tsx
 msgid "Show in Finder"
 msgstr "Show in Finder"
+
+#: src/settings/general/app-settings.tsx
+msgid "Show Meeki in the Dock and app switcher."
+msgstr "Show Meeki in the Dock and app switcher."
 
 #: src/settings/general/app-settings.tsx
 msgid "Show the compact floating control while listening."
@@ -2054,10 +2062,6 @@ msgstr "Sign in for private repo access."
 msgid "Sign in for Pro"
 msgstr "Sign in for Pro"
 
-#: src/settings/general/account.tsx
-msgid "Sign in to Anarlog"
-msgstr "Sign in to Anarlog"
-
 #: src/onboarding/calendar.tsx
 msgid "Sign in to connect"
 msgstr "Sign in to connect"
@@ -2070,6 +2074,10 @@ msgstr "Sign in to connect {0}"
 #: src/session/components/note-input/enhanced/enhance-error.tsx
 msgid "Sign in to generate this summary"
 msgstr "Sign in to generate this summary"
+
+#: src/settings/general/account.tsx
+msgid "Sign in to Meeki"
+msgstr "Sign in to Meeki"
 
 #: src/settings/general/account.tsx
 msgid "Sign in to unlock cloud transcription and AI models, plus Pro features like sharing."
@@ -2146,8 +2154,8 @@ msgid "Start a Pro trial or add your own LLM API key to generate a summary from 
 msgstr "Start a Pro trial or add your own LLM API key to generate a summary from this transcript."
 
 #: src/settings/general/app-settings.tsx
-msgid "Start Anarlog at login"
-msgstr "Start Anarlog at login"
+msgid "Start Meeki at login"
+msgstr "Start Meeki at login"
 
 #: src/main/empty.tsx
 msgid "Start Recording"
@@ -2317,7 +2325,12 @@ msgstr "The main language is always included for transcription"
 msgid "The note may have been unshared or moved out of a workspace you can access."
 msgstr "The note may have been unshared or moved out of a workspace you can access."
 
+#: src/session/components/note-input/enhanced/thinking.tsx
+msgid "Thinking"
+msgstr "Thinking"
+
 #: src/chat/components/message/loading.tsx
+#: src/session/components/note-input/enhanced/thinking.tsx
 msgid "Thinking..."
 msgstr "Thinking..."
 
@@ -2344,8 +2357,8 @@ msgid "Timezone"
 msgstr "Timezone"
 
 #: src/session/components/note-input/enhanced/streaming.tsx
-msgid "Tip: The Anarlog team loves our users!"
-msgstr "Tip: The Anarlog team loves our users!"
+msgid "Tip: The Meeki team loves our users!"
+msgstr "Tip: The Meeki team loves our users!"
 
 #: src/session/components/note-input/header.tsx
 #: src/session/components/outer-header/overflow/export-modal.tsx
@@ -2359,8 +2372,8 @@ msgid "Transcription"
 msgstr "Transcription"
 
 #: src/settings/ai/stt/select.tsx
-msgid "Transcription model is needed to make Anarlog listen to your conversations."
-msgstr "Transcription model is needed to make Anarlog listen to your conversations."
+msgid "Transcription model is needed to make Meeki listen to your conversations."
+msgstr "Transcription model is needed to make Meeki listen to your conversations."
 
 #: src/templates/template-icon-picker.tsx
 msgid "Travel & Places"
@@ -2395,8 +2408,8 @@ msgid "Unlock sync"
 msgstr "Unlock sync"
 
 #: src/settings/ai/shared/index.tsx
-msgid "Unlock your login Keychain in the macOS prompt. Anarlog will retry saving this API key automatically."
-msgstr "Unlock your login Keychain in the macOS prompt. Anarlog will retry saving this API key automatically."
+msgid "Unlock your login Keychain in the macOS prompt. Meeki will retry saving this API key automatically."
+msgstr "Unlock your login Keychain in the macOS prompt. Meeki will retry saving this API key automatically."
 
 #: src/contacts/organization-details.tsx
 msgid "Unnamed"
@@ -2493,8 +2506,8 @@ msgid "Week starts on"
 msgstr "Week starts on"
 
 #: src/onboarding/index.tsx
-msgid "Welcome to Anarlog"
-msgstr "Welcome to Anarlog"
+msgid "Welcome to Meeki"
+msgstr "Welcome to Meeki"
 
 #: src/changelog/index.tsx
 msgid "What's new in {version}?"
@@ -2553,12 +2566,12 @@ msgid "Your notes remain available locally. Try again in a moment."
 msgstr "Your notes remain available locally. Try again in a moment."
 
 #: src/settings/general/e2ee-setup.tsx
-msgid "Your recovery key encrypts synced notes before they leave this device. Anarlog cannot read or recover it."
-msgstr "Your recovery key encrypts synced notes before they leave this device. Anarlog cannot read or recover it."
+msgid "Your recovery key encrypts synced notes before they leave this device. Meeki cannot read or recover it."
+msgstr "Your recovery key encrypts synced notes before they leave this device. Meeki cannot read or recover it."
 
 #: src/settings/sync/index.tsx
-msgid "Your recovery key encrypts synced notes before they leave this device. Anarlog cannot read them."
-msgstr "Your recovery key encrypts synced notes before they leave this device. Anarlog cannot read them."
+msgid "Your recovery key encrypts synced notes before they leave this device. Meeki cannot read them."
+msgstr "Your recovery key encrypts synced notes before they leave this device. Meeki cannot read them."
 
 #: src/templates/template-sidebar.tsx
 msgid "Z to A"

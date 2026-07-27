@@ -7,7 +7,7 @@ pub enum Error {
     Request(#[from] reqwest::Error),
 
     #[error(transparent)]
-    HyprFile(#[from] hypr_file::Error),
+    HyprFile(#[from] meeki_file::Error),
 
     #[error(transparent)]
     Json(#[from] serde_json::Error),

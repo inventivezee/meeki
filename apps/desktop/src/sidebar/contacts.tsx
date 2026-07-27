@@ -3,7 +3,7 @@ import { Reorder } from "motion/react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
-import type { ContactsSelection } from "@hypr/plugin-windows";
+import type { ContactsSelection } from "@meeki/plugin-windows";
 
 import { NewPersonForm } from "~/contacts/new-person-form";
 import { OrganizationItem } from "~/contacts/organization-item";

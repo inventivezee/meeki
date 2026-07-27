@@ -32,7 +32,7 @@ pub use adapter::{StreamingBatchEvent, StreamingBatchStream};
 
 pub use batch::{BatchClient, BatchClientBuilder};
 pub use error::Error;
-pub use hypr_ws_client;
+pub use meeki_ws_client;
 pub use live::{
     DualHandle, FinalizeHandle, ListenClient, ListenClientBuilder, ListenClientDual,
     ListenClientDualInput, ListenClientInput,

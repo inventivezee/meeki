@@ -99,7 +99,7 @@ impl ChannelSplitProxy {
             .clone()
             .into_client_request()
             .map_err(|error| crate::ProxyError::InvalidRequest(error.to_string()))?;
-        hypr_observability::inject_current_trace_context(req.headers_mut());
+        meeki_observability::inject_current_trace_context(req.headers_mut());
 
         let result = tokio::time::timeout(timeout, connect_async(req)).await;
         match result {

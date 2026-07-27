@@ -79,7 +79,7 @@ fn build_initial_message_with_adapter(
     };
 
     msg.and_then(|m| match m {
-        owhisper_client::hypr_ws_client::client::Message::Text(t) => Some(t.to_string()),
+        owhisper_client::meeki_ws_client::client::Message::Text(t) => Some(t.to_string()),
         _ => None,
     })
 }
@@ -297,7 +297,7 @@ pub async fn build_proxy(
 mod tests {
     use super::*;
     use crate::query_params::QueryValue;
-    use hypr_language::ISO639;
+    use meeki_language::ISO639;
 
     #[test]
     fn test_build_listen_params_basic() {

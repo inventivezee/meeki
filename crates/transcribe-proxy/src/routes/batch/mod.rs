@@ -12,12 +12,12 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use futures_util::StreamExt;
-use hypr_api_auth::AuthContext;
+use meeki_api_auth::AuthContext;
 use owhisper_client::normalize_listen_params;
 use owhisper_interface::ListenParams;
 use tokio::io::AsyncWriteExt;
 
-use hypr_audio_mime::content_type_to_extension;
+use meeki_audio_mime::content_type_to_extension;
 
 use crate::hyprnote_routing::should_use_hyprnote_routing;
 use crate::query_params::QueryParams;
@@ -250,7 +250,7 @@ async fn write_body_to_temp_file(
 mod tests {
     use super::*;
     use crate::query_params::QueryValue;
-    use hypr_language::ISO639;
+    use meeki_language::ISO639;
 
     #[test]
     fn test_build_listen_params_normalizes_duplicate_base_languages() {

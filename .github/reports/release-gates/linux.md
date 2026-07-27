@@ -100,7 +100,7 @@ on both architectures.
 | ----------- | -------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
 | L-ART-01    | Yes      | Record the URL, filename, version, commit, size, and SHA-256 for every published Linux artifact.          | Hashes match published checksums and every required run uses an exact recorded hash.                                                        | NOT RUN             |
 | L-ART-02    | Yes      | Inspect each artifact with file and inspect each .deb control record.                                     | Machine architecture, package Architecture, filename, download label, and updater target all agree.                                         | NOT RUN             |
-| L-ART-03    | Yes      | Inspect AppImage and .deb contents for the expected binary, icon, desktop file, resources, and libraries. | The installed identity is Anarlog, the main binary is anarlog, and required shared libraries are declared or bundled correctly.             | NOT RUN             |
+| L-ART-03    | Yes      | Inspect AppImage and .deb contents for the expected binary, icon, desktop file, resources, and libraries. | The installed identity is Meeki, the main binary is meeki, and required shared libraries are declared or bundled correctly.             | NOT RUN             |
 | L-INS-01    | Yes      | Launch the x86_64 AppImage on L-ENV-X64-CLEAN from a fresh download.                                      | It launches without an undeclared host dependency, reaches the main shell, and creates no duplicate app identity.                           | NOT RUN             |
 | L-INS-02    | Yes      | Install the x86_64 .deb with apt on L-ENV-X64-CLEAN, then launch from the desktop and terminal.           | apt resolves declared dependencies, the launcher and icon work, and the app reaches the main shell.                                         | NOT RUN             |
 | L-INS-03    | Yes      | Install and launch L-PKG-ARM64-DEB on the required ARM64 environment.                                     | The artifact is native ARM64, launches successfully, opens SQLite, and extracts the ARM64 CloudSync library.                                | NOT RUN             |
@@ -157,7 +157,7 @@ meter alone is not proof.
 | L-DESK-01   | Yes      | Start and end calls in Zoom, Meet, and Slack; observe meeting and microphone-use detection.                         | Each advertised app is identified without persistent helper-process noise and start/end transitions do not duplicate.                       | NOT RUN             |
 | L-DESK-02   | Yes      | Trigger notifications focused, minimized, and backgrounded; click, dismiss, clear, and repeat once.                | Notifications appear once with correct identity and expected actions; clearing and main-window activation work.                              | NOT RUN             |
 | L-DESK-03   | Yes      | Exercise tray show/hide and menu actions, then restart the desktop session.                                         | The tray remains usable on the declared GNOME baseline and does not strand the main window.                                                   | NOT RUN             |
-| L-DESK-04   | Yes      | Enable autostart, reboot, open anarlog:// and legacy hyprnote:// deep links, and launch a second instance.            | Autostart behavior matches the setting, both deep links open Anarlog, and the second launch focuses the existing instance.                   | NOT RUN             |
+| L-DESK-04   | Yes      | Enable autostart, reboot, open meeki:// and legacy hyprnote:// deep links, and launch a second instance.            | Autostart behavior matches the setting, both deep links open Meeki, and the second launch focuses the existing instance.                   | NOT RUN             |
 | L-DESK-05   | Conditional | Exercise every global shortcut advertised to Linux on GNOME/Wayland, including press, release, and repeated use. | Advertised shortcuts fire once without stuck state; otherwise the controls are visibly unavailable and absent from beta claims.              | NOT RUN             |
 | L-DESK-06   | Conditional | Exercise dictation, floating controls, or live captions only if they are advertised to Linux.                   | Advertised controls are usable; unsupported controls are gated and cannot silently no-op.                                                    | NOT RUN             |
 
@@ -225,8 +225,8 @@ variables do not prove per-display scale.
 ### Artifact and package metadata
 
 ~~~bash
-appimage="/path/to/Anarlog.AppImage"
-deb="/path/to/anarlog.deb"
+appimage="/path/to/Meeki.AppImage"
+deb="/path/to/meeki.deb"
 
 sha256sum "$appimage" "$deb"
 file "$appimage" "$deb"
@@ -239,8 +239,8 @@ chmod +x "$appimage"
 sudo apt install "$deb"
 pkg="$(dpkg-deb --field "$deb" Package)"
 dpkg-query -W "$pkg"
-file "$(command -v anarlog)"
-ldd "$(command -v anarlog)"
+file "$(command -v meeki)"
+ldd "$(command -v meeki)"
 ~~~
 
 For the .deb upgrade test:
@@ -259,7 +259,7 @@ For removal, use sudo apt remove "$pkg", not purge.
 
 ### Application logs and audio backend markers
 
-The stable bundle identifier is com.hyprnote.stable. The tracing plugin writes
+The stable bundle identifier is com.meeki.stable. The tracing plugin writes
 app.log and up to five rotated files, app.log.1 through app.log.5, under the
 Tauri app log directory.
 
@@ -269,7 +269,7 @@ if [ -z "$data_dir" ]; then
   data_dir="$HOME/.local/share"
 fi
 
-log_dir="$data_dir/com.hyprnote.stable/logs"
+log_dir="$data_dir/com.meeki.stable/logs"
 find "$log_dir" -maxdepth 1 -type f -name "app.log*" -print
 tail -n 500 "$log_dir/app.log"
 
@@ -277,22 +277,22 @@ grep -E "mic_input_initialized|pipewire_capture_initialized|pipewire_capture_una
   "$log_dir"/app.log*
 ~~~
 
-Use com.hyprnote.staging for a staging package and com.hyprnote.dev for a dev
+Use com.meeki.staging for a staging package and com.meeki.dev for a dev
 build. To capture the foreground process as well as file logs:
 
 ~~~bash
-RUST_LOG=info,audio_actual=debug ./Anarlog.AppImage 2>&1 |
-  tee anarlog-console.log
+RUST_LOG=info,audio_actual=debug ./Meeki.AppImage 2>&1 |
+  tee meeki-console.log
 ~~~
 
 The speaker implementation tries PipeWire first and falls back to a PulseAudio monitor
 source. Use a disposable launch to exercise the fallback:
 
 ~~~bash
-PIPEWIRE_REMOTE=anarlog-invalid \
+PIPEWIRE_REMOTE=meeki-invalid \
 RUST_LOG=info,audio_actual=debug \
-./Anarlog.AppImage 2>&1 |
-  tee anarlog-pulse-fallback.log
+./Meeki.AppImage 2>&1 |
+  tee meeki-pulse-fallback.log
 ~~~
 
 The run passes L-AUD-07 only if the log contains pipewire_capture_unavailable followed
@@ -302,14 +302,14 @@ the command as BLOCKED and link the follow-up issue rather than claiming the fal
 passed.
 
 The stable app database normally lives at
-$data_dir/anarlog/app.db, but a migrated install can intentionally retain the legacy
+$data_dir/meeki/app.db, but a migrated install can intentionally retain the legacy
 hyprnote or bundle-identifier directory.
 
 ~~~bash
 for db in \
-  "$data_dir/anarlog/app.db" \
+  "$data_dir/meeki/app.db" \
   "$data_dir/hyprnote/app.db" \
-  "$data_dir/com.hyprnote.stable/app.db"
+  "$data_dir/com.meeki.stable/app.db"
 do
   if [ -f "$db" ]; then
     stat "$db"
@@ -325,25 +325,25 @@ find "$cache_dir/char/cloudsync" -type f -name "cloudsync.so" -exec file {} \;
 busctl --user list | grep -F "org.freedesktop.secrets"
 ~~~
 
-The Secret Service command proves only service availability. Verify Anarlog credential
+The Secret Service command proves only service availability. Verify Meeki credential
 metadata through the desktop credential manager or Seahorse without exposing values. The
-current secure-store service name is com.anarlog.stable.secure-store. The CloudSync
+current secure-store service name is com.meeki.stable.secure-store. The CloudSync
 cache path intentionally still uses char/cloudsync.
 
 For a desktop or audio-service failure, collect a bounded journal slice:
 
 ~~~bash
 journalctl --user --since "-30 min" --no-pager |
-  grep -Ei "anarlog|hyprnote|pipewire|wireplumber|pulse|gnome-keyring"
+  grep -Ei "meeki|hyprnote|pipewire|wireplumber|pulse|gnome-keyring"
 
 if command -v coredumpctl >/dev/null 2>&1; then
-  coredumpctl --since "-30 min" info anarlog
+  coredumpctl --since "-30 min" info meeki
 fi
 ~~~
 
 If Flatpak is later tested, its host-visible log path is expected under:
 
-    $HOME/.var/app/com.hyprnote.Hyprnote/data/com.hyprnote.Hyprnote/logs/
+    $HOME/.var/app/com.meeki.Meeki/data/com.meeki.Meeki/logs/
 
 Confirm the path from the running sandbox rather than assuming the native-package path.
 
@@ -361,7 +361,7 @@ pnpm -F ui build
 pnpm -F desktop typecheck
 cargo check -p desktop --target x86_64-unknown-linux-gnu
 POSTHOG_API_KEY=phc_local_smoke \
-VITE_API_URL=https://api.anarlog.so \
+VITE_API_URL=https://api.meeki.so \
 pnpm -F desktop tauri build --no-bundle --target x86_64-unknown-linux-gnu --config ./src-tauri/tauri.conf.staging.json --features devtools
 ~~~
 

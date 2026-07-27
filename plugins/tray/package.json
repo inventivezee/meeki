@@ -1,9 +1,9 @@
 {
-  "name": "@hypr/plugin-tray",
+  "name": "@meeki/plugin-tray",
   "private": true,
   "main": "./js/index.ts",
   "scripts": {
-    "codegen": "cargo test -p tauri-plugin-hypr-tray",
+    "codegen": "cargo test -p tauri-plugin-meeki-tray",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

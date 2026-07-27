@@ -11,10 +11,10 @@ import {
   suspendCloudsync,
   suspendCloudsyncAfterAuthLoss,
   suspendCloudsyncForSignOut,
-} from "@hypr/plugin-db";
-import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
-import { commands as miscCommands } from "@hypr/plugin-misc";
-import { sonnerToast } from "@hypr/ui/components/ui/toast";
+} from "@meeki/plugin-db";
+import { commands as fsSyncCommands } from "@meeki/plugin-fs-sync";
+import { commands as miscCommands } from "@meeki/plugin-misc";
+import { sonnerToast } from "@meeki/ui/components/ui/toast";
 
 import {
   applyCloudsyncPreference,
@@ -36,7 +36,7 @@ vi.mock("./cloudsync-progress", () => ({
   stopCloudsyncInitialSyncProgress: vi.fn(),
 }));
 
-vi.mock("@hypr/plugin-fs-sync", () => ({
+vi.mock("@meeki/plugin-fs-sync", () => ({
   commands: {
     deleteSessionFolder: vi.fn(() =>
       Promise.resolve({ status: "ok", data: null }),
@@ -54,7 +54,7 @@ vi.mock("~/settings/queries", () => ({
   getStoredSettingValues: vi.fn(),
 }));
 
-vi.mock("@hypr/plugin-misc", () => ({
+vi.mock("@meeki/plugin-misc", () => ({
   commands: {
     getFingerprint: vi.fn(() =>
       Promise.resolve({ status: "error", error: "unavailable" }),
@@ -66,7 +66,7 @@ vi.mock("@tauri-apps/plugin-os", () => ({
   hostname: vi.fn(() => Promise.resolve(null)),
 }));
 
-vi.mock("@hypr/ui/components/ui/toast", () => ({
+vi.mock("@meeki/ui/components/ui/toast", () => ({
   sonnerToast: { error: vi.fn() },
 }));
 
@@ -401,7 +401,7 @@ describe("CloudSync auth lifecycle", () => {
         method: "POST",
         headers: {
           Authorization: "Bearer supabase-token",
-          "X-Anarlog-E2EE-Key-Id": E2EE_KEY_ID,
+          "X-Meeki-E2EE-Key-Id": E2EE_KEY_ID,
         },
       }),
     );
@@ -679,7 +679,7 @@ describe("CloudSync auth lifecycle", () => {
           JSON.stringify({
             error: {
               code: "subscription_required",
-              message: "Anarlog Pro is required for CloudSync",
+              message: "Meeki Pro is required for CloudSync",
             },
           }),
           { status: 403, headers: { "Content-Type": "application/json" } },
@@ -696,7 +696,7 @@ describe("CloudSync auth lifecycle", () => {
     expect(configureCloudsyncToken).not.toHaveBeenCalled();
     expect(suspendCloudsync).toHaveBeenCalledTimes(1);
     expect(warn).toHaveBeenCalledWith(
-      "[cloudsync] Anarlog Pro is required; sync remains disabled",
+      "[cloudsync] Meeki Pro is required; sync remains disabled",
     );
     expect(getCloudsyncCredentialBlock()).toBe("not_entitled");
   });
@@ -1850,7 +1850,7 @@ describe("CloudSync auth lifecycle", () => {
       expect.objectContaining({
         headers: expect.objectContaining({
           "x-device-fingerprint": "device-fingerprint-1",
-          "x-anarlog-device-name": "Johns-M4-Max",
+          "x-meeki-device-name": "Johns-M4-Max",
         }),
       }),
     );

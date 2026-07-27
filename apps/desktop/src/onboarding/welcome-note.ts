@@ -1,23 +1,23 @@
-import { md2json } from "@hypr/editor/markdown";
-import type { SessionEvent } from "@hypr/store";
+import { md2json } from "@meeki/editor/markdown";
+import type { SessionEvent } from "@meeki/store";
 
 import { liveQueryClient } from "~/db";
 import { WELCOME_NOTE_TRACKING_ID } from "~/onboarding/welcome-note.constants";
 import { createSession } from "~/session/queries";
 import { DEFAULT_USER_ID } from "~/shared/utils";
 
-const PENDING_WELCOME_SESSION_KEY = "anarlog.pending-welcome-session";
+const PENDING_WELCOME_SESSION_KEY = "meeki.pending-welcome-session";
 
-const WELCOME_NOTE = `Welcome to Anarlog 👋
-
-
-This note is a quick way to see how Anarlog works.
+const WELCOME_NOTE = `Welcome to Meeki 👋
 
 
-Click **Record** in the top-right corner. Anarlog will listen to your microphone and system audio, transcribe what it hears, and turn it into notes.
+This note is a quick way to see how Meeki works.
 
 
-When you stop recording, Anarlog can start creating your summary.`;
+Click **Record** in the top-right corner. Meeki will listen to your microphone and system audio, transcribe what it hears, and turn it into notes.
+
+
+When you stop recording, Meeki can start creating your summary.`;
 
 let pendingWelcomeSession: Promise<string> | null = null;
 
@@ -52,7 +52,7 @@ async function stripLegacyDemoMeetingLink(sessionId: string) {
         event_json = json_set(
           json_set(event_json, '$.meeting_link', ''),
           '$.description',
-          'A quick introduction to recording with Anarlog.'
+          'A quick introduction to recording with Meeki.'
         ),
         updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
       WHERE id = ?
@@ -110,15 +110,15 @@ async function findOrCreateWelcomeSession(): Promise<string> {
   const event: SessionEvent = {
     tracking_id: WELCOME_NOTE_TRACKING_ID,
     calendar_id: "",
-    title: "Welcome to Anarlog",
+    title: "Welcome to Meeki",
     started_at: now,
     ended_at: "",
     is_all_day: false,
     has_recurrence_rules: false,
-    description: "A quick introduction to recording with Anarlog.",
+    description: "A quick introduction to recording with Meeki.",
   };
 
-  return createSession("Welcome to Anarlog", DEFAULT_USER_ID, {
+  return createSession("Welcome to Meeki", DEFAULT_USER_ID, {
     event_json: JSON.stringify(event),
     raw_md: JSON.stringify(md2json(WELCOME_NOTE)),
   });

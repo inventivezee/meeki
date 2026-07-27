@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Anarlog STT",
-  "mainBinaryName": "anarlog-stt",
-  "identifier": "com.hyprnote.dev.stt",
+  "productName": "Meeki STT",
+  "mainBinaryName": "meeki-stt",
+  "identifier": "com.meeki.dev.stt",
   "bundle": {
     "createUpdaterArtifacts": false,
     "resources": {

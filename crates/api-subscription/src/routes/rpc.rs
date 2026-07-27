@@ -4,7 +4,7 @@ use utoipa::ToSchema;
 
 use crate::state::AppState;
 
-use hypr_api_auth::AuthContext;
+use meeki_api_auth::AuthContext;
 
 #[derive(Debug, Serialize, ToSchema)]
 #[serde(rename_all = "snake_case")]

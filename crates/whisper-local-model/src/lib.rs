@@ -54,7 +54,7 @@ impl WhisperModel {
     }
 
     pub fn model_url(&self) -> &str {
-        // Public Hugging Face mirror (not hyprnote/anarlog CDN).
+        // Public Hugging Face mirror (not hyprnote/meeki CDN).
         match self {
             WhisperModel::QuantizedTiny => {
                 "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny-q8_0.bin"
@@ -113,15 +113,15 @@ impl WhisperModel {
         }
     }
 
-    pub fn supported_languages(&self) -> Vec<hypr_language::Language> {
+    pub fn supported_languages(&self) -> Vec<meeki_language::Language> {
         match self {
             WhisperModel::QuantizedTinyEn
             | WhisperModel::QuantizedBaseEn
-            | WhisperModel::QuantizedSmallEn => vec![hypr_language::ISO639::En.into()],
+            | WhisperModel::QuantizedSmallEn => vec![meeki_language::ISO639::En.into()],
             WhisperModel::QuantizedTiny
             | WhisperModel::QuantizedBase
             | WhisperModel::QuantizedSmall
-            | WhisperModel::QuantizedLargeTurbo => hypr_language::whisper_multilingual(),
+            | WhisperModel::QuantizedLargeTurbo => meeki_language::whisper_multilingual(),
         }
     }
 }

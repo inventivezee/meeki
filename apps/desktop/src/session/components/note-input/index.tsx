@@ -11,8 +11,8 @@ import {
 } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
-import type { NoteEditorRef } from "@hypr/editor/note";
-import { cn } from "@hypr/utils";
+import type { NoteEditorRef } from "@meeki/editor/note";
+import { cn } from "@meeki/utils";
 
 import { Enhanced } from "./enhanced";
 import { Header, useEditorTabs } from "./header";

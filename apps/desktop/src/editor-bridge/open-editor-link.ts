@@ -1,4 +1,4 @@
-import { commands as openerCommands } from "@hypr/plugin-opener2";
+import { commands as openerCommands } from "@meeki/plugin-opener2";
 
 export async function openEditorLink(href: string) {
   await openerCommands.openUrl(href, null);

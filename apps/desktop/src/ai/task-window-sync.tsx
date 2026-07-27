@@ -1,7 +1,7 @@
 import { emit, emitTo, listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { useEffect } from "react";
 
-import { getCurrentWebviewWindowLabel } from "@hypr/plugin-windows";
+import { getCurrentWebviewWindowLabel } from "@meeki/plugin-windows";
 
 import { type EnhancerService, getEnhancerService } from "~/services/enhancer";
 import { id } from "~/shared/utils";

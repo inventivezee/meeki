@@ -26,7 +26,7 @@ pub(super) async fn handle_stream_response(
 
     span.record("http.response.status_code", http_status as i64);
     if status.is_client_error() || status.is_server_error() {
-        hypr_observability::mark_span_as_error(&span, &http_status.to_string());
+        meeki_observability::mark_span_as_error(&span, &http_status.to_string());
     }
 
     tracing::info!(

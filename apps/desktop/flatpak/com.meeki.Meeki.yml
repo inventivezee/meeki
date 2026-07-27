@@ -1,4 +1,4 @@
-# Flatpak manifest for Anarlog
+# Flatpak manifest for Meeki
 # https://docs.flathub.org/docs/for-app-authors/requirements
 #
 # To generate vendored dependencies:
@@ -6,12 +6,12 @@
 #   flatpak-cargo-generator.py -d Cargo.lock -o flatpak/cargo-sources.json
 #
 # To build locally:
-#   flatpak-builder --user --install --force-clean flatpak-build-dir flatpak/com.hyprnote.Hyprnote.yml
+#   flatpak-builder --user --install --force-clean flatpak-build-dir flatpak/com.meeki.Meeki.yml
 #
 # To run:
-#   flatpak run com.hyprnote.Hyprnote
+#   flatpak run com.meeki.Meeki
 
-id: com.hyprnote.Hyprnote
+id: com.meeki.Meeki
 
 runtime: org.gnome.Platform
 runtime-version: "47"
@@ -42,7 +42,7 @@ finish-args:
   - --talk-name=org.kde.StatusNotifierWatcher
 
   # Single instance D-Bus
-  - --own-name=com.hyprnote.Hyprnote
+  - --own-name=com.meeki.Meeki
 
   # Filesystem access for user documents and notes
   - --filesystem=xdg-documents
@@ -95,14 +95,14 @@ modules:
       - install -Dm755 apps/desktop/src-tauri/target/x86_64-unknown-linux-gnu/release/hyprnote /app/bin/hyprnote
 
       # Install desktop file
-      - install -Dm644 apps/desktop/flatpak/com.hyprnote.Hyprnote.desktop /app/share/applications/com.hyprnote.Hyprnote.desktop
+      - install -Dm644 apps/desktop/flatpak/com.meeki.Meeki.desktop /app/share/applications/com.meeki.Meeki.desktop
 
       # Install metainfo
-      - install -Dm644 apps/desktop/flatpak/com.hyprnote.Hyprnote.metainfo.xml /app/share/metainfo/com.hyprnote.Hyprnote.metainfo.xml
+      - install -Dm644 apps/desktop/flatpak/com.meeki.Meeki.metainfo.xml /app/share/metainfo/com.meeki.Meeki.metainfo.xml
 
       # Install icons
-      - install -Dm644 apps/desktop/src-tauri/icons/stable/32x32.png /app/share/icons/hicolor/32x32/apps/com.hyprnote.Hyprnote.png
-      - install -Dm644 apps/desktop/src-tauri/icons/stable/64x64.png /app/share/icons/hicolor/64x64/apps/com.hyprnote.Hyprnote.png
-      - install -Dm644 apps/desktop/src-tauri/icons/stable/128x128.png /app/share/icons/hicolor/128x128/apps/com.hyprnote.Hyprnote.png
-      - install -Dm644 apps/desktop/src-tauri/icons/stable/128x128@2x.png /app/share/icons/hicolor/256x256/apps/com.hyprnote.Hyprnote.png
-      - install -Dm644 apps/desktop/src-tauri/icons/stable/icon.png /app/share/icons/hicolor/512x512/apps/com.hyprnote.Hyprnote.png
+      - install -Dm644 apps/desktop/src-tauri/icons/stable/32x32.png /app/share/icons/hicolor/32x32/apps/com.meeki.Meeki.png
+      - install -Dm644 apps/desktop/src-tauri/icons/stable/64x64.png /app/share/icons/hicolor/64x64/apps/com.meeki.Meeki.png
+      - install -Dm644 apps/desktop/src-tauri/icons/stable/128x128.png /app/share/icons/hicolor/128x128/apps/com.meeki.Meeki.png
+      - install -Dm644 apps/desktop/src-tauri/icons/stable/128x128@2x.png /app/share/icons/hicolor/256x256/apps/com.meeki.Meeki.png
+      - install -Dm644 apps/desktop/src-tauri/icons/stable/icon.png /app/share/icons/hicolor/512x512/apps/com.meeki.Meeki.png

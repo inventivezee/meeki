@@ -1,5 +1,5 @@
-import { and, desc, eq, sharedSessionCache } from "@hypr/db";
-import type { JSONContent } from "@hypr/editor/note";
+import { and, desc, eq, sharedSessionCache } from "@meeki/db";
+import type { JSONContent } from "@meeki/editor/note";
 
 import {
   db,

@@ -5,7 +5,7 @@ import type {
   RenderedTranscriptSegment,
   SegmentKey as BoundSegmentKey,
   SegmentWord as BoundSegmentWord,
-} from "@hypr/plugin-transcription";
+} from "@meeki/plugin-transcription";
 
 import type { TranscriptWordMetadata } from "~/stt/timing";
 

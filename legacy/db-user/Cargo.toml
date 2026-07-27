@@ -4,9 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-hypr-buffer = { workspace = true }
-hypr-language = { workspace = true }
 legacy-db-core = { workspace = true }
+meeki-buffer = { workspace = true }
+meeki-language = { workspace = true }
 owhisper-interface = { workspace = true }
 
 libsql = { workspace = true }

@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use futures_util::{Stream, StreamExt, future, stream};
-use hypr_audio_interface::AsyncSource;
+use meeki_audio_interface::AsyncSource;
 
 use crate::{AudioChunk, Chunker};
 

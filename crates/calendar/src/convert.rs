@@ -1,17 +1,17 @@
-use hypr_apple_calendar::types::{
+use meeki_apple_calendar::types::{
     AppleCalendar, AppleEvent, EventStatus as AppleEventStatus, Participant, ParticipantRole,
     ParticipantStatus,
 };
-use hypr_calendar_interface::{
+use meeki_calendar_interface::{
     AttendeeRole, AttendeeStatus, CalendarEvent, CalendarListItem, CalendarProviderType,
     EventAttendee, EventPerson, EventStatus,
 };
-use hypr_google_calendar::{
+use meeki_google_calendar::{
     AccessRole as GoogleAccessRole, Attendee as GoogleAttendee, AttendeeResponseStatus,
     CalendarListEntry as GoogleCalendar, Event as GoogleEvent, EventDateTime,
     EventStatus as GoogleEventStatus,
 };
-use hypr_outlook_calendar::{
+use meeki_outlook_calendar::{
     Attendee as OutlookAttendee, AttendeeType, Calendar as OutlookCalendar, Event as OutlookEvent,
     EventShowAs, ResponseType as OutlookResponseType,
 };
@@ -94,7 +94,7 @@ pub fn convert_apple_calendars(calendars: Vec<AppleCalendar>) -> Vec<CalendarLis
         .collect()
 }
 
-fn apple_color_to_css(color: hypr_apple_calendar::types::CalendarColor) -> String {
+fn apple_color_to_css(color: meeki_apple_calendar::types::CalendarColor) -> String {
     format!(
         "rgba({}, {}, {}, {})",
         (color.red * 255.0).round(),
@@ -360,7 +360,7 @@ fn extract_video_entry_point(event: &GoogleEvent) -> Option<String> {
         .find(|ep| {
             matches!(
                 ep.entry_point_type,
-                hypr_google_calendar::EntryPointType::Video
+                meeki_google_calendar::EntryPointType::Video
             )
         })
         .map(|ep| ep.uri.clone())

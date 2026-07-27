@@ -37,7 +37,7 @@ describe("sidebar toast registry", () => {
           {
             id: "capture-error:transcript-incomplete:session-1",
             message:
-              "Anarlog could not finish saving the transcript. The recording was kept so you can try again.",
+              "Meeki could not finish saving the transcript. The recording was kept so you can try again.",
             variant: "error",
           },
         ],
@@ -90,7 +90,7 @@ describe("sidebar toast registry", () => {
     );
 
     expect(toast?.id).toBe("sign-in-benefits");
-    expect(toast?.description).toBe("Sign in to get the most out of Anarlog");
+    expect(toast?.description).toBe("Sign in to get the most out of Meeki");
     expect(toast?.primaryAction?.label).toBe("Sign in");
   });
 
@@ -178,7 +178,7 @@ describe("sidebar toast registry", () => {
     expect(toast?.loading).toBe(true);
   });
 
-  it("does not upsell Anarlog Pro in the sidebar toast registry", () => {
+  it("does not upsell Meeki Pro in the sidebar toast registry", () => {
     const toast = getToastToShow(
       createToastRegistry({
         ...baseParams,

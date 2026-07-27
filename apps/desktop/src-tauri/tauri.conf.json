@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Anarlog Dev",
-  "mainBinaryName": "anarlog-dev",
-  "identifier": "com.hyprnote.dev",
+  "productName": "Meeki Dev",
+  "mainBinaryName": "meeki-dev",
+  "identifier": "com.meeki.dev",
   "build": {
     "beforeDevCommand": "pnpm -F desktop dev",
     "devUrl": "http://localhost:1422",
@@ -24,7 +24,7 @@
     }
   },
   "bundle": {
-    "publisher": "Anarlog",
+    "publisher": "Meeki",
     "active": true,
     "createUpdaterArtifacts": true,
     "targets": "all",
@@ -76,7 +76,7 @@
     "deep-link": {
       "desktop": {
         "schemes": [
-          "anarlog-dev",
+          "meeki-dev",
           "hypr",
           "char"
         ]

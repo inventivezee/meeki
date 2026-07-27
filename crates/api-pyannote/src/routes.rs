@@ -6,8 +6,8 @@ use axum::{
     response::{IntoResponse, Response},
     routing::post,
 };
-use hypr_api_auth::AuthContext;
-use hypr_pyannote_cloud::ClientInfo;
+use meeki_api_auth::AuthContext;
+use meeki_pyannote_cloud::ClientInfo;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -18,7 +18,7 @@ use crate::{
 
 #[derive(Clone)]
 struct AppState {
-    client: hypr_pyannote_cloud::Client,
+    client: meeki_pyannote_cloud::Client,
 }
 
 #[derive(Debug, Deserialize)]
@@ -125,7 +125,7 @@ async fn forward_request(request: reqwest::RequestBuilder) -> Result<Response> {
 fn sanitize_diarize_request(
     user_id: &str,
     mut body: DiarizeRequest,
-) -> Result<hypr_pyannote_cloud::types::DiarizeRequest> {
+) -> Result<meeki_pyannote_cloud::types::DiarizeRequest> {
     body.url = validate_media_url(user_id, &body.url)?;
     Ok(body.into())
 }
@@ -133,7 +133,7 @@ fn sanitize_diarize_request(
 fn sanitize_identify_request(
     user_id: &str,
     mut body: IdentifyRequest,
-) -> Result<hypr_pyannote_cloud::types::IdentifyRequest> {
+) -> Result<meeki_pyannote_cloud::types::IdentifyRequest> {
     body.url = validate_media_url(user_id, &body.url)?;
     Ok(body.into())
 }
@@ -141,7 +141,7 @@ fn sanitize_identify_request(
 fn sanitize_voiceprint_request(
     user_id: &str,
     mut body: VoiceprintRequest,
-) -> Result<hypr_pyannote_cloud::types::VoiceprintRequest> {
+) -> Result<meeki_pyannote_cloud::types::VoiceprintRequest> {
     body.url = validate_media_url(user_id, &body.url)?;
     Ok(body.into())
 }
@@ -226,7 +226,7 @@ fn default_message(status: StatusCode) -> String {
 #[cfg(test)]
 mod tests {
     use axum::{Extension, Router, body::Body, body::to_bytes, http::Request, http::StatusCode};
-    use hypr_api_auth::{AuthContext, Claims};
+    use meeki_api_auth::{AuthContext, Claims};
     use serde_json::{Value, json};
     use tower::ServiceExt;
     use wiremock::{

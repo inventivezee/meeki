@@ -36,7 +36,7 @@ const hoisted = vi.hoisted(() => ({
   enhancedEditorMountCount: 0,
 }));
 
-vi.mock("@hypr/ui/components/ui/spinner", () => ({
+vi.mock("@meeki/ui/components/ui/spinner", () => ({
   Spinner: () => <span data-testid="spinner" />,
 }));
 
@@ -170,7 +170,7 @@ describe("Enhanced", () => {
     expect(screen.getByRole("status")).not.toBeNull();
     expect(screen.getByText("Analyzing structure...")).not.toBeNull();
     expect(
-      screen.getByText("Tip: The Anarlog team loves our users!"),
+      screen.getByText("Tip: The Meeki team loves our users!"),
     ).not.toBeNull();
   });
 

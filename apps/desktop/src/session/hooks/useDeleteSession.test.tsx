@@ -59,11 +59,11 @@ vi.mock("@tauri-apps/api/webviewWindow", () => ({
   getAllWebviewWindows: mocks.getAllWebviewWindows,
 }));
 
-vi.mock("@hypr/plugin-windows", () => ({
+vi.mock("@meeki/plugin-windows", () => ({
   getCurrentWebviewWindowLabel: mocks.getCurrentWebviewWindowLabel,
 }));
 
-vi.mock("@hypr/ui/components/ui/toast", () => ({
+vi.mock("@meeki/ui/components/ui/toast", () => ({
   sonnerToast: { error: mocks.toastError, warning: mocks.toastWarning },
 }));
 

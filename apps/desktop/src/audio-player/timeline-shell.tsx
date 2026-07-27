@@ -1,6 +1,6 @@
 import type { MouseEvent, ReactNode } from "react";
 
-import { cn } from "@hypr/utils";
+import { cn } from "@meeki/utils";
 
 export function TimelineMeta({ children }: { children: ReactNode }) {
   return (

@@ -7,7 +7,7 @@ use axum::{
     http::{StatusCode, request::Parts},
     response::{IntoResponse, Response},
 };
-use hypr_language::Language;
+use meeki_language::Language;
 
 #[derive(Debug, Clone)]
 pub enum QueryValue {
@@ -148,7 +148,7 @@ where
 mod tests {
     use super::*;
     use axum::http::Uri;
-    use hypr_language::ISO639;
+    use meeki_language::ISO639;
 
     fn parse_query(query: &str) -> QueryParams {
         let uri: Uri = format!("http://example.com{}", query).parse().unwrap();

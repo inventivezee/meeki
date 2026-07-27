@@ -1,5 +1,5 @@
-import { type ModelInfo } from "@hypr/plugin-local-llm";
-import { cn } from "@hypr/utils";
+import { type ModelInfo } from "@meeki/plugin-local-llm";
+import { cn } from "@meeki/utils";
 
 /**
  * Decimal GB, because a download is checked against Finder and Hugging Face,

@@ -13,7 +13,7 @@ vi.mock("@tauri-apps/api/core", () => ({
   convertFileSrc: mocks.convertFileSrc,
 }));
 
-vi.mock("@hypr/plugin-fs-sync", () => ({
+vi.mock("@meeki/plugin-fs-sync", () => ({
   commands: {
     attachmentRemove: mocks.attachmentRemove,
     attachmentSave: mocks.attachmentSave,

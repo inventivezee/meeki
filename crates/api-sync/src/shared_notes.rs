@@ -10,8 +10,8 @@ use axum::{
 };
 use chrono::{SecondsFormat, TimeDelta, Utc};
 use hmac::{Hmac, KeyInit, Mac};
-use hypr_api_auth::AuthContext;
-use hypr_loops::{LoopClient, TransactionalEmail};
+use meeki_api_auth::AuthContext;
+use meeki_loops::{LoopClient, TransactionalEmail};
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use serde_json::Value;
 use sha2::Sha256;
@@ -35,14 +35,14 @@ const MAX_ACCESS_LIST_RESPONSE_BYTES: usize = 1024 * 1024;
 const SHARED_ATTACHMENT_BUCKET: &str = "shared-note-attachments";
 const ATTACHMENT_DOWNLOAD_TTL_SECONDS: i64 = 60;
 const FLY_CLIENT_IP_HEADER: &str = "fly-client-ip";
-const HANDOFF_SOURCE_DOMAIN: &[u8] = b"anarlog:shared-note-handoff-source:v1\0";
+const HANDOFF_SOURCE_DOMAIN: &[u8] = b"meeki:shared-note-handoff-source:v1\0";
 const INVITATION_TRANSACTIONAL_ID: &str = "cmrvkrh3c0k0t0jvh80zpkk93";
 
 #[derive(Clone)]
 pub struct SharedNotesState {
     config: SharedNotesConfig,
     client: reqwest::Client,
-    storage: hypr_supabase_storage::SupabaseStorage,
+    storage: meeki_supabase_storage::SupabaseStorage,
     invitation_email: Option<LoopClient>,
 }
 
@@ -53,7 +53,7 @@ impl SharedNotesState {
             .redirect(reqwest::redirect::Policy::none())
             .build()
             .expect("shared-note HTTP client must build");
-        let storage = hypr_supabase_storage::SupabaseStorage::new(
+        let storage = meeki_supabase_storage::SupabaseStorage::new(
             client.clone(),
             &config.supabase_url,
             &config.supabase_service_role_key,
@@ -406,10 +406,10 @@ async fn send_shared_note_invitation_email(
         .email
         .as_deref()
         .filter(|email| is_valid_invitation_email(email))
-        .unwrap_or("An Anarlog user")
+        .unwrap_or("An Meeki user")
         .to_string();
     let invitation_url = format!(
-        "https://anarlog.so/share/invite/{invitation_id}/#token={}",
+        "https://meeki.so/share/invite/{invitation_id}/#token={}",
         input.invite_token
     );
     let invitation_email = state
@@ -1158,7 +1158,7 @@ fn is_valid_public_slug(value: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use axum::{body::Body, body::to_bytes, http::Request, http::StatusCode};
-    use hypr_api_auth::Claims;
+    use meeki_api_auth::Claims;
     use serde_json::{Value, json};
     use tower::ServiceExt;
     use wiremock::{

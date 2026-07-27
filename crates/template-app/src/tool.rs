@@ -1,5 +1,5 @@
 #[allow(unused_imports)]
-use hypr_askama_utils::filters;
+use meeki_askama_utils::filters;
 
 use crate::{SessionContext, common_derives};
 

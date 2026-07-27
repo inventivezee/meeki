@@ -9,10 +9,10 @@ import {
 } from "@lobehub/icons";
 import type { ReactNode } from "react";
 
-import type { LocalModel } from "@hypr/plugin-local-stt";
+import type { LocalModel } from "@meeki/plugin-local-stt";
 
 import { env } from "~/env";
-import { AnarlogProviderIcon, ProviderBrandImage } from "~/settings/ai/shared";
+import { MeekiProviderIcon, ProviderBrandImage } from "~/settings/ai/shared";
 import { type ProviderRequirement } from "~/settings/ai/shared/eligibility";
 import { sortProviders } from "~/settings/ai/shared/sort-providers";
 import { localSttQueries } from "~/stt/useLocalSttModel";
@@ -190,12 +190,12 @@ const _PROVIDERS = [
     requirements: [{ kind: "requires_config", fields: ["api_key"] }],
   },
   {
-    // On-device Soniqo models (Qwen / Parakeet). Cloud "Anarlog Pro" stays hidden.
+    // On-device Soniqo models (Qwen / Parakeet). Cloud "Meeki Pro" stays hidden.
     disabled: false,
     id: "hyprnote",
     displayName: "On device",
     badge: "Local",
-    icon: <AnarlogProviderIcon />,
+    icon: <MeekiProviderIcon />,
     baseUrl: new URL("/stt", env.VITE_API_URL).toString(),
     models: [],
     requirements: [],

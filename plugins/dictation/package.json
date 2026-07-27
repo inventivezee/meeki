@@ -1,5 +1,5 @@
 {
-  "name": "@hypr/plugin-dictation",
+  "name": "@meeki/plugin-dictation",
   "private": true,
   "main": "./js/index.ts",
   "scripts": {

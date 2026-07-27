@@ -7,7 +7,7 @@ use crate::events::NotificationEvent;
 pub fn init(app: tauri::AppHandle<tauri::Wry>) {
     {
         let app = app.clone();
-        hypr_notification::setup_collapsed_confirm_handler(move |ctx| {
+        meeki_notification::setup_collapsed_confirm_handler(move |ctx| {
             if let Err(_e) = app.windows().show(tauri_plugin_windows::AppWindow::Main) {}
 
             let _ = NotificationEvent::Confirm {
@@ -23,7 +23,7 @@ pub fn init(app: tauri::AppHandle<tauri::Wry>) {
 
     {
         let app = app.clone();
-        hypr_notification::setup_expanded_accept_handler(move |ctx| {
+        meeki_notification::setup_expanded_accept_handler(move |ctx| {
             if let Err(_e) = app.windows().show(tauri_plugin_windows::AppWindow::Main) {}
 
             let _ = NotificationEvent::Accept {
@@ -39,7 +39,7 @@ pub fn init(app: tauri::AppHandle<tauri::Wry>) {
 
     {
         let app = app.clone();
-        hypr_notification::setup_dismiss_handler(move |ctx| {
+        meeki_notification::setup_dismiss_handler(move |ctx| {
             let _ = NotificationEvent::Dismiss {
                 key: ctx.key,
                 source: ctx.source,
@@ -53,7 +53,7 @@ pub fn init(app: tauri::AppHandle<tauri::Wry>) {
 
     {
         let app = app.clone();
-        hypr_notification::setup_collapsed_timeout_handler(move |ctx| {
+        meeki_notification::setup_collapsed_timeout_handler(move |ctx| {
             let _ = NotificationEvent::Timeout {
                 key: ctx.key,
                 source: ctx.source,
@@ -67,7 +67,7 @@ pub fn init(app: tauri::AppHandle<tauri::Wry>) {
 
     {
         let app = app.clone();
-        hypr_notification::setup_option_selected_handler(move |ctx, selected_index| {
+        meeki_notification::setup_option_selected_handler(move |ctx, selected_index| {
             if let Err(_e) = app.windows().show(tauri_plugin_windows::AppWindow::Main) {}
 
             let _ = NotificationEvent::OptionSelected {
@@ -84,7 +84,7 @@ pub fn init(app: tauri::AppHandle<tauri::Wry>) {
 
     {
         let app = app.clone();
-        hypr_notification::setup_footer_action_handler(move |ctx| {
+        meeki_notification::setup_footer_action_handler(move |ctx| {
             let _ = NotificationEvent::FooterAction {
                 key: ctx.key,
                 source: ctx.source,

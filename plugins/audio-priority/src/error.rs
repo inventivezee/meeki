@@ -5,7 +5,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error(transparent)]
-    AudioDevice(#[from] hypr_audio_device::Error),
+    AudioDevice(#[from] meeki_audio_device::Error),
     #[error(transparent)]
     IoError(#[from] std::io::Error),
     #[error(transparent)]

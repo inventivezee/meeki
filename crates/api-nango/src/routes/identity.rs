@@ -1,4 +1,4 @@
-use hypr_nango::OwnedNangoProxy;
+use meeki_nango::OwnedNangoProxy;
 
 #[derive(serde::Deserialize)]
 struct GoogleUserInfo {
@@ -16,7 +16,7 @@ struct OutlookMe {
 }
 
 pub(crate) async fn fetch_identity(
-    nango: &hypr_nango::NangoClient,
+    nango: &meeki_nango::NangoClient,
     integration_id: &str,
     connection_id: &str,
 ) -> std::result::Result<(Option<String>, Option<String>), String> {

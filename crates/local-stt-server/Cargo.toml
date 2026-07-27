@@ -7,18 +7,18 @@ edition = "2024"
 default = []
 specta = ["dep:specta"]
 tauri-event = ["specta", "dep:tauri-specta"]
-whisper-cpp = ["dep:hypr-transcribe-whisper-local"]
-coreml = ["whisper-cpp", "hypr-transcribe-whisper-local/coreml"]
-directml = ["whisper-cpp", "hypr-transcribe-whisper-local/directml"]
-cuda = ["whisper-cpp", "hypr-transcribe-whisper-local/cuda"]
-hipblas = ["whisper-cpp", "hypr-transcribe-whisper-local/hipblas"]
-openblas = ["whisper-cpp", "hypr-transcribe-whisper-local/openblas"]
-metal = ["whisper-cpp", "hypr-transcribe-whisper-local/metal"]
-vulkan = ["whisper-cpp", "hypr-transcribe-whisper-local/vulkan"]
-openmp = ["whisper-cpp", "hypr-transcribe-whisper-local/openmp"]
+whisper-cpp = ["dep:meeki-transcribe-whisper-local"]
+coreml = ["whisper-cpp", "meeki-transcribe-whisper-local/coreml"]
+directml = ["whisper-cpp", "meeki-transcribe-whisper-local/directml"]
+cuda = ["whisper-cpp", "meeki-transcribe-whisper-local/cuda"]
+hipblas = ["whisper-cpp", "meeki-transcribe-whisper-local/hipblas"]
+openblas = ["whisper-cpp", "meeki-transcribe-whisper-local/openblas"]
+metal = ["whisper-cpp", "meeki-transcribe-whisper-local/metal"]
+vulkan = ["whisper-cpp", "meeki-transcribe-whisper-local/vulkan"]
+openmp = ["whisper-cpp", "meeki-transcribe-whisper-local/openmp"]
 
 [dependencies]
-hypr-transcribe-whisper-local = { workspace = true, optional = true }
+meeki-transcribe-whisper-local = { workspace = true, optional = true }
 
 axum = { workspace = true }
 tokio = { workspace = true }

@@ -5,7 +5,7 @@ import {
   type Permission,
   commands as permissionsCommands,
   type PermissionStatus,
-} from "@hypr/plugin-permissions";
+} from "@meeki/plugin-permissions";
 
 export function usePermission(type: Permission) {
   const [optimisticStatus, setOptimisticStatus] =

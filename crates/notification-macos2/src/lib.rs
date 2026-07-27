@@ -73,7 +73,7 @@ pub fn initialize() {
     });
 }
 
-pub fn show(notification: &hypr_notification_interface::Notification) {
+pub fn show(notification: &meeki_notification_interface::Notification) {
     initialize();
 
     let content = UNMutableNotificationContent::new();
@@ -82,7 +82,7 @@ pub fn show(notification: &hypr_notification_interface::Notification) {
 
     if let Some(key) = &notification.key {
         let info =
-            NSDictionary::from_slices(&[ns_string!("hypr_key")], &[&*NSString::from_str(key)]);
+            NSDictionary::from_slices(&[ns_string!("meeki_key")], &[&*NSString::from_str(key)]);
         // Safety: the NSDictionary we built is well-formed.
         unsafe {
             content.setUserInfo(

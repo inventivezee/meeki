@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
-import type { MeetingCapturedChatMessage } from "@hypr/plugin-detect";
+import type { MeetingCapturedChatMessage } from "@meeki/plugin-detect";
 
 import { startMeetingChatCapture } from "./meeting-chat-capture";
 
@@ -18,7 +18,7 @@ const {
   captureSettingState: { value: true },
 }));
 
-vi.mock("@hypr/plugin-detect", () => ({
+vi.mock("@meeki/plugin-detect", () => ({
   commands: {
     captureMeetingChatMessages: captureMeetingChatMessagesMock,
     listMicUsingApplications: listMicUsingApplicationsMock,
@@ -29,7 +29,7 @@ vi.mock("~/stt/meeting-chat-records", () => ({
   persistMeetingChatRecords: persistMeetingChatRecordsMock,
 }));
 
-vi.mock("@hypr/ui/components/ui/toast", () => ({
+vi.mock("@meeki/ui/components/ui/toast", () => ({
   sonnerToast: { warning: sonnerToastWarningMock },
 }));
 
@@ -293,7 +293,7 @@ describe("startMeetingChatCapture", () => {
   });
 
   test("excludes the generated disclosure while retaining participant chat", async () => {
-    const disclosure = "Meety disclosure";
+    const disclosure = "Meeki disclosure";
     captureMeetingChatMessagesMock.mockResolvedValue(captureResult([]));
     const stop = startMeetingChatCapture({
       sessionId: "session-1",

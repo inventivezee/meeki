@@ -15,18 +15,18 @@ import {
 import { ChevronLeftIcon, ChevronRightIcon, RefreshCwIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { Button } from "@hypr/ui/components/ui/button";
+import { Button } from "@meeki/ui/components/ui/button";
 import {
   ButtonGroup,
   ButtonGroupSeparator,
-} from "@hypr/ui/components/ui/button-group";
-import { Spinner } from "@hypr/ui/components/ui/spinner";
+} from "@meeki/ui/components/ui/button-group";
+import { Spinner } from "@meeki/ui/components/ui/spinner";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@hypr/ui/components/ui/tooltip";
-import { cn } from "@hypr/utils";
+} from "@meeki/ui/components/ui/tooltip";
+import { cn } from "@meeki/utils";
 
 import { useSync } from "./context";
 import { DayCell } from "./day-cell";

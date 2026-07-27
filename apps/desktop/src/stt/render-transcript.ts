@@ -1,12 +1,12 @@
-import type { TranscriptSpeakerHint } from "@hypr/plugin-fs-sync";
-import { commands as listenerCommands } from "@hypr/plugin-transcription";
+import type { TranscriptSpeakerHint } from "@meeki/plugin-fs-sync";
+import { commands as listenerCommands } from "@meeki/plugin-transcription";
 import type {
   IdentityAssignment,
   RenderTranscriptHuman,
   RenderTranscriptInput,
   RenderTranscriptRequest,
   RenderedTranscriptSegment,
-} from "@hypr/plugin-transcription";
+} from "@meeki/plugin-transcription";
 
 import type { SegmentWord } from "~/stt/live-segment";
 import type { TranscriptWordMetadata } from "~/stt/timing";

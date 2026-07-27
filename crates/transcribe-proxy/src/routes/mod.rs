@@ -205,7 +205,7 @@ mod tests {
         let mut env = Env::default();
         env.stt.deepgram_api_key = Some("deepgram-key".to_string());
 
-        let supabase = hypr_api_env::SupabaseEnv {
+        let supabase = meeki_api_env::SupabaseEnv {
             supabase_url: String::new(),
             supabase_anon_key: String::new(),
             supabase_service_role_key: String::new(),

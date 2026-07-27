@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>com.hyprnote.Hyprnote</id>
+  <id>com.meeki.Meeki</id>
 
-  <name>Anarlog</name>
+  <name>Meeki</name>
   <summary>The AI notepad for private meetings</summary>
 
   <metadata_license>CC0-1.0</metadata_license>
@@ -10,13 +10,13 @@
 
   <description>
     <p>
-      Anarlog is an AI notetaking app specifically designed to take meeting notes.
-      With Anarlog, you can transcribe all kinds of meetings whether it be online or offline.
+      Meeki is an AI notetaking app specifically designed to take meeting notes.
+      With Meeki, you can transcribe all kinds of meetings whether it be online or offline.
     </p>
     <p>Features:</p>
     <ul>
       <li>Listens to your meetings so you can only jot down important stuff</li>
-      <li>No bots joining your meetings - Anarlog listens directly to sounds coming in and out of your computer</li>
+      <li>No bots joining your meetings - Meeki listens directly to sounds coming in and out of your computer</li>
       <li>Crafts perfect summaries based on your memos, right after the meeting is over</li>
       <li>Run completely offline by using LM Studio or Ollama</li>
       <li>Bring your own LLM - use local models via Ollama or third-party APIs like Gemini, Claude, or Azure-hosted GPT</li>
@@ -25,14 +25,14 @@
     </ul>
   </description>
 
-  <launchable type="desktop-id">com.hyprnote.Hyprnote.desktop</launchable>
+  <launchable type="desktop-id">com.meeki.Meeki.desktop</launchable>
 
   <url type="homepage">https://hyprnote.com</url>
   <url type="bugtracker">https://github.com/fastrepl/char/issues</url>
   <url type="vcs-browser">https://github.com/fastrepl/char</url>
   <url type="contribute">https://github.com/fastrepl/char/blob/main/CONTRIBUTING.md</url>
 
-  <developer id="com.hyprnote">
+  <developer id="com.meeki">
     <name>Fastrepl</name>
   </developer>
 

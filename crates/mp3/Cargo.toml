@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 hound = { workspace = true }
-hypr-audio-utils = { workspace = true }
+meeki-audio-utils = { workspace = true }
 mp3lame-encoder = { workspace = true }
 thiserror = { workspace = true }
 

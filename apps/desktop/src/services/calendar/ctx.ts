@@ -1,9 +1,9 @@
-import { commands as calendarCommands } from "@hypr/plugin-calendar";
+import { commands as calendarCommands } from "@meeki/plugin-calendar";
 import type {
   CalendarListItem,
   CalendarProviderType,
   ProviderConnectionIds,
-} from "@hypr/plugin-calendar";
+} from "@meeki/plugin-calendar";
 
 import { applyCalendarInventory, loadEnabledCalendars } from "./storage";
 

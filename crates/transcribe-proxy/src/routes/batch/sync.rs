@@ -399,7 +399,7 @@ fn classify_audio_processing_message(message: String) -> BatchAttemptError {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use hypr_language::ISO639;
+    use meeki_language::ISO639;
 
     #[test]
     fn test_resolve_listen_params_for_provider_resolves_meta_model_per_provider() {

@@ -1,5 +1,5 @@
-import { md2json } from "@hypr/editor/markdown";
-import type { JSONContent } from "@hypr/editor/note";
+import { md2json } from "@meeki/editor/markdown";
+import type { JSONContent } from "@meeki/editor/note";
 
 import { liveQueryClient, useLiveQuery } from "~/db";
 import { flushDatabaseWrites } from "~/db/write-queue";

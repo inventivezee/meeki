@@ -1,6 +1,6 @@
 import type { StoreApi } from "zustand";
 
-import { commands as analyticsCommands } from "@hypr/plugin-analytics";
+import { commands as analyticsCommands } from "@meeki/plugin-analytics";
 
 import type { ChatModeState } from "./chat-mode";
 import type { LifecycleState } from "./lifecycle";

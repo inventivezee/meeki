@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { json2md, md2json, parseJsonContent } from "@hypr/editor/markdown";
+import { json2md, md2json, parseJsonContent } from "@meeki/editor/markdown";
 
 const mocks = vi.hoisted(() => ({
   applySessionContentCorrections: vi.fn(),
@@ -272,7 +272,7 @@ describe("session correction chat tool", () => {
     );
     let persistedDictionary = "";
     mocks.updateSettingValue.mockImplementation(async (_key, update) => {
-      persistedDictionary = update(JSON.stringify(["Anarlog"]));
+      persistedDictionary = update(JSON.stringify(["Meeki"]));
       return persistedDictionary;
     });
 
@@ -306,7 +306,7 @@ describe("session correction chat tool", () => {
     expect(
       mocks.applySessionContentCorrections.mock.invocationCallOrder[0],
     ).toBeLessThan(mocks.updateSettingValue.mock.invocationCallOrder[0]);
-    expect(persistedDictionary).toBe(JSON.stringify(["Anarlog", "Erebor"]));
+    expect(persistedDictionary).toBe(JSON.stringify(["Meeki", "Erebor"]));
   });
 
   it("reports partial success when a requested target does not match", async () => {

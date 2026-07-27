@@ -12,7 +12,7 @@ export const VENICE_DEFAULT_MODEL = "e2ee-qwen3-6-35b-a3b";
 
 /**
  * If VITE_VENICE_API_KEY is set, configure Venice and select Qwen 3.6 whenever
- * the LLM provider is unset or still pointing at Anarlog Pro cloud.
+ * the LLM provider is unset or still pointing at Meeki Pro cloud.
  */
 export async function configureVeniceLlmFromEnv(): Promise<void> {
   const apiKey = env.VITE_VENICE_API_KEY?.trim();

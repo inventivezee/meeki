@@ -5,7 +5,7 @@ import type {
   EnhanceUser,
   TitleSystem,
   TitleUser,
-} from "@hypr/plugin-template";
+} from "@meeki/plugin-template";
 
 import type { EnhanceImageContext } from "./enhance-images";
 import { enhanceSuccess } from "./enhance-success";

@@ -1,5 +1,5 @@
 // Re-export everything from agent-core for backwards compatibility
-export * from "@hypr/agent-core";
+export * from "@meeki/agent-core";
 
 // Main agent exports
 export { agent } from "./agent";

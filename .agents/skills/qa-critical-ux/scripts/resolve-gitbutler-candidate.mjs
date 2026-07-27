@@ -22,7 +22,7 @@ if (explicitCandidate) {
       status = JSON.parse(source);
     } catch {
       console.error(
-        "Could not parse `but status --format json`. Set ANARLOG_QA_GIT_SHA to the candidate commit.",
+        "Could not parse `but status --format json`. Set MEEKI_QA_GIT_SHA to the candidate commit.",
       );
       process.exit(1);
     }
@@ -30,7 +30,7 @@ if (explicitCandidate) {
     const stacks = Array.isArray(status.stacks) ? status.stacks : [];
     if (stacks.length !== 1) {
       console.error(
-        `Expected exactly one applied GitButler stack, found ${stacks.length}. Set ANARLOG_QA_GIT_SHA to the candidate commit.`,
+        `Expected exactly one applied GitButler stack, found ${stacks.length}. Set MEEKI_QA_GIT_SHA to the candidate commit.`,
       );
       process.exit(1);
     }
@@ -41,7 +41,7 @@ if (explicitCandidate) {
     const candidate = branches[0]?.commits?.[0]?.commitId;
     if (!candidate) {
       console.error(
-        "The applied GitButler stack has no unambiguous committed tip. Set ANARLOG_QA_GIT_SHA to the candidate commit.",
+        "The applied GitButler stack has no unambiguous committed tip. Set MEEKI_QA_GIT_SHA to the candidate commit.",
       );
       process.exit(1);
     }

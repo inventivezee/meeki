@@ -8,7 +8,7 @@ describe("sortProviders", () => {
       { id: "custom", displayName: "Custom" },
       { id: "fireworks", displayName: "Fireworks", disabled: true },
       { id: "openai", displayName: "OpenAI" },
-      { id: "hyprnote", displayName: "Anarlog" },
+      { id: "hyprnote", displayName: "Meeki" },
       { id: "assemblyai", displayName: "AssemblyAI" },
     ]);
 

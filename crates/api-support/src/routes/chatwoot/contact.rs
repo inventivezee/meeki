@@ -44,7 +44,7 @@ pub async fn create_contact(
         .and_then(|v| v.as_object().cloned())
         .unwrap_or_default();
 
-    let body = hypr_chatwoot::types::PublicContactCreateUpdatePayload {
+    let body = meeki_chatwoot::types::PublicContactCreateUpdatePayload {
         identifier: Some(payload.identifier),
         name: payload.name,
         email: payload.email,

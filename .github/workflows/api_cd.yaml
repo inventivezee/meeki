@@ -47,7 +47,7 @@ jobs:
             --token="$INFISICAL_TOKEN" \
             --env="$INFISICAL_ENV" \
             --projectId="$INFISICAL_PROJECT_ID" \
-            --path="/anarlog/cloudsync" \
+            --path="/meeki/cloudsync" \
             --format=json \
             --output-file="$cloudsync_secrets_json"
 
@@ -67,7 +67,7 @@ jobs:
             --token="$INFISICAL_TOKEN" \
             --env="$INFISICAL_ENV" \
             --projectId="$INFISICAL_PROJECT_ID" \
-            --path="/anarlog/ai" \
+            --path="/meeki/ai" \
             --format=json \
             --output-file="$ai_secrets_json"
 
@@ -75,7 +75,7 @@ jobs:
             --token="$INFISICAL_TOKEN" \
             --env="$INFISICAL_ENV" \
             --projectId="$INFISICAL_PROJECT_ID" \
-            --path="/anarlog/cloudsync" \
+            --path="/meeki/cloudsync" \
             --format=json \
             --output-file="$cloudsync_secrets_json"
 
@@ -84,10 +84,10 @@ jobs:
           import sys
 
           cloudsync_runtime_keys = {
-              "ANARLOG_CLOUDSYNC_DATABASE_ID",
-              "ANARLOG_CLOUDSYNC_E2EE_DATABASE_ID",
-              "ANARLOG_CLOUDSYNC_PROTOCOL_MODE",
-              "ANARLOG_CLOUDSYNC_TOKEN_TTL_SECONDS",
+              "MEEKI_CLOUDSYNC_DATABASE_ID",
+              "MEEKI_CLOUDSYNC_E2EE_DATABASE_ID",
+              "MEEKI_CLOUDSYNC_PROTOCOL_MODE",
+              "MEEKI_CLOUDSYNC_TOKEN_TTL_SECONDS",
               "SQLITECLOUD_PROJECT_URL",
               "SQLITECLOUD_TOKEN_ISSUER_API_KEY",
           }

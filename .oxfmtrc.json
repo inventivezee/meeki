@@ -11,7 +11,7 @@
         "builtin",
         "external"
       ],
-      "hypr-internal",
+      "meeki-internal",
       "app-internal",
       [
         "parent",
@@ -22,9 +22,9 @@
     ],
     "customGroups": [
       {
-        "groupName": "hypr-internal",
+        "groupName": "meeki-internal",
         "elementNamePattern": [
-          "@hypr/**"
+          "@meeki/**"
         ]
       },
       {

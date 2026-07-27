@@ -6,7 +6,7 @@ const { isSupportedLanguagesBatchMock, isSupportedLanguagesLiveMock } =
     isSupportedLanguagesLiveMock: vi.fn(),
   }));
 
-vi.mock("@hypr/plugin-transcription", () => ({
+vi.mock("@meeki/plugin-transcription", () => ({
   commands: {
     isSupportedLanguagesBatch: isSupportedLanguagesBatchMock,
     isSupportedLanguagesLive: isSupportedLanguagesLiveMock,
@@ -99,7 +99,7 @@ describe("isSupportedLocalSttModel", () => {
 });
 
 describe("isConfiguredSttModel", () => {
-  test("requires known model ids for Anarlog STT", () => {
+  test("requires known model ids for Meeki STT", () => {
     expect(isConfiguredSttModel("hyprnote", "cloud")).toBe(true);
     expect(isConfiguredSttModel("hyprnote", "soniqo-qwen3-small")).toBe(true);
     expect(isConfiguredSttModel("hyprnote", "removed-local-model")).toBe(false);

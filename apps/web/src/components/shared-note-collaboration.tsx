@@ -14,8 +14,8 @@ import {
   XIcon,
 } from "lucide-react";
 
-import { Avatar } from "@hypr/ui/components/avatar";
-import { cn } from "@hypr/utils";
+import { Avatar } from "@meeki/ui/components/avatar";
+import { cn } from "@meeki/utils";
 
 import {
   useDeleteSharedNoteComment,

@@ -1,5 +1,5 @@
 {
-  "name": "@hypr/plugin-transcription",
+  "name": "@meeki/plugin-transcription",
   "private": true,
   "main": "./js/index.ts",
   "scripts": {

@@ -9,9 +9,9 @@ SQLite is the primary data store (schema and migrations in `crates/db-app/`, des
 - Format: `pnpm exec dprint fmt`
 - Typecheck (TS): `pnpm -r typecheck`
 - Typecheck (Rust): `cargo check`
-- Desktop dev: `pnpm -F @hypr/desktop tauri:dev`
-- Web dev: `pnpm -F @hypr/web dev`
-- Dev docs: https://docs.anarlog.so
+- Desktop dev: `pnpm -F @meeki/desktop tauri:dev`
+- Web dev: `pnpm -F @meeki/web dev`
+- Dev docs: https://docs.meeki.so
 
 ## Guidelines
 
@@ -29,7 +29,7 @@ SQLite is the primary data store (schema and migrations in `crates/db-app/`, des
 
 - Avoid creating types/interfaces unless shared. Inline function props.
 - Do not write comments unless code is non-obvious. Comments should explain "why", not "what".
-- Use `cn` from `@hypr/utils` for conditional classNames. Always pass an array, split by logical grouping.
+- Use `cn` from `@meeki/utils` for conditional classNames. Always pass an array, split by logical grouping.
 - Use `motion/react` instead of `framer-motion`.
 
 ## CLI TUI Command Architecture

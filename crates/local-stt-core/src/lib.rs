@@ -1,4 +1,4 @@
-pub use hypr_local_model::{AmModel, LocalModel, SoniqoModel, WhisperModel};
+pub use meeki_local_model::{AmModel, LocalModel, SoniqoModel, WhisperModel};
 
 pub static SUPPORTED_MODELS: &[LocalModel] = &[
     LocalModel::Soniqo(SoniqoModel::Qwen3Large),

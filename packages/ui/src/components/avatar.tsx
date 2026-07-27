@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from "react";
 
-import { useMountEffect } from "@hypr/ui/hooks/use-mount-effect";
+import { useMountEffect } from "@meeki/ui/hooks/use-mount-effect";
 
 export type AvatarRenderStyle = "dithered" | "smooth";
 

@@ -2,8 +2,8 @@ mod enhance;
 mod title;
 mod transcript_patch;
 
-use hypr_template_eval::EvalCase;
-use hypr_template_eval::Failed;
+use meeki_template_eval::EvalCase;
+use meeki_template_eval::Failed;
 
 pub fn all(samples: usize) -> Result<Vec<EvalCase>, Failed> {
     Ok(vec![

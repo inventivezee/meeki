@@ -1,4 +1,4 @@
-use hypr_supabase_storage::SupabaseStorage;
+use meeki_supabase_storage::SupabaseStorage;
 use serde::{Deserialize, Serialize};
 use std::time::Instant;
 
@@ -67,7 +67,7 @@ impl SupabaseClient {
     }
 
     fn auth_headers(&self, builder: reqwest::RequestBuilder) -> reqwest::RequestBuilder {
-        hypr_observability::with_current_trace_context(
+        meeki_observability::with_current_trace_context(
             builder
                 .header("Authorization", format!("Bearer {}", self.service_role_key))
                 .header("apikey", &self.service_role_key),

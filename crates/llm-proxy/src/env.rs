@@ -1,4 +1,4 @@
-pub use hypr_api_env::OpenRouterEnv as Env;
+pub use meeki_api_env::OpenRouterEnv as Env;
 
 pub struct ApiKey(pub String);
 

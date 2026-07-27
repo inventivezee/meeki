@@ -5,8 +5,8 @@ use db_app::{
     apply_e2ee_replica_changes, claim_cloudsync_workspace, cloudsync_table_registry,
     encrypt_e2ee_replica_changes, prepare_schema,
 };
-use hypr_db_core::{CloudsyncAuth, CloudsyncRuntimeConfig, Db, DbOpenOptions, DbStorage};
-use hypr_e2ee::{RecoveryKey, WorkspaceKey};
+use meeki_db_core::{CloudsyncAuth, CloudsyncRuntimeConfig, Db, DbOpenOptions, DbStorage};
+use meeki_e2ee::{RecoveryKey, WorkspaceKey};
 
 const SYNC_TIMEOUT: Duration = Duration::from_secs(90);
 const SYNC_ATTEMPTS: usize = 3;
@@ -16,8 +16,8 @@ const REPLICA_VISIBILITY_POLL_INTERVAL: Duration = Duration::from_secs(2);
 
 fn cloudsync_config(auth: CloudsyncAuth, wait_ms: i64, max_retries: i64) -> CloudsyncRuntimeConfig {
     CloudsyncRuntimeConfig {
-        connection_string: std::env::var("ANARLOG_CLOUDSYNC_E2EE_DATABASE_ID")
-            .expect("ANARLOG_CLOUDSYNC_E2EE_DATABASE_ID must be set"),
+        connection_string: std::env::var("MEEKI_CLOUDSYNC_E2EE_DATABASE_ID")
+            .expect("MEEKI_CLOUDSYNC_E2EE_DATABASE_ID must be set"),
         auth,
         tables: cloudsync_table_registry().to_vec(),
         sync_interval_ms: 86_400_000,
@@ -376,13 +376,13 @@ fn cloudsync_enables_only_the_encrypted_replica() {
 }
 
 #[tokio::test]
-#[ignore = "external E2EE verification only; requires ANARLOG_CLOUDSYNC_E2EE_DATABASE_ID, ANARLOG_CLOUDSYNC_WORKSPACE_A, ANARLOG_CLOUDSYNC_TOKEN_A, and ANARLOG_CLOUDSYNC_RECOVERY_KEY_A"]
+#[ignore = "external E2EE verification only; requires MEEKI_CLOUDSYNC_E2EE_DATABASE_ID, MEEKI_CLOUDSYNC_WORKSPACE_A, MEEKI_CLOUDSYNC_TOKEN_A, and MEEKI_CLOUDSYNC_RECOVERY_KEY_A"]
 async fn same_personal_workspace_syncs_and_decrypts_a_real_note() {
-    let workspace_id = std::env::var("ANARLOG_CLOUDSYNC_WORKSPACE_A")
-        .expect("ANARLOG_CLOUDSYNC_WORKSPACE_A must be set");
+    let workspace_id = std::env::var("MEEKI_CLOUDSYNC_WORKSPACE_A")
+        .expect("MEEKI_CLOUDSYNC_WORKSPACE_A must be set");
     let token =
-        std::env::var("ANARLOG_CLOUDSYNC_TOKEN_A").expect("ANARLOG_CLOUDSYNC_TOKEN_A must be set");
-    let keys = workspace_keys(&workspace_id, "ANARLOG_CLOUDSYNC_RECOVERY_KEY_A");
+        std::env::var("MEEKI_CLOUDSYNC_TOKEN_A").expect("MEEKI_CLOUDSYNC_TOKEN_A must be set");
+    let keys = workspace_keys(&workspace_id, "MEEKI_CLOUDSYNC_RECOVERY_KEY_A");
     let marker = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap()
@@ -449,18 +449,18 @@ async fn same_personal_workspace_syncs_and_decrypts_a_real_note() {
 }
 
 #[tokio::test]
-#[ignore = "external E2EE policy verification only; requires ANARLOG_CLOUDSYNC_E2EE_DATABASE_ID, ANARLOG_CLOUDSYNC_WORKSPACE_A/B, ANARLOG_CLOUDSYNC_TOKEN_A/B, and ANARLOG_CLOUDSYNC_RECOVERY_KEY_B"]
+#[ignore = "external E2EE policy verification only; requires MEEKI_CLOUDSYNC_E2EE_DATABASE_ID, MEEKI_CLOUDSYNC_WORKSPACE_A/B, MEEKI_CLOUDSYNC_TOKEN_A/B, and MEEKI_CLOUDSYNC_RECOVERY_KEY_B"]
 async fn personal_workspace_tokens_block_foreign_encrypted_writes() {
-    let workspace_a = std::env::var("ANARLOG_CLOUDSYNC_WORKSPACE_A")
-        .expect("ANARLOG_CLOUDSYNC_WORKSPACE_A must be set");
-    let workspace_b = std::env::var("ANARLOG_CLOUDSYNC_WORKSPACE_B")
-        .expect("ANARLOG_CLOUDSYNC_WORKSPACE_B must be set");
+    let workspace_a = std::env::var("MEEKI_CLOUDSYNC_WORKSPACE_A")
+        .expect("MEEKI_CLOUDSYNC_WORKSPACE_A must be set");
+    let workspace_b = std::env::var("MEEKI_CLOUDSYNC_WORKSPACE_B")
+        .expect("MEEKI_CLOUDSYNC_WORKSPACE_B must be set");
     assert_ne!(workspace_a, workspace_b);
     let token_a =
-        std::env::var("ANARLOG_CLOUDSYNC_TOKEN_A").expect("ANARLOG_CLOUDSYNC_TOKEN_A must be set");
+        std::env::var("MEEKI_CLOUDSYNC_TOKEN_A").expect("MEEKI_CLOUDSYNC_TOKEN_A must be set");
     let token_b =
-        std::env::var("ANARLOG_CLOUDSYNC_TOKEN_B").expect("ANARLOG_CLOUDSYNC_TOKEN_B must be set");
-    let keys_b = workspace_keys(&workspace_b, "ANARLOG_CLOUDSYNC_RECOVERY_KEY_B");
+        std::env::var("MEEKI_CLOUDSYNC_TOKEN_B").expect("MEEKI_CLOUDSYNC_TOKEN_B must be set");
+    let keys_b = workspace_keys(&workspace_b, "MEEKI_CLOUDSYNC_RECOVERY_KEY_B");
     let marker = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap()
@@ -711,12 +711,12 @@ async fn personal_workspace_tokens_block_foreign_encrypted_writes() {
 }
 
 #[tokio::test]
-#[ignore = "deployment cleanup only; requires ANARLOG_CLOUDSYNC_E2EE_DATABASE_ID, ANARLOG_CLOUDSYNC_WORKSPACE_A/B with deploy-e2ee-a-/deploy-e2ee-b- prefixes, and ANARLOG_CLOUDSYNC_TOKEN_A/B"]
+#[ignore = "deployment cleanup only; requires MEEKI_CLOUDSYNC_E2EE_DATABASE_ID, MEEKI_CLOUDSYNC_WORKSPACE_A/B with deploy-e2ee-a-/deploy-e2ee-b- prefixes, and MEEKI_CLOUDSYNC_TOKEN_A/B"]
 async fn cleanup_e2ee_verification_workspaces() {
-    let workspace_a = std::env::var("ANARLOG_CLOUDSYNC_WORKSPACE_A")
-        .expect("ANARLOG_CLOUDSYNC_WORKSPACE_A must be set");
-    let workspace_b = std::env::var("ANARLOG_CLOUDSYNC_WORKSPACE_B")
-        .expect("ANARLOG_CLOUDSYNC_WORKSPACE_B must be set");
+    let workspace_a = std::env::var("MEEKI_CLOUDSYNC_WORKSPACE_A")
+        .expect("MEEKI_CLOUDSYNC_WORKSPACE_A must be set");
+    let workspace_b = std::env::var("MEEKI_CLOUDSYNC_WORKSPACE_B")
+        .expect("MEEKI_CLOUDSYNC_WORKSPACE_B must be set");
     assert!(
         workspace_a.starts_with("deploy-e2ee-a-"),
         "cleanup is restricted to deploy-e2ee-a-* workspaces"
@@ -726,9 +726,9 @@ async fn cleanup_e2ee_verification_workspaces() {
         "cleanup is restricted to deploy-e2ee-b-* workspaces"
     );
     let token_a =
-        std::env::var("ANARLOG_CLOUDSYNC_TOKEN_A").expect("ANARLOG_CLOUDSYNC_TOKEN_A must be set");
+        std::env::var("MEEKI_CLOUDSYNC_TOKEN_A").expect("MEEKI_CLOUDSYNC_TOKEN_A must be set");
     let token_b =
-        std::env::var("ANARLOG_CLOUDSYNC_TOKEN_B").expect("ANARLOG_CLOUDSYNC_TOKEN_B must be set");
+        std::env::var("MEEKI_CLOUDSYNC_TOKEN_B").expect("MEEKI_CLOUDSYNC_TOKEN_B must be set");
 
     let cleanup_a = tokio::spawn(async move {
         cleanup_verification_workspace(&token_a, &workspace_a, "workspace A verification").await;

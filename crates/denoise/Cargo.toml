@@ -5,11 +5,11 @@ edition = "2024"
 
 [features]
 default = []
-onnx = ["dep:hypr-onnx", "dep:realfft"]
-coreml = ["onnx", "hypr-onnx/coreml"]
+onnx = ["dep:meeki-onnx", "dep:realfft"]
+coreml = ["onnx", "meeki-onnx/coreml"]
 
 [dependencies]
-hypr-onnx = { workspace = true, optional = true }
+meeki-onnx = { workspace = true, optional = true }
 realfft = { workspace = true, optional = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
@@ -19,8 +19,8 @@ approx = { workspace = true }
 criterion = { workspace = true }
 dasp = { workspace = true }
 hound = { workspace = true }
-hypr-audio-snapshot = { workspace = true }
-hypr-data = { workspace = true }
+meeki-audio-snapshot = { workspace = true }
+meeki-data = { workspace = true }
 rodio = { workspace = true }
 
 [[bench]]

@@ -1,6 +1,6 @@
 use std::collections::{BTreeSet, HashSet};
 
-use hypr_notification_interface::NotificationKey;
+use meeki_notification_interface::NotificationKey;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MicEventType {
@@ -30,10 +30,10 @@ impl AppCategory {
     pub fn bundle_ids(&self) -> &'static [&'static str] {
         match self {
             Self::Hyprnote => &[
-                "com.hyprnote.dev",
-                "com.hyprnote.stable",
-                "com.hyprnote.nightly",
-                "com.hyprnote.staging",
+                "com.meeki.dev",
+                "com.meeki.stable",
+                "com.meeki.nightly",
+                "com.meeki.staging",
             ],
             Self::Dictation => &[
                 "com.electron.wispr-flow",
@@ -111,14 +111,14 @@ pub fn default_ignored_bundle_ids() -> Vec<String> {
 }
 
 pub struct PolicyContext<'a> {
-    pub apps: &'a [hypr_detect::InstalledApp],
+    pub apps: &'a [meeki_detect::InstalledApp],
     pub is_dnd: bool,
     pub event_type: MicEventType,
 }
 
 #[derive(Debug)]
 pub struct PolicyResult {
-    pub filtered_apps: Vec<hypr_detect::InstalledApp>,
+    pub filtered_apps: Vec<meeki_detect::InstalledApp>,
     pub dedup_key: String,
 }
 
@@ -141,9 +141,9 @@ impl MicNotificationPolicy {
 
     fn filter_apps(
         &self,
-        apps: &[hypr_detect::InstalledApp],
+        apps: &[meeki_detect::InstalledApp],
         is_dnd: bool,
-    ) -> Result<Vec<hypr_detect::InstalledApp>, SkipReason> {
+    ) -> Result<Vec<meeki_detect::InstalledApp>, SkipReason> {
         if self.respect_dnd && is_dnd {
             return Err(SkipReason::DoNotDisturb);
         }
@@ -208,8 +208,8 @@ impl Default for MicNotificationPolicy {
 mod tests {
     use super::*;
 
-    fn app(id: &str) -> hypr_detect::InstalledApp {
-        hypr_detect::InstalledApp {
+    fn app(id: &str) -> meeki_detect::InstalledApp {
+        meeki_detect::InstalledApp {
             id: id.to_string(),
             name: id.to_string(),
         }
@@ -220,7 +220,7 @@ mod tests {
     #[test]
     fn test_app_category_find() {
         assert_eq!(
-            AppCategory::find_category("com.hyprnote.dev"),
+            AppCategory::find_category("com.meeki.dev"),
             Some(AppCategory::Hyprnote)
         );
         assert_eq!(AppCategory::find_category("com.zoom.us"), None);
@@ -316,7 +316,7 @@ mod tests {
     #[test]
     fn test_should_not_track_categorized_app() {
         let policy = MicNotificationPolicy::default();
-        assert!(!policy.should_track_app("com.hyprnote.dev"));
+        assert!(!policy.should_track_app("com.meeki.dev"));
         assert!(!policy.should_track_app("com.electron.aqua-voice"));
         assert!(!policy.should_track_app("com.microsoft.VSCode"));
     }
@@ -367,7 +367,7 @@ mod tests {
     #[test]
     fn test_evaluate_filters_all_categorized_apps() {
         let policy = MicNotificationPolicy::default();
-        let apps = vec![app("com.hyprnote.dev"), app("com.electron.aqua-voice")];
+        let apps = vec![app("com.meeki.dev"), app("com.electron.aqua-voice")];
         let ctx = PolicyContext {
             apps: &apps,
             is_dnd: false,
@@ -490,7 +490,7 @@ mod tests {
     #[test]
     fn test_evaluate_empty_apps_list() {
         let policy = MicNotificationPolicy::default();
-        let apps: Vec<hypr_detect::InstalledApp> = vec![];
+        let apps: Vec<meeki_detect::InstalledApp> = vec![];
         let ctx = PolicyContext {
             apps: &apps,
             is_dnd: false,
@@ -561,7 +561,7 @@ mod tests {
             ignored_categories: vec![],
             ..Default::default()
         };
-        let apps = vec![app("com.hyprnote.dev"), app("us.zoom.xos")];
+        let apps = vec![app("com.meeki.dev"), app("us.zoom.xos")];
         let ctx = PolicyContext {
             apps: &apps,
             is_dnd: false,
@@ -579,7 +579,7 @@ mod tests {
         };
         let apps = vec![
             app("com.electron.aqua-voice"),
-            app("com.hyprnote.dev"),
+            app("com.meeki.dev"),
             app("us.zoom.xos"),
         ];
         let ctx = PolicyContext {
@@ -589,6 +589,6 @@ mod tests {
         };
         let result = policy.evaluate(&ctx).unwrap();
         let ids: Vec<_> = result.filtered_apps.iter().map(|a| a.id.as_str()).collect();
-        assert_eq!(ids, vec!["com.hyprnote.dev", "us.zoom.xos"]);
+        assert_eq!(ids, vec!["com.meeki.dev", "us.zoom.xos"]);
     }
 }

@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
-pub use hypr_cloudsync::CloudsyncTableSpec;
-pub use hypr_cloudsync::NetworkResult as CloudsyncNetworkResult;
+pub use meeki_cloudsync::CloudsyncTableSpec;
+pub use meeki_cloudsync::NetworkResult as CloudsyncNetworkResult;
 
 #[derive(Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
@@ -91,24 +91,24 @@ pub enum CloudsyncRuntimeError {
     #[error("cloudsync local status is busy; try again")]
     LocalStatusBusy,
     #[error(transparent)]
-    Cloudsync(#[from] hypr_cloudsync::Error),
+    Cloudsync(#[from] meeki_cloudsync::Error),
 }
 
 impl CloudsyncRuntimeError {
     pub fn is_transient(&self) -> bool {
         matches!(
             self,
-            Self::Cloudsync(error) if error.kind() == hypr_cloudsync::ErrorKind::Transient
+            Self::Cloudsync(error) if error.kind() == meeki_cloudsync::ErrorKind::Transient
         )
     }
 }
 
-impl From<hypr_cloudsync::ErrorKind> for CloudsyncErrorKind {
-    fn from(kind: hypr_cloudsync::ErrorKind) -> Self {
+impl From<meeki_cloudsync::ErrorKind> for CloudsyncErrorKind {
+    fn from(kind: meeki_cloudsync::ErrorKind) -> Self {
         match kind {
-            hypr_cloudsync::ErrorKind::Transient => Self::Transient,
-            hypr_cloudsync::ErrorKind::Auth => Self::Auth,
-            hypr_cloudsync::ErrorKind::Fatal => Self::Fatal,
+            meeki_cloudsync::ErrorKind::Transient => Self::Transient,
+            meeki_cloudsync::ErrorKind::Auth => Self::Auth,
+            meeki_cloudsync::ErrorKind::Fatal => Self::Fatal,
         }
     }
 }
@@ -158,7 +158,7 @@ mod tests {
 
     #[test]
     fn runtime_exposes_transient_cloudsync_errors() {
-        let error = CloudsyncRuntimeError::from(hypr_cloudsync::Error::from(std::io::Error::new(
+        let error = CloudsyncRuntimeError::from(meeki_cloudsync::Error::from(std::io::Error::new(
             std::io::ErrorKind::ConnectionReset,
             "connection reset",
         )));

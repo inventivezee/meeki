@@ -12,20 +12,20 @@ import { useCallback, useRef, useState } from "react";
 import {
   captureCommentAnchor,
   type CommentAnchor,
-} from "@hypr/editor/comments";
+} from "@meeki/editor/comments";
 import {
   type CommentAnchorsEvent,
   getCommentAnchorRanges,
   setActiveCommentAnchor,
-} from "@hypr/editor/note";
-import { Avatar } from "@hypr/ui/components/avatar";
-import { Button } from "@hypr/ui/components/ui/button";
+} from "@meeki/editor/note";
+import { Avatar } from "@meeki/ui/components/avatar";
+import { Button } from "@meeki/ui/components/ui/button";
 import {
   Popover,
   PopoverAnchor,
   PopoverContent,
-} from "@hypr/ui/components/ui/popover";
-import { Textarea } from "@hypr/ui/components/ui/textarea";
+} from "@meeki/ui/components/ui/popover";
+import { Textarea } from "@meeki/ui/components/ui/textarea";
 
 import {
   createSessionShareComment,

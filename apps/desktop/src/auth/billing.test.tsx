@@ -2,8 +2,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { canStartTrial as canStartTrialApi } from "@hypr/api-client";
-import { commands as authCommands } from "@hypr/plugin-auth";
+import { canStartTrial as canStartTrialApi } from "@meeki/api-client";
+import { commands as authCommands } from "@meeki/plugin-auth";
 
 import * as billingProviderModule from "./billing";
 import { useBillingAccess } from "./billing-context";
@@ -28,27 +28,27 @@ vi.mock("./auth-context", () => ({
   }),
 }));
 
-vi.mock("@hypr/api-client", () => ({
+vi.mock("@meeki/api-client", () => ({
   canStartTrial: vi.fn(),
 }));
 
-vi.mock("@hypr/api-client/client", () => ({
+vi.mock("@meeki/api-client/client", () => ({
   createClient: vi.fn(() => ({})),
 }));
 
-vi.mock("@hypr/plugin-auth", () => ({
+vi.mock("@meeki/plugin-auth", () => ({
   commands: {
     decodeClaims: vi.fn(),
   },
 }));
 
-vi.mock("@hypr/plugin-opener2", () => ({
+vi.mock("@meeki/plugin-opener2", () => ({
   commands: {
     openUrl: vi.fn(),
   },
 }));
 
-vi.mock("@hypr/plugin-windows", () => ({
+vi.mock("@meeki/plugin-windows", () => ({
   openUrlWithInstruction: vi.fn(),
 }));
 
@@ -270,7 +270,7 @@ describe("BillingProvider", () => {
 
   it("opens a payment reminder during the final seven trial days", async () => {
     vi.mocked(localStorage.getItem).mockImplementation((key: string) =>
-      key.startsWith("anarlog:trial_started_seen:") ? "1" : null,
+      key.startsWith("meeki:trial_started_seen:") ? "1" : null,
     );
     vi.mocked(authCommands.decodeClaims).mockResolvedValue({
       status: "ok",
@@ -295,7 +295,7 @@ describe("BillingProvider", () => {
 
   it("does not remind trial users who already added a payment method", async () => {
     vi.mocked(localStorage.getItem).mockImplementation((key: string) =>
-      key.startsWith("anarlog:trial_started_seen:") ? "1" : null,
+      key.startsWith("meeki:trial_started_seen:") ? "1" : null,
     );
     vi.mocked(authCommands.decodeClaims).mockResolvedValue({
       status: "ok",

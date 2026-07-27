@@ -20,7 +20,7 @@ use crate::relay::OnCloseCallback;
 
 use super::AppState;
 
-use hypr_analytics::{AuthenticatedUserId, DeviceFingerprint};
+use meeki_analytics::{AuthenticatedUserId, DeviceFingerprint};
 
 pub enum ProxyBuildError {
     SessionInitFailed(String),
@@ -128,7 +128,7 @@ pub async fn handler(
         Ok(v) => v,
         Err(resp) => {
             span.record("http.response.status_code", resp.status().as_u16() as i64);
-            hypr_observability::mark_span_as_error(&span, "provider_selection_failed");
+            meeki_observability::mark_span_as_error(&span, "provider_selection_failed");
             tracing::warn!(
                 parent: &span,
                 error.type = "provider_selection_failed",
@@ -234,7 +234,7 @@ pub async fn handler(
                 "http.response.status_code",
                 StatusCode::BAD_GATEWAY.as_u16() as i64,
             );
-            hypr_observability::mark_span_as_error(&span, "session_init_failed");
+            meeki_observability::mark_span_as_error(&span, "session_init_failed");
             tracing::error!(
                 parent: &span,
                 error.type = "session_init_failed",
@@ -252,7 +252,7 @@ pub async fn handler(
                 "http.response.status_code",
                 StatusCode::BAD_REQUEST.as_u16() as i64,
             );
-            hypr_observability::mark_span_as_error(&span, "proxy_build_failed");
+            meeki_observability::mark_span_as_error(&span, "proxy_build_failed");
             tracing::error!(
                 parent: &span,
                 error.type = "proxy_build_failed",

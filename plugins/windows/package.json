@@ -1,5 +1,5 @@
 {
-  "name": "@hypr/plugin-windows",
+  "name": "@meeki/plugin-windows",
   "private": true,
   "main": "./js/index.ts",
   "exports": {

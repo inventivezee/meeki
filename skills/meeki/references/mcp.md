@@ -13,8 +13,8 @@ Transcript limits are measured in words. The default is 200 and the maximum is 5
 
 Available resources:
 
-- `anarlog://meetings/{meeting_id}`
-- `anarlog://meetings/{meeting_id}/transcript{?offset,limit}`
-- `anarlog://series/{series_id}`
+- `meeki://meetings/{meeting_id}`
+- `meeki://meetings/{meeting_id}/transcript{?offset,limit}`
+- `meeki://series/{series_id}`
 
 Prefer tools when the workflow needs structured JSON. Use resources when the client needs concise Markdown or plain-text context.

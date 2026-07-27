@@ -11,7 +11,7 @@ import {
 import { createPortal } from "react-dom";
 import { useHotkeys } from "react-hotkeys-hook";
 
-import { cn } from "@hypr/utils";
+import { cn } from "@meeki/utils";
 
 import { useAuth } from "~/auth";
 import { useSessionSummaries } from "~/session/queries";

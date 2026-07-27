@@ -23,7 +23,7 @@ impl BatchSttAdapter for DeepgramAdapter {
 
     fn is_supported_languages(
         &self,
-        languages: &[hypr_language::Language],
+        languages: &[meeki_language::Language],
         model: Option<&str>,
     ) -> bool {
         DeepgramAdapter::is_supported_languages_batch(languages, model)
@@ -260,8 +260,8 @@ mod tests {
     fn batch_url_restricts_detect_language_for_unsupported_multi_language() {
         let params = ListenParams {
             languages: vec![
-                hypr_language::ISO639::En.into(),
-                hypr_language::ISO639::Pl.into(),
+                meeki_language::ISO639::En.into(),
+                meeki_language::ISO639::Pl.into(),
             ],
             ..Default::default()
         };
@@ -291,7 +291,7 @@ mod tests {
             ..Default::default()
         };
 
-        let audio_path = std::path::PathBuf::from(hypr_data::english_1::AUDIO_PATH);
+        let audio_path = std::path::PathBuf::from(meeki_data::english_1::AUDIO_PATH);
 
         let result = adapter
             .transcribe_file(

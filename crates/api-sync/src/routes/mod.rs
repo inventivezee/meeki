@@ -8,7 +8,7 @@ use axum::{
     routing::{post, put},
 };
 use chrono::{SecondsFormat, TimeDelta, Utc};
-use hypr_api_auth::AuthContext;
+use meeki_api_auth::AuthContext;
 use reqwest::StatusCode as HttpStatusCode;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -34,9 +34,9 @@ const SNAPSHOT_PUBLISH_TIMEOUT: std::time::Duration = std::time::Duration::from_
 const MAX_SNAPSHOT_REQUEST_BYTES: usize = MAX_SNAPSHOT_BODY_BYTES + 16 * 1024;
 const MAX_SNAPSHOT_RESPONSE_BYTES: usize = MAX_SNAPSHOT_BODY_BYTES + 256 * 1024;
 const CLOUDSYNC_ENCRYPTION_VERSION: u8 = 2;
-const E2EE_KEY_ID_HEADER: &str = "x-anarlog-e2ee-key-id";
+const E2EE_KEY_ID_HEADER: &str = "x-meeki-e2ee-key-id";
 const DEVICE_FINGERPRINT_HEADER: &str = "x-device-fingerprint";
-const DEVICE_NAME_HEADER: &str = "x-anarlog-device-name";
+const DEVICE_NAME_HEADER: &str = "x-meeki-device-name";
 const MAX_DEVICE_NAME_BYTES: usize = 128;
 
 #[derive(Serialize, utoipa::ToSchema)]
@@ -371,7 +371,7 @@ pub fn web_edit_router(state: AppState) -> Router {
         (status = 200, description = "E2EE recovery-key identity claimed", body = E2eeIdentity),
         (status = 400, description = "Invalid E2EE key identity"),
         (status = 401, description = "Authentication required"),
-        (status = 403, description = "Anarlog Pro subscription required"),
+        (status = 403, description = "Meeki Pro subscription required"),
         (status = 409, description = "Account already uses a different recovery key"),
         (status = 502, description = "E2EE identity service unavailable")
     )
@@ -402,7 +402,7 @@ async fn claim_e2ee_identity(
         (status = 200, description = "Sanitized shared-note snapshot published", body = PublishedSessionShareSnapshot),
         (status = 400, description = "Invalid shared-note snapshot"),
         (status = 401, description = "Authentication required"),
-        (status = 403, description = "Anarlog Pro or share-manager access required"),
+        (status = 403, description = "Meeki Pro or share-manager access required"),
         (status = 409, description = "Shared note changed since the supplied base revision"),
         (status = 413, description = "Shared-note snapshot is too large"),
         (status = 502, description = "Shared-note service unavailable")
@@ -842,11 +842,11 @@ pub(crate) fn validate_shared_attachments(
     post,
     path = "/token",
     tag = "sync",
-    params(("x-anarlog-e2ee-key-id" = Option<String>, Header, description = "Local recovery-key identity")),
+    params(("x-meeki-e2ee-key-id" = Option<String>, Header, description = "Local recovery-key identity")),
     responses(
         (status = 200, description = "Short-lived CloudSync credentials", body = CloudsyncCredentialResponse),
         (status = 401, description = "Authentication required"),
-        (status = 403, description = "Anarlog Pro subscription required"),
+        (status = 403, description = "Meeki Pro subscription required"),
         (status = 426, description = "Desktop upgrade required"),
         (status = 502, description = "Credential issuer unavailable")
     )
@@ -891,7 +891,7 @@ async fn create_credentials(
         let token = mint_cloudsync_token(
             &state,
             &LegacyCreateTokenRequest {
-                name: "anarlog-cloudsync",
+                name: "meeki-cloudsync",
                 user_id: &auth.claims.sub,
                 expires_at: &expires_at,
             },
@@ -923,7 +923,7 @@ async fn create_credentials(
     let token = mint_cloudsync_token(
         &state,
         &E2eeCreateTokenRequest {
-            name: "anarlog-cloudsync",
+            name: "meeki-cloudsync",
             user_id: &auth.claims.sub,
             expires_at: &expires_at,
             attributes: &token_attributes,
@@ -1286,7 +1286,7 @@ fn encode_workspace_token_attributes(workspaces: &[CloudsyncWorkspace]) -> Resul
 #[cfg(test)]
 mod tests {
     use axum::{Extension, body::Body, body::to_bytes, http::Request, http::StatusCode};
-    use hypr_api_auth::{AuthContext, Claims};
+    use meeki_api_auth::{AuthContext, Claims};
     use serde_json::{Value, json};
     use tower::ServiceExt;
     use wiremock::{
@@ -1436,7 +1436,7 @@ mod tests {
             .and(path("/v2/tokens"))
             .and(header("authorization", "Bearer issuer-key"))
             .and(body_partial_json(json!({
-                "name": "anarlog-cloudsync",
+                "name": "meeki-cloudsync",
                 "userId": "user-123"
             })))
             .respond_with(ResponseTemplate::new(200).set_body_json(json!({
@@ -1654,7 +1654,7 @@ mod tests {
         let request = server.received_requests().await.unwrap().pop().unwrap();
         let body = String::from_utf8(request.body).unwrap();
         assert!(body.contains(TEST_KEY_ID));
-        assert!(!body.contains("anarlog-e2ee-v1"));
+        assert!(!body.contains("meeki-e2ee-v1"));
     }
 
     #[tokio::test]
@@ -1721,7 +1721,7 @@ mod tests {
         assert_eq!(requests.len(), 1);
         let token_request: Value = serde_json::from_slice(&requests[0].body).unwrap();
         assert_eq!(token_request.as_object().unwrap().len(), 3);
-        assert_eq!(token_request["name"], "anarlog-cloudsync");
+        assert_eq!(token_request["name"], "meeki-cloudsync");
         assert_eq!(token_request["userId"], "user-123");
         assert!(token_request["expiresAt"].as_str().unwrap().ends_with('Z'));
         assert!(token_request.get("attributes").is_none());

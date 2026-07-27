@@ -5,9 +5,9 @@ import { Volume2Icon, VolumeXIcon } from "lucide-react";
 import { motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { commands as analyticsCommands } from "@hypr/plugin-analytics";
-import { commands as sfxCommands } from "@hypr/plugin-sfx";
-import { cn } from "@hypr/utils";
+import { commands as analyticsCommands } from "@meeki/plugin-analytics";
+import { commands as sfxCommands } from "@meeki/plugin-sfx";
+import { cn } from "@meeki/utils";
 
 import { LoginSection } from "./account";
 import { CalendarSection } from "./calendar";
@@ -201,7 +201,7 @@ function OnboardingScreenContent({
         ])}
       >
         <h1 className="font-hand text-foreground text-4xl leading-none font-semibold tracking-normal">
-          <Trans>Welcome to Anarlog</Trans>
+          <Trans>Welcome to Meeki</Trans>
         </h1>
       </div>
 
@@ -219,7 +219,7 @@ function OnboardingScreenContent({
                 </Trans>
               ) : (
                 <Trans>
-                  Anarlog needs access to your microphone and system audio to
+                  Meeki needs access to your microphone and system audio to
                   record and transcribe your meetings
                 </Trans>
               )
@@ -269,7 +269,7 @@ function OnboardingScreenContent({
             title={<Trans>Connect calendar</Trans>}
             description={
               <Trans>
-                Anarlog will sync your calendar to get meeting reminders
+                Meeki will sync your calendar to get meeting reminders
               </Trans>
             }
             completedTitle={<Trans>Calendar connected</Trans>}

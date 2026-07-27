@@ -15,7 +15,7 @@ import {
   readShareRouteContinuationCookie,
 } from "@/lib/share-route-privacy";
 
-const COOKIE_PREFIX = "anarlog-share-continuation-";
+const COOKIE_PREFIX = "meeki-share-continuation-";
 const COOKIE_MAX_AGE_SECONDS = 15 * 60;
 
 const inputSchema = z

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createDb, max, templates } from "./index";
 
-describe("@hypr/db createDb", () => {
+describe("@meeki/db createDb", () => {
   const executeProxy = vi.fn();
   const db = createDb({ executeProxy });
 

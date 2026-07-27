@@ -4,11 +4,11 @@ import { ChevronLeft, ExternalLink, Github } from "lucide-react";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 
-import { commands as openerCommands } from "@hypr/plugin-opener2";
-import { OutlookIcon } from "@hypr/ui/components/icons/outlook";
-import { Button } from "@hypr/ui/components/ui/button";
-import { Input } from "@hypr/ui/components/ui/input";
-import { cn } from "@hypr/utils";
+import { commands as openerCommands } from "@meeki/plugin-opener2";
+import { OutlookIcon } from "@meeki/ui/components/icons/outlook";
+import { Button } from "@meeki/ui/components/ui/button";
+import { Input } from "@meeki/ui/components/ui/input";
+import { cn } from "@meeki/utils";
 
 import { useAuth } from "~/auth";
 
@@ -72,7 +72,7 @@ function InstructionShell({
         <div className="flex w-full max-w-sm flex-col items-center gap-6 px-10 pb-10 text-center">
           {icon ?? (
             <img
-              src="/assets/anarlog-icon.png"
+              src="/assets/meeki-icon.png"
               alt=""
               className="h-14 w-14 object-contain object-center"
             />
@@ -168,7 +168,7 @@ export function InstructionScreen({
     return (
       <ExternalInstruction
         title={t`Complete your purchase`}
-        description={t`Finish checkout in your browser, then return to Anarlog.`}
+        description={t`Finish checkout in your browser, then return to Meeki.`}
         actionLabel={t`Reopen checkout page`}
         onBack={onBack}
         url={url}
@@ -185,7 +185,7 @@ export function InstructionScreen({
           ? t`Connect ${integration.displayName}`
           : t`Connect your integration`
       }
-      description={t`Authorize access in your browser, then return to Anarlog.`}
+      description={t`Authorize access in your browser, then return to Meeki.`}
       icon={integration?.icon}
       actionLabel={t`Reopen in browser`}
       onBack={onBack}
@@ -238,7 +238,7 @@ function SignInInstruction({ onBack }: { onBack: () => void }) {
   return (
     <InstructionShell
       title={t`Sign in to your account`}
-      description={t`Complete sign-in in your browser, then return to Anarlog.`}
+      description={t`Complete sign-in in your browser, then return to Meeki.`}
       onBack={onBack}
     >
       {showCallbackInput ? (
@@ -247,7 +247,7 @@ function SignInInstruction({ onBack }: { onBack: () => void }) {
             <Input
               type="text"
               className="h-10 font-mono text-xs"
-              placeholder="anarlog://auth/callback?access_token=..."
+              placeholder="meeki://auth/callback?access_token=..."
               value={callbackUrl}
               onChange={(e) => setCallbackUrl(e.target.value)}
             />
@@ -262,7 +262,7 @@ function SignInInstruction({ onBack }: { onBack: () => void }) {
           <p className="text-muted-foreground text-xs leading-5">
             <Trans>
               Paste the browser URL here if the browser button did not reopen
-              Anarlog.
+              Meeki.
             </Trans>
           </p>
         </>

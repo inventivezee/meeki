@@ -4,7 +4,7 @@ import type { StoreApi } from "zustand";
 import type {
   DegradedError,
   CaptureStatusEvent,
-} from "@hypr/plugin-transcription";
+} from "@meeki/plugin-transcription";
 
 export type LiveSessionStatus = "inactive" | "active" | "finalizing";
 export type SessionMode = LiveSessionStatus | "running_batch";

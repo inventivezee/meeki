@@ -4,7 +4,7 @@ import {
   commands as windowsCommands,
   events as windowsEvents,
   type FloatingBarSettingsChange,
-} from "@hypr/plugin-windows";
+} from "@meeki/plugin-windows";
 
 import {
   createMeetingFloatLabelContext,

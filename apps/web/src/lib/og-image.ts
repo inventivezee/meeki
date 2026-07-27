@@ -105,7 +105,7 @@ function createBlogOgSvg(input: BlogOgImageInput) {
       return `<path d="M86 ${y} H1114" stroke="#c5bbb0" stroke-width="1"/>`;
     }).join("")}
   </g>
-  <text x="86" y="100" fill="#57534e" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700">Anarlog</text>
+  <text x="86" y="100" fill="#57534e" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700">Meeki</text>
   <text x="1114" y="100" fill="#756b5d" font-family="Arial, Helvetica, sans-serif" font-size="24" text-anchor="end">Blog</text>
   ${title
     .map(
@@ -119,7 +119,7 @@ function createBlogOgSvg(input: BlogOgImageInput) {
         `<text x="90" y="${descriptionStartY + index * 42}" fill="#57534e" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="500">${escapeXml(line)}</text>`,
     )
     .join("")}
-  <text x="86" y="552" fill="#756b5d" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="600">${escapeXml(meta || "anarlog.so")}</text>
+  <text x="86" y="552" fill="#756b5d" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="600">${escapeXml(meta || "meeki.so")}</text>
 </svg>`;
 }
 
@@ -158,7 +158,7 @@ export function createSharedNoteOgSvg(input: SharedNoteOgImageInput) {
     <rect x="108" y="82" width="42" height="42" rx="12" fill="#181613"/>
     <path d="M119 108 C124 94 135 94 139 108 C135 103 124 103 119 108 Z" fill="#ffe09d"/>
     <circle cx="129" cy="110" r="3" fill="#ffe09d"/>
-    <text x="166" y="113" fill="#181613" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700">Anarlog</text>
+    <text x="166" y="113" fill="#181613" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700">Meeki</text>
   </g>
   <g>
     <rect x="914" y="83" width="174" height="40" rx="20" fill="#f4efe6"/>
@@ -180,7 +180,7 @@ export function createSharedNoteOgSvg(input: SharedNoteOgImageInput) {
   <path d="M112 501 H1088" stroke="#e8e0d4" stroke-width="2"/>
   <g fill="#756b5d" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="600">
     <text x="112" y="548">${escapeXml(date ? `Published ${date}` : "Shared note")}</text>
-    <text x="1088" y="548" text-anchor="end">Read on anarlog.so</text>
+    <text x="1088" y="548" text-anchor="end">Read on meeki.so</text>
   </g>
 </svg>`;
 }

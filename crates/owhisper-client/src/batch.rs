@@ -133,7 +133,7 @@ impl<A: crate::RealtimeSttAdapter + BatchSttAdapter> ListenClientBuilder<A> {
 mod tests {
     use super::*;
     use crate::{DeepgramAdapter, HyprnoteAdapter, OpenAIAdapter};
-    use hypr_language::{ISO639, Language};
+    use meeki_language::{ISO639, Language};
 
     #[test]
     fn injects_provider_for_hyprnote_proxy() {

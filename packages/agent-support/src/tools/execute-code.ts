@@ -2,7 +2,7 @@ import {
   executeCodeTool as coreExecuteCodeTool,
   formatExecutionResult,
   setExecuteCodeFunction,
-} from "@hypr/agent-core";
+} from "@meeki/agent-core";
 
 import { executeCode } from "../modal/execute";
 

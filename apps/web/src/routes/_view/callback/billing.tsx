@@ -3,7 +3,7 @@ import { CheckIcon, CopyIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 
-import { cn } from "@hypr/utils";
+import { cn } from "@meeki/utils";
 
 import {
   DEFAULT_DESKTOP_SCHEME,
@@ -74,7 +74,7 @@ function Component() {
       <div className="flex w-full max-w-md flex-col gap-8 text-center">
         <div className="flex flex-col gap-3">
           <h1 className="font-sans text-3xl tracking-tight text-stone-700">
-            Returning to Anarlog
+            Returning to Meeki
           </h1>
           <p className="text-neutral-600">
             Click the button below if the app does not open automatically
@@ -89,7 +89,7 @@ function Component() {
               "rounded-full bg-linear-to-t from-stone-600 to-stone-500 text-white shadow-md hover:scale-[102%] hover:shadow-lg active:scale-[98%]",
             ])}
           >
-            Open Anarlog
+            Open Meeki
           </button>
 
           <button

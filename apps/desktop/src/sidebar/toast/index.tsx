@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 
-import { sonnerToast } from "@hypr/ui/components/ui/toast";
+import { sonnerToast } from "@meeki/ui/components/ui/toast";
 
 import {
   createDevtoolsToastPreview,

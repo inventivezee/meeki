@@ -21,7 +21,7 @@ const mocks = vi.hoisted(() => ({
   writeClipboard: vi.fn(),
 }));
 
-vi.mock("@hypr/plugin-db", () => ({
+vi.mock("@meeki/plugin-db", () => ({
   createE2eeIdentity: mocks.create,
   importE2eeIdentity: mocks.import,
   inspectE2eeRecoveryKey: mocks.inspect,
@@ -32,11 +32,11 @@ vi.mock("@tauri-apps/api/path", () => ({
   join: mocks.join,
 }));
 
-vi.mock("@hypr/plugin-fs2", () => ({
+vi.mock("@meeki/plugin-fs2", () => ({
   commands: { writeTextFile: mocks.writeTextFile },
 }));
 
-vi.mock("@hypr/plugin-opener2", () => ({
+vi.mock("@meeki/plugin-opener2", () => ({
   commands: { revealItemInDir: mocks.revealItemInDir },
 }));
 
@@ -127,13 +127,13 @@ describe("E2eeSetupDialog", () => {
   it("requires the generated recovery key to be acknowledged before enabling sync", async () => {
     const onReady = vi.fn();
     mocks.create.mockResolvedValue(
-      "anarlog-e2ee-v1:abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG",
+      "meeki-e2ee-v1:abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG",
     );
     mocks.import.mockResolvedValue(undefined);
     renderDialog(onReady);
 
     fireEvent.click(screen.getByText("Create a recovery key"));
-    expect(await screen.findByText(/anarlog-e2ee-v1:/)).toBeTruthy();
+    expect(await screen.findByText(/meeki-e2ee-v1:/)).toBeTruthy();
     expect(onReady).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByText("I saved it"));
@@ -147,14 +147,14 @@ describe("E2eeSetupDialog", () => {
 
     fireEvent.click(screen.getByText("Use an existing key"));
     fireEvent.change(screen.getByLabelText("Recovery key"), {
-      target: { value: "anarlog-e2ee-v1:existing" },
+      target: { value: "meeki-e2ee-v1:existing" },
     });
     fireEvent.click(screen.getByText("Unlock sync"));
 
     await waitFor(() =>
       expect(mocks.import).toHaveBeenCalledWith(
         "11111111-1111-4111-8111-111111111111",
-        "anarlog-e2ee-v1:existing",
+        "meeki-e2ee-v1:existing",
       ),
     );
     expect(onReady).toHaveBeenCalledTimes(1);
@@ -162,7 +162,7 @@ describe("E2eeSetupDialog", () => {
 
   it("clears a copied recovery key after one minute when it is still on the clipboard", async () => {
     const recoveryKey =
-      "anarlog-e2ee-v1:abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG";
+      "meeki-e2ee-v1:abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG";
     mocks.create.mockResolvedValue(recoveryKey);
     renderDialog();
 
@@ -183,7 +183,7 @@ describe("E2eeSetupDialog", () => {
 
   it("downloads the recovery key as a reusable text file", async () => {
     const recoveryKey =
-      "anarlog-e2ee-v1:abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG";
+      "meeki-e2ee-v1:abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG";
     mocks.create.mockResolvedValue(recoveryKey);
     renderDialog();
 
@@ -194,7 +194,7 @@ describe("E2eeSetupDialog", () => {
     await waitFor(() => expect(mocks.writeTextFile).toHaveBeenCalledTimes(1));
     const [path, content] = mocks.writeTextFile.mock.calls[0];
     expect(path).toMatch(
-      /^\/Downloads\/anarlog-recovery-key_\d{4}-\d{2}-\d{2}T.*Z\.txt$/,
+      /^\/Downloads\/meeki-recovery-key_\d{4}-\d{2}-\d{2}T.*Z\.txt$/,
     );
     expect(content).toBe(`${recoveryKey}\n`);
     await waitFor(() =>
@@ -204,7 +204,7 @@ describe("E2eeSetupDialog", () => {
 
   it("clears download errors when the dialog is dismissed", async () => {
     const recoveryKey =
-      "anarlog-e2ee-v1:abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG";
+      "meeki-e2ee-v1:abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG";
     mocks.create.mockResolvedValue(recoveryKey);
     renderDialog();
 
@@ -227,7 +227,7 @@ describe("E2eeSetupDialog", () => {
 
   it("preserves clipboard content copied after the recovery key", async () => {
     const recoveryKey =
-      "anarlog-e2ee-v1:abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG";
+      "meeki-e2ee-v1:abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG";
     mocks.create.mockResolvedValue(recoveryKey);
     renderDialog();
 
@@ -269,7 +269,7 @@ describe("E2eeSetupDialog", () => {
 
     fireEvent.click(screen.getByText("Use an existing key"));
     fireEvent.change(screen.getByLabelText("Recovery key"), {
-      target: { value: "anarlog-e2ee-v1:wrong" },
+      target: { value: "meeki-e2ee-v1:wrong" },
     });
     fireEvent.click(screen.getByText("Unlock sync"));
 

@@ -6,15 +6,15 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub enum Error {
     #[cfg(feature = "onnx")]
     #[error(transparent)]
-    HyprOnnxError(#[from] hypr_onnx::Error),
+    HyprOnnxError(#[from] meeki_onnx::Error),
 
     #[cfg(feature = "onnx")]
     #[error(transparent)]
-    OrtError(#[from] hypr_onnx::ort::Error),
+    OrtError(#[from] meeki_onnx::ort::Error),
 
     #[cfg(feature = "onnx")]
     #[error(transparent)]
-    ShapeError(#[from] hypr_onnx::ndarray::ShapeError),
+    ShapeError(#[from] meeki_onnx::ndarray::ShapeError),
 
     #[error("knf error: {0}")]
     KnfError(String),

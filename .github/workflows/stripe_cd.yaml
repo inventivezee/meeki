@@ -39,14 +39,14 @@ jobs:
               --token="$INFISICAL_TOKEN" \
               --env=prod \
               --projectId="$project_id" \
-              --path=/anarlog/web \
+              --path=/meeki/web \
               --output=json |
               python3 -c 'import json, sys; print(json.load(sys.stdin)[0]["secretValue"])'
           )"
 
           echo "::add-mask::$posthog_api_key"
           if [[ "$posthog_api_key" != phc_* || ${#posthog_api_key} -lt 20 ]]; then
-            echo "Invalid Anarlog PostHog project token" >&2
+            echo "Invalid Meeki PostHog project token" >&2
             exit 1
           fi
 

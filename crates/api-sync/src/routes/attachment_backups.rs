@@ -9,7 +9,7 @@ use axum::{
     routing::{get, post, put},
 };
 use chrono::{SecondsFormat, TimeDelta, Utc};
-use hypr_api_auth::AuthContext;
+use meeki_api_auth::AuthContext;
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use utoipa::OpenApi;
@@ -412,7 +412,7 @@ async fn add_no_store(request: Request, next: Next) -> Response {
         (status = 200, description = "Reserved immutable backup identity", body = ReservedAttachmentBackup),
         (status = 400, description = "Invalid backup metadata"),
         (status = 401, description = "Authentication required"),
-        (status = 403, description = "Anarlog Pro subscription or backup access required"),
+        (status = 403, description = "Meeki Pro subscription or backup access required"),
         (status = 409, description = "Backup reservation conflict"),
         (status = 507, description = "Backup quota exhausted"),
         (status = 502, description = "Backup service unavailable")
@@ -471,7 +471,7 @@ async fn reserve_attachment_backup(
         (status = 200, description = "Time-limited grant for an immutable backup upload", body = AttachmentBackupUploadGrant),
         (status = 400, description = "Invalid object key or ciphertext hash"),
         (status = 401, description = "Authentication required"),
-        (status = 403, description = "Anarlog Pro subscription or backup access required"),
+        (status = 403, description = "Meeki Pro subscription or backup access required"),
         (status = 404, description = "Backup reservation unavailable"),
         (status = 409, description = "Backup state or ciphertext hash conflict"),
         (status = 502, description = "Backup service unavailable")
@@ -562,7 +562,7 @@ async fn grant_attachment_backup_upload(
         (status = 200, description = "Uploaded backup verified and finalized", body = FinalizedAttachmentBackup),
         (status = 400, description = "Invalid object key"),
         (status = 401, description = "Authentication required"),
-        (status = 403, description = "Anarlog Pro subscription or backup access required"),
+        (status = 403, description = "Meeki Pro subscription or backup access required"),
         (status = 404, description = "Backup unavailable"),
         (status = 409, description = "Uploaded object does not match its reservation"),
         (status = 502, description = "Backup service unavailable"),
@@ -672,7 +672,7 @@ async fn finalize_attachment_backup(
         (status = 200, description = "Backup promoted with compare-and-swap semantics", body = PromotedAttachmentBackup),
         (status = 400, description = "Invalid object key"),
         (status = 401, description = "Authentication required"),
-        (status = 403, description = "Anarlog Pro subscription or backup access required"),
+        (status = 403, description = "Meeki Pro subscription or backup access required"),
         (status = 404, description = "Backup unavailable"),
         (status = 409, description = "Current backup changed"),
         (status = 502, description = "Backup service unavailable")
@@ -733,7 +733,7 @@ async fn promote_attachment_backup(
         (status = 200, description = "Current backup head", body = CurrentAttachmentBackup),
         (status = 400, description = "Invalid attachment reference"),
         (status = 401, description = "Authentication required"),
-        (status = 403, description = "Anarlog Pro subscription or backup access required"),
+        (status = 403, description = "Meeki Pro subscription or backup access required"),
         (status = 404, description = "Current backup unavailable"),
         (status = 502, description = "Backup service unavailable")
     )
@@ -786,7 +786,7 @@ async fn read_current_attachment_backup(
         (status = 200, description = "Short-lived download for the server-current backup", body = AttachmentBackupDownload),
         (status = 400, description = "Invalid object key"),
         (status = 401, description = "Authentication required"),
-        (status = 403, description = "Anarlog Pro subscription or backup access required"),
+        (status = 403, description = "Meeki Pro subscription or backup access required"),
         (status = 404, description = "Current backup unavailable"),
         (status = 409, description = "Backup is no longer current"),
         (status = 502, description = "Backup service unavailable")
@@ -847,7 +847,7 @@ async fn download_attachment_backup(
         (status = 200, description = "Backup deletion scheduled behind a dependency fence", body = ScheduledAttachmentBackupDeletion),
         (status = 400, description = "Invalid deletion identity"),
         (status = 401, description = "Authentication required"),
-        (status = 403, description = "Anarlog Pro subscription or backup access required"),
+        (status = 403, description = "Meeki Pro subscription or backup access required"),
         (status = 404, description = "Backup unavailable"),
         (status = 409, description = "Backup changed, deletion was canceled, or a dependency appeared"),
         (status = 502, description = "Backup service unavailable")
@@ -926,7 +926,7 @@ async fn delete_attachment_backup(
         (status = 200, description = "Exact deletion request canceled or durably prevented", body = CanceledAttachmentBackupDeletion),
         (status = 400, description = "Invalid deletion identity"),
         (status = 401, description = "Authentication required"),
-        (status = 403, description = "Anarlog Pro subscription or backup access required"),
+        (status = 403, description = "Meeki Pro subscription or backup access required"),
         (status = 409, description = "Backup changed or deletion is already being collected"),
         (status = 502, description = "Backup service unavailable")
     )
@@ -1424,7 +1424,7 @@ mod tests {
         body::{Body, to_bytes},
         http::{Method, Request, StatusCode, header},
     };
-    use hypr_api_auth::{AuthContext, Claims};
+    use meeki_api_auth::{AuthContext, Claims};
     use serde_json::{Value, json};
     use tower::ServiceExt;
     use wiremock::{

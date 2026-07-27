@@ -23,11 +23,11 @@ impl Default for MistralAdapter {
 }
 
 impl MistralAdapter {
-    fn is_language_supported(lang: &hypr_language::Language) -> bool {
+    fn is_language_supported(lang: &meeki_language::Language) -> bool {
         lang.matches_any_code(SUPPORTED_LANGUAGES)
     }
 
-    fn language_support_impl(languages: &[hypr_language::Language]) -> LanguageSupport {
+    fn language_support_impl(languages: &[meeki_language::Language]) -> LanguageSupport {
         if languages.is_empty() {
             return LanguageSupport::Supported {
                 quality: LanguageQuality::NoData,
@@ -43,19 +43,19 @@ impl MistralAdapter {
         }
     }
 
-    pub fn language_support_live(languages: &[hypr_language::Language]) -> LanguageSupport {
+    pub fn language_support_live(languages: &[meeki_language::Language]) -> LanguageSupport {
         Self::language_support_impl(languages)
     }
 
-    pub fn language_support_batch(languages: &[hypr_language::Language]) -> LanguageSupport {
+    pub fn language_support_batch(languages: &[meeki_language::Language]) -> LanguageSupport {
         Self::language_support_impl(languages)
     }
 
-    pub fn is_supported_languages_live(languages: &[hypr_language::Language]) -> bool {
+    pub fn is_supported_languages_live(languages: &[meeki_language::Language]) -> bool {
         Self::language_support_live(languages).is_supported()
     }
 
-    pub fn is_supported_languages_batch(languages: &[hypr_language::Language]) -> bool {
+    pub fn is_supported_languages_batch(languages: &[meeki_language::Language]) -> bool {
         Self::language_support_batch(languages).is_supported()
     }
 

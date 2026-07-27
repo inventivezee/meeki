@@ -7,7 +7,7 @@ use axum::{Json, extract::State, http::HeaderMap};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-use hypr_nango::{AuthOperation, NangoAuthWebhook, WebhookType};
+use meeki_nango::{AuthOperation, NangoAuthWebhook, WebhookType};
 
 use crate::error::{NangoError, Result};
 use crate::state::AppState;
@@ -56,7 +56,7 @@ pub async fn nango_webhook(
         .and_then(|h| h.to_str().ok())
         .ok_or_else(|| NangoError::Auth("Missing X-Nango-Hmac-Sha256 header".to_string()))?;
 
-    let valid = hypr_nango::verify_webhook_signature(
+    let valid = meeki_nango::verify_webhook_signature(
         &state.config.nango.nango_webhook_signing_key,
         body.as_bytes(),
         signature,
@@ -86,7 +86,7 @@ pub async fn nango_webhook(
 }
 
 fn handle_forward_webhook(state: &AppState, body: &str) -> Result<()> {
-    let forward: hypr_nango::NangoForwardWebhook =
+    let forward: meeki_nango::NangoForwardWebhook =
         serde_json::from_str(body).map_err(|e| NangoError::BadRequest(e.to_string()))?;
 
     tracing::info!(
@@ -223,7 +223,7 @@ pub(crate) async fn handle_auth_webhook(state: &AppState, payload: NangoAuthWebh
 }
 
 fn spawn_identity_task(
-    nango: hypr_nango::NangoClient,
+    nango: meeki_nango::NangoClient,
     integration_id: String,
     connection_id: String,
 ) {
@@ -248,7 +248,7 @@ fn spawn_identity_task(
                 };
                 tags.insert("account_identity".to_string(), identity.clone());
 
-                let req = hypr_nango::PatchConnectionRequest {
+                let req = meeki_nango::PatchConnectionRequest {
                     end_user: None,
                     tags: Some(tags),
                 };
@@ -292,7 +292,7 @@ mod tests {
     use wiremock::matchers::{body_json, method, path, path_regex, query_param};
     use wiremock::{Mock, MockServer, ResponseTemplate};
 
-    use hypr_nango::{
+    use meeki_nango::{
         AuthOperation, NangoAuthWebhook, NangoWebhookEndUser, NangoWebhookError, WebhookType,
     };
 
@@ -363,7 +363,7 @@ mod tests {
     fn sign_body_produces_valid_signature() {
         let body = r#"{"type":"auth"}"#;
         let sig = sign_body(body);
-        assert!(hypr_nango::verify_webhook_signature(
+        assert!(meeki_nango::verify_webhook_signature(
             WEBHOOK_SIGNING_KEY,
             body.as_bytes(),
             &sig
@@ -373,7 +373,7 @@ mod tests {
     #[test]
     fn wrong_signature_is_invalid() {
         let body = r#"{"type":"auth"}"#;
-        assert!(!hypr_nango::verify_webhook_signature(
+        assert!(!meeki_nango::verify_webhook_signature(
             WEBHOOK_SIGNING_KEY,
             body.as_bytes(),
             "bad-sig"

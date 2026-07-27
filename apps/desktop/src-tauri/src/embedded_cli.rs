@@ -6,11 +6,11 @@ use std::path::PathBuf;
 
 use serde::Serialize;
 
-const DEV_BUNDLE_ID: &str = "com.hyprnote.dev";
+const DEV_BUNDLE_ID: &str = "com.meeki.dev";
 #[cfg(target_os = "macos")]
-const MANAGED_CLI_DIR: &str = ".anarlog-cli";
-const STABLE_BUNDLE_ID: &str = "com.hyprnote.stable";
-const STAGING_BUNDLE_ID: &str = "com.hyprnote.staging";
+const MANAGED_CLI_DIR: &str = ".meeki-cli";
+const STABLE_BUNDLE_ID: &str = "com.meeki.stable";
+const STAGING_BUNDLE_ID: &str = "com.meeki.staging";
 
 #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, specta::Type)]
@@ -36,7 +36,7 @@ pub struct EmbeddedCliStatus {
 pub fn check<R: tauri::Runtime, T: tauri::Manager<R>>(manager: &T) -> EmbeddedCliStatus {
     let command_name = command_name_from_identifier(manager.config().identifier.as_ref());
     let Some(install_path) = install_path_for_command(command_name) else {
-        return unavailable_status(command_name, "Anarlog could not find your home directory.");
+        return unavailable_status(command_name, "Meeki could not find your home directory.");
     };
 
     #[cfg(not(target_os = "macos"))]
@@ -59,7 +59,7 @@ pub fn check<R: tauri::Runtime, T: tauri::Manager<R>>(manager: &T) -> EmbeddedCl
                 command_name: command_name.to_string(),
                 install_path: install_path.display().to_string(),
                 state: EmbeddedCliState::ResourceMissing,
-                details: Some("The CLI is not included in this build of Anarlog.".to_string()),
+                details: Some("The CLI is not included in this build of Meeki.".to_string()),
             };
         };
         let app_version = manager.package_info().version.to_string();
@@ -86,7 +86,7 @@ pub fn install<R: tauri::Runtime, T: tauri::Manager<R>>(
             }
             EmbeddedCliState::Conflict => {
                 return Err(format!(
-                    "Another file already exists at {}. Move it before installing the Anarlog CLI.",
+                    "Another file already exists at {}. Move it before installing the Meeki CLI.",
                     status.install_path
                 ));
             }
@@ -120,10 +120,10 @@ fn unavailable_status(command_name: &str, details: &str) -> EmbeddedCliStatus {
 
 fn command_name_from_identifier(identifier: &str) -> &'static str {
     match identifier {
-        STABLE_BUNDLE_ID => "anarlog",
-        STAGING_BUNDLE_ID => "anarlog-staging",
-        DEV_BUNDLE_ID => "anarlog-dev",
-        _ => "anarlog-dev",
+        STABLE_BUNDLE_ID => "meeki",
+        STAGING_BUNDLE_ID => "meeki-staging",
+        DEV_BUNDLE_ID => "meeki-dev",
+        _ => "meeki-dev",
     }
 }
 
@@ -137,7 +137,7 @@ fn resolve_resource_path<R: tauri::Runtime, T: tauri::Manager<R>>(manager: &T) -
 
     if let Some(sidecar_path) = std::env::current_exe()
         .ok()
-        .and_then(|path| path.parent().map(|parent| parent.join("anarlog-cli")))
+        .and_then(|path| path.parent().map(|parent| parent.join("meeki-cli")))
         .filter(|path| path.is_file())
     {
         return Some(sidecar_path);
@@ -165,12 +165,12 @@ fn resolve_resource_path<R: tauri::Runtime, T: tauri::Manager<R>>(manager: &T) -
 fn bundled_binary_name() -> Option<&'static str> {
     #[cfg(target_arch = "aarch64")]
     {
-        return Some("anarlog-cli-aarch64-apple-darwin");
+        return Some("meeki-cli-aarch64-apple-darwin");
     }
 
     #[cfg(target_arch = "x86_64")]
     {
-        return Some("anarlog-cli-x86_64-apple-darwin");
+        return Some("meeki-cli-x86_64-apple-darwin");
     }
 
     #[allow(unreachable_code)]
@@ -275,7 +275,7 @@ fn is_legacy_app_cli_target(target: &Path) -> bool {
     };
     if !matches!(
         file_name,
-        "anarlog-cli" | "anarlog-cli-aarch64-apple-darwin" | "anarlog-cli-x86_64-apple-darwin"
+        "meeki-cli" | "meeki-cli-aarch64-apple-darwin" | "meeki-cli-x86_64-apple-darwin"
     ) {
         return false;
     }
@@ -302,7 +302,7 @@ fn is_legacy_app_cli_target(target: &Path) -> bool {
 
     matches!(
         app_name,
-        "Anarlog.app" | "Anarlog Staging.app" | "Anarlog Dev.app"
+        "Meeki.app" | "Meeki Staging.app" | "Meeki Dev.app"
     )
 }
 
@@ -310,7 +310,7 @@ fn is_legacy_app_cli_target(target: &Path) -> bool {
 fn details_for_state(state: EmbeddedCliState, install_path: &Path) -> Option<String> {
     match state {
         EmbeddedCliState::Installed => Some(format!(
-            "Installed at {} and managed by Anarlog.",
+            "Installed at {} and managed by Meeki.",
             install_path.display()
         )),
         EmbeddedCliState::Missing => Some(format!(
@@ -489,23 +489,23 @@ mod tests {
 
     #[test]
     fn maps_bundle_id_to_command_name() {
-        assert_eq!(command_name_from_identifier(STABLE_BUNDLE_ID), "anarlog");
+        assert_eq!(command_name_from_identifier(STABLE_BUNDLE_ID), "meeki");
         assert_eq!(
             command_name_from_identifier(STAGING_BUNDLE_ID),
-            "anarlog-staging"
+            "meeki-staging"
         );
-        assert_eq!(command_name_from_identifier(DEV_BUNDLE_ID), "anarlog-dev");
-        assert_eq!(command_name_from_identifier("unknown"), "anarlog-dev");
+        assert_eq!(command_name_from_identifier(DEV_BUNDLE_ID), "meeki-dev");
+        assert_eq!(command_name_from_identifier("unknown"), "meeki-dev");
     }
 
     #[cfg(target_os = "macos")]
     #[test]
     fn classifies_missing_install() {
         let dir = tempfile::tempdir().unwrap();
-        let resource_path = dir.path().join("anarlog-cli");
+        let resource_path = dir.path().join("meeki-cli");
         std::fs::write(&resource_path, "cli").unwrap();
 
-        let state = classify_installation(&dir.path().join("anarlog"), &resource_path).unwrap();
+        let state = classify_installation(&dir.path().join("meeki"), &resource_path).unwrap();
         assert_eq!(state, EmbeddedCliState::Missing);
     }
 
@@ -513,10 +513,10 @@ mod tests {
     #[test]
     fn classifies_installed_symlink() {
         let dir = tempfile::tempdir().unwrap();
-        let managed_path = dir.path().join("managed-anarlog-cli");
+        let managed_path = dir.path().join("managed-meeki-cli");
         std::fs::write(&managed_path, "cli").unwrap();
         std::fs::set_permissions(&managed_path, std::fs::Permissions::from_mode(0o755)).unwrap();
-        let install_path = dir.path().join("anarlog");
+        let install_path = dir.path().join("meeki");
         std::os::unix::fs::symlink(&managed_path, &install_path).unwrap();
 
         let state = classify_installation(&install_path, &managed_path).unwrap();
@@ -527,10 +527,10 @@ mod tests {
     #[test]
     fn classifies_non_executable_managed_cli_as_missing() {
         let dir = tempfile::tempdir().unwrap();
-        let managed_path = dir.path().join("managed-anarlog-cli");
+        let managed_path = dir.path().join("managed-meeki-cli");
         std::fs::write(&managed_path, "cli").unwrap();
         std::fs::set_permissions(&managed_path, std::fs::Permissions::from_mode(0o644)).unwrap();
-        let install_path = dir.path().join("anarlog");
+        let install_path = dir.path().join("meeki");
         std::os::unix::fs::symlink(&managed_path, &install_path).unwrap();
 
         assert_eq!(
@@ -543,9 +543,9 @@ mod tests {
     #[test]
     fn classifies_stale_symlinks_as_missing() {
         let dir = tempfile::tempdir().unwrap();
-        let managed_path = dir.path().join("anarlog-cli");
-        let old_managed_path = dir.path().join("old-anarlog-cli");
-        let install_path = dir.path().join("anarlog");
+        let managed_path = dir.path().join("meeki-cli");
+        let old_managed_path = dir.path().join("old-meeki-cli");
+        let install_path = dir.path().join("meeki");
         std::fs::write(&managed_path, "new cli").unwrap();
         std::fs::write(&old_managed_path, "old cli").unwrap();
         std::os::unix::fs::symlink(&old_managed_path, &install_path).unwrap();
@@ -566,11 +566,11 @@ mod tests {
     #[test]
     fn classifies_legacy_app_resource_symlink_as_missing() {
         let dir = tempfile::tempdir().unwrap();
-        let managed_path = dir.path().join("managed-anarlog-cli");
+        let managed_path = dir.path().join("managed-meeki-cli");
         let app_resource_path = dir
             .path()
-            .join("Anarlog.app/Contents/Resources/anarlog-cli");
-        let install_path = dir.path().join("anarlog");
+            .join("Meeki.app/Contents/Resources/meeki-cli");
+        let install_path = dir.path().join("meeki");
         std::fs::create_dir_all(app_resource_path.parent().unwrap()).unwrap();
         std::fs::write(&app_resource_path, "cli").unwrap();
         std::os::unix::fs::symlink(&app_resource_path, &install_path).unwrap();
@@ -585,9 +585,9 @@ mod tests {
     #[test]
     fn classifies_legacy_app_executable_symlink_as_missing() {
         let dir = tempfile::tempdir().unwrap();
-        let managed_path = dir.path().join(".anarlog-cli/anarlog/1.2.0");
-        let app_executable_path = dir.path().join("Anarlog.app/Contents/MacOS/anarlog-cli");
-        let install_path = dir.path().join("anarlog");
+        let managed_path = dir.path().join(".meeki-cli/meeki/1.2.0");
+        let app_executable_path = dir.path().join("Meeki.app/Contents/MacOS/meeki-cli");
+        let install_path = dir.path().join("meeki");
         std::fs::create_dir_all(app_executable_path.parent().unwrap()).unwrap();
         std::fs::write(&app_executable_path, "cli").unwrap();
         std::os::unix::fs::symlink(&app_executable_path, &install_path).unwrap();
@@ -602,10 +602,10 @@ mod tests {
     #[test]
     fn installer_replaces_legacy_app_executable_symlink() {
         let dir = tempfile::tempdir().unwrap();
-        let resource_path = dir.path().join("bundled-anarlog-cli");
-        let managed_path = dir.path().join(".anarlog-cli/anarlog/1.2.0");
-        let app_executable_path = dir.path().join("Anarlog.app/Contents/MacOS/anarlog-cli");
-        let install_path = dir.path().join("anarlog");
+        let resource_path = dir.path().join("bundled-meeki-cli");
+        let managed_path = dir.path().join(".meeki-cli/meeki/1.2.0");
+        let app_executable_path = dir.path().join("Meeki.app/Contents/MacOS/meeki-cli");
+        let install_path = dir.path().join("meeki");
         std::fs::write(&resource_path, "new cli").unwrap();
         std::fs::create_dir_all(app_executable_path.parent().unwrap()).unwrap();
         std::fs::write(&app_executable_path, "old cli").unwrap();
@@ -621,9 +621,9 @@ mod tests {
     #[test]
     fn classifies_foreign_symlink_as_conflict() {
         let dir = tempfile::tempdir().unwrap();
-        let managed_path = dir.path().join(".anarlog-cli/anarlog/1.2.0");
-        let install_path = dir.path().join("anarlog");
-        std::os::unix::fs::symlink("/opt/homebrew/bin/anarlog", &install_path).unwrap();
+        let managed_path = dir.path().join(".meeki-cli/meeki/1.2.0");
+        let install_path = dir.path().join("meeki");
+        std::os::unix::fs::symlink("/opt/homebrew/bin/meeki", &install_path).unwrap();
 
         assert_eq!(
             classify_installation(&install_path, &managed_path).unwrap(),
@@ -635,10 +635,10 @@ mod tests {
     #[test]
     fn installer_refuses_to_replace_foreign_symlink() {
         let dir = tempfile::tempdir().unwrap();
-        let resource_path = dir.path().join("bundled-anarlog-cli");
-        let managed_path = dir.path().join(".anarlog-cli/anarlog/1.2.0");
-        let install_path = dir.path().join("anarlog");
-        let foreign_target = Path::new("/opt/homebrew/bin/anarlog");
+        let resource_path = dir.path().join("bundled-meeki-cli");
+        let managed_path = dir.path().join(".meeki-cli/meeki/1.2.0");
+        let install_path = dir.path().join("meeki");
+        let foreign_target = Path::new("/opt/homebrew/bin/meeki");
         std::fs::write(&resource_path, "cli").unwrap();
         std::os::unix::fs::symlink(foreign_target, &install_path).unwrap();
 
@@ -650,15 +650,15 @@ mod tests {
     #[test]
     fn installed_cli_survives_bundled_resource_move() {
         let dir = tempfile::tempdir().unwrap();
-        let resource_path = dir.path().join("Anarlog.app/Contents/MacOS/anarlog-cli");
-        let install_path = dir.path().join("home/.local/bin/anarlog");
-        let managed_path = managed_binary_path(&install_path, "anarlog", "1.2.0").unwrap();
+        let resource_path = dir.path().join("Meeki.app/Contents/MacOS/meeki-cli");
+        let install_path = dir.path().join("home/.local/bin/meeki");
+        let managed_path = managed_binary_path(&install_path, "meeki", "1.2.0").unwrap();
         std::fs::create_dir_all(resource_path.parent().unwrap()).unwrap();
         std::fs::write(&resource_path, "cli").unwrap();
         std::fs::set_permissions(&resource_path, std::fs::Permissions::from_mode(0o644)).unwrap();
 
         install_managed_cli(&resource_path, &managed_path, &install_path).unwrap();
-        std::fs::remove_dir_all(dir.path().join("Anarlog.app")).unwrap();
+        std::fs::remove_dir_all(dir.path().join("Meeki.app")).unwrap();
 
         assert_eq!(std::fs::read_to_string(&install_path).unwrap(), "cli");
         assert_ne!(
@@ -679,11 +679,11 @@ mod tests {
     #[test]
     fn app_update_requires_installing_the_new_cli_version() {
         let dir = tempfile::tempdir().unwrap();
-        let install_path = dir.path().join("home/.local/bin/anarlog");
+        let install_path = dir.path().join("home/.local/bin/meeki");
         let old_resource_path = dir.path().join("old-cli");
         let new_resource_path = dir.path().join("new-cli");
-        let old_managed_path = managed_binary_path(&install_path, "anarlog", "1.2.0").unwrap();
-        let new_managed_path = managed_binary_path(&install_path, "anarlog", "1.3.0").unwrap();
+        let old_managed_path = managed_binary_path(&install_path, "meeki", "1.2.0").unwrap();
+        let new_managed_path = managed_binary_path(&install_path, "meeki", "1.3.0").unwrap();
         std::fs::write(&old_resource_path, "old cli").unwrap();
         std::fs::write(&new_resource_path, "new cli").unwrap();
         install_managed_cli(&old_resource_path, &old_managed_path, &install_path).unwrap();
@@ -705,8 +705,8 @@ mod tests {
     #[test]
     fn classifies_regular_file_as_conflict() {
         let dir = tempfile::tempdir().unwrap();
-        let managed_path = dir.path().join("anarlog-cli");
-        let install_path = dir.path().join("anarlog");
+        let managed_path = dir.path().join("meeki-cli");
+        let install_path = dir.path().join("meeki");
         std::fs::write(&managed_path, "cli").unwrap();
         std::fs::write(&install_path, "other").unwrap();
 

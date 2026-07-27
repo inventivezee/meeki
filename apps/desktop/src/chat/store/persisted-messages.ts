@@ -1,4 +1,4 @@
-import type { ChatMessageStatus } from "@hypr/store";
+import type { ChatMessageStatus } from "@meeki/store";
 
 import { hasRenderableContent } from "~/chat/message-content";
 import type { HyprUIMessage } from "~/chat/types";

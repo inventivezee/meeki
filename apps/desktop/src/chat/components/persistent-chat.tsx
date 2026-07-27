@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useLayoutEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
-import { cn } from "@hypr/utils";
+import { cn } from "@meeki/utils";
 
 import { ChatPanelFrame } from "./chat-panel";
 

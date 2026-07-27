@@ -4,13 +4,13 @@ set -euo pipefail
 umask 077
 
 qa_repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
-qa_target_dir="${ANARLOG_QA_TARGET_DIR:-$HOME/Library/Caches/anarlog/native-dev-qa-target}"
+qa_target_dir="${MEEKI_QA_TARGET_DIR:-$HOME/Library/Caches/meeki/native-dev-qa-target}"
 qa_target_parent="$(dirname "$qa_target_dir")"
-qa_bundle_dir="$qa_target_dir/debug/bundle/macos/Anarlog Dev.app"
-qa_bundle_executable="$qa_target_dir/debug/bundle/macos/Anarlog Dev.app/Contents/MacOS/anarlog-dev"
-qa_manifest="$qa_target_dir/.anarlog-native-dev-qa-manifest"
-qa_cache_marker="$qa_target_dir/.anarlog-native-dev-qa-cache-v1"
-qa_lock_dir="$qa_target_dir/.anarlog-native-dev-qa-lock"
+qa_bundle_dir="$qa_target_dir/debug/bundle/macos/Meeki Dev.app"
+qa_bundle_executable="$qa_target_dir/debug/bundle/macos/Meeki Dev.app/Contents/MacOS/meeki-dev"
+qa_manifest="$qa_target_dir/.meeki-native-dev-qa-manifest"
+qa_cache_marker="$qa_target_dir/.meeki-native-dev-qa-cache-v1"
+qa_lock_dir="$qa_target_dir/.meeki-native-dev-qa-lock"
 qa_frontend_dist="$qa_repo_root/apps/desktop/dist"
 qa_config_validator="$qa_repo_root/.agents/skills/qa-critical-ux/scripts/validate-native-dev-qa-config.mjs"
 qa_gitbutler_candidate_resolver="$qa_repo_root/.agents/skills/qa-critical-ux/scripts/resolve-gitbutler-candidate.mjs"
@@ -57,7 +57,7 @@ validated_commit_sha() {
   local qa_resolved_sha
 
   [[ "$qa_requested_sha" =~ ^[0-9a-fA-F]{40}$ ]] ||
-    fail "ANARLOG_QA_GIT_SHA must be a full 40-character commit SHA."
+    fail "MEEKI_QA_GIT_SHA must be a full 40-character commit SHA."
   qa_normalized_sha="$(
     printf '%s' "$qa_requested_sha" |
       tr '[:upper:]' '[:lower:]'
@@ -65,9 +65,9 @@ validated_commit_sha() {
   qa_resolved_sha="$(
     "$qa_git_executable" -C "$qa_repo_root" \
       rev-parse --verify "$qa_normalized_sha^{commit}" 2>/dev/null
-  )" || fail "ANARLOG_QA_GIT_SHA does not resolve to a local Git commit."
+  )" || fail "MEEKI_QA_GIT_SHA does not resolve to a local Git commit."
   [[ "$qa_resolved_sha" == "$qa_normalized_sha" ]] ||
-    fail "ANARLOG_QA_GIT_SHA must identify the commit object directly."
+    fail "MEEKI_QA_GIT_SHA must identify the commit object directly."
   printf '%s' "$qa_resolved_sha"
 }
 
@@ -76,12 +76,12 @@ candidate_git_sha() {
   local qa_derived_sha
   local qa_but_executable
 
-  if [[ -n "${ANARLOG_QA_GIT_SHA:-}" ]]; then
+  if [[ -n "${MEEKI_QA_GIT_SHA:-}" ]]; then
     qa_derived_sha="$(
       "$qa_node_executable" \
         "$qa_gitbutler_candidate_resolver" \
-        "$ANARLOG_QA_GIT_SHA"
-    )" || fail "ANARLOG_QA_GIT_SHA is not a valid candidate commit."
+        "$MEEKI_QA_GIT_SHA"
+    )" || fail "MEEKI_QA_GIT_SHA is not a valid candidate commit."
   else
     qa_current_branch="$(
       "$qa_git_executable" -C "$qa_repo_root" \
@@ -89,7 +89,7 @@ candidate_git_sha() {
     )"
     if [[ "$qa_current_branch" == "gitbutler/workspace" ]]; then
       qa_but_executable="$(command -v but)" ||
-        fail "GitButler is required to derive the QA candidate. Set ANARLOG_QA_GIT_SHA explicitly."
+        fail "GitButler is required to derive the QA candidate. Set MEEKI_QA_GIT_SHA explicitly."
       qa_derived_sha="$(
         (
           cd "$qa_repo_root"
@@ -239,10 +239,10 @@ compiled_frontend_config_fingerprint() {
   env -i \
     PATH="$PATH" \
     HOME="$HOME" \
-    ANARLOG_QA_EXPECTED_VITE_APP_URL="$qa_production_app_url" \
-    ANARLOG_QA_EXPECTED_VITE_API_URL="$qa_production_api_url" \
-    ANARLOG_QA_EXPECTED_VITE_SUPABASE_URL="$qa_supabase_url" \
-    ANARLOG_QA_EXPECTED_VITE_SUPABASE_ANON_KEY="$qa_supabase_anon_key" \
+    MEEKI_QA_EXPECTED_VITE_APP_URL="$qa_production_app_url" \
+    MEEKI_QA_EXPECTED_VITE_API_URL="$qa_production_api_url" \
+    MEEKI_QA_EXPECTED_VITE_SUPABASE_URL="$qa_supabase_url" \
+    MEEKI_QA_EXPECTED_VITE_SUPABASE_ANON_KEY="$qa_supabase_anon_key" \
     "$qa_node_executable" "$qa_config_validator" "$qa_frontend_dist"
 }
 
@@ -471,7 +471,7 @@ validate_builtin_audio_devices
 
 case "$qa_target_dir" in
   /*) ;;
-  *) fail "ANARLOG_QA_TARGET_DIR must be an absolute path." ;;
+  *) fail "MEEKI_QA_TARGET_DIR must be an absolute path." ;;
 esac
 mkdir -p "$qa_target_parent"
 qa_target_parent_real="$(cd "$qa_target_parent" && pwd -P)"
@@ -480,12 +480,12 @@ qa_home_real="$(cd "$HOME" && pwd -P)"
 
 case "$qa_target_real" in
   "$qa_repo_root" | "$qa_repo_root"/*)
-    fail "ANARLOG_QA_TARGET_DIR must be outside the repository."
+    fail "MEEKI_QA_TARGET_DIR must be outside the repository."
     ;;
 esac
 case "$qa_target_real" in
   / | /private | /private/tmp | /tmp | "$qa_home_real" | "$qa_home_real/Library" | "$qa_home_real/Library/Caches")
-    fail "ANARLOG_QA_TARGET_DIR must be a dedicated cache directory."
+    fail "MEEKI_QA_TARGET_DIR must be a dedicated cache directory."
     ;;
 esac
 [[ ! -L "$qa_target_dir" ]] || fail "Refusing to use a symlinked QA target."
@@ -498,13 +498,13 @@ if [[ -e "$qa_target_dir" ]]; then
     fail "Refusing to use an existing directory not created by this helper: $qa_target_dir"
 else
   mkdir -m 700 "$qa_target_dir"
-  printf 'anarlog-native-dev-qa-cache-v1\n' >"$qa_cache_marker"
+  printf 'meeki-native-dev-qa-cache-v1\n' >"$qa_cache_marker"
 fi
 chmod 700 "$qa_target_dir"
 
-if pgrep -x anarlog-dev >/dev/null 2>&1; then
-  echo "Anarlog Dev is already running. Quit it before building or launching QA:" >&2
-  pgrep -x anarlog-dev | while IFS= read -r qa_pid; do
+if pgrep -x meeki-dev >/dev/null 2>&1; then
+  echo "Meeki Dev is already running. Quit it before building or launching QA:" >&2
+  pgrep -x meeki-dev | while IFS= read -r qa_pid; do
     ps -p "$qa_pid" -o pid=,command= >&2
   done
   exit 1

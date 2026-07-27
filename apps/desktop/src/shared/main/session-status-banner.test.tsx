@@ -27,7 +27,7 @@ describe("MainSessionStatusBannerHost", () => {
       </SessionStatusBannerProvider>,
     );
 
-    expect(screen.queryByText("Ask for consent when using Anarlog")).toBeNull();
+    expect(screen.queryByText("Ask for consent when using Meeki")).toBeNull();
   });
 
   it("positions skip reasons at the bottom of the main surface", () => {

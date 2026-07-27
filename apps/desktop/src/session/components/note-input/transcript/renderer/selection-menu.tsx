@@ -7,7 +7,7 @@ import {
 } from "@floating-ui/react";
 import { type MouseEvent, useCallback, useEffect, useState } from "react";
 
-import { cn } from "@hypr/utils";
+import { cn } from "@meeki/utils";
 
 import { useAutoCloser } from "~/shared/hooks/useAutoCloser";
 

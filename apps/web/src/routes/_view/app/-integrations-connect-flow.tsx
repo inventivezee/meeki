@@ -2,8 +2,8 @@ import Nango from "@nangohq/frontend";
 import { useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 
-import { createSession } from "@hypr/api-client";
-import { createClient } from "@hypr/api-client/client";
+import { createSession } from "@meeki/api-client";
+import { createClient } from "@meeki/api-client/client";
 
 import { env } from "@/env";
 import { getAccessToken } from "@/functions/access-token";
@@ -128,14 +128,14 @@ export function ConnectFlow() {
       {isConnectedCalendar && !isConnecting && status !== "success" && (
         <div className="flex flex-col gap-3 rounded-2xl border border-stone-200 bg-stone-50 p-5 text-left text-sm leading-6 text-stone-700">
           <p>
-            Anarlog will read your calendar list and event details—including
+            Meeki will read your calendar list and event details—including
             titles, times, participants, locations, and meeting links—to show
             upcoming events and associate them with your private notes.
           </p>
           <p>
-            Access is read-only. Anarlog cannot create, edit, or delete events.
+            Access is read-only. Meeki cannot create, edit, or delete events.
             Calendar API responses pass through Nango's encrypted proxy before
-            reaching Anarlog, and Nango stores the encrypted OAuth credentials
+            reaching Meeki, and Nango stores the encrypted OAuth credentials
             needed to maintain the connection. Calendar data is then stored
             locally on your device.
           </p>
@@ -152,7 +152,7 @@ export function ConnectFlow() {
             and{" "}
             <a
               className="underline"
-              href="https://docs.anarlog.so/calendar#manage-or-delete-connected-calendar-data"
+              href="https://docs.meeki.so/calendar#manage-or-delete-connected-calendar-data"
             >
               calendar data instructions
             </a>

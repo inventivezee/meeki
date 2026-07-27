@@ -1,11 +1,11 @@
-import type { ServerStatus } from "@hypr/plugin-local-stt";
+import type { ServerStatus } from "@meeki/plugin-local-stt";
 
 import type { DownloadProgress, ToastCondition, ToastType } from "./types";
 
 import type { CaptureErrorNotification } from "~/store/zustand/capture-errors";
 import type { DevtoolsToastPreview } from "~/store/zustand/devtools-toast-preview";
 
-const ANARLOG_ICON_SRC = "/assets/anarlog-icon.png";
+const MEEKI_ICON_SRC = "/assets/meeki-icon.png";
 
 type ToastRegistryEntry = {
   toast: ToastType;
@@ -135,12 +135,12 @@ export function createToastRegistry({
         id: "sign-in-benefits",
         icon: (
           <img
-            src={ANARLOG_ICON_SRC}
-            alt="Anarlog"
+            src={MEEKI_ICON_SRC}
+            alt="Meeki"
             className="size-5 object-contain object-center"
           />
         ),
-        description: "Sign in to get the most out of Anarlog",
+        description: "Sign in to get the most out of Meeki",
         primaryAction: {
           label: "Sign in",
           onClick: onSignIn,
@@ -186,7 +186,7 @@ export function createToastRegistry({
         },
         dismissible: true,
       },
-      // Meety does not upsell Anarlog Pro.
+      // Meeki does not upsell Meeki Pro.
       condition: () => false,
     },
   ];

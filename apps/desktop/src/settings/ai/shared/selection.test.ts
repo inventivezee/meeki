@@ -31,48 +31,48 @@ describe("getVisibleModelSelection", () => {
 
 describe("getConfiguredProviders", () => {
   test("returns only providers whose configuration is complete", () => {
-    const providers = [{ id: "anarlog" }, { id: "deepgram" }, { id: "openai" }];
+    const providers = [{ id: "meeki" }, { id: "deepgram" }, { id: "openai" }];
 
     expect(
       getConfiguredProviders(providers, {
-        anarlog: { configured: true },
+        meeki: { configured: true },
         deepgram: { configured: true },
         openai: { configured: false },
       }),
-    ).toEqual([{ id: "anarlog" }, { id: "deepgram" }]);
+    ).toEqual([{ id: "meeki" }, { id: "deepgram" }]);
   });
 });
 
 describe("getConfiguredProviderIds", () => {
   test("keeps the configured active provider first", () => {
-    const providers = [{ id: "anarlog" }, { id: "deepgram" }, { id: "openai" }];
+    const providers = [{ id: "meeki" }, { id: "deepgram" }, { id: "openai" }];
 
     expect(
       getConfiguredProviderIds(
         providers,
         {
-          anarlog: { configured: true },
+          meeki: { configured: true },
           deepgram: { configured: true },
           openai: { configured: false },
         },
         "deepgram",
       ),
-    ).toEqual(["deepgram", "anarlog"]);
+    ).toEqual(["deepgram", "meeki"]);
   });
 
   test("falls back to configured provider order when the active provider is unavailable", () => {
-    const providers = [{ id: "anarlog" }, { id: "deepgram" }, { id: "openai" }];
+    const providers = [{ id: "meeki" }, { id: "deepgram" }, { id: "openai" }];
 
     expect(
       getConfiguredProviderIds(
         providers,
         {
-          anarlog: { configured: true },
+          meeki: { configured: true },
           deepgram: { configured: true },
           openai: { configured: false },
         },
         "openai",
       ),
-    ).toEqual(["anarlog", "deepgram"]);
+    ).toEqual(["meeki", "deepgram"]);
   });
 });

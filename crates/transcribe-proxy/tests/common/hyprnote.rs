@@ -3,7 +3,7 @@ use std::time::Duration;
 
 use bytes::Bytes;
 use futures_util::StreamExt;
-use owhisper_client::hypr_ws_client;
+use owhisper_client::meeki_ws_client;
 use owhisper_client::{
     BatchClient, BatchSttAdapter, DeepgramAdapter, HyprnoteAdapter, ListenClient,
 };
@@ -32,7 +32,7 @@ pub struct ClientStreamResult {
     pub terminal_error: Option<String>,
 }
 
-fn is_mock_trailing_disconnect(error: &hypr_ws_client::Error) -> bool {
+fn is_mock_trailing_disconnect(error: &meeki_ws_client::Error) -> bool {
     format!("{error:?}").contains("ResetWithoutClosingHandshake")
 }
 
@@ -68,8 +68,8 @@ pub async fn start_mock_ws() -> MockServerHandle {
         .expect("failed to start mock ws server")
 }
 
-pub fn english() -> Vec<hypr_language::Language> {
-    vec![hypr_language::ISO639::En.into()]
+pub fn english() -> Vec<meeki_language::Language> {
+    vec![meeki_language::ISO639::En.into()]
 }
 
 pub fn split_test_audio_frame() -> Vec<u8> {
@@ -123,7 +123,7 @@ pub async fn send_streaming(addr: SocketAddr, query: &str) {
 pub async fn send_streaming_via_client(
     addr: SocketAddr,
     model: &str,
-    languages: Vec<hypr_language::Language>,
+    languages: Vec<meeki_language::Language>,
 ) {
     let client = hyprnote_listen_client(addr, model, languages).await;
 
@@ -133,7 +133,7 @@ pub async fn send_streaming_via_client(
 pub async fn collect_streaming_via_client(
     addr: SocketAddr,
     model: &str,
-    languages: Vec<hypr_language::Language>,
+    languages: Vec<meeki_language::Language>,
     timeout: Duration,
 ) -> Vec<StreamResponse> {
     let result = collect_streaming_via_client_result(addr, model, languages, timeout).await;
@@ -148,7 +148,7 @@ pub async fn collect_streaming_via_client(
 pub async fn collect_streaming_via_client_result(
     addr: SocketAddr,
     model: &str,
-    languages: Vec<hypr_language::Language>,
+    languages: Vec<meeki_language::Language>,
     timeout: Duration,
 ) -> ClientStreamResult {
     let client = hyprnote_listen_client(addr, model, languages).await;
@@ -205,10 +205,10 @@ pub async fn send_batch(addr: SocketAddr, query: &str) {
 pub async fn send_batch_via_hyprnote_client(
     addr: SocketAddr,
     model: &str,
-    languages: Vec<hypr_language::Language>,
+    languages: Vec<meeki_language::Language>,
 ) -> owhisper_interface::batch::Response {
     batch_client::<HyprnoteAdapter>(addr, model, languages)
-        .transcribe_file(hypr_data::english_1::AUDIO_PATH)
+        .transcribe_file(meeki_data::english_1::AUDIO_PATH)
         .await
         .expect("hyprnote batch request should succeed")
 }
@@ -216,10 +216,10 @@ pub async fn send_batch_via_hyprnote_client(
 pub async fn send_batch_via_deepgram_client(
     addr: SocketAddr,
     model: &str,
-    languages: Vec<hypr_language::Language>,
+    languages: Vec<meeki_language::Language>,
 ) -> owhisper_interface::batch::Response {
     batch_client::<DeepgramAdapter>(addr, model, languages)
-        .transcribe_file(hypr_data::english_1::AUDIO_PATH)
+        .transcribe_file(meeki_data::english_1::AUDIO_PATH)
         .await
         .expect("deepgram passthrough batch request should succeed")
 }
@@ -363,7 +363,7 @@ pub fn stereo_listen_url(addr: SocketAddr, query: &str) -> String {
 async fn hyprnote_listen_client(
     addr: SocketAddr,
     model: &str,
-    languages: Vec<hypr_language::Language>,
+    languages: Vec<meeki_language::Language>,
 ) -> ListenClient<HyprnoteAdapter> {
     ListenClient::builder()
         .adapter::<HyprnoteAdapter>()
@@ -389,7 +389,7 @@ fn test_client_outbound() -> impl futures_util::Stream<Item = MixedMessage<Bytes
 fn batch_client<A: BatchSttAdapter>(
     addr: SocketAddr,
     model: &str,
-    languages: Vec<hypr_language::Language>,
+    languages: Vec<meeki_language::Language>,
 ) -> BatchClient<A> {
     BatchClient::<A>::builder()
         .api_base(format!("http://{addr}/stt"))

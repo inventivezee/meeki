@@ -18,7 +18,7 @@ impl BatchSttAdapter for ElevenLabsAdapter {
 
     fn is_supported_languages(
         &self,
-        languages: &[hypr_language::Language],
+        languages: &[meeki_language::Language],
         _model: Option<&str>,
     ) -> bool {
         ElevenLabsAdapter::is_supported_languages_batch(languages)
@@ -244,7 +244,7 @@ mod tests {
         let adapter = ElevenLabsAdapter::default();
         let params = ListenParams::default();
 
-        let audio_path = std::path::PathBuf::from(hypr_data::english_1::AUDIO_PATH);
+        let audio_path = std::path::PathBuf::from(meeki_data::english_1::AUDIO_PATH);
 
         let result = adapter
             .transcribe_file(&client, "", &api_key, &params, &audio_path)

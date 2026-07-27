@@ -82,7 +82,7 @@ impl WebSocketProxy {
             .clone()
             .into_client_request()
             .map_err(|e| crate::ProxyError::InvalidRequest(e.to_string()))?;
-        hypr_observability::inject_current_trace_context(req.headers_mut());
+        meeki_observability::inject_current_trace_context(req.headers_mut());
 
         let connect_start = Instant::now();
         tracing::info!("upstream_connect_started");

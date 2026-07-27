@@ -1,6 +1,6 @@
 import path from "path";
 
-import { createAgentNode, loadPrompt } from "@hypr/agent-core";
+import { createAgentNode, loadPrompt } from "@meeki/agent-core";
 
 import { tools } from "../tools";
 

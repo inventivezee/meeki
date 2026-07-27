@@ -1,11 +1,11 @@
-# Anarlog documentation instructions
+# Meeki documentation instructions
 
 ## Scope
 
-- This is the Mintlify project published at `https://docs.anarlog.so`.
-- Write for Anarlog users, developers, and agents using the CLI or MCP server.
+- This is the Mintlify project published at `https://docs.meeki.so`.
+- Write for Meeki users, developers, and agents using the CLI or MCP server.
 - Configuration lives in `docs.json`; content pages are MDX.
-- The public agent skill is maintained in `../skills/anarlog/`.
+- The public agent skill is maintained in `../skills/meeki/`.
 
 ## Sources of truth
 
@@ -19,8 +19,8 @@
 - Use active voice and second person.
 - Keep headings and sentences concise.
 - Put the result before implementation detail.
-- Use `Anarlog` for the product and `anarlog` for the executable.
-- Use root-relative links between Mintlify pages. Use `https://docs.anarlog.so` in external instructions and agent metadata.
+- Use `Meeki` for the product and `meeki` for the executable.
+- Use root-relative links between Mintlify pages. Use `https://docs.meeki.so` in external instructions and agent metadata.
 
 ## Accuracy boundaries
 

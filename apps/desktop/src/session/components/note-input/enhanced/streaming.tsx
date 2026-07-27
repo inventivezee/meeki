@@ -1,7 +1,7 @@
 import { Trans } from "@lingui/react/macro";
 import { Streamdown } from "streamdown";
 
-import { cn } from "@hypr/utils";
+import { cn } from "@meeki/utils";
 
 import { streamdownComponents } from "../../streamdown";
 import { ThinkingDisclosure } from "./thinking";
@@ -77,7 +77,7 @@ export function StreamingView({
             className="border-muted-foreground/60 mt-[5px] h-2 w-2 shrink-0 rounded-bl-[2px] border-b border-l"
           />
           <span>
-            <Trans>Tip: The Anarlog team loves our users!</Trans>
+            <Trans>Tip: The Meeki team loves our users!</Trans>
           </span>
         </p>
       </div>

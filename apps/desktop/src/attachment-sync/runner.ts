@@ -1,4 +1,4 @@
-import { uploadPrivateAttachment } from "@hypr/supabase/storage";
+import { uploadPrivateAttachment } from "@meeki/supabase/storage";
 
 import {
   AttachmentBackupGatewayError,

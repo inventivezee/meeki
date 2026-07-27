@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use futures_util::Stream;
 use futures_util::task::AtomicWaker;
-use hypr_audio_utils::{pcm_i16_to_f32, pcm_i32_to_f32};
+use meeki_audio_utils::{pcm_i16_to_f32, pcm_i32_to_f32};
 use pin_project::pin_project;
 use ringbuf::{
     HeapCons, HeapProd, HeapRb,

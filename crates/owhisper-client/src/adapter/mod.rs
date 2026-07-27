@@ -46,7 +46,7 @@ use std::path::Path;
 use std::pin::Pin;
 use std::str::FromStr;
 
-use hypr_ws_client::client::Message;
+use meeki_ws_client::client::Message;
 use owhisper_interface::ListenParams;
 use owhisper_interface::batch::Response as BatchResponse;
 use owhisper_interface::batch_stream::BatchStreamEvent;
@@ -76,7 +76,7 @@ fn canonical_menu_language_code(code: &str) -> Option<String> {
         _ => language.as_str(),
     };
 
-    hypr_language::ISO639::from_str(language)
+    meeki_language::ISO639::from_str(language)
         .ok()
         .map(|code| code.code().to_string())
 }
@@ -128,7 +128,7 @@ pub trait RealtimeSttAdapter: Clone + Default + Send + Sync + 'static {
 
     fn is_supported_languages(
         &self,
-        languages: &[hypr_language::Language],
+        languages: &[meeki_language::Language],
         model: Option<&str>,
     ) -> bool;
 
@@ -176,7 +176,7 @@ pub trait BatchSttAdapter: Clone + Default + Send + Sync + 'static {
 
     fn is_supported_languages(
         &self,
-        languages: &[hypr_language::Language],
+        languages: &[meeki_language::Language],
         model: Option<&str>,
     ) -> bool;
 
@@ -279,7 +279,7 @@ pub(crate) fn host_matches(base_url: &str, predicate: impl Fn(&str) -> bool) -> 
         .unwrap_or(false)
 }
 
-const HYPRNOTE_PROXY_DOMAINS: &[&str] = &["hyprnote.com", "char.com", "anarlog.so"];
+const HYPRNOTE_PROXY_DOMAINS: &[&str] = &["hyprnote.com", "char.com", "meeki.so"];
 
 fn is_hyprnote_cloud_host(host: &str) -> bool {
     HYPRNOTE_PROXY_DOMAINS.iter().any(|domain| {
@@ -305,7 +305,7 @@ pub fn is_hyprnote_proxy(base_url: &str) -> bool {
     is_hyprnote_cloud(base_url) || is_hyprnote_local_proxy(base_url)
 }
 
-pub fn normalize_languages(languages: &[hypr_language::Language]) -> Vec<hypr_language::Language> {
+pub fn normalize_languages(languages: &[meeki_language::Language]) -> Vec<meeki_language::Language> {
     let mut seen = HashSet::new();
     let mut result = Vec::with_capacity(languages.len());
 
@@ -431,7 +431,7 @@ pub enum AdapterKind {
 impl AdapterKind {
     pub fn from_url_and_languages(
         base_url: &str,
-        _languages: &[hypr_language::Language],
+        _languages: &[meeki_language::Language],
         _model: Option<&str>,
     ) -> Self {
         use crate::providers::Provider;
@@ -467,7 +467,7 @@ impl AdapterKind {
 
     pub fn language_support_live(
         &self,
-        languages: &[hypr_language::Language],
+        languages: &[meeki_language::Language],
         model: Option<&str>,
     ) -> LanguageSupport {
         match self {
@@ -493,7 +493,7 @@ impl AdapterKind {
 
     pub fn language_support_batch(
         &self,
-        languages: &[hypr_language::Language],
+        languages: &[meeki_language::Language],
         model: Option<&str>,
     ) -> LanguageSupport {
         match self {
@@ -519,7 +519,7 @@ impl AdapterKind {
 
     pub fn is_supported_languages_live(
         &self,
-        languages: &[hypr_language::Language],
+        languages: &[meeki_language::Language],
         model: Option<&str>,
     ) -> bool {
         self.language_support_live(languages, model).is_supported()
@@ -527,7 +527,7 @@ impl AdapterKind {
 
     pub fn is_supported_languages_batch(
         &self,
-        languages: &[hypr_language::Language],
+        languages: &[meeki_language::Language],
         model: Option<&str>,
     ) -> bool {
         self.language_support_batch(languages, model).is_supported()
@@ -535,7 +535,7 @@ impl AdapterKind {
 
     pub fn recommended_model_live(
         &self,
-        languages: &[hypr_language::Language],
+        languages: &[meeki_language::Language],
     ) -> Option<&'static str> {
         match self {
             Self::Deepgram => DeepgramAdapter::recommended_model_live(languages),
@@ -545,7 +545,7 @@ impl AdapterKind {
 
     pub fn recommended_model_batch(
         &self,
-        languages: &[hypr_language::Language],
+        languages: &[meeki_language::Language],
     ) -> Option<&'static str> {
         match self {
             Self::Deepgram => DeepgramAdapter::recommended_model_live(languages),
@@ -580,7 +580,7 @@ mod tests {
 
     #[test]
     fn test_normalize_languages_deduplicates_same_base() {
-        use hypr_language::{ISO639, Language};
+        use meeki_language::{ISO639, Language};
 
         let en: Language = ISO639::En.into();
         let en_gb = Language::with_region(ISO639::En, "GB");
@@ -595,7 +595,7 @@ mod tests {
 
     #[test]
     fn test_normalize_languages_prefers_base_over_regional() {
-        use hypr_language::{ISO639, Language};
+        use meeki_language::{ISO639, Language};
 
         let en_gb = Language::with_region(ISO639::En, "GB");
         let en: Language = ISO639::En.into();
@@ -608,7 +608,7 @@ mod tests {
 
     #[test]
     fn test_normalize_languages_keeps_regional_if_no_base() {
-        use hypr_language::{ISO639, Language};
+        use meeki_language::{ISO639, Language};
 
         let en_gb = Language::with_region(ISO639::En, "GB");
         let es: Language = ISO639::Es.into();
@@ -622,7 +622,7 @@ mod tests {
 
     #[test]
     fn test_normalize_languages_multiple_variants() {
-        use hypr_language::{ISO639, Language};
+        use meeki_language::{ISO639, Language};
 
         let en_us = Language::with_region(ISO639::En, "US");
         let en_gb = Language::with_region(ISO639::En, "GB");
@@ -664,8 +664,8 @@ mod tests {
         assert!(is_hyprnote_proxy("https://api.hyprnote.com"));
         assert!(is_hyprnote_proxy("https://api.char.com/stt"));
         assert!(is_hyprnote_proxy("https://api.char.com"));
-        assert!(is_hyprnote_proxy("https://api.anarlog.so/stt"));
-        assert!(is_hyprnote_proxy("https://api.anarlog.so"));
+        assert!(is_hyprnote_proxy("https://api.meeki.so/stt"));
+        assert!(is_hyprnote_proxy("https://api.meeki.so"));
         assert!(is_hyprnote_proxy("http://localhost:3001/stt"));
         assert!(is_hyprnote_proxy("http://127.0.0.1:3001/stt"));
 
@@ -686,9 +686,9 @@ mod tests {
 
     #[test]
     fn test_adapter_kind_from_url_and_languages() {
-        use hypr_language::ISO639::*;
+        use meeki_language::ISO639::*;
 
-        let cases: &[(&str, &[hypr_language::ISO639], Option<&str>, AdapterKind)] = &[
+        let cases: &[(&str, &[meeki_language::ISO639], Option<&str>, AdapterKind)] = &[
             // HyprnoteCloud - always routes to Hyprnote adapter (proxy owns provider selection)
             (
                 "https://api.hyprnote.com/stt",
@@ -703,7 +703,7 @@ mod tests {
                 AdapterKind::Hyprnote,
             ),
             (
-                "https://api.anarlog.so/stt",
+                "https://api.meeki.so/stt",
                 &[En, Ko],
                 Some("cloud"),
                 AdapterKind::Hyprnote,
@@ -780,7 +780,7 @@ mod tests {
         ];
 
         for (url, langs, model, expected) in cases {
-            let langs: Vec<hypr_language::Language> = langs.iter().map(|l| (*l).into()).collect();
+            let langs: Vec<meeki_language::Language> = langs.iter().map(|l| (*l).into()).collect();
             assert_eq!(
                 AdapterKind::from_url_and_languages(url, &langs, *model),
                 *expected,
@@ -843,9 +843,9 @@ mod tests {
                 )),
             ),
             (
-                "https://api.anarlog.so/stt?provider=hyprnote",
+                "https://api.meeki.so/stt?provider=hyprnote",
                 Some((
-                    "wss://api.anarlog.so/stt/listen",
+                    "wss://api.meeki.so/stt/listen",
                     vec![("provider", "hyprnote")],
                 )),
             ),
@@ -914,22 +914,22 @@ mod tests {
 
     #[test]
     fn test_hyprnote_proxy_always_selects_hyprnote_adapter() {
-        use hypr_language::ISO639::*;
+        use meeki_language::ISO639::*;
 
         let proxy_urls = &[
             "https://api.hyprnote.com/stt",
             "https://api.char.com/stt",
-            "https://api.anarlog.so/stt",
+            "https://api.meeki.so/stt",
             "http://localhost:3001/stt",
             "http://127.0.0.1:3001/stt",
         ];
 
-        let language_combos: &[&[hypr_language::ISO639]] =
+        let language_combos: &[&[meeki_language::ISO639]] =
             &[&[En], &[Ko], &[En, De], &[En, Ko], &[Ar]];
 
         for url in proxy_urls {
             for langs in language_combos {
-                let langs: Vec<hypr_language::Language> =
+                let langs: Vec<meeki_language::Language> =
                     langs.iter().map(|l| (*l).into()).collect();
                 assert_eq!(
                     AdapterKind::from_url_and_languages(url, &langs, Some("cloud")),
@@ -942,13 +942,13 @@ mod tests {
 
     #[test]
     fn test_hyprnote_cloud_adapter_supports_all_languages() {
-        use hypr_language::ISO639::*;
+        use meeki_language::ISO639::*;
 
-        let combos: &[&[hypr_language::ISO639]] =
+        let combos: &[&[meeki_language::ISO639]] =
             &[&[En], &[Ko], &[Ar], &[En, De], &[En, Ko], &[Zh]];
 
         for langs in combos {
-            let langs: Vec<hypr_language::Language> = langs.iter().map(|l| (*l).into()).collect();
+            let langs: Vec<meeki_language::Language> = langs.iter().map(|l| (*l).into()).collect();
             assert!(
                 AdapterKind::Hyprnote.is_supported_languages_live(&langs, Some("cloud")),
                 "Hyprnote adapter should support all languages: {langs:?}"
@@ -958,10 +958,10 @@ mod tests {
 
     #[test]
     fn test_hyprnote_soniqo_live_limits_parakeet_languages() {
-        use hypr_language::ISO639::*;
+        use meeki_language::ISO639::*;
 
-        let fr: Vec<hypr_language::Language> = vec![Fr.into()];
-        let ko: Vec<hypr_language::Language> = vec![Ko.into()];
+        let fr: Vec<meeki_language::Language> = vec![Fr.into()];
+        let ko: Vec<meeki_language::Language> = vec![Ko.into()];
 
         assert!(
             AdapterKind::Hyprnote
@@ -975,9 +975,9 @@ mod tests {
 
     #[test]
     fn test_hyprnote_soniqo_live_rejects_batch_only_models() {
-        use hypr_language::ISO639::*;
+        use meeki_language::ISO639::*;
 
-        let fr: Vec<hypr_language::Language> = vec![Fr.into()];
+        let fr: Vec<meeki_language::Language> = vec![Fr.into()];
 
         assert!(
             !AdapterKind::Hyprnote.is_supported_languages_live(&fr, Some("soniqo-parakeet-batch"))
@@ -989,9 +989,9 @@ mod tests {
 
     #[test]
     fn test_direct_provider_urls_not_affected() {
-        use hypr_language::ISO639::*;
+        use meeki_language::ISO639::*;
 
-        let en: Vec<hypr_language::Language> = vec![En.into()];
+        let en: Vec<meeki_language::Language> = vec![En.into()];
         assert_eq!(
             AdapterKind::from_url_and_languages("https://api.deepgram.com/v1", &en, None),
             AdapterKind::Deepgram,

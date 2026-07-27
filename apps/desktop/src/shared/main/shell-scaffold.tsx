@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 
-import { cn } from "@hypr/utils";
+import { cn } from "@meeki/utils";
 
 import { SyncProvider } from "~/calendar/components/context";
 import { useTabs } from "~/store/zustand/tabs";

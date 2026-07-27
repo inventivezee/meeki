@@ -1,4 +1,4 @@
-use hypr_ws_client::client::Message;
+use meeki_ws_client::client::Message;
 use owhisper_interface::ListenParams;
 use owhisper_interface::stream::StreamResponse;
 
@@ -16,7 +16,7 @@ impl RealtimeSttAdapter for DeepgramAdapter {
 
     fn is_supported_languages(
         &self,
-        languages: &[hypr_language::Language],
+        languages: &[meeki_language::Language],
         model: Option<&str>,
     ) -> bool {
         if languages.is_empty() {
@@ -68,7 +68,7 @@ impl RealtimeSttAdapter for DeepgramAdapter {
 mod tests {
     use std::collections::HashMap;
 
-    use hypr_language::ISO639;
+    use meeki_language::ISO639;
 
     use crate::ListenClient;
     use crate::adapter::RealtimeSttAdapter;

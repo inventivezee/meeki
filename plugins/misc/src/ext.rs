@@ -1,4 +1,4 @@
-use hypr_template_support::DeviceInfo;
+use meeki_template_support::DeviceInfo;
 
 pub struct Misc<'a, R: tauri::Runtime, M: tauri::Manager<R>> {
     #[allow(dead_code)]
@@ -12,7 +12,7 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Misc<'a, R, M> {
     }
 
     pub fn get_fingerprint(&self) -> String {
-        hypr_host::fingerprint()
+        meeki_host::fingerprint()
     }
 
     pub fn get_device_info(&self, locale: Option<String>) -> DeviceInfo {
@@ -27,7 +27,7 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Misc<'a, R, M> {
     }
 
     pub fn opinionated_md_to_html(&self, text: impl AsRef<str>) -> Result<String, String> {
-        hypr_buffer::opinionated_md_to_html(text.as_ref()).map_err(|e| e.to_string())
+        meeki_buffer::opinionated_md_to_html(text.as_ref()).map_err(|e| e.to_string())
     }
 }
 

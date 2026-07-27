@@ -15,7 +15,7 @@ vi.mock("@tauri-apps/api/event", () => ({
   listen: mocks.listen,
 }));
 
-vi.mock("@hypr/plugin-windows", () => ({
+vi.mock("@meeki/plugin-windows", () => ({
   getCurrentWebviewWindowLabel: () => mocks.currentLabel,
 }));
 

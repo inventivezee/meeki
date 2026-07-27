@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use hypr_openrouter::{
+use meeki_openrouter::{
     ChatCompletionRequest, ChatMessage, Client as OpenRouterClient, ResponseFormat, Role,
 };
 

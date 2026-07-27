@@ -2,7 +2,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use hf_hub::api::tokio::{ApiBuilder, Progress};
-use hypr_download_interface::DownloadProgress;
+use meeki_download_interface::DownloadProgress;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {

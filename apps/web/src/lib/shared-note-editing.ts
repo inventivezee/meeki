@@ -54,7 +54,7 @@ export function getSharedNoteWebEditPreparationMessage(
   ) {
     return null;
   }
-  return "This note needs to be prepared before it can be edited on the web. You can still edit it in the Anarlog app.";
+  return "This note needs to be prepared before it can be edited on the web. You can still edit it in the Meeki app.";
 }
 
 export function shouldRenderSharedNoteUnavailable({

@@ -1,6 +1,6 @@
-import { commands as detectCommands } from "@hypr/plugin-detect";
-import type { MeetingCapturedChatMessage } from "@hypr/plugin-detect";
-import { sonnerToast } from "@hypr/ui/components/ui/toast";
+import { commands as detectCommands } from "@meeki/plugin-detect";
+import type { MeetingCapturedChatMessage } from "@meeki/plugin-detect";
+import { sonnerToast } from "@meeki/ui/components/ui/toast";
 
 import { getStoredSettingValues } from "~/settings/queries";
 import { resolveConfigValue } from "~/shared/config";

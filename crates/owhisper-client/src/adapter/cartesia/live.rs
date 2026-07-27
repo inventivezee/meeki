@@ -1,4 +1,4 @@
-use hypr_ws_client::client::Message;
+use meeki_ws_client::client::Message;
 use owhisper_interface::ListenParams;
 use owhisper_interface::stream::{Alternatives, Channel, Metadata, StreamResponse};
 use serde::Deserialize;
@@ -16,7 +16,7 @@ impl RealtimeSttAdapter for CartesiaAdapter {
 
     fn is_supported_languages(
         &self,
-        languages: &[hypr_language::Language],
+        languages: &[meeki_language::Language],
         _model: Option<&str>,
     ) -> bool {
         CartesiaAdapter::is_supported_languages_live(languages)

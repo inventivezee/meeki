@@ -9,8 +9,8 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@hypr/ui/components/ui/popover";
-import { cn } from "@hypr/utils";
+} from "@meeki/ui/components/ui/popover";
+import { cn } from "@meeki/utils";
 
 import {
   DEFAULT_TEMPLATE_ICON,
@@ -68,7 +68,7 @@ const FREQUENT_EMOJI_IDS = [
   "question",
 ];
 
-const RECENT_EMOJIS_KEY = "anarlog.template-picker.recent-emojis";
+const RECENT_EMOJIS_KEY = "meeki.template-picker.recent-emojis";
 const data = emojiData as EmojiMartData;
 
 type EmojiItem = {

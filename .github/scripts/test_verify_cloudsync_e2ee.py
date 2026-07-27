@@ -15,12 +15,12 @@ class VerifyCloudSyncE2eeTests(unittest.TestCase):
     def test_accepts_only_known_protocol_modes(self) -> None:
         for mode in verify.PROTOCOL_MODES:
             self.assertEqual(
-                verify.protocol_mode({"ANARLOG_CLOUDSYNC_PROTOCOL_MODE": mode}),
+                verify.protocol_mode({"MEEKI_CLOUDSYNC_PROTOCOL_MODE": mode}),
                 mode,
             )
 
         with self.assertRaisesRegex(ValueError, "must be dual"):
-            verify.protocol_mode({"ANARLOG_CLOUDSYNC_PROTOCOL_MODE": "legacy"})
+            verify.protocol_mode({"MEEKI_CLOUDSYNC_PROTOCOL_MODE": "legacy"})
 
     def test_requires_the_legacy_plaintext_database_to_be_deleted(self) -> None:
         with mock.patch.object(verify, "management_get", return_value={"id": "legacy"}):

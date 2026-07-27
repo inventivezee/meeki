@@ -4,14 +4,14 @@ import { fetch } from "@tauri-apps/plugin-http";
 import { ExternalLinkIcon, Loader2Icon, PlusIcon, XIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
-import { commands as openerCommands } from "@hypr/plugin-opener2";
-import { Input } from "@hypr/ui/components/ui/input";
+import { commands as openerCommands } from "@meeki/plugin-opener2";
+import { Input } from "@meeki/ui/components/ui/input";
 import {
   Popover,
   PopoverAnchor,
   PopoverContent,
-} from "@hypr/ui/components/ui/popover";
-import { cn } from "@hypr/utils";
+} from "@meeki/ui/components/ui/popover";
+import { cn } from "@meeki/utils";
 
 import type { TodoProvider } from "./shared";
 

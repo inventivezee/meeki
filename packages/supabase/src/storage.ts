@@ -143,7 +143,7 @@ export function uploadPrivateAttachment(options: {
 
   const endpoint = getSignedTusEndpoint(options.supabaseUrl);
   const fingerprint = [
-    "anarlog-private-attachment-v1",
+    "meeki-private-attachment-v1",
     options.objectKey,
     options.ciphertextSizeBytes,
     options.ciphertextSha256,
@@ -300,7 +300,7 @@ export function uploadSharedAttachment(options: {
 
   const endpoint = getSignedTusEndpoint(options.supabaseUrl);
   const fingerprint = [
-    "anarlog-shared-attachment-v1",
+    "meeki-shared-attachment-v1",
     options.objectKey,
     options.sizeBytes,
     options.sha256,

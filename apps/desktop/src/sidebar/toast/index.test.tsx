@@ -41,7 +41,7 @@ const mocks = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("@hypr/ui/components/ui/toast", () => ({
+vi.mock("@meeki/ui/components/ui/toast", () => ({
   sonnerToast: {
     message: mocks.message,
     error: mocks.error,
@@ -154,7 +154,7 @@ describe("ToastNotifications", () => {
     act(() => vi.advanceTimersByTime(500));
 
     expect(mocks.message).toHaveBeenCalledWith(
-      "Sign in to get the most out of Anarlog",
+      "Sign in to get the most out of Meeki",
       expect.objectContaining({
         id: "sign-in-benefits",
         duration: Infinity,

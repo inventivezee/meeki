@@ -30,19 +30,19 @@ pub enum Error {
     Poisoned,
 }
 
-impl From<hypr_cli_process::ProcessError> for Error {
-    fn from(value: hypr_cli_process::ProcessError) -> Self {
+impl From<meeki_cli_process::ProcessError> for Error {
+    fn from(value: meeki_cli_process::ProcessError) -> Self {
         match value {
-            hypr_cli_process::ProcessError::MissingStdin => Self::MissingStdin,
-            hypr_cli_process::ProcessError::MissingStdout => Self::MissingStdout,
-            hypr_cli_process::ProcessError::StdinWrite(error) => Self::StdinWrite(error),
-            hypr_cli_process::ProcessError::StdoutRead(error) => Self::StdoutRead(error),
-            hypr_cli_process::ProcessError::Wait(error) => Self::Wait(error),
-            hypr_cli_process::ProcessError::Kill(error) => Self::Kill(error),
-            hypr_cli_process::ProcessError::ProcessFailed { detail } => {
+            meeki_cli_process::ProcessError::MissingStdin => Self::MissingStdin,
+            meeki_cli_process::ProcessError::MissingStdout => Self::MissingStdout,
+            meeki_cli_process::ProcessError::StdinWrite(error) => Self::StdinWrite(error),
+            meeki_cli_process::ProcessError::StdoutRead(error) => Self::StdoutRead(error),
+            meeki_cli_process::ProcessError::Wait(error) => Self::Wait(error),
+            meeki_cli_process::ProcessError::Kill(error) => Self::Kill(error),
+            meeki_cli_process::ProcessError::ProcessFailed { detail } => {
                 Self::ProcessFailed { detail }
             }
-            hypr_cli_process::ProcessError::Cancelled => Self::Cancelled,
+            meeki_cli_process::ProcessError::Cancelled => Self::Cancelled,
         }
     }
 }

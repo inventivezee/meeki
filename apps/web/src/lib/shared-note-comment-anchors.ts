@@ -2,7 +2,7 @@ import {
   type CommentAnchor,
   type ResolvedAnchorRange,
   resolveCommentAnchors,
-} from "@hypr/editor/comments";
+} from "@meeki/editor/comments";
 
 import type {
   SharedNoteComment,

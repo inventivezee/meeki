@@ -9,24 +9,24 @@ description = ""
 
 [features]
 default = ["zoom", "sleep"]
-zoom = ["hypr-detect/zoom"]
-language = ["hypr-detect/language"]
-sleep = ["hypr-detect/sleep"]
+zoom = ["meeki-detect/zoom"]
+language = ["meeki-detect/language"]
+sleep = ["meeki-detect/sleep"]
 test-support = []
 
 [build-dependencies]
 tauri-plugin = { workspace = true, features = ["build"] }
 
 [dev-dependencies]
-hypr-detect = { workspace = true, features = ["mic"] }
+meeki-detect = { workspace = true, features = ["mic"] }
 specta-typescript = { workspace = true }
 tauri-plugin-detect = { path = ".", features = ["test-support"] }
 tokio = { workspace = true, features = ["test-util"] }
 
 [dependencies]
-hypr-detect = { workspace = true, features = ["mic", "list", "language", "sleep"] }
-hypr-host = { workspace = true }
-hypr-notification-interface = { workspace = true }
+meeki-detect = { workspace = true, features = ["mic", "list", "language", "sleep"] }
+meeki-host = { workspace = true }
+meeki-notification-interface = { workspace = true }
 
 tauri = { workspace = true, features = ["specta", "test"] }
 tauri-plugin-settings = { workspace = true }

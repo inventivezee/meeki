@@ -1,6 +1,6 @@
 use std::process::ExitCode;
 
-use anarlog_cli::Args;
+use meeki_cli::Args;
 use clap::Parser;
 use clap::error::ErrorKind;
 
@@ -21,7 +21,7 @@ async fn main() -> ExitCode {
                 eprintln!(
                     "{}",
                     serde_json::to_string_pretty(&serde_json::json!({
-                        "schema_version": anarlog_cli::JSON_SCHEMA_VERSION,
+                        "schema_version": meeki_cli::JSON_SCHEMA_VERSION,
                         "error": {
                             "code": "invalid_arguments",
                             "message": error.to_string(),
@@ -35,7 +35,7 @@ async fn main() -> ExitCode {
         }
     };
 
-    match anarlog_cli::run(args).await {
+    match meeki_cli::run(args).await {
         Ok(code) => ExitCode::from(code),
         Err(error) => {
             if json {

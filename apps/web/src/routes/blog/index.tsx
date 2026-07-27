@@ -2,21 +2,21 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { allArticles } from "content-collections";
 
 import { SiteFooter } from "@/components/site-footer";
-import { ANARLOG_SITE_URL } from "@/lib/seo";
+import { MEEKI_SITE_URL } from "@/lib/seo";
 
 export const Route = createFileRoute("/blog/")({
   component: Component,
   head: () => ({
-    links: [{ rel: "canonical", href: `${ANARLOG_SITE_URL}/blog` }],
+    links: [{ rel: "canonical", href: `${MEEKI_SITE_URL}/blog` }],
     meta: [
-      { title: "Anarlog Blog" },
+      { title: "Meeki Blog" },
       {
         name: "description",
         content:
-          "Guides for AI meeting notes, privacy research, and engineering notes from the Anarlog team.",
+          "Guides for AI meeting notes, privacy research, and engineering notes from the Meeki team.",
       },
-      { property: "og:title", content: "Anarlog Blog" },
-      { property: "og:url", content: `${ANARLOG_SITE_URL}/blog` },
+      { property: "og:title", content: "Meeki Blog" },
+      { property: "og:url", content: `${MEEKI_SITE_URL}/blog` },
     ],
   }),
 });
@@ -30,8 +30,8 @@ function Component() {
     <main className="min-h-screen bg-white text-[#181613]">
       <div className="mx-auto w-full max-w-[860px] px-5 py-8 md:px-8 md:py-12">
         <header className="flex items-center justify-between gap-6">
-          <Link to="/" aria-label="Anarlog home">
-            <img src="/logo.svg" alt="Anarlog" className="h-9 w-auto" />
+          <Link to="/" aria-label="Meeki home">
+            <img src="/logo.svg" alt="Meeki" className="h-9 w-auto" />
           </Link>
         </header>
 

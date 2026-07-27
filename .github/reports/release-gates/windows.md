@@ -94,7 +94,7 @@ release notes, and do not claim mixed-DPI overlay support.
 | W-ART-02   | Yes      | Inspect the executable and installer Authenticode signatures.                                         | Signature status is valid, the publisher is Fastrepl's approved publisher, and timestamp verification succeeds.                            | NOT RUN             |
 | W-ART-03   | Yes      | Confirm the Tauri updater signature is published separately from the Authenticode signature.          | The updater artifact and its .sig file are present and tied to the candidate version.                                                       | NOT RUN             |
 | W-INS-01   | Yes      | Install on W-ENV-X64-CLEAN from a fresh download. Record every SmartScreen and UAC screen.             | Publisher identity is correct, any reputation warning is documented verbatim, installation completes, and the app launches.                | NOT RUN             |
-| W-INS-02   | Yes      | Check install location, Start menu entry, app icon, protocol registration, and single-instance focus. | Entries use the Anarlog identity; anarlog:// and legacy hyprnote:// open the installed app; a second launch focuses the existing instance.  | NOT RUN             |
+| W-INS-02   | Yes      | Check install location, Start menu entry, app icon, protocol registration, and single-instance focus. | Entries use the Meeki identity; meeki:// and legacy hyprnote:// open the installed app; a second launch focuses the existing instance.  | NOT RUN             |
 | W-UPD-01   | Yes      | Install the previous supported version, create local data, then update to the candidate.               | Update detection, download, signature verification, install, restart, version change, and existing data all succeed.                       | NOT RUN             |
 | W-UPD-02   | Yes      | Interrupt or reject one update attempt, then retry normally.                                           | The installed version remains launchable after the rejected attempt and a later retry succeeds without data loss.                          | NOT RUN             |
 | W-UNINS-01 | Yes      | Uninstall from Windows Settings, then reinstall the same candidate.                                    | Executables and shortcuts are removed; user data is neither unexpectedly deleted nor duplicated; reinstall opens the expected local data. | NOT RUN             |
@@ -105,7 +105,7 @@ release notes, and do not claim mixed-DPI overlay support.
 | --------- | -------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- |
 | W-CORE-01 | Yes      | Launch, sign in, reach the main shell, open settings, create a session, edit its title and notes, then restart. | No platform-only crash occurs; the session and edits remain present after restart.                                                         | NOT RUN             |
 | W-CORE-02 | Yes      | Lock and unlock Windows, minimize and restore the app, then reboot and launch from the Start menu.             | Main-window state is usable after each transition and no duplicate background instance remains.                                            | NOT RUN             |
-| W-CRED-01 | Yes      | Save and update a provider secret through the app, restart twice, and use the provider after each restart.     | The secret remains usable and a Windows Credential Manager entry exists under the Anarlog secure-store service without plaintext fallback. | NOT RUN             |
+| W-CRED-01 | Yes      | Save and update a provider secret through the app, restart twice, and use the provider after each restart.     | The secret remains usable and a Windows Credential Manager entry exists under the Meeki secure-store service without plaintext fallback. | NOT RUN             |
 | W-CRED-02 | Yes      | Sign out and back in, including one canceled sign-in, then repeat the provider and sync checks.                | Auth state follows the sign-in lifecycle, durable provider secrets follow declared product policy, and existing secrets are not corrupted. | NOT RUN             |
 | W-SYNC-01 | Yes      | Enable CloudSync, create and edit a session, observe it on a second client, restart Windows, and edit again.    | Sync completes in both directions before and after restart without duplicate or missing sessions.                                          | NOT RUN             |
 | W-SYNC-02 | Yes      | Start once without network, edit existing local data, restore network, and trigger or wait for sync.           | The app remains usable offline and later syncs without losing the offline edit.                                                             | NOT RUN             |
@@ -135,8 +135,8 @@ meter alone is not proof.
 
 | Test ID   | Required    | Procedure                                                                                                           | Pass criteria                                                                                                                                | Result and evidence |
 | --------- | ----------- | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
-| W-NOT-01  | Yes         | Trigger meeting-detected and reminder notifications with Anarlog focused, minimized, and backgrounded.              | Each required notification appears once with correct title, body, icon, and app identity; click and dismiss behavior match product intent.  | NOT RUN             |
-| W-NOT-02  | Yes         | Repeat one notification with Windows Do Not Disturb or Focus Assist off and on, then clear notifications.           | Suppression behavior follows Windows settings, no silent app error occurs, and clear removes Anarlog notifications.                         | NOT RUN             |
+| W-NOT-01  | Yes         | Trigger meeting-detected and reminder notifications with Meeki focused, minimized, and backgrounded.              | Each required notification appears once with correct title, body, icon, and app identity; click and dismiss behavior match product intent.  | NOT RUN             |
+| W-NOT-02  | Yes         | Repeat one notification with Windows Do Not Disturb or Focus Assist off and on, then clear notifications.           | Suppression behavior follows Windows settings, no silent app error occurs, and clear removes Meeki notifications.                         | NOT RUN             |
 | W-OVR-01  | Yes         | Start a recording on a single display; move, interact with, and stop from the floating bar.                         | The bar is visible, always on top without stealing focus, controls emit once, and all overlay state closes after stop.                      | NOT RUN             |
 | W-OVR-02  | Yes         | Move the recording window and floating bar between internal and external displays, minimize, restore, and Alt-Tab. | Position, scale, drag behavior, and controls remain usable and the bar does not become stranded off-screen.                                 | NOT RUN             |
 | W-OVR-03  | Conditional | Repeat W-OVR-02 across mixed-DPI displays and after changing display scale.                                        | The overlay rescales and remains inside the active display bounds without requiring an app restart.                                        | NOT RUN             |
@@ -228,12 +228,12 @@ They do not verify the separate Tauri updater .sig file.
 
 ### Application logs and diagnostics
 
-The stable bundle identifier is com.hyprnote.stable. The tracing plugin writes
+The stable bundle identifier is com.meeki.stable. The tracing plugin writes
 app.log and up to five rotated files, app.log.1 through app.log.5, under the
 Tauri app log directory.
 
 ~~~powershell
-$bundleId = "com.hyprnote.stable"
+$bundleId = "com.meeki.stable"
 $logDir = Join-Path $env:LOCALAPPDATA "$bundleId\logs"
 
 Get-ChildItem $logDir -Filter "app.log*" |
@@ -244,16 +244,16 @@ Get-Content (Join-Path $logDir "app.log") -Tail 500
 Select-String -Path (Join-Path $logDir "app.log*") -Pattern "mic_input_initialized|wasapi_loopback_initialized|mic_stream_error|queue_overflow|capture_stream_failed"
 ~~~
 
-Use com.hyprnote.staging for a staging package and com.hyprnote.dev for a dev
+Use com.meeki.staging for a staging package and com.meeki.dev for a dev
 build. The stable app database normally lives at
-$env:APPDATA\anarlog\app.db, but a migrated install can intentionally retain the
+$env:APPDATA\meeki\app.db, but a migrated install can intentionally retain the
 legacy hyprnote or bundle-identifier directory.
 
 ~~~powershell
 $dbCandidates = @(
-  (Join-Path $env:APPDATA "anarlog\app.db"),
+  (Join-Path $env:APPDATA "meeki\app.db"),
   (Join-Path $env:APPDATA "hyprnote\app.db"),
-  (Join-Path $env:APPDATA "com.hyprnote.stable\app.db")
+  (Join-Path $env:APPDATA "com.meeki.stable\app.db")
 )
 
 $dbCandidates |
@@ -265,7 +265,7 @@ Get-ChildItem (Join-Path $env:LOCALAPPDATA "char\cloudsync") -Recurse -Filter "c
   Select-Object FullName, Length, LastWriteTime
 
 cmdkey /list |
-  Select-String "com.anarlog.stable.secure-store"
+  Select-String "com.meeki.stable.secure-store"
 ~~~
 
 The Credential Manager command records only target metadata. Never export or print the
@@ -276,7 +276,7 @@ For an application crash, also collect a bounded Windows event-log slice:
 ~~~powershell
 $since = (Get-Date).AddMinutes(-30)
 Get-WinEvent -FilterHashtable @{LogName="Application"; StartTime=$since} |
-  Where-Object { $_.Message -match "anarlog|hyprnote" } |
+  Where-Object { $_.Message -match "meeki|hyprnote" } |
   Select-Object TimeCreated, ProviderName, Id, LevelDisplayName, Message |
   Format-List
 ~~~
@@ -291,7 +291,7 @@ pnpm -F desktop typecheck
 cargo check -p desktop --target x86_64-pc-windows-msvc
 pnpm -F desktop tauri:dev
 $env:POSTHOG_API_KEY = "phc_local_smoke"
-$env:VITE_API_URL = "https://api.anarlog.so"
+$env:VITE_API_URL = "https://api.meeki.so"
 pnpm -F desktop tauri build --ci --bundles nsis --no-sign --target x86_64-pc-windows-msvc --config ./src-tauri/tauri.conf.staging.json --features devtools
 ~~~
 

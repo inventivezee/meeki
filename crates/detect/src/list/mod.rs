@@ -16,16 +16,16 @@ pub fn list_installed_apps() -> Vec<InstalledApp> {
 }
 
 const SELF_BUNDLE_IDS: &[&str] = &[
-    "com.hyprnote.dev",
-    "com.hyprnote.stable",
-    "com.hyprnote.staging",
-    "com.hyprnote.nightly",
+    "com.meeki.dev",
+    "com.meeki.stable",
+    "com.meeki.staging",
+    "com.meeki.nightly",
 ];
 
 const SELF_APP_NAMES: &[&str] = &[
-    "anarlog",
-    "anarlog staging",
-    "anarlog nightly",
+    "meeki",
+    "meeki staging",
+    "meeki nightly",
     "hyprnote",
     "hyprnote staging",
     "hyprnote nightly",
@@ -35,9 +35,9 @@ const SELF_APP_NAMES: &[&str] = &[
 ];
 
 const SELF_APP_PATH_SEGMENTS: &[&str] = &[
-    "/anarlog.app/",
-    "/anarlog staging.app/",
-    "/anarlog nightly.app/",
+    "/meeki.app/",
+    "/meeki staging.app/",
+    "/meeki nightly.app/",
     "/hyprnote.app/",
     "/hyprnote staging.app/",
     "/hyprnote nightly.app/",
@@ -96,13 +96,13 @@ mod tests {
 
     #[test]
     fn test_is_self_app_matches_known_bundle_ids() {
-        assert!(is_self_app(&app("com.hyprnote.stable", "Anarlog")));
-        assert!(is_self_app(&app("com.hyprnote.Hyprnote", "Hyprnote")));
+        assert!(is_self_app(&app("com.meeki.stable", "Meeki")));
+        assert!(is_self_app(&app("com.meeki.Meeki", "Hyprnote")));
     }
 
     #[test]
     fn test_is_self_app_matches_renamed_app_names() {
-        assert!(is_self_app(&app("pid:42", "Anarlog")));
+        assert!(is_self_app(&app("pid:42", "Meeki")));
         assert!(is_self_app(&app("pid:43", "Char Nightly")));
         assert!(is_self_app(&app("pid:44", "Hyprnote Staging")));
     }
@@ -110,7 +110,7 @@ mod tests {
     #[test]
     fn test_is_self_app_matches_path_fallbacks() {
         assert!(is_self_app(&app(
-            "/Applications/Anarlog.app/Contents/MacOS/anarlog",
+            "/Applications/Meeki.app/Contents/MacOS/meeki",
             "Unknown",
         )));
         assert!(is_self_app(&app(

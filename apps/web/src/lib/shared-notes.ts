@@ -15,32 +15,32 @@ export const handoffRequestIdSchema = z
   );
 export const sharedNoteDesktopSchemeSchema = z
   .enum([
-    "anarlog",
-    "anarlog-staging",
-    "anarlog-dev",
+    "meeki",
+    "meeki-staging",
+    "meeki-dev",
     "hyprnote",
     "hyprnote-staging",
     "hypr",
   ])
-  .catch("anarlog")
-  .default("anarlog");
+  .catch("meeki")
+  .default("meeki");
 export type SharedNoteDesktopScheme = z.infer<
   typeof sharedNoteDesktopSchemeSchema
 >;
 
 export function buildSharedNoteWebPath(
   pathname: string,
-  scheme: SharedNoteDesktopScheme = "anarlog",
+  scheme: SharedNoteDesktopScheme = "meeki",
 ) {
   const parsedScheme = sharedNoteDesktopSchemeSchema.parse(scheme);
-  return parsedScheme === "anarlog"
+  return parsedScheme === "meeki"
     ? pathname
     : `${pathname}?scheme=${parsedScheme}`;
 }
 
 export function buildAccountShareDeepLink(
   shareId: string,
-  scheme: SharedNoteDesktopScheme = "anarlog",
+  scheme: SharedNoteDesktopScheme = "meeki",
 ) {
   const parsedShareId = shareIdSchema.parse(shareId);
   const parsedScheme = sharedNoteDesktopSchemeSchema.parse(scheme);
@@ -49,7 +49,7 @@ export function buildAccountShareDeepLink(
 
 export function buildShareHandoffDeepLink(
   requestId: string,
-  scheme: SharedNoteDesktopScheme = "anarlog",
+  scheme: SharedNoteDesktopScheme = "meeki",
 ) {
   const parsedRequestId = handoffRequestIdSchema.parse(requestId);
   const parsedScheme = sharedNoteDesktopSchemeSchema.parse(scheme);

@@ -3,9 +3,9 @@ import { useMemo } from "react";
 import {
   commands as trayCommands,
   type TrayScheduleEvent,
-} from "@hypr/plugin-tray";
-import { getCurrentWebviewWindowLabel } from "@hypr/plugin-windows";
-import { addDays, safeParseDate, startOfDay, TZDate } from "@hypr/utils";
+} from "@meeki/plugin-tray";
+import { getCurrentWebviewWindowLabel } from "@meeki/plugin-windows";
+import { addDays, safeParseDate, startOfDay, TZDate } from "@meeki/utils";
 
 import { useIgnoredEvents } from "~/calendar/ignored-events";
 import { useTimelineEventsTable } from "~/calendar/queries";

@@ -10,7 +10,7 @@ use common::{
     start_mock_server_with_config, start_mock_ws, start_proxy, start_proxy_under_stt,
     wait_for_first_batch_query, wait_for_first_request,
 };
-use hypr_language::ISO639;
+use meeki_language::ISO639;
 use owhisper_client::Provider;
 use owhisper_interface::batch::Response;
 use owhisper_interface::stream::StreamResponse;

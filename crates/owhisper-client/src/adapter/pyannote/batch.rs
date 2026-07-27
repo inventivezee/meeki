@@ -27,7 +27,7 @@ impl BatchSttAdapter for PyannoteAdapter {
 
     fn is_supported_languages(
         &self,
-        languages: &[hypr_language::Language],
+        languages: &[meeki_language::Language],
         model: Option<&str>,
     ) -> bool {
         PyannoteAdapter::language_support_batch(languages, model).is_supported()

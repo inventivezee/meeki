@@ -5,13 +5,13 @@ edition = "2024"
 
 [features]
 default = ["onnx", "128"]
-onnx = ["dep:hypr-onnx"]
+onnx = ["dep:meeki-onnx"]
 128 = []
 256 = []
 512 = []
 
 [dependencies]
-hypr-onnx = { workspace = true, optional = true }
+meeki-onnx = { workspace = true, optional = true }
 
 realfft = { workspace = true }
 
@@ -24,9 +24,9 @@ clap = { workspace = true, features = ["derive"] }
 criterion = { workspace = true }
 dasp = { workspace = true }
 hound = { workspace = true }
-hypr-audacity = { workspace = true }
-hypr-audio-snapshot = { workspace = true }
-hypr-audio-utils = { workspace = true }
+meeki-audacity = { workspace = true }
+meeki-audio-snapshot = { workspace = true }
+meeki-audio-utils = { workspace = true }
 rodio = { workspace = true }
 
 [[bench]]

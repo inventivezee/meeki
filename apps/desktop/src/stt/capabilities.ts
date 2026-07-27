@@ -1,8 +1,8 @@
-import type { LocalModel } from "@hypr/plugin-local-stt";
+import type { LocalModel } from "@meeki/plugin-local-stt";
 import {
   commands as listenerCommands,
   type TranscriptionMode,
-} from "@hypr/plugin-transcription";
+} from "@meeki/plugin-transcription";
 
 type LiveTranscriptionConfig = {
   languages: string[];

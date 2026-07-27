@@ -1,5 +1,5 @@
 {
-  "name": "@hypr/plugin-shortcut",
+  "name": "@meeki/plugin-shortcut",
   "private": true,
   "main": "./js/index.ts",
   "scripts": {

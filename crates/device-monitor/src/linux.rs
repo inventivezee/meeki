@@ -14,7 +14,7 @@ use std::sync::mpsc;
 type PulseAudioHandles = (Rc<RefCell<Mainloop>>, Rc<RefCell<Context>>);
 
 fn is_headphone_from_default_output_device() -> Option<bool> {
-    hypr_audio_device::linux::is_headphone_from_default_output_device()
+    meeki_audio_device::linux::is_headphone_from_default_output_device()
 }
 
 fn setup_pulseaudio(stop_rx: &mpsc::Receiver<()>) -> Option<PulseAudioHandles> {

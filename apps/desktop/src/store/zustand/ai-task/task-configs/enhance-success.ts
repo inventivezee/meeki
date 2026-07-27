@@ -1,5 +1,5 @@
-import { md2json } from "@hypr/editor/markdown";
-import { beginCloudsyncActivity } from "@hypr/plugin-db";
+import { md2json } from "@meeki/editor/markdown";
+import { beginCloudsyncActivity } from "@meeki/plugin-db";
 
 import { createTaskId, type TaskConfig } from ".";
 import {

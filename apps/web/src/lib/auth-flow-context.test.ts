@@ -9,12 +9,12 @@ import {
 test("restores desktop recovery context from the encoded Supabase redirect", () => {
   const context = resolveAuthFlowContext({
     redirectTo:
-      "https://anarlog.so/callback/auth?flow=desktop&scheme=anarlog-staging&redirect=%2Fshare%2Finvite%2Fabc%2F",
+      "https://meeki.so/callback/auth?flow=desktop&scheme=meeki-staging&redirect=%2Fshare%2Finvite%2Fabc%2F",
   });
 
   assert.deepEqual(context, {
     flow: "desktop",
-    scheme: "anarlog-staging",
+    scheme: "meeki-staging",
     redirect: "/share/invite/abc/",
   });
   assert.deepEqual(toAuthFlowSearch(context), context);
@@ -23,17 +23,16 @@ test("restores desktop recovery context from the encoded Supabase redirect", () 
 test("keeps legacy desktop schemes valid during migration", () => {
   assert.deepEqual(
     resolveAuthFlowContext({
-      redirectTo:
-        "https://anarlog.so/callback/auth?flow=desktop&scheme=hyprnote",
+      redirectTo: "https://meeki.so/callback/auth?flow=desktop&scheme=hyprnote",
     }),
     { flow: "desktop", scheme: "hyprnote" },
   );
 });
 
-test("defaults new desktop flows to the canonical Anarlog scheme", () => {
+test("defaults new desktop flows to the canonical Meeki scheme", () => {
   assert.deepEqual(resolveAuthFlowContext({ flow: "desktop" }), {
     flow: "desktop",
-    scheme: "anarlog",
+    scheme: "meeki",
   });
 });
 
@@ -59,7 +58,7 @@ test("explicit route context takes precedence over template redirect context", (
     resolveAuthFlowContext({
       flow: "web",
       redirect: "/app/account/",
-      redirectTo: "https://anarlog.so/callback/auth?flow=desktop&scheme=char",
+      redirectTo: "https://meeki.so/callback/auth?flow=desktop&scheme=char",
     }),
     { flow: "web", scheme: "char", redirect: "/app/account/" },
   );

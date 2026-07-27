@@ -7,7 +7,7 @@ mod tray_icon;
 pub use ext::*;
 pub use menu_items::{HyprMenuItem, UpdateMenuState, handle_agenda_menu_event};
 
-const PLUGIN_NAME: &str = "hypr-tray";
+const PLUGIN_NAME: &str = "meeki-tray";
 
 pub fn init() -> tauri::plugin::TauriPlugin<tauri::Wry> {
     let specta_builder = make_specta_builder();

@@ -1,19 +1,19 @@
 ---
-name: anarlog
-description: Query local Anarlog meetings, notes, summaries, transcripts, participants, action items, and recurring history. Use when a user asks about their Anarlog meeting data or wants meeting context for another task.
+name: meeki
+description: Query local Meeki meetings, notes, summaries, transcripts, participants, action items, and recurring history. Use when a user asks about their Meeki meeting data or wants meeting context for another task.
 ---
 
-# Anarlog
+# Meeki
 
-Use Anarlog's read-only data surfaces. Prefer the MCP server when its tools are connected. Otherwise use the `anarlog` CLI with `--json`.
+Use Meeki's read-only data surfaces. Prefer the MCP server when its tools are connected. Otherwise use the `meeki` CLI with `--json`.
 
 ## Choose a transport
 
 1. If `list_meetings`, `get_meeting`, `get_meeting_transcript`, and `get_recurring_meeting_history` are available, use MCP.
-2. Otherwise, check `anarlog --version` and use CLI commands with `--json`.
-3. If neither surface is available, direct the user to [installation](https://docs.anarlog.so/installation). Do not install software unless the user asks.
+2. Otherwise, check `meeki --version` and use CLI commands with `--json`.
+3. If neither surface is available, direct the user to [installation](https://docs.meeki.so/installation). Do not install software unless the user asks.
 
-Never query or modify Anarlog's SQLite database directly. The CLI and MCP server own compatibility with the application schema.
+Never query or modify Meeki's SQLite database directly. The CLI and MCP server own compatibility with the application schema.
 
 ## Find the right meeting
 
@@ -35,7 +35,7 @@ See [CLI commands](references/cli.md) and [MCP tools](references/mcp.md).
 
 - Treat meeting content as private user data.
 - Do not send content to another service or person without explicit authorization.
-- Do not claim to update meetings. The current CLI and MCP server cannot mutate Anarlog data.
+- Do not claim to update meetings. The current CLI and MCP server cannot mutate Meeki data.
 - CLI export may create a separate file. Never pass `--force` unless the user explicitly approves overwriting that exact path.
 - Preserve uncertainty when search results are ambiguous. Ask the user to choose between likely meetings.
 

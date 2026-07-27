@@ -2,13 +2,13 @@ import type {
   DrizzleProxyClient,
   LiveQueryClient,
   TransactionClient,
-} from "@hypr/db-runtime";
+} from "@meeki/db-runtime";
 import {
   execute,
   executeProxy,
   executeTransaction,
   subscribe,
-} from "@hypr/plugin-db";
+} from "@meeki/plugin-db";
 
 export const tauriLiveQueryClient: LiveQueryClient & DrizzleProxyClient = {
   execute,

@@ -13,8 +13,8 @@ import {
   DialogContent,
   DialogTitle,
   DialogTrigger,
-} from "@hypr/ui/components/ui/dialog";
-import { cn } from "@hypr/utils";
+} from "@meeki/ui/components/ui/dialog";
+import { cn } from "@meeki/utils";
 
 import { sharedPrimaryButtonClassName } from "@/components/shared-note-viewer";
 import { useMountEffect } from "@/hooks/useMountEffect";

@@ -1,12 +1,12 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Anarlog Staging",
-  "mainBinaryName": "anarlog-staging",
-  "identifier": "com.hyprnote.staging",
+  "productName": "Meeki Staging",
+  "mainBinaryName": "meeki-staging",
+  "identifier": "com.meeki.staging",
   "plugins": {
     "deep-link": {
       "desktop": {
-        "schemes": ["anarlog-staging", "hyprnote-staging"]
+        "schemes": ["meeki-staging", "hyprnote-staging"]
       }
     },
     "updater": {

@@ -8,7 +8,7 @@ export function sortProviders<T extends Sortable>(
   providers: readonly T[],
 ): T[] {
   return [...providers].sort((a, b) => {
-    // Prefer AssemblyAI (STT), On device, and Venice for Meety.
+    // Prefer AssemblyAI (STT), On device, and Venice for Meeki.
     // `hyprnote` is the STT id for on-device Soniqo models; the hosted LLM
     // provider that used to share this id was removed.
     if (a.id === "assemblyai") return -1;

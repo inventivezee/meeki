@@ -30,7 +30,7 @@ const {
   loadSessionEventMock: vi.fn(),
 }));
 
-vi.mock("@hypr/plugin-detect", () => ({
+vi.mock("@meeki/plugin-detect", () => ({
   commands: {
     listMicUsingApplications: listMicUsingApplicationsMock,
   },
@@ -41,7 +41,7 @@ vi.mock("@hypr/plugin-detect", () => ({
   },
 }));
 
-vi.mock("@hypr/plugin-notification", () => ({
+vi.mock("@meeki/plugin-notification", () => ({
   commands: {
     showNotification: showNotificationMock,
   },
@@ -2054,7 +2054,7 @@ describe("ListenerProvider detect events", () => {
       expect(notification).toEqual({
         key: expect.stringContaining("auto-stop-ended:session-1"),
         title: "Did your meeting end?",
-        message: "Anarlog will stop listening in 30 seconds.",
+        message: "Meeki will stop listening in 30 seconds.",
         timeout: { secs: 30, nanos: 0 },
         source: null,
         start_time: null,

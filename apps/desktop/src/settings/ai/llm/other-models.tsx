@@ -7,9 +7,9 @@ import {
   commands as localLlmCommands,
   type GgufLlmModel,
   type ModelInfo,
-} from "@hypr/plugin-local-llm";
-import { Button } from "@hypr/ui/components/ui/button";
-import { sonnerToast } from "@hypr/ui/components/ui/toast";
+} from "@meeki/plugin-local-llm";
+import { Button } from "@meeki/ui/components/ui/button";
+import { sonnerToast } from "@meeki/ui/components/ui/toast";
 
 import { Disclosure } from "~/chat/components/message/shared";
 import { ModelFacts } from "~/settings/ai/shared/model-facts";

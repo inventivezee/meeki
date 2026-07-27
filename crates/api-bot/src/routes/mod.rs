@@ -8,7 +8,7 @@ use axum::{
     routing::{delete, get, post},
 };
 
-use hypr_recall::RecallClient;
+use meeki_recall::RecallClient;
 
 use crate::config::BotConfig;
 use crate::error::BotError;

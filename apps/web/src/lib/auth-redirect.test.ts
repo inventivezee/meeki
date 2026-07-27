@@ -21,7 +21,7 @@ test("accepts only internal paths with one leading slash", () => {
     "share/invite/abc",
     "//attacker.example/share",
     "/\\attacker.example/share",
-    "https://anarlog.so/share",
+    "https://meeki.so/share",
     "javascript:alert(1)",
   ]) {
     assert.equal(sanitizeInternalReturnPath(value), DEFAULT_AUTH_RETURN_PATH);
@@ -33,7 +33,7 @@ test("new web accounts enter the card-required onboarding checkout", () => {
     newAccount: true,
     returnTo: "/share/invite/abc/?scheme=hyprnote",
   });
-  const url = new URL(destination, "https://anarlog.so");
+  const url = new URL(destination, "https://meeki.so");
 
   assert.equal(url.pathname, "/app/checkout");
   assert.equal(url.searchParams.get("period"), "monthly");
@@ -77,16 +77,13 @@ test("checkout results preserve invitation query and hash state", () => {
 test("absolute Stripe return URLs cannot change the app origin", () => {
   assert.equal(
     toAbsoluteInternalReturnUrl(
-      "https://anarlog.so",
+      "https://meeki.so",
       "/share/invite/abc/?scheme=hyprnote",
     ),
-    "https://anarlog.so/share/invite/abc/?scheme=hyprnote",
+    "https://meeki.so/share/invite/abc/?scheme=hyprnote",
   );
   assert.equal(
-    toAbsoluteInternalReturnUrl(
-      "https://anarlog.so",
-      "//attacker.example/share",
-    ),
-    "https://anarlog.so/app/account/",
+    toAbsoluteInternalReturnUrl("https://meeki.so", "//attacker.example/share"),
+    "https://meeki.so/app/account/",
   );
 });

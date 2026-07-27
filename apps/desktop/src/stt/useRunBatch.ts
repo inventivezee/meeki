@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 
-import type { TranscriptionParams } from "@hypr/plugin-transcription";
+import type { TranscriptionParams } from "@meeki/plugin-transcription";
 
 import { useListener } from "./contexts";
 import { persistTranscriptWrite } from "./persist-retry";
@@ -117,7 +117,7 @@ export function getBatchFallbackTarget({
   accessToken?: string | null;
   apiBaseUrl: string;
 }): BatchTarget {
-  // Meety does not fall back to Anarlog Pro cloud — use local Soniqo batch.
+  // Meeki does not fall back to Meeki Pro cloud — use local Soniqo batch.
   return LOCAL_SONIQO_BATCH_TARGET;
 }
 

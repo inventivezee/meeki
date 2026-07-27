@@ -60,7 +60,7 @@ impl QueryParamBuilder {
 
 pub fn resolve_model_for_languages<'a>(
     model: Option<&'a str>,
-    languages: &[hypr_language::Language],
+    languages: &[meeki_language::Language],
     default: &'a str,
 ) -> &'a str {
     match model {
@@ -220,7 +220,7 @@ mod tests {
         let mut builder = QueryParamBuilder::new();
         let params = ListenParams {
             model: Some("cloud".to_string()),
-            languages: vec![hypr_language::ISO639::Zh.into()],
+            languages: vec![meeki_language::ISO639::Zh.into()],
             sample_rate: 16000,
             ..Default::default()
         };

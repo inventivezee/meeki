@@ -81,13 +81,13 @@ vi.mock("../shared", () => ({
     mocks.hasTranscriptBySession[sessionId] ?? false,
 }));
 
-vi.mock("@hypr/plugin-opener2", () => ({
+vi.mock("@meeki/plugin-opener2", () => ({
   commands: {
     openUrl: mocks.openUrl,
   },
 }));
 
-vi.mock("@hypr/plugin-deeplink2", () => ({
+vi.mock("@meeki/plugin-deeplink2", () => ({
   commands: {
     startCallbackServer: mocks.startCallbackServer,
   },
@@ -174,7 +174,7 @@ describe("OuterHeader", () => {
       data: 43210,
     });
     mocks.getScheme.mockReset();
-    mocks.getScheme.mockResolvedValue("anarlog-dev");
+    mocks.getScheme.mockResolvedValue("meeki-dev");
     mocks.startListening.mockClear();
     mocks.stopListening.mockClear();
     mocks.stopTranscription.mockClear();
@@ -474,8 +474,8 @@ describe("OuterHeader", () => {
   it("treats the legacy welcome demo link as a normal Record action", () => {
     mocks.sessionEvents = {
       "session-1": {
-        tracking_id: "anarlog-onboarding-demo-v1",
-        meeting_link: "https://anarlog.so/onboarding-demo/",
+        tracking_id: "meeki-onboarding-demo-v1",
+        meeting_link: "https://meeki.so/onboarding-demo/",
       },
     };
 

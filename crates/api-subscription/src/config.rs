@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
-use hypr_analytics::AnalyticsClient;
+use meeki_analytics::AnalyticsClient;
 
 use crate::StripeEnv;
-use hypr_api_env::{LoopsEnv, SupabaseEnv};
+use meeki_api_env::{LoopsEnv, SupabaseEnv};
 
 #[derive(Clone)]
 pub struct SubscriptionConfig {
@@ -100,7 +100,7 @@ impl CloudsyncCleanupConfig {
                 .bytes()
                 .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'_' | b'-'))
         {
-            return Err("ANARLOG_CLOUDSYNC_E2EE_DATABASE_ID is invalid".to_string());
+            return Err("MEEKI_CLOUDSYNC_E2EE_DATABASE_ID is invalid".to_string());
         }
 
         Ok(Self {

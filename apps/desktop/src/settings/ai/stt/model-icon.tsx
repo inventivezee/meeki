@@ -1,4 +1,4 @@
-import { cn } from "@hypr/utils";
+import { cn } from "@meeki/utils";
 
 type ModelIconSpec = {
   label: string;
@@ -9,7 +9,7 @@ type ModelIconSpec = {
 };
 
 const MODEL_ICON_ASSET_BASE = "/assets/model-icons";
-const ANARLOG_ICON_SRC = "/assets/anarlog-icon.png";
+const MEEKI_ICON_SRC = "/assets/meeki-icon.png";
 
 export function getLocalModelIcon(model: string): ModelIconSpec | null {
   const value = model.toLowerCase();
@@ -17,9 +17,9 @@ export function getLocalModelIcon(model: string): ModelIconSpec | null {
   if (value === "cloud") {
     return {
       label: "A",
-      title: "Anarlog Pro",
+      title: "Meeki Pro",
       className: "border-border bg-card text-muted-foreground",
-      imageSrc: ANARLOG_ICON_SRC,
+      imageSrc: MEEKI_ICON_SRC,
       imageClassName: "size-4 object-contain",
     };
   }

@@ -1,5 +1,5 @@
 {
-  "name": "@hypr/plugin-webhook",
+  "name": "@meeki/plugin-webhook",
   "private": true,
   "main": "./js/index.ts",
   "scripts": {

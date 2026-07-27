@@ -5,15 +5,15 @@ edition = "2024"
 
 [dependencies]
 askama = { workspace = true }
-hypr-askama-utils = { workspace = true }
+meeki-askama-utils = { workspace = true }
 minijinja = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 specta = { workspace = true, features = ["derive"] }
 thiserror = { workspace = true }
 
 [dev-dependencies]
-hypr-template-eval = { workspace = true }
 insta = { workspace = true }
+meeki-template-eval = { workspace = true }
 
 [[test]]
 name = "llm_eval"

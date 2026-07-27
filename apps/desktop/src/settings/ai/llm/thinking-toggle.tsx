@@ -1,4 +1,4 @@
-import { Switch } from "@hypr/ui/components/ui/switch";
+import { Switch } from "@meeki/ui/components/ui/switch";
 
 import { setSettingValue } from "~/settings/queries";
 import { useConfigValue } from "~/shared/config";

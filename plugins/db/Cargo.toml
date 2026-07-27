@@ -8,16 +8,16 @@ links = "tauri-plugin-db"
 description = ""
 
 [dependencies]
-hypr-agent-access = { workspace = true }
-hypr-db-app = { workspace = true }
-hypr-db-core = { workspace = true }
-hypr-db-execute = { workspace = true }
-hypr-db-migrate = { workspace = true }
-hypr-db-reactive = { workspace = true, features = ["specta"] }
-hypr-e2ee = { workspace = true }
-hypr-fs-sync-core = { workspace = true }
-hypr-storage = { workspace = true }
-hypr-tauri-utils = { workspace = true }
+meeki-agent-access = { workspace = true }
+meeki-db-app = { workspace = true }
+meeki-db-core = { workspace = true }
+meeki-db-execute = { workspace = true }
+meeki-db-migrate = { workspace = true }
+meeki-db-reactive = { workspace = true, features = ["specta"] }
+meeki-e2ee = { workspace = true }
+meeki-fs-sync-core = { workspace = true }
+meeki-storage = { workspace = true }
+meeki-tauri-utils = { workspace = true }
 
 futures-util = { workspace = true }
 reqwest = { workspace = true, features = ["json", "query", "stream"] }
@@ -37,7 +37,7 @@ uuid = { workspace = true, features = ["v4"] }
 
 [dev-dependencies]
 anyhow = { workspace = true }
-hypr-db-core = { workspace = true, features = ["test-utils"] }
+meeki-db-core = { workspace = true, features = ["test-utils"] }
 serde_json = { workspace = true }
 tempfile = { workspace = true }
 tokio = { workspace = true, features = ["macros", "rt", "sync", "time"] }

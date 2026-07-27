@@ -112,7 +112,7 @@ async fn start_proxy_with(
         env.stt.soniox_api_key = Some("test-key".to_string());
     }
 
-    let supabase_env = hypr_api_env::SupabaseEnv {
+    let supabase_env = meeki_api_env::SupabaseEnv {
         supabase_url: String::new(),
         supabase_anon_key: String::new(),
         supabase_service_role_key: String::new(),

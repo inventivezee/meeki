@@ -1,4 +1,4 @@
-use hypr_audio_chunking::AudioChunk;
+use meeki_audio_chunking::AudioChunk;
 use owhisper_interface::batch_sse::BatchSseMessage;
 use owhisper_interface::progress::{InferencePhase, InferenceProgress};
 use tokio::sync::mpsc;

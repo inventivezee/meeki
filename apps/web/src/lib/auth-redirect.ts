@@ -1,6 +1,6 @@
 export const DEFAULT_AUTH_RETURN_PATH = "/app/account/";
 
-const INTERNAL_URL_ORIGIN = "https://anarlog.invalid";
+const INTERNAL_URL_ORIGIN = "https://meeki.invalid";
 
 export function sanitizeInternalReturnPath(value?: string) {
   if (!value?.startsWith("/") || value.startsWith("//")) {

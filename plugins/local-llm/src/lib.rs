@@ -5,7 +5,7 @@ use std::sync::Mutex;
 use tauri::Wry;
 use tokio::sync::Mutex as TokioMutex;
 
-use hypr_model_downloader::ModelDownloadManager;
+use meeki_model_downloader::ModelDownloadManager;
 
 mod commands;
 mod error;
@@ -14,7 +14,7 @@ mod migrate;
 
 pub use error::*;
 pub use ext::*;
-pub use hypr_local_llm_core::{
+pub use meeki_local_llm_core::{
     CustomModelInfo, ModelIdentifier, ModelInfo, ModelRecommendation, SUPPORTED_MODELS,
     SupportedModel,
 };
@@ -26,7 +26,7 @@ pub type SharedState = std::sync::Arc<TokioMutex<State>>;
 pub struct State {
     pub model_downloader: ModelDownloadManager<SupportedModel>,
     pub download_channels: Arc<Mutex<HashMap<String, tauri::ipc::Channel<i8>>>>,
-    pub server: Option<hypr_local_llm_core::LlmServer>,
+    pub server: Option<meeki_local_llm_core::LlmServer>,
 }
 
 fn make_specta_builder<R: tauri::Runtime>() -> tauri_specta::Builder<R> {

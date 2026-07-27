@@ -1,5 +1,5 @@
-use hypr_exa::ExaClient;
-use hypr_jina::JinaClient;
+use meeki_exa::ExaClient;
+use meeki_jina::JinaClient;
 
 use crate::config::ResearchConfig;
 

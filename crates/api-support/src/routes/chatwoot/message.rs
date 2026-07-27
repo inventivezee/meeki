@@ -61,7 +61,7 @@ pub async fn send_message(
         SupportError::InvalidRequest("source_id required for incoming messages".into())
     })?;
 
-    let body = hypr_chatwoot::types::PublicMessageCreatePayload {
+    let body = meeki_chatwoot::types::PublicMessageCreatePayload {
         content: Some(payload.content),
         echo_id: None,
     };

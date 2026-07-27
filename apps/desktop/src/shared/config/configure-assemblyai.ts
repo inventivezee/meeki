@@ -7,7 +7,7 @@ const ASSEMBLYAI_DEFAULT_MODEL = "u3-rt-pro";
 
 /**
  * If VITE_ASSEMBLYAI_API_KEY is set, ensure AssemblyAI is configured and selected
- * whenever STT is unset or still pointing at Anarlog Pro cloud.
+ * whenever STT is unset or still pointing at Meeki Pro cloud.
  */
 export async function configureAssemblyAiSttFromEnv(): Promise<void> {
   const apiKey = env.VITE_ASSEMBLYAI_API_KEY?.trim();

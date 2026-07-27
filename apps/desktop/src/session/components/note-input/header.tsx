@@ -12,17 +12,17 @@ import {
 } from "lucide-react";
 import { useCallback, useMemo, useRef, useState } from "react";
 
-import { json2md, parseJsonContent } from "@hypr/editor/markdown";
-import { DancingSticks } from "@hypr/ui/components/ui/dancing-sticks";
+import { json2md, parseJsonContent } from "@meeki/editor/markdown";
+import { DancingSticks } from "@meeki/ui/components/ui/dancing-sticks";
 import {
   AppFloatingPanel,
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@hypr/ui/components/ui/popover";
-import { Spinner } from "@hypr/ui/components/ui/spinner";
-import { sonnerToast } from "@hypr/ui/components/ui/toast";
-import { cn } from "@hypr/utils";
+} from "@meeki/ui/components/ui/popover";
+import { Spinner } from "@meeki/ui/components/ui/spinner";
+import { sonnerToast } from "@meeki/ui/components/ui/toast";
+import { cn } from "@meeki/utils";
 
 import { useAITaskTask } from "~/ai/hooks";
 import * as AudioPlayer from "~/audio-player";

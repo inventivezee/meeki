@@ -8,7 +8,7 @@ export const commands = {
     try {
       return {
         status: "ok",
-        data: await TAURI_INVOKE("plugin:hypr-tray|set_tray_icon_visible", {
+        data: await TAURI_INVOKE("plugin:meeki-tray|set_tray_icon_visible", {
           visible,
         }),
       };
@@ -23,7 +23,7 @@ export const commands = {
     try {
       return {
         status: "ok",
-        data: await TAURI_INVOKE("plugin:hypr-tray|set_tray_schedule", {
+        data: await TAURI_INVOKE("plugin:meeki-tray|set_tray_schedule", {
           events,
         }),
       };

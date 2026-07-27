@@ -36,7 +36,7 @@ const mocks = vi.hoisted(() => ({
   subscribeListener: vi.fn(() => vi.fn()),
 }));
 
-vi.mock("@hypr/plugin-windows", () => ({
+vi.mock("@meeki/plugin-windows", () => ({
   commands: {
     floatingBarShow: mocks.floatingBarShow,
     floatingBarHide: mocks.floatingBarHide,

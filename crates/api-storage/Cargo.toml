@@ -4,10 +4,10 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-hypr-api-error = { workspace = true }
-hypr-api-nango = { workspace = true }
-hypr-google-drive = { workspace = true }
-hypr-nango = { workspace = true }
+meeki-api-error = { workspace = true }
+meeki-api-nango = { workspace = true }
+meeki-google-drive = { workspace = true }
+meeki-nango = { workspace = true }
 
 utoipa = { workspace = true }
 

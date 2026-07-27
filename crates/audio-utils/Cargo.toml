@@ -7,9 +7,9 @@ edition = "2024"
 audioadapter-buffers = "2.0"
 bytes = { workspace = true }
 futures-util = { workspace = true }
-hypr-audio-interface = { workspace = true }
-hypr-audio-mime = { workspace = true }
-hypr-resampler = { workspace = true }
+meeki-audio-interface = { workspace = true }
+meeki-audio-mime = { workspace = true }
+meeki-resampler = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 
@@ -19,4 +19,4 @@ rubato = "1.0.1"
 vorbis_rs = { workspace = true }
 
 [dev-dependencies]
-hypr-data = { workspace = true }
+meeki-data = { workspace = true }

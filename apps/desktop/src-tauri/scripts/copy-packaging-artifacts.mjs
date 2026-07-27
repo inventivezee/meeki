@@ -36,7 +36,7 @@ function collectArtifacts(root) {
 
 function isLightweightProductArtifact(path) {
   const name = basename(path);
-  return name === "Anarlog.app" || /^Anarlog_\d.*\.dmg$/i.test(name);
+  return name === "Meeki.app" || /^Meeki_\d.*\.dmg$/i.test(name);
 }
 
 const artifacts = collectArtifacts(bundleRoot).filter(
@@ -47,7 +47,7 @@ mkdirSync(outRoot, { recursive: true });
 
 if (artifacts.length === 0) {
   console.warn(
-    "No lightweight Anarlog packaging artifacts found under",
+    "No lightweight Meeki packaging artifacts found under",
     bundleRoot,
   );
 } else {

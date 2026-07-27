@@ -14,10 +14,10 @@ tauri-plugin = { workspace = true, features = ["build"] }
 specta-typescript = { workspace = true }
 
 [dependencies]
-hypr-gbnf = { workspace = true }
-hypr-template-app = { workspace = true }
-hypr-template-app-legacy = { workspace = true }
-hypr-template-support = { workspace = true }
+meeki-gbnf = { workspace = true }
+meeki-template-app = { workspace = true }
+meeki-template-app-legacy = { workspace = true }
+meeki-template-support = { workspace = true }
 
 serde_json = { workspace = true }
 tracing = { workspace = true }

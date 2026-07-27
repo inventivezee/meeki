@@ -14,10 +14,10 @@ import {
   createE2eeIdentity,
   importE2eeIdentity,
   inspectE2eeRecoveryKey,
-} from "@hypr/plugin-db";
-import { commands as fs2Commands } from "@hypr/plugin-fs2";
-import { commands as openerCommands } from "@hypr/plugin-opener2";
-import { Button } from "@hypr/ui/components/ui/button";
+} from "@meeki/plugin-db";
+import { commands as fs2Commands } from "@meeki/plugin-fs2";
+import { commands as openerCommands } from "@meeki/plugin-opener2";
+import { Button } from "@meeki/ui/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -25,8 +25,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@hypr/ui/components/ui/dialog";
-import { Input } from "@hypr/ui/components/ui/input";
+} from "@meeki/ui/components/ui/dialog";
+import { Input } from "@meeki/ui/components/ui/input";
 
 import { env } from "~/env";
 
@@ -114,7 +114,7 @@ export function E2eeSetupDialog({
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
       const path = await join(
         downloadsPath,
-        `anarlog-recovery-key_${timestamp}.txt`,
+        `meeki-recovery-key_${timestamp}.txt`,
       );
       const result = await fs2Commands.writeTextFile(path, `${recoveryKey}\n`);
       if (result.status === "error") {
@@ -162,7 +162,7 @@ export function E2eeSetupDialog({
           <DialogDescription className="text-foreground max-w-[260px] text-center text-[13px] leading-[1.36]">
             <Trans>
               Your recovery key encrypts synced notes before they leave this
-              device. Anarlog cannot read or recover it.
+              device. Meeki cannot read or recover it.
             </Trans>
           </DialogDescription>
         </DialogHeader>
@@ -209,7 +209,7 @@ export function E2eeSetupDialog({
             <div className="space-y-3">
               <p className="text-muted-foreground text-xs leading-5">
                 <Trans>
-                  Enter the recovery key from an existing Anarlog device.
+                  Enter the recovery key from an existing Meeki device.
                 </Trans>
               </p>
               <importForm.Field name="recoveryKey">
@@ -218,7 +218,7 @@ export function E2eeSetupDialog({
                     aria-label="Recovery key"
                     value={field.state.value}
                     onChange={(event) => field.handleChange(event.target.value)}
-                    placeholder="anarlog-e2ee-v1:..."
+                    placeholder="meeki-e2ee-v1:..."
                     autoComplete="off"
                     spellCheck={false}
                     className="font-mono text-xs"

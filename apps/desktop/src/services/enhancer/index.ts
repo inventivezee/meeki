@@ -1,6 +1,6 @@
 import type { LanguageModel } from "ai";
 
-import { commands as analyticsCommands } from "@hypr/plugin-analytics";
+import { commands as analyticsCommands } from "@meeki/plugin-analytics";
 
 import { type EnhanceEligibilitySkipCode, getEligibility } from "./eligibility";
 import {

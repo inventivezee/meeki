@@ -1,7 +1,7 @@
 use camino::Utf8PathBuf;
 
 use crate::SettingsPluginExt;
-use hypr_storage::ObsidianVault;
+use meeki_storage::ObsidianVault;
 
 #[tauri::command]
 #[specta::specta]

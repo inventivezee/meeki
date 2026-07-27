@@ -80,7 +80,7 @@ describe("bootstrapThemeFromSettings", () => {
     await bootstrapThemeFromSettings({ timeoutMs: 100 });
 
     expect(document.documentElement.classList.contains("dark")).toBe(true);
-    expect(localStorage.getItem("hypr-theme")).toBe("dark");
+    expect(localStorage.getItem("meeki-theme")).toBe("dark");
   });
 
   it("does not hold startup past the deadline when settings load stalls", async () => {
@@ -105,7 +105,7 @@ describe("bootstrapThemeFromSettings", () => {
     await vi.advanceTimersByTimeAsync(20);
 
     expect(resolved).toBe(true);
-    expect(localStorage.getItem("hypr-theme")).toBe(null);
+    expect(localStorage.getItem("meeki-theme")).toBe(null);
 
     resolveLoad({
       values: { theme: "dark" },
@@ -114,6 +114,6 @@ describe("bootstrapThemeFromSettings", () => {
     await Promise.resolve();
 
     expect(document.documentElement.classList.contains("dark")).toBe(true);
-    expect(localStorage.getItem("hypr-theme")).toBe("dark");
+    expect(localStorage.getItem("meeki-theme")).toBe("dark");
   });
 });

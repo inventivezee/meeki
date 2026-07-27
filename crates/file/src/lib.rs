@@ -8,7 +8,7 @@ pub use types::*;
 
 use {
     futures_util::{StreamExt, TryStreamExt, stream::FuturesUnordered},
-    hypr_download_interface::DownloadProgress,
+    meeki_download_interface::DownloadProgress,
     reqwest::StatusCode,
     std::{
         cmp::min,

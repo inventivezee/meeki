@@ -1,5 +1,5 @@
 {
-  "name": "@hypr/plugin-detect",
+  "name": "@meeki/plugin-detect",
   "private": true,
   "main": "./js/index.ts",
   "scripts": {

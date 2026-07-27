@@ -1,5 +1,5 @@
 use axum::extract::ws::Message;
-use hypr_audio_utils::{bytes_to_f32_samples, deinterleave_stereo_bytes};
+use meeki_audio_utils::{bytes_to_f32_samples, deinterleave_stereo_bytes};
 use owhisper_interface::{ControlMessage, ListenInputChunk};
 
 pub(super) enum IncomingMessage {

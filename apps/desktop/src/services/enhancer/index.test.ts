@@ -16,7 +16,7 @@ const mocks = vi.hoisted(() => ({
   listenerGetState: vi.fn(),
 }));
 
-vi.mock("@hypr/plugin-analytics", () => ({
+vi.mock("@meeki/plugin-analytics", () => ({
   commands: { event: mocks.analyticsEvent },
 }));
 

@@ -78,13 +78,13 @@ fn request_client_address(request: &Request<Body>) -> Option<String> {
 }
 
 fn build_sync_routes(
-    state: hypr_api_sync::AppState,
+    state: meeki_api_sync::AppState,
     cloudsync_rate_limit_state: rate_limit::RateLimitState,
     session_share_rate_limit_state: rate_limit::RateLimitState,
     witness_rate_limit_state: rate_limit::RateLimitState,
     auth_state: AuthState,
 ) -> Router {
-    let cloudsync_routes = hypr_api_sync::cloudsync_router(state.clone())
+    let cloudsync_routes = meeki_api_sync::cloudsync_router(state.clone())
         .route_layer(middleware::from_fn_with_state(
             cloudsync_rate_limit_state,
             rate_limit::rate_limit,
@@ -94,7 +94,7 @@ fn build_sync_routes(
             auth_state.clone().with_required_entitlement("hyprnote_pro"),
             auth::require_auth,
         ));
-    let session_share_routes = hypr_api_sync::session_share_router(state.clone())
+    let session_share_routes = meeki_api_sync::session_share_router(state.clone())
         .route_layer(middleware::from_fn_with_state(
             session_share_rate_limit_state.clone(),
             rate_limit::rate_limit,
@@ -104,7 +104,7 @@ fn build_sync_routes(
             auth_state.clone().with_required_entitlement("hyprnote_pro"),
             auth::require_auth,
         ));
-    let witness_routes = hypr_api_sync::e2ee_witness_router(state.clone())
+    let witness_routes = meeki_api_sync::e2ee_witness_router(state.clone())
         .route_layer(middleware::from_fn_with_state(
             witness_rate_limit_state,
             rate_limit::wait_for_rate_limit,
@@ -114,7 +114,7 @@ fn build_sync_routes(
             auth_state.clone().with_required_entitlement("hyprnote_pro"),
             auth::require_auth,
         ));
-    let web_edit_routes = hypr_api_sync::web_edit_router(state)
+    let web_edit_routes = meeki_api_sync::web_edit_router(state)
         .route_layer(middleware::from_fn_with_state(
             session_share_rate_limit_state,
             rate_limit::rate_limit,
@@ -137,9 +137,9 @@ async fn app() -> Router {
     let analytics = build_analytics_client(env);
 
     let llm_config =
-        hypr_llm_proxy::LlmProxyConfig::new(&env.llm).with_analytics(analytics.clone());
-    let stt_config = hypr_transcribe_proxy::SttProxyConfig::new(&env.stt, &env.supabase)
-        .with_hyprnote_routing(hypr_transcribe_proxy::HyprnoteRoutingConfig::default())
+        meeki_llm_proxy::LlmProxyConfig::new(&env.llm).with_analytics(analytics.clone());
+    let stt_config = meeki_transcribe_proxy::SttProxyConfig::new(&env.stt, &env.supabase)
+        .with_hyprnote_routing(meeki_transcribe_proxy::HyprnoteRoutingConfig::default())
         .with_analytics(analytics.clone());
 
     let stt_rate_limit = rate_limit::RateLimitState::builder()
@@ -207,17 +207,17 @@ async fn app() -> Router {
     let auth_state_basic = auth_state.clone();
     let auth_state_support = auth_state.clone();
 
-    let nango_config = hypr_api_nango::NangoConfig::new(
+    let nango_config = meeki_api_nango::NangoConfig::new(
         &env.nango,
         &env.supabase,
         Some(env.supabase.supabase_service_role_key.clone()),
     );
-    let nango_connection_state = hypr_api_nango::NangoConnectionState::from_config(&nango_config);
+    let nango_connection_state = meeki_api_nango::NangoConnectionState::from_config(&nango_config);
     let subscription_config =
-        hypr_api_subscription::SubscriptionConfig::new(&env.supabase, &env.stripe, &env.loops)
+        meeki_api_subscription::SubscriptionConfig::new(&env.supabase, &env.stripe, &env.loops)
             .with_analytics(analytics.clone())
-            .with_durable_cleanup_enabled(env.anarlog_attachment_backup_gc_enabled);
-    let support_config = hypr_api_support::SupportConfig::new(
+            .with_durable_cleanup_enabled(env.meeki_attachment_backup_gc_enabled);
+    let support_config = meeki_api_support::SupportConfig::new(
         &env.github_app,
         &env.llm,
         &env.support_database,
@@ -226,48 +226,48 @@ async fn app() -> Router {
         &env.chatwoot,
         auth_state_support.clone(),
     );
-    let research_config = hypr_api_research::ResearchConfig {
+    let research_config = meeki_api_research::ResearchConfig {
         exa_api_key: env.exa_api_key.clone(),
         jina_api_key: env.jina_api_key.clone(),
     };
-    let pyannote_config = hypr_api_pyannote::PyannoteConfig::new(&env.pyannote);
-    let sync_config = hypr_api_sync::SyncConfig::from_env(
+    let pyannote_config = meeki_api_pyannote::PyannoteConfig::new(&env.pyannote);
+    let sync_config = meeki_api_sync::SyncConfig::from_env(
         &env.sync,
         &env.supabase.supabase_url,
         &env.supabase.supabase_anon_key,
         &env.supabase.supabase_service_role_key,
     )
     .unwrap_or_else(|error| panic!("Failed to load environment: {error}"));
-    let shared_notes_config = hypr_api_sync::SharedNotesConfig::new(
+    let shared_notes_config = meeki_api_sync::SharedNotesConfig::new(
         &env.supabase.supabase_url,
         &env.supabase.supabase_service_role_key,
     )
     .and_then(|config| config.with_invitation_email(&env.loops.loops_key))
     .unwrap_or_else(|error| panic!("Failed to load environment: {error}"));
 
-    use hypr_api_nango::NangoIntegrationId;
+    use meeki_api_nango::NangoIntegrationId;
 
-    let mut forward_handlers = hypr_api_nango::ForwardHandlerRegistry::new();
+    let mut forward_handlers = meeki_api_nango::ForwardHandlerRegistry::new();
     forward_handlers.insert(
-        hypr_api_nango::Linear::ID.to_string(),
-        hypr_api_nango::forward_handler(hypr_linear::webhook::handle),
+        meeki_api_nango::Linear::ID.to_string(),
+        meeki_api_nango::forward_handler(meeki_linear::webhook::handle),
     );
 
     let webhook_routes = Router::new()
         .nest(
             "/nango",
-            hypr_api_nango::webhook_router(nango_config.clone(), forward_handlers),
+            meeki_api_nango::webhook_router(nango_config.clone(), forward_handlers),
         )
         .nest(
             "/stt",
-            hypr_transcribe_proxy::callback_router(stt_config.clone()),
+            meeki_transcribe_proxy::callback_router(stt_config.clone()),
         );
 
     let auth_state_integration = auth_state_paid.clone();
 
     let paid_routes = Router::new()
-        .merge(hypr_api_research::router(research_config))
-        .nest("/pyannote", hypr_api_pyannote::router(pyannote_config))
+        .merge(meeki_api_research::router(research_config))
+        .nest("/pyannote", meeki_api_pyannote::router(pyannote_config))
         .route_layer(middleware::from_fn(auth::sentry_and_analytics))
         .route_layer(middleware::from_fn_with_state(
             auth_state_paid,
@@ -276,7 +276,7 @@ async fn app() -> Router {
 
     let sync_routes = match sync_config {
         Some(config) => build_sync_routes(
-            hypr_api_sync::AppState::new(config),
+            meeki_api_sync::AppState::new(config),
             cloudsync_rate_limit,
             session_share_rate_limit,
             e2ee_witness_rate_limit,
@@ -284,14 +284,14 @@ async fn app() -> Router {
         ),
         None => Router::new(),
     };
-    let shared_notes_state = hypr_api_sync::SharedNotesState::new(shared_notes_config);
-    let shared_notes_routes = hypr_api_sync::shared_notes_router(shared_notes_state.clone())
+    let shared_notes_state = meeki_api_sync::SharedNotesState::new(shared_notes_config);
+    let shared_notes_routes = meeki_api_sync::shared_notes_router(shared_notes_state.clone())
         .route_layer(middleware::from_fn_with_state(
             shared_notes_rate_limit.clone(),
             rate_limit::rate_limit_by_ip,
         ));
     let authenticated_shared_notes_routes =
-        hypr_api_sync::authenticated_shared_notes_router(shared_notes_state)
+        meeki_api_sync::authenticated_shared_notes_router(shared_notes_state)
             .route_layer(middleware::from_fn_with_state(
                 shared_notes_rate_limit,
                 rate_limit::rate_limit_by_ip,
@@ -303,12 +303,12 @@ async fn app() -> Router {
             ));
 
     let integration_routes = Router::new()
-        .nest("/calendar", hypr_api_calendar::router())
-        .nest("/mail", hypr_api_mail::router())
-        .nest("/ticket", hypr_api_ticket::router())
+        .nest("/calendar", meeki_api_calendar::router())
+        .nest("/mail", meeki_api_mail::router())
+        .nest("/ticket", meeki_api_ticket::router())
         .nest(
             "/nango",
-            hypr_api_nango::session_router(nango_config.clone()),
+            meeki_api_nango::session_router(nango_config.clone()),
         )
         .layer(axum::Extension(nango_connection_state))
         .route_layer(middleware::from_fn(auth::sentry_and_analytics))
@@ -320,7 +320,7 @@ async fn app() -> Router {
     let integration_management_routes = Router::new()
         .nest(
             "/nango",
-            hypr_api_nango::management_router(nango_config.clone()),
+            meeki_api_nango::management_router(nango_config.clone()),
         )
         .route_layer(middleware::from_fn(auth::sentry_and_analytics))
         .route_layer(middleware::from_fn_with_state(
@@ -329,22 +329,22 @@ async fn app() -> Router {
         ));
 
     let stt_routes = Router::new()
-        .merge(hypr_transcribe_proxy::listen_router(stt_config.clone()))
-        .nest("/stt", hypr_transcribe_proxy::router(stt_config))
+        .merge(meeki_transcribe_proxy::listen_router(stt_config.clone()))
+        .nest("/stt", meeki_transcribe_proxy::router(stt_config))
         .route_layer(middleware::from_fn_with_state(
             stt_rate_limit,
             rate_limit::rate_limit,
         ));
 
     let llm_routes = Router::new()
-        .merge(hypr_llm_proxy::chat_completions_router(llm_config.clone()))
-        .nest("/llm", hypr_llm_proxy::router(llm_config))
+        .merge(meeki_llm_proxy::chat_completions_router(llm_config.clone()))
+        .nest("/llm", meeki_llm_proxy::router(llm_config))
         .route_layer(middleware::from_fn_with_state(
             llm_rate_limit,
             rate_limit::rate_limit,
         ));
 
-    let subscription_router = hypr_api_subscription::router(subscription_config);
+    let subscription_router = meeki_api_subscription::router(subscription_config);
     let auth_routes = Router::new()
         .merge(stt_routes)
         .merge(llm_routes)
@@ -358,7 +358,7 @@ async fn app() -> Router {
         ));
 
     let support_routes = Router::new()
-        .merge(hypr_api_support::router(support_config).await)
+        .merge(meeki_api_support::router(support_config).await)
         .layer(middleware::from_fn_with_state(
             auth_state_support.clone(),
             auth::optional_auth,
@@ -460,7 +460,7 @@ async fn app() -> Router {
                             if let Some(client_address) = client_address.as_deref() {
                                 span.record("client.address", client_address);
                             }
-                            hypr_observability::set_remote_parent(&span, request.headers());
+                            meeki_observability::set_remote_parent(&span, request.headers());
                             span
                         })
                         .on_request(|request: &Request<Body>, span: &tracing::Span| {
@@ -495,7 +495,7 @@ async fn app() -> Router {
                                     response.status().as_u16() as i64,
                                 );
                                 if response.status().is_server_error() {
-                                    hypr_observability::mark_span_as_error(
+                                    meeki_observability::mark_span_as_error(
                                         span,
                                         &response.status().as_u16().to_string(),
                                     );
@@ -523,7 +523,7 @@ async fn app() -> Router {
                                         "http_server_failure".to_string()
                                     }
                                 };
-                                hypr_observability::mark_span_as_error(span, error_type.as_str());
+                                meeki_observability::mark_span_as_error(span, error_type.as_str());
                                 tracing::error!(
                                     parent: span,
                                     error.type = %error_type,
@@ -537,8 +537,8 @@ async fn app() -> Router {
         )
 }
 
-fn build_analytics_client(env: &Env) -> Arc<hypr_analytics::AnalyticsClient> {
-    let mut builder = hypr_analytics::AnalyticsClientBuilder::default();
+fn build_analytics_client(env: &Env) -> Arc<meeki_analytics::AnalyticsClient> {
+    let mut builder = meeki_analytics::AnalyticsClientBuilder::default();
     if cfg!(debug_assertions) {
         tracing::info!("analytics: dev mode, printing events as tracing");
     } else {
@@ -588,7 +588,7 @@ fn main() -> std::io::Result<()> {
 
     let observability = observability::init("api", &env.observability);
 
-    hypr_transcribe_proxy::ApiKeys::from(&env.stt.stt).log_configured_providers();
+    meeki_transcribe_proxy::ApiKeys::from(&env.stt.stt).log_configured_providers();
 
     tokio::runtime::Builder::new_multi_thread()
         .enable_all()
@@ -598,8 +598,8 @@ fn main() -> std::io::Result<()> {
             let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
             let app = app().await;
             let cancellation = CancellationToken::new();
-            let worker_task = env.anarlog_attachment_backup_gc_enabled.then(|| {
-                let cloudsync_cleanup = hypr_api_subscription::CloudsyncCleanupConfig::new(
+            let worker_task = env.meeki_attachment_backup_gc_enabled.then(|| {
+                let cloudsync_cleanup = meeki_api_subscription::CloudsyncCleanupConfig::new(
                     env.sync
                         .sqlitecloud_project_url
                         .as_deref()
@@ -609,7 +609,7 @@ fn main() -> std::io::Result<()> {
                         .as_deref()
                         .unwrap_or_default(),
                     env.sync
-                        .anarlog_cloudsync_e2ee_database_id
+                        .meeki_cloudsync_e2ee_database_id
                         .as_deref()
                         .unwrap_or_default(),
                     env.sqlitecloud_cloudsync_management_api_key
@@ -617,13 +617,13 @@ fn main() -> std::io::Result<()> {
                         .unwrap_or_default(),
                 )
                 .unwrap_or_else(|error| panic!("Failed to load environment: {error}"));
-                let config = hypr_api_subscription::SubscriptionConfig::new(
+                let config = meeki_api_subscription::SubscriptionConfig::new(
                     &env.supabase,
                     &env.stripe,
                     &env.loops,
                 )
                 .with_cloudsync_cleanup(cloudsync_cleanup);
-                let worker = hypr_api_subscription::CleanupWorker::new(&config);
+                let worker = meeki_api_subscription::CleanupWorker::new(&config);
                 let worker_cancellation = cancellation.clone();
                 tokio::spawn(worker.run(worker_cancellation))
             });
@@ -693,7 +693,7 @@ async fn version() -> &'static str {
 }
 
 fn configure_sentry_trace_scope(span: &tracing::Span, env: &Env, request_started_at: SystemTime) {
-    let Some(trace_identifiers) = hypr_observability::span_identifiers(span) else {
+    let Some(trace_identifiers) = meeki_observability::span_identifiers(span) else {
         return;
     };
 
@@ -723,7 +723,7 @@ fn configure_sentry_trace_scope(span: &tracing::Span, env: &Env, request_started
 
 fn build_honeycomb_trace_url(
     env: &Env,
-    trace_identifiers: &hypr_observability::TraceIdentifiers,
+    trace_identifiers: &meeki_observability::TraceIdentifiers,
     request_started_at: SystemTime,
 ) -> Option<String> {
     let team = env.observability.honeycomb_ui_team.as_deref()?;
@@ -814,8 +814,8 @@ kHmPRiazukxPLb6ilpRAewjW8nihRANCAATDskChT+Altkm9X7MI69T3IUmrQU0L\n\
             .build()
     }
 
-    fn test_sync_state(server: &MockServer) -> hypr_api_sync::AppState {
-        let config = hypr_api_sync::SyncConfig::new(
+    fn test_sync_state(server: &MockServer) -> meeki_api_sync::AppState {
+        let config = meeki_api_sync::SyncConfig::new(
             "https://test.sqlite.cloud",
             "issuer-key",
             "database-id",
@@ -826,7 +826,7 @@ kHmPRiazukxPLb6ilpRAewjW8nihRANCAATDskChT+Altkm9X7MI69T3IUmrQU0L\n\
         .unwrap()
         .with_token_ttl_seconds(60)
         .unwrap();
-        hypr_api_sync::AppState::new(config)
+        meeki_api_sync::AppState::new(config)
     }
 
     async fn response_bytes(response: axum::response::Response) -> Vec<u8> {

@@ -32,7 +32,7 @@ waived by the user) before running the release-new-version skill.
    a different Supabase project require a rebuild and cannot pass this gate.
 
    The helper owns a clean, persistent Cargo cache under
-   `~/Library/Caches/anarlog`; never point it at the repository's `target`
+   `~/Library/Caches/meeki`; never point it at the repository's `target`
    directory or clone that directory into the QA cache. The repository cache
    can contain enough old, provenance-tracked proc-macro dylibs for macOS
    assessment to stall `rustc` for minutes. Native builds use the full Xcode
@@ -57,7 +57,7 @@ waived by the user) before running the release-new-version skill.
    Pin release-gate builds to the intended 40-character candidate commit:
 
    ```bash
-   ANARLOG_QA_GIT_SHA=<candidate-commit-sha> \
+   MEEKI_QA_GIT_SHA=<candidate-commit-sha> \
      .agents/skills/qa-critical-ux/scripts/run-native-dev-qa.sh
    ```
 
@@ -120,7 +120,7 @@ waived by the user) before running the release-new-version skill.
    inputs match the candidate commit. Record
    `git_head_sha`, which is the candidate commit rather than GitButler's
    synthetic workspace HEAD. The manifest is
-   `${ANARLOG_QA_TARGET_DIR:-$HOME/Library/Caches/anarlog/native-dev-qa-target}/.anarlog-native-dev-qa-manifest`.
+   `${MEEKI_QA_TARGET_DIR:-$HOME/Library/Caches/meeki/native-dev-qa-target}/.meeki-native-dev-qa-manifest`.
 2. Require every Dev gate to pass, then trigger `desktop_cd.yaml` with
    `channel=staging` from a branch or ref whose tip is that exact SHA. Verify
    the Actions run's head SHA matches the manifest before testing it.
@@ -169,7 +169,7 @@ tests alone is not cross-platform evidence.
   opens the native-protocol prompt without a click; accepting it signs the
   desktop app in.
 - Sign out, repeat the flow, dismiss the automatic prompt, then click the
-  page's **Open Anarlog** button. PASS when the button opens the same native
+  page's **Open Meeki** button. PASS when the button opens the same native
   prompt and completes desktop sign-in without a duplicate or expired-link
   error.
 - Sign out once more with CloudSync enabled. The app must return promptly to
@@ -284,7 +284,7 @@ tests alone is not cross-platform evidence.
 | --- | --- |
 | On-device | Settings → AI: select local STT model and local LLM; sign-out state is also worth one pass |
 | API keys | Settings → AI: configure a custom provider with an API key for both STT (if supported) and LLM |
-| Pro plan | Settings → AI: select Anarlog cloud (`hyprnote` provider) with a Pro/trialing account |
+| Pro plan | Settings → AI: select Meeki cloud (`hyprnote` provider) with a Pro/trialing account |
 
 - PASS when: steps 3–6 behave identically in outcome under each config
   (transcript + chat + automated summary), with provider-appropriate quality.

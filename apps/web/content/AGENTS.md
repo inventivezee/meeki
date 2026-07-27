@@ -2,15 +2,15 @@
 
 All content created under this directory must follow the positioning below.
 
-## What Anarlog Is
+## What Meeki Is
 
-Anarlog is the open-source AI meeting notetaker. It runs on your machine, keeps its canonical meeting data in local SQLite, and is MIT-licensed. The app you previously knew as "Char" is now Anarlog.
+Meeki is the open-source AI meeting notetaker. It runs on your machine, keeps its canonical meeting data in local SQLite, and is MIT-licensed. The app you previously knew as "Char" is now Meeki.
 
-> Note: This blog lives at anarlog.so. The brand "Char" still exists, but it's a different product now (an agentic todo notepad — see char.com). All content under this directory is for **Anarlog**, the meeting notetaker.
+> Note: This blog lives at meeki.so. The brand "Char" still exists, but it's a different product now (an agentic todo notepad — see char.com). All content under this directory is for **Meeki**, the meeting notetaker.
 
 ## Core Philosophy
 
-**Zero lock-in.** Anarlog gives users control over their local meeting data, AI stack, and workflow. Markdown is an export format, not the canonical storage model.
+**Zero lock-in.** Meeki gives users control over their local meeting data, AI stack, and workflow. Markdown is an export format, not the canonical storage model.
 
 **Local-first, not file-based.** Sessions, notes, transcripts, and meeting metadata are stored locally in SQLite. Attachments remain separate local files. Users can export Markdown or other formats when they need them.
 
@@ -41,7 +41,7 @@ Anarlog is the open-source AI meeting notetaker. It runs on your machine, keeps 
 
 **Your choice of AI stack**
 
-- Managed cloud service (kept through the Char→Anarlog migration window)
+- Managed cloud service (kept through the Char→Meeki migration window)
 - Bring your own API keys (OpenAI, Deepgram, Anthropic, others)
 - Run local models (via Ollama or LM Studio)
 
@@ -63,7 +63,7 @@ Anarlog is the open-source AI meeting notetaker. It runs on your machine, keeps 
 - 45+ language support
 - Optional end-to-end encrypted CloudSync and note sharing for Pro users
 
-## What Makes Anarlog Different
+## What Makes Meeki Different
 
 **vs. Other AI notetakers (Granola, Otter, Fireflies, Fathom, tldv):**
 
@@ -116,9 +116,9 @@ A meeting notetaker that gives complete control without getting in your way. Cle
 
 ## Critical Reminders
 
-- **Name:** Always use "Anarlog" for the meeting notetaker. "Char" is the legacy name (the app pre-rename) AND a different product (the agentic todo notepad at char.com). Don't conflate them in content.
+- **Name:** Always use "Meeki" for the meeting notetaker. "Char" is the legacy name (the app pre-rename) AND a different product (the agentic todo notepad at char.com). Don't conflate them in content.
 - **Hyprnote** is the original product name — only mention in historical context.
-- **Don't recommend Char as a "managed Anarlog"** — Char is a different product (delegation/todos), not a managed cloud version of the meeting notetaker.
+- **Don't recommend Char as a "managed Meeki"** — Char is a different product (delegation/todos), not a managed cloud version of the meeting notetaker.
 - **Tone:** Direct, engineering-minded, respects user intelligence
 - **Focus:** Zero lock-in, true ownership, complete control, open source
 - **Avoid:** Generic productivity language, corporate marketing speak, fear-based messaging

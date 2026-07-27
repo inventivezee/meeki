@@ -1,1 +1,1 @@
-export { default } from "@hypr/ui/postcss.config";
+export { default } from "@meeki/ui/postcss.config";

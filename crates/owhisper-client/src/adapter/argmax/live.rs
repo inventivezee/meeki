@@ -1,4 +1,4 @@
-use hypr_ws_client::client::Message;
+use meeki_ws_client::client::Message;
 use owhisper_interface::ListenParams;
 use owhisper_interface::stream::StreamResponse;
 
@@ -14,7 +14,7 @@ impl RealtimeSttAdapter for ArgmaxAdapter {
 
     fn is_supported_languages(
         &self,
-        languages: &[hypr_language::Language],
+        languages: &[meeki_language::Language],
         model: Option<&str>,
     ) -> bool {
         ArgmaxAdapter::is_supported_languages_live(languages, model)
@@ -90,7 +90,7 @@ struct ArgmaxError {
 
 #[cfg(test)]
 mod tests {
-    use hypr_language::ISO639;
+    use meeki_language::ISO639;
 
     use super::ArgmaxAdapter;
     use crate::ListenClient;
@@ -204,7 +204,7 @@ mod tests {
         test_build_single,
         owhisper_interface::ListenParams {
             model: Some("large-v3-v20240930_626MB".to_string()),
-            languages: vec![hypr_language::ISO639::En.into()],
+            languages: vec![meeki_language::ISO639::En.into()],
             ..Default::default()
         }
     );
@@ -213,7 +213,7 @@ mod tests {
         test_single_with_keywords,
         owhisper_interface::ListenParams {
             model: Some("large-v3-v20240930_626MB".to_string()),
-            languages: vec![hypr_language::ISO639::En.into()],
+            languages: vec![meeki_language::ISO639::En.into()],
             keywords: vec!["Hyprnote".to_string(), "transcription".to_string()],
             ..Default::default()
         }
@@ -228,7 +228,7 @@ mod tests {
             .api_key("")
             .params(owhisper_interface::ListenParams {
                 model: Some("large-v3-v20240930_626MB".to_string()),
-                languages: vec![hypr_language::ISO639::En.into()],
+                languages: vec![meeki_language::ISO639::En.into()],
                 ..Default::default()
             })
             .build_dual()

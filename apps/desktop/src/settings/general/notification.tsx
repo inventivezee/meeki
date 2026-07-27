@@ -8,10 +8,10 @@ import {
   commands as detectCommands,
   type InstalledApp,
   type Result,
-} from "@hypr/plugin-detect";
-import { commands as notificationCommands } from "@hypr/plugin-notification";
-import { Badge } from "@hypr/ui/components/ui/badge";
-import { Button } from "@hypr/ui/components/ui/button";
+} from "@meeki/plugin-detect";
+import { commands as notificationCommands } from "@meeki/plugin-notification";
+import { Badge } from "@meeki/ui/components/ui/badge";
+import { Button } from "@meeki/ui/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -19,22 +19,22 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@hypr/ui/components/ui/command";
+} from "@meeki/ui/components/ui/command";
 import {
   AppFloatingPanel,
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@hypr/ui/components/ui/popover";
+} from "@meeki/ui/components/ui/popover";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@hypr/ui/components/ui/select";
-import { Switch } from "@hypr/ui/components/ui/switch";
-import { cn } from "@hypr/utils";
+} from "@meeki/ui/components/ui/select";
+import { Switch } from "@meeki/ui/components/ui/switch";
+import { cn } from "@meeki/utils";
 
 import {
   getIgnoredBundleIds,

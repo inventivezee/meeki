@@ -1,4 +1,4 @@
-import { md2json, parseJsonContent } from "@hypr/editor/markdown";
+import { md2json, parseJsonContent } from "@meeki/editor/markdown";
 
 import type { TaskConfig } from ".";
 

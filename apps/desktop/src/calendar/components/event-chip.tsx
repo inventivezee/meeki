@@ -3,14 +3,14 @@ import { format } from "date-fns";
 import { Loader2Icon } from "lucide-react";
 import { useCallback, useMemo } from "react";
 
-import { Button } from "@hypr/ui/components/ui/button";
+import { Button } from "@meeki/ui/components/ui/button";
 import {
   AppFloatingPanel,
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@hypr/ui/components/ui/popover";
-import { cn } from "@hypr/utils";
+} from "@meeki/ui/components/ui/popover";
+import { cn } from "@meeki/utils";
 
 import { toTz, useTimezone } from "~/calendar/hooks";
 import { useIgnoredEvents } from "~/calendar/ignored-events";

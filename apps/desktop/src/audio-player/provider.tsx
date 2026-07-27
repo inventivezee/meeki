@@ -12,7 +12,7 @@ import {
 } from "react";
 import WaveSurfer from "wavesurfer.js";
 
-import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
+import { commands as fsSyncCommands } from "@meeki/plugin-fs-sync";
 
 import { useBillingAccess } from "~/auth/billing-context";
 import { isSessionAudioIdle } from "~/services/audio-retention";

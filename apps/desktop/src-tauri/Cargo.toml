@@ -3,7 +3,7 @@ name = "desktop"
 version = "0.0.0"
 authors = ["you"]
 edition = "2024"
-description = "Anarlog Desktop App"
+description = "Meeki Desktop App"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -85,13 +85,13 @@ tauri-plugin-updater2 = { workspace = true }
 tauri-plugin-window-state = { workspace = true }
 tauri-plugin-windows = { workspace = true }
 
-hypr-audio-actual = { workspace = true }
-hypr-audio-mock = { workspace = true, optional = true }
-hypr-db-app = { workspace = true }
-hypr-db-core = { workspace = true }
-hypr-host = { workspace = true }
-hypr-storage = { workspace = true }
-hypr-supervisor = { workspace = true }
+meeki-audio-actual = { workspace = true }
+meeki-audio-mock = { workspace = true, optional = true }
+meeki-db-app = { workspace = true }
+meeki-db-core = { workspace = true }
+meeki-host = { workspace = true }
+meeki-storage = { workspace = true }
+meeki-supervisor = { workspace = true }
 
 chrono = { workspace = true }
 dirs = { workspace = true }
@@ -110,13 +110,13 @@ tracing = { workspace = true }
 
 [features]
 default = []
-dev = ["dep:hypr-audio-mock"]
-devtools = ["tauri/devtools", "dep:hypr-audio-mock"]
+dev = ["dep:meeki-audio-mock"]
+devtools = ["tauri/devtools", "dep:meeki-audio-mock"]
 automation = ["tauri-plugin-automation"]
 
 [target.'cfg(target_os = "macos")'.dependencies]
 tauri-plugin-automation = { version = "0.1", optional = true }
-hypr-intercept = { workspace = true }
+meeki-intercept = { workspace = true }
 
 [dev-dependencies]
 tempfile = { workspace = true }

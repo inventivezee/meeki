@@ -1,10 +1,10 @@
 import { useCallback, useRef } from "react";
 
-import { commands as analyticsCommands } from "@hypr/plugin-analytics";
-import { beginCloudsyncActivity } from "@hypr/plugin-db";
-import { commands as detectCommands } from "@hypr/plugin-detect";
-import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
-import { sonnerToast } from "@hypr/ui/components/ui/toast";
+import { commands as analyticsCommands } from "@meeki/plugin-analytics";
+import { beginCloudsyncActivity } from "@meeki/plugin-db";
+import { commands as detectCommands } from "@meeki/plugin-detect";
+import { commands as fsSyncCommands } from "@meeki/plugin-fs-sync";
+import { sonnerToast } from "@meeki/ui/components/ui/toast";
 
 import { useListener } from "./contexts";
 import { startMeetingChatCapture } from "./meeting-chat-capture";
@@ -67,7 +67,7 @@ import {
 } from "~/stt/queries";
 
 export const MEETING_DISCLOSURE_MESSAGE =
-  "I'm using Meety to record and transcribe this meeting.";
+  "I'm using Meeki to record and transcribe this meeting.";
 
 const MEETING_DISCLOSURE_MAX_ATTEMPTS = 30;
 const MEETING_DISCLOSURE_RETRY_INTERVAL_MS = 1_000;
@@ -99,7 +99,7 @@ function meetingDisclosureFailure(reason: unknown): MeetingDisclosureOutcome {
   const detail = reason instanceof Error ? reason.message : String(reason);
   console.warn("[listener] meeting disclosure was not sent", reason);
   sonnerToast.warning(
-    "Recording started, but Meety could not post the meeting chat disclosure.",
+    "Recording started, but Meeki could not post the meeting chat disclosure.",
     { id: "meeting-disclosure-send-failed" },
   );
   return { status: "notSent", reason: detail };
@@ -613,7 +613,7 @@ function useCaptureLifecycle(sessionId: string) {
               reportCaptureErrorOnce({
                 id: captureTranscriptIncompleteErrorId(sessionId),
                 message:
-                  "Anarlog could not finish saving the transcript. The recording was kept so you can try again.",
+                  "Meeki could not finish saving the transcript. The recording was kept so you can try again.",
                 variant: "error",
               });
             } else {
@@ -638,8 +638,8 @@ function useCaptureLifecycle(sessionId: string) {
               ? captureTranscriptIncompleteErrorId(sessionId)
               : `capture-error:live-transcript-persist:${sessionId}`,
             message: details.audioPath
-              ? "Anarlog could not finish saving the transcript. The recording was kept so you can try again."
-              : "Anarlog could not save part of the live transcript.",
+              ? "Meeki could not finish saving the transcript. The recording was kept so you can try again."
+              : "Meeki could not save part of the live transcript.",
             variant: "error",
           });
         }
@@ -705,7 +705,7 @@ function useCaptureLifecycle(sessionId: string) {
                 error,
               );
               sonnerToast.error(
-                "The transcript was saved, but Anarlog could not start the summary. Try generating it again.",
+                "The transcript was saved, but Meeki could not start the summary. Try generating it again.",
                 { id: "post-capture-summary-failed" },
               );
               await requestRecovery();
@@ -723,7 +723,7 @@ function useCaptureLifecycle(sessionId: string) {
             summaryScheduled = false;
             console.error("[listener] failed to schedule summary", error);
             sonnerToast.error(
-              "The transcript was saved, but Anarlog could not start the summary. Try generating it again.",
+              "The transcript was saved, but Meeki could not start the summary. Try generating it again.",
               { id: "post-capture-summary-failed" },
             );
           }
@@ -1146,7 +1146,7 @@ export function useStartListening(sessionId: string) {
         );
       }
       sonnerToast.error(
-        "Anarlog could not safely start recording. Please try again.",
+        "Meeki could not safely start recording. Please try again.",
         { id: "capture-state-persist-failed" },
       );
       return;
@@ -1176,7 +1176,7 @@ export function useStartListening(sessionId: string) {
         );
       }
       sonnerToast.error(
-        "Anarlog could not safely start recording. Please try again.",
+        "Meeki could not safely start recording. Please try again.",
         { id: "capture-state-persist-failed" },
       );
       return;
@@ -1221,7 +1221,7 @@ export function useStartListening(sessionId: string) {
         await lifecycle.releaseCloudsyncLease();
       }
       sonnerToast.error(
-        "Anarlog could not safely start recording. Please try again.",
+        "Meeki could not safely start recording. Please try again.",
         { id: "capture-state-persist-failed" },
       );
       return;
@@ -1234,7 +1234,7 @@ export function useStartListening(sessionId: string) {
       } catch (error) {
         console.error("[listener] failed to clean up capture state", error);
         sonnerToast.error(
-          "Anarlog could not safely start recording. Please try again.",
+          "Meeki could not safely start recording. Please try again.",
           { id: "capture-state-persist-failed" },
         );
       } finally {

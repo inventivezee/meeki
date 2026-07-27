@@ -1,6 +1,6 @@
 # Product Requirements Document (PRD)
 
-**Product:** Anarlog (this repository; historically Hyprnote; forkable as Meety)  
+**Product:** Meeki (this repository; historically Hyprnote; forkable as Meeki)  
 **License:** MIT  
 **Status:** Living reference of *current* product behavior and architecture  
 **Last updated:** 2026-07-26  
@@ -14,7 +14,7 @@ This document describes what the app does today and how it is built, so future e
 
 ### 1.1 Positioning
 
-Anarlog is an **open-source, local-first AI meeting notetaker**. It records meetings without joining as a bot (mic + system audio), transcribes (on-device and/or cloud/BYOK), stores canonical data in **local SQLite**, and supports editable memos, AI summaries, transcripts, calendar linkage, contacts, templates, chat, CLI/MCP, and optional cloud features (auth, hosted AI, CloudSync, sharing).
+Meeki is an **open-source, local-first AI meeting notetaker**. It records meetings without joining as a bot (mic + system audio), transcribes (on-device and/or cloud/BYOK), stores canonical data in **local SQLite**, and supports editable memos, AI summaries, transcripts, calendar linkage, contacts, templates, chat, CLI/MCP, and optional cloud features (auth, hosted AI, CloudSync, sharing).
 
 Tagline framing in README: *“Granola, rearranged.”*
 
@@ -32,14 +32,14 @@ Tagline framing in README: *“Granola, rearranged.”*
 | Principle | Behavior today |
 |-----------|----------------|
 | Local-first | Sessions, notes, transcripts live in local SQLite; audio/attachments are local files by default |
-| Privacy-first | On-device STT and BYOK LLM keep data off Anarlog servers when configured that way |
+| Privacy-first | On-device STT and BYOK LLM keep data off Meeki servers when configured that way |
 | Optional cloud | Auth, hosted STT/LLM, CloudSync, Google/Outlook, sharing are opt-in |
 | Sessions as hub | All notes are backed by sessions (`AGENTS.md`) |
-| Forkable | MIT; package/crate names still use `@hypr/*` / `hypr-*` historically |
+| Forkable | MIT; package/crate names still use `@meeki/*` / `meeki-*` historically |
 
 ### 1.4 Name / branding history
 
-Hyprnote → brief “char” naming → split: **[char](https://char.com)** is the team’s current commercial productivity app; **this repo** remains the OSS meeting notetaker (anarlog). Docs: https://docs.anarlog.so
+Hyprnote → brief “char” naming → split: **[char](https://char.com)** is the team’s current commercial productivity app; **this repo** remains the OSS meeting notetaker (meeki). Docs: https://docs.meeki.so
 
 ---
 
@@ -69,7 +69,7 @@ From product docs and `packages/pricing/src/tiers.ts`:
 
 Entitlement keys: `hyprnote_pro`, `hyprnote_lite` (Lite counts as paid for many STT/LLM/integration gates; Pro-only for CloudSync / some share / E2EE APIs).
 
-- Hosted (Anarlog) cloud transcription — **the hosted cloud LLM provider was removed from the desktop app** (§2.6)
+- Hosted (Meeki) cloud transcription — **the hosted cloud LLM provider was removed from the desktop app** (§2.6)
 - Local ↔ cloud sync (E2EE CloudSync)
 - Google Calendar / Outlook Calendar (via Nango + API)
 - Shareable links / invites / public slugs (partial DocSend-like features)
@@ -78,7 +78,7 @@ Entitlement keys: `hyprnote_pro`, `hyprnote_lite` (Lite counts as paid for many 
 - Playback rate controls gated Pro in desktop UI
 - Trial path (configured in `packages/pricing`; Stripe-backed)
 
-**Meety fork note:** Comp / admin Pro without Stripe is supported via `private.pro_grants` (Supabase auth hook) and client env `VITE_FORCE_PRO` / `VITE_PRO_GRANT_EMAILS`. Stripe remains for charging other users later. Cloud Pro features still require *your* API + Supabase, not upstream Anarlog servers.
+**Meeki fork note:** Comp / admin Pro without Stripe is supported via `private.pro_grants` (Supabase auth hook) and client env `VITE_FORCE_PRO` / `VITE_PRO_GRANT_EMAILS`. Stripe remains for charging other users later. Cloud Pro features still require *your* API + Supabase, not upstream Meeki servers.
 
 ### 2.3 Meetings & recording
 
@@ -97,7 +97,7 @@ Entitlement keys: `hyprnote_pro`, `hyprnote_lite` (Lite counts as paid for many 
 
 Each session exposes:
 
-- **Memo** — user notes (TipTap / ProseMirror via `@hypr/editor`)
+- **Memo** — user notes (TipTap / ProseMirror via `@meeki/editor`)
 - **Summary** — AI-enhanced / template output (`session_documents` kinds)
 - **Transcript** — word-level JSON + speaker hints
 - Title, participants, tags, action items, attachments
@@ -119,7 +119,7 @@ Powers summaries, titles, and chat. Templates + Auto prompt customize summaries 
 `cloudflare_workers_ai`, `anthropic`, `mistral`, `azure_openai`, `azure_ai`,
 `google_generative_ai`, `custom`.
 
-The hosted **`hyprnote` / "Anarlog Pro" LLM provider was removed.** Its auth + entitlement
+The hosted **`hyprnote` / "Meeki Pro" LLM provider was removed.** Its auth + entitlement
 gate, the "Upgrade to Pro" redirect on provider select, and the "Pro (Cloud)" model label are
 gone. Installs still pointing at it are cleared on launch (`apps/desktop/src/auth/billing.tsx`,
 `RETIRED_HOSTED_LLM_PROVIDER`). Note the id `hyprnote` still exists on the **STT** side, where
@@ -133,7 +133,7 @@ it means *on-device Soniqo* — see §2.7.
   Provider id is `hyprnote`, displayed as **"On device"** — this is *not* the removed cloud LLM provider.
 - Live capture always uses `soniqo-parakeet-streaming` (preview only, never persisted); the saved
   transcript comes from a batch pass with `soniqo-qwen3-large` by default.
-- Hosted Anarlog cloud STT (`{VITE_API_URL}/stt`, model id `cloud`) still exists in code but is
+- Hosted Meeki cloud STT (`{VITE_API_URL}/stt`, model id `cloud`) still exists in code but is
   hidden from the picker.
 - BYO: Deepgram, AssemblyAI, OpenAI, Cartesia, Gladia, Soniox, ElevenLabs, Mistral, Fireworks, Pyannote, Aquavoice, custom, etc. (`settings/ai/stt/shared.tsx`)
 
@@ -156,9 +156,9 @@ it means *on-device Soniqo* — see §2.7.
 
 ### 2.10 Agent / CLI surfaces
 
-- `anarlog` CLI: list/get/note/transcript/history/export meetings; `doctor`; `mcp`
+- `meeki` CLI: list/get/note/transcript/history/export meetings; `doctor`; `mcp`
 - MCP tools: `list_meetings`, `get_meeting`, `get_meeting_transcript`, `get_recurring_meeting_history`
-- Desktop Settings → Developers → install CLI to `~/.local/bin/anarlog`
+- Desktop Settings → Developers → install CLI to `~/.local/bin/meeki`
 
 ### 2.11 Non-goals / out of scope for “core local”
 
@@ -177,13 +177,13 @@ apps/
   desktop/     # Primary product — Tauri 2 + React (Vite)
   web/         # Marketing, auth/billing UI, share viewers, admin APIs
   api/         # Axum backend (proxies, sync, billing, integrations)
-  cli/         # anarlog CLI + MCP
+  cli/         # meeki CLI + MCP
   stripe/      # Stripe ↔ Supabase sync worker
-packages/      # Shared TS (@hypr/db, editor, ui, supabase, pricing, …)
+packages/      # Shared TS (@meeki/db, editor, ui, supabase, pricing, …)
 plugins/       # Tauri plugins (Rust + JS bindings)
 crates/        # Rust domain (db-app, audio, STT, sync, API modules, …)
 supabase/      # Cloud Postgres migrations + RLS tests
-docs/          # User docs (Mintlify → docs.anarlog.so)
+docs/          # User docs (Mintlify → docs.meeki.so)
 legacy/        # Importers / legacy parsers
 ```
 
@@ -223,10 +223,10 @@ Web: marketing · account/checkout · share viewers · ops admin APIs
 |-------|--------|
 | Shell | Tauri 2 (`apps/desktop/src-tauri`) |
 | UI | React 19, Vite, TanStack Router / Query / Form |
-| Editor | `@hypr/editor` (ProseMirror); styles in `@hypr/tiptap` |
-| Styling | Tailwind + `@hypr/ui`; `cn` from `@hypr/utils`; `motion/react` |
+| Editor | `@meeki/editor` (ProseMirror); styles in `@meeki/tiptap` |
+| Styling | Tailwind + `@meeki/ui`; `cn` from `@meeki/utils`; `motion/react` |
 | i18n | Lingui |
-| DB access | Drizzle schema mirror (`packages/db`) + `useDrizzleLiveQuery` (`packages/db-react`) over `@hypr/plugin-db` |
+| DB access | Drizzle schema mirror (`packages/db`) + `useDrizzleLiveQuery` (`packages/db-react`) over `@meeki/plugin-db` |
 | Schema SoT | Rust SQL migrations in `crates/db-app/migrations/` |
 
 ### 3.4 Data stores
@@ -260,7 +260,7 @@ Weights are never bundled — they download from Hugging Face on demand.
 | Concern | Detail |
 |---------|--------|
 | Runtime | `llama-server` + dylibs (~50 MB) at `Contents/Resources/llama-cpp/` |
-| Fetched by | `apps/desktop/src-tauri/scripts/prepare-llama-cpp.mjs` (release `b10067`, macOS arm64; override `MEETY_LLAMA_CPP_RELEASE`) |
+| Fetched by | `apps/desktop/src-tauri/scripts/prepare-llama-cpp.mjs` (release `b10067`, macOS arm64; override `MEEKI_LLAMA_CPP_RELEASE`) |
 | Wired via | `tauri.conf.json` → `"resources/llama-cpp": "llama-cpp"`; `pnpm llama:prepare` runs before every app build |
 | Catalog | `crates/local-model/src/lib.rs` (`GgufLlmModel`) |
 | Selectable set | `crates/local-llm-core/src/model.rs` (`SUPPORTED_MODELS`, aarch64 only) |
@@ -298,11 +298,11 @@ keeps `min_memory_bytes()` and `recommended_model_for_memory()` from drifting ap
 
 ```
 --model <path> --host 127.0.0.1 --port <free>
---ctx-size 65536            # ANARLOG_LLM_CTX_SIZE, clamped 8192–262144
+--ctx-size 65536            # MEEKI_LLM_CTX_SIZE, clamped 8192–262144
 --reasoning-format deepseek # thoughts land in reasoning_content, never in the note
---reasoning-budget -1       # ANARLOG_LLM_THINK_BUDGET
+--reasoning-budget -1       # MEEKI_LLM_THINK_BUDGET
 --chat-template-kwargs {"enable_thinking":false}
---sleep-idle-seconds 300    # ANARLOG_LLM_SLEEP_IDLE_SECONDS
+--sleep-idle-seconds 300    # MEEKI_LLM_SLEEP_IDLE_SECONDS
 --alias <openai_model_id> -ngl 99
 ```
 
@@ -382,8 +382,8 @@ Supporting tables (later migrations): E2EE local state/dirty/witness, share cach
 
 ```text
 UI component
-  → useDrizzleLiveQuery / mutations (@hypr/db-react + Drizzle)
-  → @hypr/plugin-db execute/subscribe
+  → useDrizzleLiveQuery / mutations (@meeki/db-react + Drizzle)
+  → @meeki/plugin-db execute/subscribe
   → crates/db-* + migrations (db-app)
   → app.db
 ```
@@ -434,7 +434,7 @@ flowchart TB
 
 **Importing an existing audio file.** `AUDIO_EXTENSIONS` (`stt/useUploadFile.ts`) is the single
 source for the file-picker filters in both entry points and for the drop-overlay copy. Decoding
-is `hypr_audio_norm::normalize_file` → `rodio::Decoder::try_from(File)` with **no format hint**,
+is `meeki_audio_norm::normalize_file` → `rodio::Decoder::try_from(File)` with **no format hint**,
 so symphonia sniffs the content and the extension lists are advisory only; everything is
 re-encoded to a 16 kHz `audio.mp3`.
 
@@ -689,10 +689,10 @@ Webhook: `POST /nango/webhook` (no JWT)
 ## 9. CLI & MCP
 
 ```text
-anarlog [--base DIR] [--db-path FILE] [--json] <command>
+meeki [--base DIR] [--db-path FILE] [--json] <command>
 ```
 
-Env: `ANARLOG_BASE`, `ANARLOG_DB_PATH`.
+Env: `MEEKI_BASE`, `MEEKI_DB_PATH`.
 
 | Command | Behavior |
 |---------|----------|
@@ -700,7 +700,7 @@ Env: `ANARLOG_BASE`, `ANARLOG_DB_PATH`.
 | `doctor` | DB path + schema readiness |
 | `mcp` | Read-only MCP over stdio |
 
-Resources: `anarlog://meetings/{id}`, `…/transcript`, `anarlog://series/{series_id}`.
+Resources: `meeki://meetings/{id}`, `…/transcript`, `meeki://series/{series_id}`.
 
 Docs: `docs/reference/cli.mdx`, `docs/reference/mcp.mdx`.
 
@@ -727,22 +727,22 @@ Runtime env read by the Rust side (not Vite):
 
 | Variable | Purpose |
 |----------|---------|
-| `ANARLOG_LLM_CTX_SIZE` | Local LLM context window; default 65536, clamped 8192–262144 |
-| `ANARLOG_LLM_THINK_BUDGET` | Reasoning token budget; default `-1` (unrestricted) |
-| `ANARLOG_LLM_SLEEP_IDLE_SECONDS` | Idle seconds before llama-server unloads its weights; default 300, floored at 30, any value ≤ 0 disables sleeping |
-| `MEETY_LLAMA_CPP_RELEASE` | llama.cpp release tag fetched by `llama:prepare` |
-| `MEETY_HYPR_LLM_URL` | Re-enables the legacy HyprLLM download (disabled by default) |
+| `MEEKI_LLM_CTX_SIZE` | Local LLM context window; default 65536, clamped 8192–262144 |
+| `MEEKI_LLM_THINK_BUDGET` | Reasoning token budget; default `-1` (unrestricted) |
+| `MEEKI_LLM_SLEEP_IDLE_SECONDS` | Idle seconds before llama-server unloads its weights; default 300, floored at 30, any value ≤ 0 disables sleeping |
+| `MEEKI_LLAMA_CPP_RELEASE` | llama.cpp release tag fetched by `llama:prepare` |
+| `MEEKI_HYPR_LLM_URL` | Re-enables the legacy HyprLLM download (disabled by default) |
 
 ### 10.2 API / sync (selected)
 
-`SUPABASE_*`, `STRIPE_*`, `NANGO_*`, LLM/STT proxy keys, `SQLITECLOUD_*`, `ANARLOG_CLOUDSYNC_*`, `POSTHOG_API_KEY`, `SENTRY_DSN`, Loops/Exa/Jina/Pyannote as configured in `apps/api` + `crates/api-env` / `api-sync`.
+`SUPABASE_*`, `STRIPE_*`, `NANGO_*`, LLM/STT proxy keys, `SQLITECLOUD_*`, `MEEKI_CLOUDSYNC_*`, `POSTHOG_API_KEY`, `SENTRY_DSN`, Loops/Exa/Jina/Pyannote as configured in `apps/api` + `crates/api-env` / `api-sync`.
 
 ### 10.3 Local commands (from `AGENTS.md`)
 
 ```bash
 pnpm install
-pnpm -F @hypr/desktop tauri:dev
-pnpm -F @hypr/web dev
+pnpm -F @meeki/desktop tauri:dev
+pnpm -F @meeki/web dev
 cargo run -p api          # needs full env
 task supabase-start       # optional local Supabase
 pnpm exec dprint fmt
@@ -754,21 +754,21 @@ cargo check
 
 ## 10.4 Desktop packaging
 
-One lightweight product ships: **Anarlog**, built from `tauri.conf.thin.json`.
+One lightweight product ships: **Meeki**, built from `tauri.conf.thin.json`.
 
 ```bash
-pnpm -F @hypr/desktop tauri:build:app
+pnpm -F @meeki/desktop tauri:build:app
 # = llama:prepare → tauri build --config src-tauri/tauri.conf.thin.json
 #   → copy-packaging-artifacts.mjs
 ```
 
 | Config | Product | Bundle id | Purpose |
 |--------|---------|-----------|---------|
-| `tauri.conf.json` | Anarlog Dev | `com.hyprnote.dev` | base config, dev |
-| **`tauri.conf.thin.json`** | **Anarlog** | `com.hyprnote.dev.thin` | **shipping build**, targets `app` + `dmg` |
-| `tauri.conf.stable.json` | Anarlog | `com.hyprnote.stable` | updater disabled |
-| `tauri.conf.staging.json` | Anarlog Staging | `com.hyprnote.staging` | staging |
-| `tauri.conf.bundled-models.json` | Anarlog STT | `com.hyprnote.dev.stt` | archived; STT weights baked in |
+| `tauri.conf.json` | Meeki Dev | `com.meeki.dev` | base config, dev |
+| **`tauri.conf.thin.json`** | **Meeki** | `com.meeki.dev.thin` | **shipping build**, targets `app` + `dmg` |
+| `tauri.conf.stable.json` | Meeki | `com.meeki.stable` | updater disabled |
+| `tauri.conf.staging.json` | Meeki Staging | `com.meeki.staging` | staging |
+| `tauri.conf.bundled-models.json` | Meeki STT | `com.meeki.dev.stt` | archived; STT weights baked in |
 | `tauri.conf.macos-intel.json` / `flatpak.json` | — | — | other targets |
 
 `tauri:build:bundled` is deliberately disabled (`exit 1`) — the product downloads weights
@@ -779,12 +779,12 @@ rather than bundling them.
 the signing identifier is the binary name rather than the bundle id, `Info.plist` is not
 bound, and **the entitlements in `Entitlements.plist` are never applied** — which silently
 breaks microphone permission, because macOS cannot attribute or persist a TCC grant to such
-a bundle. A correct build reports `Identifier=com.hyprnote.dev.thin`,
+a bundle. A correct build reports `Identifier=com.meeki.dev.thin`,
 `flags=0x10002(adhoc,runtime)`, `Info.plist entries=22`.
 
 Builds are ad-hoc signed and not notarized, so other Macs warn on first open. After
 installing over a previously broken build, reset the stale grant:
-`tccutil reset All com.hyprnote.dev.thin`.
+`tccutil reset All com.meeki.dev.thin`.
 
 Artifacts land in `apps/desktop/src-tauri/target/release/bundle/` and are copied to
 `apps/desktop/dist-packaging/app/`. Copy signed bundles with `ditto`, not `cp -R`.
@@ -796,42 +796,42 @@ Approximate sizes: `.app` 422 MB, `.dmg` 188 MB.
 
 | Package | Purpose |
 |---------|---------|
-| `@hypr/db` | Drizzle schema + DB proxy |
-| `@hypr/db-react` | Reactive live-query hooks |
-| `@hypr/db-tauri` / `db-runtime` | Transport contracts |
-| `@hypr/editor` | Note editor |
-| `@hypr/tiptap` | Editor CSS |
-| `@hypr/ui` / `@hypr/utils` | UI + helpers |
-| `@hypr/supabase` | Client, JWT, `deriveBillingInfo`, Pro grant helpers |
-| `@hypr/pricing` | Plan tiers / trial policy |
-| `@hypr/api-client` | Generated OpenAPI client |
-| `@hypr/store` | Settings Zod schema |
-| `@hypr/changelog` | Changelog content |
-| `@hypr/plugin-sdk` | Plugin TS SDK |
-| `@hypr/agent-*` | Agent runtimes |
+| `@meeki/db` | Drizzle schema + DB proxy |
+| `@meeki/db-react` | Reactive live-query hooks |
+| `@meeki/db-tauri` / `db-runtime` | Transport contracts |
+| `@meeki/editor` | Note editor |
+| `@meeki/tiptap` | Editor CSS |
+| `@meeki/ui` / `@meeki/utils` | UI + helpers |
+| `@meeki/supabase` | Client, JWT, `deriveBillingInfo`, Pro grant helpers |
+| `@meeki/pricing` | Plan tiers / trial policy |
+| `@meeki/api-client` | Generated OpenAPI client |
+| `@meeki/store` | Settings Zod schema |
+| `@meeki/changelog` | Changelog content |
+| `@meeki/plugin-sdk` | Plugin TS SDK |
+| `@meeki/agent-*` | Agent runtimes |
 
 ---
 
 ## 12. Privacy, telemetry, and trust boundaries
 
-Meety fork P0 posture (2026-07-25):
+Meeki fork P0 posture (2026-07-25):
 
 - PostHog analytics **opt-in** (`telemetry_consent` default `false`; analytics plugin disabled until consent)
 - Sentry: JS only after consent + `VITE_SENTRY_DSN`; Rust requires `ENABLE_SENTRY=true` + `SENTRY_DSN`
 - Stable auto-updater **disabled** (no `desktop2.hyprnote.com`)
 - Whisper / common GGUF models download from Hugging Face (not hyprnote S3)
-- Argmax/AM packs and HyprLLM downloads disabled unless `MEETY_AM_*_URL` / `MEETY_HYPR_LLM_URL` set
-- Resource suggestions do not call `anarlog.so` unless `VITE_RESOURCE_SUGGESTIONS_URL` is set
+- Argmax/AM packs and HyprLLM downloads disabled unless `MEEKI_AM_*_URL` / `MEEKI_HYPR_LLM_URL` set
+- Resource suggestions do not call `meeki.so` unless `VITE_RESOURCE_SUGGESTIONS_URL` is set
 - Web prod `VITE_API_URL` has no upstream default (`api.char.com` removed)
 - Desktop upstream links removed (2026-07-26): changelog no longer fetches from
   `raw.githubusercontent.com/fastrepl/char` (this phoned home on every changelog view),
   onboarding Discord/GitHub/X buttons, tray "Report Bug" / "Suggest Feature" (which opened
-  `anarlog.so/discord`), `docs.anarlog.so` links in LM Studio / Ollama / CLI / MCP / calendar,
-  and `fastrepl/char` issue links. Publisher is now `Anarlog`.
+  `meeki.so/discord`), `docs.meeki.so` links in LM Studio / Ollama / CLI / MCP / calendar,
+  and `fastrepl/char` issue links. Publisher is now `Meeki`.
 - Local LLM weights come from Hugging Face (`unsloth/*`); the runtime comes from the
   `ggml-org/llama.cpp` GitHub release
 
-Still upstream, deliberately: `com.hyprnote.*` bundle identifiers (they own the data
+Still upstream, deliberately: `com.meeki.*` bundle identifiers (they own the data
 directory and Keychain entries — renaming loses existing user data), the legacy `hyprnote://`
 deep-link scheme, and CI / web / Supabase / Stripe infrastructure.
 
@@ -846,7 +846,7 @@ Hardening notes for forks: broad Tauri HTTP capability, unscoped `write_text_fil
 
 ## 13. User-facing documentation map
 
-Published at https://docs.anarlog.so — sources under `docs/`:
+Published at https://docs.meeki.so — sources under `docs/`:
 
 | Doc | Topic |
 |-----|-------|
@@ -875,7 +875,7 @@ Use these as “current product still works” checks when editing:
 5. **Apple Calendar** works without Pro; Google/Outlook require paid JWT + Nango.
 6. **Free user** cannot call Pro-only `/sync/token` without entitlement (or `pro_grants` / Stripe).
 7. **Admin grant path:** email in `private.pro_grants` or `VITE_FORCE_PRO` unlocks Pro UI; JWT grant required for API Pro routes.
-8. **CLI** `anarlog meetings list` reads the same `app.db` as the desktop app.
+8. **CLI** `meeki meetings list` reads the same `app.db` as the desktop app.
 9. **Export** produces Markdown/PDF from memo/summary/transcript as configured.
 10. **Schema changes** go through `crates/db-app/migrations/` + Drizzle mirror — never hand-edit production DB files.
 11. **On-device LLM one-click** — the settings card offers the model matching this Mac's RAM,
@@ -888,7 +888,7 @@ Use these as “current product still works” checks when editing:
 14. **Signed bundle** — a fresh `tauri:build:app` produces a bundle whose `codesign -dv` reports
     the real bundle id with `Info.plist` bound and the audio-input entitlement present.
 15. **No upstream phone-home** — opening the changelog, onboarding, or tray menus issues no
-    requests to `anarlog.so`, `hyprnote.com`, or `fastrepl/*`.
+    requests to `meeki.so`, `hyprnote.com`, or `fastrepl/*`.
 
 ---
 
@@ -900,7 +900,7 @@ When changing the product:
 2. Prefer local-first paths that degrade gracefully without cloud.
 3. Keep schema SoT in Rust migrations; TS consumes `execute`/`subscribe` only.
 4. Feature-gate paid cloud on JWT claims (not client-only flags) when API/RLS are involved.
-5. For Meety branding/fork work: rename surfaces (`@hypr/*`, bundle IDs, deep links, updater/CDN, telemetry) deliberately; do not silently keep upstream phone-home endpoints in production builds.
+5. For Meeki branding/fork work: rename surfaces (`@meeki/*`, bundle IDs, deep links, updater/CDN, telemetry) deliberately; do not silently keep upstream phone-home endpoints in production builds.
 
 ---
 
@@ -933,4 +933,4 @@ When changing the product:
 
 ---
 
-*End of PRD — current-state reference for Anarlog / Meety fork development.*
+*End of PRD — current-state reference for Meeki / Meeki fork development.*

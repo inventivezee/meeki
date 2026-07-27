@@ -1,7 +1,7 @@
 import { useCallback, useState, type ReactNode } from "react";
 
-import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
-import { sonnerToast } from "@hypr/ui/components/ui/toast";
+import { commands as fsSyncCommands } from "@meeki/plugin-fs-sync";
+import { sonnerToast } from "@meeki/ui/components/ui/toast";
 
 import {
   formatSttModelLabel,

@@ -127,7 +127,7 @@ mod tests {
     #[cfg(target_os = "macos")]
     #[tokio::test]
     async fn native_http_request_deadline_is_enforced() {
-        const CHILD_ENV: &str = "ANARLOG_CLOUDSYNC_TIMEOUT_TEST_CHILD";
+        const CHILD_ENV: &str = "MEEKI_CLOUDSYNC_TIMEOUT_TEST_CHILD";
 
         if std::env::var_os(CHILD_ENV).is_none() {
             let mut child = std::process::Command::new(std::env::current_exe().unwrap())

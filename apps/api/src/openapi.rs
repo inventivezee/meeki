@@ -30,17 +30,17 @@ pub struct ApiDoc;
 pub fn openapi() -> utoipa::openapi::OpenApi {
     let mut doc = ApiDoc::openapi();
 
-    let stt_doc = hypr_transcribe_proxy::openapi();
-    let llm_doc = hypr_llm_proxy::openapi();
-    let pyannote_doc = with_path_prefix(hypr_api_pyannote::openapi(), "/pyannote");
-    let calendar_doc = with_path_prefix(hypr_api_calendar::openapi(), "/calendar");
-    let mail_doc = with_path_prefix(hypr_api_mail::openapi(), "/mail");
-    let ticket_doc = with_path_prefix(hypr_api_ticket::openapi(), "/ticket");
-    let nango_doc = with_path_prefix(hypr_api_nango::openapi(), "/nango");
-    let subscription_doc = with_path_prefix(hypr_api_subscription::openapi(), "/subscription");
-    let support_doc = hypr_api_support::openapi();
-    let sync_doc = with_path_prefix(hypr_api_sync::openapi(), "/sync");
-    let shared_notes_doc = hypr_api_sync::shared_notes_openapi();
+    let stt_doc = meeki_transcribe_proxy::openapi();
+    let llm_doc = meeki_llm_proxy::openapi();
+    let pyannote_doc = with_path_prefix(meeki_api_pyannote::openapi(), "/pyannote");
+    let calendar_doc = with_path_prefix(meeki_api_calendar::openapi(), "/calendar");
+    let mail_doc = with_path_prefix(meeki_api_mail::openapi(), "/mail");
+    let ticket_doc = with_path_prefix(meeki_api_ticket::openapi(), "/ticket");
+    let nango_doc = with_path_prefix(meeki_api_nango::openapi(), "/nango");
+    let subscription_doc = with_path_prefix(meeki_api_subscription::openapi(), "/subscription");
+    let support_doc = meeki_api_support::openapi();
+    let sync_doc = with_path_prefix(meeki_api_sync::openapi(), "/sync");
+    let shared_notes_doc = meeki_api_sync::shared_notes_openapi();
 
     doc.merge(stt_doc);
     doc.merge(llm_doc);

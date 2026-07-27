@@ -9,9 +9,9 @@ pub use error::{Error, Result};
 pub use ext::*;
 use store::*;
 
-pub use hypr_analytics::*;
+pub use meeki_analytics::*;
 
-pub type ManagedState = hypr_analytics::AnalyticsClient;
+pub type ManagedState = meeki_analytics::AnalyticsClient;
 
 const PLUGIN_NAME: &str = "analytics";
 
@@ -47,7 +47,7 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
             });
 
             let client = {
-                let mut builder = hypr_analytics::AnalyticsClientBuilder::default();
+                let mut builder = meeki_analytics::AnalyticsClientBuilder::default();
                 if let Some(key) = posthog_key {
                     builder = builder.with_posthog(key);
                 }
@@ -84,7 +84,7 @@ mod test {
 
     fn create_app<R: tauri::Runtime>(builder: tauri::Builder<R>) -> tauri::App<R> {
         let mut ctx = tauri::test::mock_context(tauri::test::noop_assets());
-        ctx.config_mut().identifier = "com.hyprnote.dev".to_string();
+        ctx.config_mut().identifier = "com.meeki.dev".to_string();
         ctx.config_mut().version = Some("0.0.1".to_string());
 
         builder
@@ -101,7 +101,7 @@ mod test {
         let app = create_app(tauri::test::mock_builder());
         let result = app
             .analytics()
-            .event(hypr_analytics::AnalyticsPayload::builder("test_event").build())
+            .event(meeki_analytics::AnalyticsPayload::builder("test_event").build())
             .await;
         assert!(result.is_ok());
 

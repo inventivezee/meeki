@@ -339,8 +339,8 @@ mod tests {
     #[tokio::test]
     #[ignore = "requires audio hardware"]
     async fn test_mic_stream_with_resampling() {
-        use hypr_audio_utils::chunk_size_for_stt;
-        use hypr_resampler::ResampleExtDynamicNew;
+        use meeki_audio_utils::chunk_size_for_stt;
+        use meeki_resampler::ResampleExtDynamicNew;
 
         let mic = MicInput::new(None).unwrap();
         println!("mic device: {}", mic.device_name());

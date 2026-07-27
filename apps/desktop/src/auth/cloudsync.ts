@@ -2,7 +2,7 @@ import { t } from "@lingui/core/macro";
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import { hostname } from "@tauri-apps/plugin-os";
 
-import type { CloudsyncWorkspaceProjection } from "@hypr/plugin-db";
+import type { CloudsyncWorkspaceProjection } from "@meeki/plugin-db";
 import {
   bindCloudsyncAccount,
   configureCloudsyncToken,
@@ -13,10 +13,10 @@ import {
   suspendCloudsync,
   suspendCloudsyncAfterAuthLoss,
   suspendCloudsyncForSignOut,
-} from "@hypr/plugin-db";
-import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
-import { commands as miscCommands } from "@hypr/plugin-misc";
-import { sonnerToast } from "@hypr/ui/components/ui/toast";
+} from "@meeki/plugin-db";
+import { commands as fsSyncCommands } from "@meeki/plugin-fs-sync";
+import { commands as miscCommands } from "@meeki/plugin-misc";
+import { sonnerToast } from "@meeki/ui/components/ui/toast";
 
 import {
   startCloudsyncInitialSyncProgress,
@@ -62,7 +62,7 @@ type CloudsyncCredentials =
   | LegacyCloudsyncCredentials
   | ProjectedCloudsyncCredentials;
 
-const DEVICE_NAME_HEADER = "x-anarlog-device-name";
+const DEVICE_NAME_HEADER = "x-meeki-device-name";
 const DEVICE_LIMIT_ERROR_CODE = "sync_device_limit_reached";
 const DEVICE_LIMIT_TOAST_ID = "cloudsync-device-limit";
 
@@ -1293,7 +1293,7 @@ async function activateCloudsync(
     }
     const headers: Record<string, string> = {
       Authorization: `Bearer ${session.access_token}`,
-      "X-Anarlog-E2EE-Key-Id": encryptionKeyId,
+      "X-Meeki-E2EE-Key-Id": encryptionKeyId,
     };
     if (device.fingerprint) {
       headers[DEVICE_FINGERPRINT_HEADER] = device.fingerprint;
@@ -1394,9 +1394,7 @@ async function activateCloudsync(
         );
         return "ok";
       }
-      console.warn(
-        "[cloudsync] Anarlog Pro is required; sync remains disabled",
-      );
+      console.warn("[cloudsync] Meeki Pro is required; sync remains disabled");
       return "ok";
     }
 

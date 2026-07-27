@@ -8,8 +8,8 @@ import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 import { extractReasoningMiddleware, wrapLanguageModel } from "ai";
 import { useMemo } from "react";
 
-import type { CharTask } from "@hypr/api-client";
-import type { AIProviderStorage } from "@hypr/store";
+import type { CharTask } from "@meeki/api-client";
+import type { AIProviderStorage } from "@meeki/store";
 
 import { createWarmupFetch } from "~/ai/local-llm-warmup";
 import { useAuth } from "~/auth";

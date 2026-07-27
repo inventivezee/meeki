@@ -1,9 +1,9 @@
 use std::path::{Path, PathBuf};
 
-pub use hypr_am::AmModel;
-use hypr_model_downloader::{DownloadableModel, Error};
-pub use hypr_transcribe_soniqo::SoniqoModel;
-pub use hypr_whisper_local_model::WhisperModel;
+pub use meeki_am::AmModel;
+use meeki_model_downloader::{DownloadableModel, Error};
+pub use meeki_transcribe_soniqo::SoniqoModel;
+pub use meeki_whisper_local_model::WhisperModel;
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type, Eq, Hash, PartialEq)]
 pub enum GgufLlmModel {
@@ -57,8 +57,8 @@ impl GgufLlmModel {
                 "https://huggingface.co/lmstudio-community/Llama-3.2-3B-Instruct-GGUF/resolve/main/Llama-3.2-3B-Instruct-Q4_K_M.gguf"
             }
             // Proprietary package historically hosted on hyprnote CDN — disabled by default.
-            // Set MEETY_HYPR_LLM_URL at build time to re-enable downloads from your own host.
-            GgufLlmModel::HyprLLM => option_env!("MEETY_HYPR_LLM_URL").unwrap_or(""),
+            // Set MEEKI_HYPR_LLM_URL at build time to re-enable downloads from your own host.
+            GgufLlmModel::HyprLLM => option_env!("MEEKI_HYPR_LLM_URL").unwrap_or(""),
             GgufLlmModel::Gemma3_4bQ4 => {
                 "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q4_K_M.gguf"
             }
@@ -171,7 +171,7 @@ impl GgufLlmModel {
             GgufLlmModel::Gemma4_12bQ4Km => "gemma-4-12b",
             GgufLlmModel::Qwen3_4bQ4Km => "qwen3-4b",
             GgufLlmModel::Llama3p2_3bQ4 => "llm-llama3-2-3b-q4",
-            GgufLlmModel::HyprLLM => "llm-hypr-llm",
+            GgufLlmModel::HyprLLM => "llm-meeki-llm",
             GgufLlmModel::Gemma3_4bQ4 => "llm-gemma3-4b-q4",
         }
     }
@@ -354,7 +354,7 @@ impl DownloadableModel for GgufLlmModel {
         }
 
         let actual =
-            hypr_file::file_size(&path).map_err(|e| Error::OperationFailed(e.to_string()))?;
+            meeki_file::file_size(&path).map_err(|e| Error::OperationFailed(e.to_string()))?;
         Ok(gguf_size_matches(
             actual,
             self.model_size(),
@@ -422,7 +422,7 @@ impl DownloadableModel for LocalModel {
 
     fn is_downloaded(&self, models_base: &Path) -> Result<bool, Error> {
         match self {
-            LocalModel::Soniqo(model) => hypr_transcribe_soniqo::is_model_downloaded(*model)
+            LocalModel::Soniqo(model) => meeki_transcribe_soniqo::is_model_downloaded(*model)
                 .map_err(|e| Error::OperationFailed(e.to_string())),
             LocalModel::Whisper(model) => {
                 Ok(models_base.join("stt").join(model.file_name()).exists())
@@ -452,7 +452,7 @@ impl DownloadableModel for LocalModel {
 
     fn delete_downloaded(&self, models_base: &Path) -> Result<(), Error> {
         match self {
-            LocalModel::Soniqo(model) => hypr_transcribe_soniqo::delete_model(*model)
+            LocalModel::Soniqo(model) => meeki_transcribe_soniqo::delete_model(*model)
                 .map_err(|e| Error::DeleteFailed(e.to_string())),
             LocalModel::Whisper(model) => {
                 let model_path = models_base.join("stt").join(model.file_name());

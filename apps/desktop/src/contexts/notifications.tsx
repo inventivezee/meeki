@@ -13,8 +13,8 @@ import {
   events as localSttEvents,
   type ServerStatus,
   type LocalModel,
-} from "@hypr/plugin-local-stt";
-import { sonnerToast } from "@hypr/ui/components/ui/toast";
+} from "@meeki/plugin-local-stt";
+import { sonnerToast } from "@meeki/ui/components/ui/toast";
 
 import { useConfigValues } from "~/shared/config";
 import type { DownloadProgress } from "~/sidebar/toast/types";

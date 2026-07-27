@@ -41,7 +41,7 @@ define_class!(
             let action = response.actionIdentifier();
             let user_info = response.notification().request().content().userInfo();
             let key = user_info
-                .valueForKey(ns_string!("hypr_key"))
+                .valueForKey(ns_string!("meeki_key"))
                 .and_then(|v| v.downcast::<NSString>().ok())
                 .map(|s| s.to_string())
                 .unwrap_or_default();

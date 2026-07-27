@@ -3,7 +3,7 @@ use std::sync::{
     atomic::{AtomicU8, Ordering},
 };
 
-use hypr_download_interface::DownloadProgress;
+use meeki_download_interface::DownloadProgress;
 
 use crate::model::DownloadableModel;
 use crate::runtime::{DownloadStatus, ModelDownloaderRuntime};

@@ -1,5 +1,5 @@
 {
-  "name": "@hypr/plugin-calendar",
+  "name": "@meeki/plugin-calendar",
   "private": true,
   "main": "./js/index.ts",
   "scripts": {

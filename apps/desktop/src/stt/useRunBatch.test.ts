@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-import { beginCloudsyncActivity, endCloudsyncActivity } from "@hypr/plugin-db";
+import { beginCloudsyncActivity, endCloudsyncActivity } from "@meeki/plugin-db";
 
 import {
   canRunBatchTranscription,
@@ -59,7 +59,7 @@ vi.mock("./useSTTConnection", () => ({
   useSTTConnection: useSTTConnectionMock,
 }));
 
-vi.mock("@hypr/ui/components/ui/toast", () => ({
+vi.mock("@meeki/ui/components/ui/toast", () => ({
   sonnerToast: {
     warning: sonnerToastWarningMock,
   },
@@ -180,7 +180,7 @@ describe("canRunBatchTranscription", () => {
 });
 
 describe("getBatchFallbackTarget", () => {
-  test("uses local Qwen3 Large batch instead of Anarlog Pro cloud", () => {
+  test("uses local Qwen3 Large batch instead of Meeki Pro cloud", () => {
     expect(
       getBatchFallbackTarget({
         isPaid: true,
@@ -547,7 +547,7 @@ describe("useRunBatch", () => {
     expect(sonnerToastWarningMock).not.toHaveBeenCalled();
   });
 
-  test("falls back to local Qwen3 Large instead of Anarlog Pro cloud for paid users", async () => {
+  test("falls back to local Qwen3 Large instead of Meeki Pro cloud for paid users", async () => {
     isSupportedLanguagesBatchMock.mockResolvedValue(false);
     useBillingAccessMock.mockReturnValue({
       isPaid: true,

@@ -14,11 +14,11 @@ mod listener2;
 
 pub use api::*;
 pub use error::{Error, Result};
-pub use hypr_transcription_core::listener::{
+pub use meeki_transcription_core::listener::{
     DegradedError, ListenerRuntime, LiveTranscriptDelta, LiveTranscriptEngine,
     LiveTranscriptSegment, LiveTranscriptSegmentDelta, LiveTranscriptUpdate,
 };
-pub use hypr_transcription_core::listener2::{
+pub use meeki_transcription_core::listener2::{
     DenoiseEvent, DenoiseParams, DenoiseRuntime, Error as Listener2Error,
     Result as Listener2Result, Subtitle, Token, VttWord, export_words_to_vtt_file,
     is_supported_languages_batch, list_documented_language_codes_batch, parse_subtitle_from_path,
@@ -27,8 +27,8 @@ pub use hypr_transcription_core::listener2::{
 pub use listener::{Listener, ListenerPluginExt};
 pub use listener2::{Listener2, Listener2PluginExt};
 
-use hypr_audio::AudioProvider;
-use hypr_transcription_core::listener::actors::{RootActor, RootArgs};
+use meeki_audio::AudioProvider;
+use meeki_transcription_core::listener::actors::{RootActor, RootArgs};
 
 const PLUGIN_NAME: &str = "transcription";
 

@@ -23,7 +23,7 @@ const awaitTauriCommands = {
         const source = node.source.value;
 
         const isTauriCommands =
-          source.startsWith("@hypr/plugin-") || source.endsWith("/tauri.gen");
+          source.startsWith("@meeki/plugin-") || source.endsWith("/tauri.gen");
 
         if (isTauriCommands) {
           for (const specifier of node.specifiers) {
@@ -102,8 +102,8 @@ const noRawTinybase = {
         if (
           source === "tinybase" ||
           source.startsWith("tinybase/") ||
-          source === "@hypr/tinybase-utils" ||
-          source.startsWith("@hypr/tinybase-utils/") ||
+          source === "@meeki/tinybase-utils" ||
+          source.startsWith("@meeki/tinybase-utils/") ||
           source.startsWith("~/store/tinybase/")
         ) {
           context.report({

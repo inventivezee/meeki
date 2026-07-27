@@ -2,9 +2,9 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import { Search, X } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { Badge } from "@hypr/ui/components/ui/badge";
-import { Button } from "@hypr/ui/components/ui/button";
-import { cn } from "@hypr/utils";
+import { Badge } from "@meeki/ui/components/ui/badge";
+import { Button } from "@meeki/ui/components/ui/button";
+import { cn } from "@meeki/utils";
 
 import {
   getAdditionalSpokenLanguages,

@@ -3,8 +3,8 @@ use axum::{
     extract::{Query, State},
     response::{IntoResponse, Response},
 };
-use hypr_analytics::{AnalyticsClient, DeviceFingerprint, ToAnalyticsPayload};
-use hypr_api_auth::AuthContext;
+use meeki_analytics::{AnalyticsClient, DeviceFingerprint, ToAnalyticsPayload};
+use meeki_api_auth::AuthContext;
 use serde::Deserialize;
 use serde_json::json;
 

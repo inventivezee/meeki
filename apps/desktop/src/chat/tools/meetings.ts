@@ -6,7 +6,7 @@ import {
   getMeetingTranscript,
   getRecurringMeetingHistory,
   listMeetings,
-} from "@hypr/plugin-db";
+} from "@meeki/plugin-db";
 
 const listLimitSchema = z
   .number()
@@ -41,7 +41,7 @@ const historyOffsetSchema = z
 export const buildListMeetingsTool = () =>
   tool({
     description:
-      "List recent Anarlog meetings with pagination metadata. Use query to narrow by title or meeting id, then pass next_offset as offset to continue.",
+      "List recent Meeki meetings with pagination metadata. Use query to narrow by title or meeting id, then pass next_offset as offset to continue.",
     inputSchema: z.object({
       query: z
         .string()
@@ -57,9 +57,9 @@ export const buildListMeetingsTool = () =>
 export const buildGetMeetingTool = () =>
   tool({
     description:
-      "Get one Anarlog meeting with its canonical note, summaries, participants, and action items. Use get_meeting_transcript separately for transcript words.",
+      "Get one Meeki meeting with its canonical note, summaries, participants, and action items. Use get_meeting_transcript separately for transcript words.",
     inputSchema: z.object({
-      meeting_id: z.string().describe("Anarlog meeting id"),
+      meeting_id: z.string().describe("Meeki meeting id"),
     }),
     execute: getMeeting,
   });
@@ -67,9 +67,9 @@ export const buildGetMeetingTool = () =>
 export const buildGetMeetingTranscriptTool = () =>
   tool({
     description:
-      "Get a bounded page of transcript words and readable text for an Anarlog meeting. Pass pagination.next_offset as offset to continue.",
+      "Get a bounded page of transcript words and readable text for an Meeki meeting. Pass pagination.next_offset as offset to continue.",
     inputSchema: z.object({
-      meeting_id: z.string().describe("Anarlog meeting id"),
+      meeting_id: z.string().describe("Meeki meeting id"),
       offset: z
         .number()
         .int()

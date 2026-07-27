@@ -7,7 +7,7 @@ pub use error::*;
 pub use ext::*;
 pub use feature::*;
 
-pub type ManagedState = hypr_analytics::AnalyticsClient;
+pub type ManagedState = meeki_analytics::AnalyticsClient;
 
 const PLUGIN_NAME: &str = "flag";
 
@@ -52,13 +52,13 @@ mod test {
 
     fn create_app<R: tauri::Runtime>(builder: tauri::Builder<R>) -> tauri::App<R> {
         let mut ctx = tauri::test::mock_context(tauri::test::noop_assets());
-        ctx.config_mut().identifier = "com.hyprnote.dev".to_string();
+        ctx.config_mut().identifier = "com.meeki.dev".to_string();
         ctx.config_mut().version = Some("1.0.0".to_string());
 
         builder
             .plugin(init())
             .setup(|app| {
-                let client = hypr_analytics::AnalyticsClientBuilder::default().build();
+                let client = meeki_analytics::AnalyticsClientBuilder::default().build();
                 app.manage(client);
                 Ok(())
             })

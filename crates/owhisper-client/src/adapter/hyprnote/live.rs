@@ -1,4 +1,4 @@
-use hypr_ws_client::client::Message;
+use meeki_ws_client::client::Message;
 use owhisper_interface::ListenParams;
 use owhisper_interface::stream::StreamResponse;
 
@@ -12,7 +12,7 @@ impl RealtimeSttAdapter for HyprnoteAdapter {
 
     fn is_supported_languages(
         &self,
-        languages: &[hypr_language::Language],
+        languages: &[meeki_language::Language],
         model: Option<&str>,
     ) -> bool {
         HyprnoteAdapter::is_supported_languages_live(languages, model)
@@ -97,7 +97,7 @@ impl RealtimeSttAdapter for HyprnoteAdapter {
 
 #[cfg(test)]
 mod tests {
-    use hypr_language::ISO639;
+    use meeki_language::ISO639;
     use owhisper_interface::stream::{Alternatives, Channel, Metadata, StreamResponse};
 
     use super::HyprnoteAdapter;

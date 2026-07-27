@@ -28,15 +28,14 @@ export const INTEGRATION_DISPLAY: Record<
   "google-calendar": {
     name: "Google Calendar",
     description:
-      "Review how Anarlog uses Google Calendar data, then continue to Google",
-    connectingHint: "Finish authorization with Google, then return to Anarlog",
+      "Review how Meeki uses Google Calendar data, then continue to Google",
+    connectingHint: "Finish authorization with Google, then return to Meeki",
   },
   outlook: {
     name: "Outlook Calendar",
     description:
-      "Review how Anarlog uses Outlook Calendar data, then continue to Microsoft",
-    connectingHint:
-      "Finish authorization with Microsoft, then return to Anarlog",
+      "Review how Meeki uses Outlook Calendar data, then continue to Microsoft",
+    connectingHint: "Finish authorization with Microsoft, then return to Meeki",
   },
   linear: {
     name: "Linear",

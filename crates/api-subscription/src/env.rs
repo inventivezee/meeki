@@ -1,1 +1,1 @@
-pub use hypr_api_env::StripeEnv;
+pub use meeki_api_env::StripeEnv;

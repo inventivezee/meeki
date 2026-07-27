@@ -1,16 +1,16 @@
 [package]
-name = "anarlog-cli"
+name = "meeki-cli"
 version = "0.1.0"
 edition = "2024"
 
 [[bin]]
-name = "anarlog"
+name = "meeki"
 path = "src/main.rs"
 
 [dependencies]
-hypr-agent-access = { workspace = true }
-hypr-db-app = { workspace = true }
-hypr-db-core = { workspace = true }
+meeki-agent-access = { workspace = true }
+meeki-db-app = { workspace = true }
+meeki-db-core = { workspace = true }
 
 clap = { workspace = true, features = ["derive", "env"] }
 dirs = { workspace = true }

@@ -167,7 +167,7 @@ if (values.help) {
   console.log(`
 Usage: bun stripe-migrate-legacy-pro-prices.ts [options]
 
-Migrates paid Anarlog subscriptions to the single Pro price set:
+Migrates paid Meeki subscriptions to the single Pro price set:
   - monthly sources -> $15/month Pro
   - yearly sources  -> $150/year Pro
 
@@ -222,7 +222,7 @@ const stripe = createStripeAdapter({
 const livemode = await validateConfiguredPrices(PRICE_RULES, stripe);
 
 console.log(
-  `${shouldApply ? "Applying" : "Dry run"} Anarlog Pro price migration in ${
+  `${shouldApply ? "Applying" : "Dry run"} Meeki Pro price migration in ${
     livemode ? "live" : "test"
   } mode`,
 );
@@ -327,7 +327,7 @@ for (const [index, candidate] of allCandidates.entries()) {
         quantity: candidate.quantity,
       },
       {
-        idempotencyKey: `anarlog-pro-price-migration-v3:${candidate.subscriptionItemId}:${candidate.targetPriceId}`,
+        idempotencyKey: `meeki-pro-price-migration-v3:${candidate.subscriptionItemId}:${candidate.targetPriceId}`,
       },
     );
 

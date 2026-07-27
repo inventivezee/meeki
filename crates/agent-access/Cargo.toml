@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-hypr-db-app = { workspace = true }
-hypr-tiptap = { workspace = true }
+meeki-db-app = { workspace = true }
+meeki-tiptap = { workspace = true }
 
 schemars = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
@@ -16,5 +16,5 @@ thiserror = { workspace = true }
 tokio = { workspace = true, features = ["macros"] }
 
 [dev-dependencies]
-hypr-db-core = { workspace = true }
+meeki-db-core = { workspace = true }
 tokio = { workspace = true, features = ["macros", "rt"] }

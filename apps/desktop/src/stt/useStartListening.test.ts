@@ -111,12 +111,12 @@ const {
   idMock: vi.fn(() => "generated-id"),
 }));
 
-vi.mock("@hypr/plugin-db", () => ({
+vi.mock("@meeki/plugin-db", () => ({
   beginCloudsyncActivity: beginCloudsyncActivityMock,
   endCloudsyncActivity: endCloudsyncActivityMock,
 }));
 
-vi.mock("@hypr/plugin-transcription", () => ({
+vi.mock("@meeki/plugin-transcription", () => ({
   commands: {
     isSupportedLanguagesLive: isSupportedLanguagesLiveMock,
   },
@@ -126,21 +126,21 @@ vi.mock("./contexts", () => ({
   useListener: useListenerMock,
 }));
 
-vi.mock("@hypr/plugin-detect", () => ({
+vi.mock("@meeki/plugin-detect", () => ({
   commands: {
     listMicUsingApplications: listMicUsingApplicationsMock,
     sendMeetingChatMessage: sendMeetingChatMessageMock,
   },
 }));
 
-vi.mock("@hypr/plugin-fs-sync", () => ({
+vi.mock("@meeki/plugin-fs-sync", () => ({
   commands: {
     audioPath: audioPathMock,
     audioSourceMetadata: audioSourceMetadataMock,
   },
 }));
 
-vi.mock("@hypr/ui/components/ui/toast", () => ({
+vi.mock("@meeki/ui/components/ui/toast", () => ({
   sonnerToast: {
     warning: sonnerToastWarningMock,
     error: sonnerToastErrorMock,
@@ -628,7 +628,7 @@ describe("useStartListening", () => {
       "session-1:generated-id",
     );
     expect(sonnerToastErrorMock).toHaveBeenCalledWith(
-      "Anarlog could not safely start recording. Please try again.",
+      "Meeki could not safely start recording. Please try again.",
       { id: "capture-state-persist-failed" },
     );
     consoleError.mockRestore();
@@ -2200,7 +2200,7 @@ describe("useStartListening", () => {
     expect(useCaptureErrors.getState().errors).toEqual([
       {
         id: "capture-error:live-transcript-persist:session-1",
-        message: "Anarlog could not save part of the live transcript.",
+        message: "Meeki could not save part of the live transcript.",
         variant: "error",
       },
     ]);
@@ -2255,7 +2255,7 @@ describe("useStartListening", () => {
       {
         id: captureTranscriptIncompleteErrorId("session-1"),
         message:
-          "Anarlog could not finish saving the transcript. The recording was kept so you can try again.",
+          "Meeki could not finish saving the transcript. The recording was kept so you can try again.",
         variant: "error",
       },
     ]);
@@ -2343,7 +2343,7 @@ describe("useStartListening", () => {
       {
         id: captureTranscriptIncompleteErrorId("session-1"),
         message:
-          "Anarlog could not finish saving the transcript. The recording was kept so you can try again.",
+          "Meeki could not finish saving the transcript. The recording was kept so you can try again.",
         variant: "error",
       },
     ]);
@@ -2589,7 +2589,7 @@ describe("useStartListening", () => {
 
     expect(queueAutoEnhanceIfSummaryEmptyMock).toHaveBeenCalledOnce();
     expect(sonnerToastErrorMock).toHaveBeenCalledWith(
-      "The transcript was saved, but Anarlog could not start the summary. Try generating it again.",
+      "The transcript was saved, but Meeki could not start the summary. Try generating it again.",
       { id: "post-capture-summary-failed" },
     );
     expect(clearCaptureLifecycleMarkerMock).not.toHaveBeenCalled();
@@ -2930,7 +2930,7 @@ describe("useStartListening", () => {
 
     await waitFor(() => {
       expect(sendMeetingChatMessageMock).toHaveBeenCalledWith(
-        "I'm using Meety to record and transcribe this meeting.",
+        "I'm using Meeki to record and transcribe this meeting.",
         ["com.tinyspeck.slackmacgap"],
       );
     });
@@ -3028,13 +3028,13 @@ describe("useStartListening", () => {
 
     expect(listMicUsingApplicationsMock).toHaveBeenCalledTimes(2);
     expect(sendMeetingChatMessageMock).toHaveBeenCalledWith(
-      expect.stringContaining("I'm using Meety"),
+      expect.stringContaining("I'm using Meeki"),
       ["com.tinyspeck.slackmacgap"],
     );
     expect(sonnerToastWarningMock).not.toHaveBeenCalled();
   });
 
-  test("keeps the Slack scope when Anarlog also appears in the mic-active apps", async () => {
+  test("keeps the Slack scope when Meeki also appears in the mic-active apps", async () => {
     useConfigValueMock.mockImplementation((key: string) =>
       key === "ai_language"
         ? "en"
@@ -3045,7 +3045,7 @@ describe("useStartListening", () => {
     listMicUsingApplicationsMock.mockResolvedValue({
       status: "ok",
       data: [
-        { id: "com.hyprnote.dev", name: "Anarlog Dev" },
+        { id: "com.meeki.dev", name: "Meeki Dev" },
         { id: "com.tinyspeck.slackmacgap", name: "Slack" },
       ],
     });
@@ -3059,8 +3059,8 @@ describe("useStartListening", () => {
 
     await waitFor(() => {
       expect(sendMeetingChatMessageMock).toHaveBeenCalledWith(
-        expect.stringContaining("I'm using Meety"),
-        ["com.hyprnote.dev", "com.tinyspeck.slackmacgap"],
+        expect.stringContaining("I'm using Meeki"),
+        ["com.meeki.dev", "com.tinyspeck.slackmacgap"],
       );
     });
   });
@@ -3088,7 +3088,7 @@ describe("useStartListening", () => {
     });
 
     expect(sendMeetingChatMessageMock).toHaveBeenCalledWith(
-      expect.stringContaining("I'm using Meety"),
+      expect.stringContaining("I'm using Meeki"),
       ["us.zoom.xos", "com.tinyspeck.slackmacgap"],
     );
     expect(warn).toHaveBeenCalledWith(
@@ -3096,7 +3096,7 @@ describe("useStartListening", () => {
       "expected exactly one recognized meeting app bundle",
     );
     expect(sonnerToastWarningMock).toHaveBeenCalledWith(
-      "Recording started, but Meety could not post the meeting chat disclosure.",
+      "Recording started, but Meeki could not post the meeting chat disclosure.",
       { id: "meeting-disclosure-send-failed" },
     );
     warn.mockRestore();
@@ -3246,7 +3246,7 @@ describe("useStartListening", () => {
       error,
     );
     expect(sonnerToastWarningMock).toHaveBeenCalledWith(
-      "Recording started, but Meety could not post the meeting chat disclosure.",
+      "Recording started, but Meeki could not post the meeting chat disclosure.",
       { id: "meeting-disclosure-send-failed" },
     );
     warn.mockRestore();
@@ -3271,7 +3271,7 @@ describe("useStartListening", () => {
       expect(startMeetingChatCaptureMock).toHaveBeenCalledWith({
         sessionId: "session-1",
         excludedTexts: [
-          "I'm using Meety to record and transcribe this meeting.",
+          "I'm using Meeki to record and transcribe this meeting.",
         ],
       });
     });
@@ -3309,7 +3309,7 @@ describe("useStartListening", () => {
       expect(startMeetingChatCaptureMock).toHaveBeenCalledWith({
         sessionId: "session-1",
         excludedTexts: [
-          "I'm using Meety to record and transcribe this meeting.",
+          "I'm using Meeki to record and transcribe this meeting.",
         ],
       });
     });

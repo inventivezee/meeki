@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use hypr_db_reactive::QueryEventSink;
+use meeki_db_reactive::QueryEventSink;
 
 #[uniffi::export(with_foreign)]
 pub trait QueryEventListener: Send + Sync {

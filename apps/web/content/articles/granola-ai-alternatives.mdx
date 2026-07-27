@@ -14,7 +14,7 @@ This guide compares six Granola alternatives by those workflow differences. It d
 
 ## The short answer
 
-- **Choose Anarlog** if you want bot-free capture, local transcription, and a local-first meeting record with Markdown export.
+- **Choose Meeki** if you want bot-free capture, local transcription, and a local-first meeting record with Markdown export.
 - **Choose Jamie** if you want a polished bot-free assistant with multilingual notes and European data hosting.
 - **Choose Tactiq** if your meetings happen in a browser and you want to see the transcript live.
 - **Choose Notta** if multilingual transcription, translation, mobile capture, and imported recordings matter most.
@@ -40,7 +40,7 @@ Those changes make the real comparison more specific. You should switch when ano
 
 | Tool | Capture model | Where the meeting record lives | Best fit | Main tradeoff |
 | --- | --- | --- | --- | --- |
-| **Anarlog** | Desktop system audio, no meeting bot | Local SQLite with Markdown export | Local-first meeting workflows | Mac-focused product experience today |
+| **Meeki** | Desktop system audio, no meeting bot | Local SQLite with Markdown export | Local-first meeting workflows | Mac-focused product experience today |
 | **Jamie** | Desktop and mobile capture, no meeting bot | Jamie workspace | Multilingual bot-free notes with EU hosting | Managed service rather than a local file workflow |
 | **Tactiq** | Browser extension using meeting captions | Tactiq workspace and exports | Live browser transcripts | Depends on supported browsers and meeting web apps |
 | **Notta** | Desktop, mobile, browser, imports, and meeting workflows | Notta workspace or local Privacy Mode | Multilingual and cross-device work | Capture and storage behavior varies by mode |
@@ -50,19 +50,19 @@ Those changes make the real comparison more specific. You should switch when ano
 
 Pricing changes too often to be the foundation of a durable comparison. Check the current plan against your actual meeting volume, history requirements, integrations, export needs, and team size before deciding.
 
-## 1. Anarlog: best for local-first meeting data and AI-provider control
+## 1. Meeki: best for local-first meeting data and AI-provider control
 
-[Anarlog](/) is an open-source, local-first meeting notetaker. It captures microphone and system audio without joining the call as a participant, transcribes the conversation, and keeps meeting data in local SQLite on your computer.
+[Meeki](/) is an open-source, local-first meeting notetaker. It captures microphone and system audio without joining the call as a participant, transcribes the conversation, and keeps meeting data in local SQLite on your computer.
 
-<Image src="/api/assets/blog/library/products/anarlog/desktop/2026-07-22-quick-start.jpg" alt="Anarlog desktop quick-start screen with New Note, Start Recording, and Settings actions" />
+<Image src="/api/assets/blog/library/products/meeki/desktop/2026-07-22-quick-start.jpg" alt="Meeki desktop quick-start screen with New Note, Start Recording, and Settings actions" />
 
-*The current Anarlog desktop quick-start screen shows the bot-free recording entry point.*
+*The current Meeki desktop quick-start screen shows the bot-free recording entry point.*
 
-The important difference is not simply that Anarlog is bot-free. Granola is bot-free too. The difference is what becomes the source of truth after the meeting.
+The important difference is not simply that Meeki is bot-free. Granola is bot-free too. The difference is what becomes the source of truth after the meeting.
 
-With Anarlog, the durable artifact is a local meeting record you can search, back up, export, or include in a broader knowledge workflow. Transcription can run locally, and AI can use local models, your own provider keys, or Anarlog's hosted service.
+With Meeki, the durable artifact is a local meeting record you can search, back up, export, or include in a broader knowledge workflow. Transcription can run locally, and AI can use local models, your own provider keys, or Meeki's hosted service.
 
-**Choose Anarlog when:**
+**Choose Meeki when:**
 
 - the meeting record should remain local by default, with portable exports when needed;
 - offline transcription matters;
@@ -190,7 +190,7 @@ If you are comparing capture methods in more depth, see our current guide to the
 
 *Meetily's official repository screenshot shows the transcript and generated meeting record side by side. Source: [Meetily](https://github.com/Zackriya-Solutions/meetily/blob/main/docs/summary.png).*
 
-Meetily is relevant to technical users who want local meeting AI but need a different platform or operating model from Anarlog. Its [open-source repository](https://github.com/Zackriya-Solutions/meetily) exposes the implementation, and local Ollama support can keep summarization on your own machine.
+Meetily is relevant to technical users who want local meeting AI but need a different platform or operating model from Meeki. Its [open-source repository](https://github.com/Zackriya-Solutions/meetily) exposes the implementation, and local Ollama support can keep summarization on your own machine.
 
 **Choose Meetily when:**
 
@@ -205,13 +205,13 @@ Meetily is relevant to technical users who want local meeting AI but need a diff
 - Local model speed and quality depend on the machine.
 - Product polish, support, and operational burden should be evaluated alongside features.
 
-Anarlog and Meetily share a local-first direction. The practical choice comes down to platform support, file format, product experience, and how much of the stack you want to operate yourself.
+Meeki and Meetily share a local-first direction. The practical choice comes down to platform support, file format, product experience, and how much of the stack you want to operate yourself.
 
 ## How to choose the right Granola alternative
 
 Start with the meeting artifact you want to keep.
 
-- If it should be a local Markdown file, start with **Anarlog**.
+- If it should be a local Markdown file, start with **Meeki**.
 - If it should live in a polished collaborative notepad, stay with **Granola** or test **Jamie**.
 - If the live browser transcript is the product, test **Tactiq**.
 - If language and device coverage dominate the decision, test **Notta**.
@@ -234,15 +234,15 @@ That test will tell you more than another grid of checkmarks.
 
 ### What is the best free alternative to Granola?
 
-Anarlog is a strong fit when you want local transcription, a local meeting record, and bring-your-own-key or local-model workflows. Tactiq and several managed products also offer free tiers, but their current limits can change. Compare meeting quotas, history access, AI credits, and exports—not just whether the signup page says free.
+Meeki is a strong fit when you want local transcription, a local meeting record, and bring-your-own-key or local-model workflows. Tactiq and several managed products also offer free tiers, but their current limits can change. Compare meeting quotas, history access, AI credits, and exports—not just whether the signup page says free.
 
 ### Which Granola alternatives do not use meeting bots?
 
-Anarlog, Jamie, Tactiq, and Meetily are built around capture without a visible meeting participant. Notta and Otter offer multiple capture methods, so the answer depends on which app or workflow you select. Our [bot-free AI meeting assistant guide](/blog/bot-free-ai-meeting-assistants/) explains the architectural differences.
+Meeki, Jamie, Tactiq, and Meetily are built around capture without a visible meeting participant. Notta and Otter offer multiple capture methods, so the answer depends on which app or workflow you select. Our [bot-free AI meeting assistant guide](/blog/bot-free-ai-meeting-assistants/) explains the architectural differences.
 
 ### Which alternative keeps meeting notes locally?
 
-Anarlog keeps meeting data locally in SQLite and can run transcription locally. Meetily is also designed for local or self-managed processing. Notta documents a local Privacy Mode for supported plans and workflows, but that should not be confused with making every Notta workflow local.
+Meeki keeps meeting data locally in SQLite and can run transcription locally. Meetily is also designed for local or self-managed processing. Notta documents a local Privacy Mode for supported plans and workflows, but that should not be confused with making every Notta workflow local.
 
 ### Is Granola private because it has no meeting bot?
 
@@ -250,6 +250,6 @@ Not necessarily. A missing participant icon tells you how audio is captured, not
 
 ### What is the closest open-source alternative to Granola?
 
-Anarlog is the closest match when you want a polished bot-free notepad with local Markdown storage and control over the AI stack. Meetily is another open-source option for users who prioritize a local, self-managed setup and broader desktop platform coverage.
+Meeki is the closest match when you want a polished bot-free notepad with local Markdown storage and control over the AI stack. Meetily is another open-source option for users who prioritize a local, self-managed setup and broader desktop platform coverage.
 
-If the real reason you are leaving Granola is ownership rather than interface preference, [try Anarlog](/). Your meeting memory stays in files you control, and you decide which AI stack touches it.
+If the real reason you are leaving Granola is ownership rather than interface preference, [try Meeki](/). Your meeting memory stays in files you control, and you decide which AI stack touches it.

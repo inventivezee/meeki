@@ -1,7 +1,7 @@
 import type { Session } from "@supabase/supabase-js";
 
-import type { JSONContent } from "@hypr/editor/note";
-import { uploadSharedAttachment } from "@hypr/supabase/storage";
+import type { JSONContent } from "@meeki/editor/note";
+import { uploadSharedAttachment } from "@meeki/supabase/storage";
 
 import { attachmentTransferNative } from "~/attachment-sync/native";
 import { liveQueryClient, useLiveQuery } from "~/db";
@@ -149,10 +149,10 @@ export async function prepareSessionShareAttachment(input: {
   const client = createSharedAttachmentClient(input);
   const [attachmentRef, versionRef] = await Promise.all([
     deriveBlindRef(
-      `anarlog-shared-attachment-v1\0${input.shareId}\0${attachment.id}`,
+      `meeki-shared-attachment-v1\0${input.shareId}\0${attachment.id}`,
     ),
     deriveBlindRef(
-      `anarlog-shared-attachment-version-v1\0${input.shareId}\0${attachment.id}\0${attachment.sha256}\0${attachment.sizeBytes}\0${attachment.filename}\0${contentType}`,
+      `meeki-shared-attachment-version-v1\0${input.shareId}\0${attachment.id}\0${attachment.sha256}\0${attachment.sizeBytes}\0${attachment.filename}\0${contentType}`,
     ),
   ]);
   const reserved = await client.reserve({

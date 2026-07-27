@@ -4,7 +4,7 @@ mod commands;
 mod ext;
 
 pub use ext::TemplatePluginExt;
-pub use hypr_template_app::Template;
+pub use meeki_template_app::Template;
 
 const PLUGIN_NAME: &str = "template";
 
@@ -17,7 +17,7 @@ fn make_specta_builder<R: tauri::Runtime>() -> tauri_specta::Builder<R> {
             commands::render_support::<Wry>,
             commands::get_template_source::<Wry>,
         ])
-        .typ::<hypr_gbnf::Grammar>()
+        .typ::<meeki_gbnf::Grammar>()
         .error_handling(tauri_specta::ErrorHandlingMode::Result)
 }
 
@@ -27,7 +27,7 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
     tauri::plugin::Builder::new(PLUGIN_NAME)
         .invoke_handler(specta_builder.invoke_handler())
         .setup(|_app, _api| {
-            let _ = hypr_template_app_legacy::get_environment();
+            let _ = meeki_template_app_legacy::get_environment();
             Ok(())
         })
         .build()

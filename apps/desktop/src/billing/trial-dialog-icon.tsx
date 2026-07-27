@@ -1,6 +1,6 @@
-import { cn } from "@hypr/utils";
+import { cn } from "@meeki/utils";
 
-const ANARLOG_ICON_SRC = "/assets/anarlog-icon.png";
+const MEEKI_ICON_SRC = "/assets/meeki-icon.png";
 
 export function TrialDialogIcon({ state }: { state: "started" | "ended" }) {
   const isStarted = state === "started";
@@ -28,7 +28,7 @@ export function TrialDialogIcon({ state }: { state: "started" | "ended" }) {
         ])}
       >
         <img
-          src={ANARLOG_ICON_SRC}
+          src={MEEKI_ICON_SRC}
           alt=""
           aria-hidden="true"
           className={cn([

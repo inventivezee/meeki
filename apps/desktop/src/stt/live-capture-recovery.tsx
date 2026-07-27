@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { commands as listenerCommands } from "@hypr/plugin-transcription";
+import { commands as listenerCommands } from "@meeki/plugin-transcription";
 
 import {
   clearCaptureLifecycleMarker,

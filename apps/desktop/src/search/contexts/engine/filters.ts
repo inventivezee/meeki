@@ -1,4 +1,4 @@
-import type { SearchFilters as TantivySearchFilters } from "@hypr/plugin-tantivy";
+import type { SearchFilters as TantivySearchFilters } from "@meeki/plugin-tantivy";
 
 import type { SearchFilters } from "./types";
 

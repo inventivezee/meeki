@@ -20,7 +20,7 @@ The right choice depends on four practical questions:
 For most people, the decision looks like this:
 
 - **Choose Microsoft Intelligent Recap or Copilot** when your organization already works inside Microsoft 365 and wants native administration.
-- **Choose Anarlog** when you want bot-free capture, local transcription, and a local-first meeting record on your own computer.
+- **Choose Meeki** when you want bot-free capture, local transcription, and a local-first meeting record on your own computer.
 - **Choose Tactiq** when you attend Teams meetings through a browser and want live transcription from an extension.
 - **Choose Otter** when you want an automated participant that can attend meetings and prepare notes even when you are absent.
 - **Choose Fireflies** when downstream integrations and automated routing are more important than avoiding a meeting bot.
@@ -30,7 +30,7 @@ For most people, the decision looks like this:
 | Workflow | Capture method | Visible meeting bot? | Where notes live | Best for |
 | --- | --- | --- | --- | --- |
 | Microsoft Intelligent Recap and Copilot | Native Teams recording, transcription, and meeting audio | No external bot | Microsoft 365 | Organizations already standardized on Microsoft |
-| Anarlog | Desktop audio capture and local transcription | No | Local SQLite with Markdown export | Local-first, bot-free meeting notes |
+| Meeki | Desktop audio capture and local transcription | No | Local SQLite with Markdown export | Local-first, bot-free meeting notes |
 | Tactiq | Browser extension using Teams web | No guest participant | Tactiq dashboard | Live transcription in the Teams web app |
 | Otter | Automated guest participant | Yes | Otter workspace | Auto-join, catch-up, and meeting automation |
 | Fireflies | Meeting participant or desktop system-audio capture | Optional | Fireflies and connected tools | Integration-heavy team workflows |
@@ -98,19 +98,19 @@ Participants can review material from the same Teams meeting surface, while admi
 
 Microsoft is the strongest default when the organization already treats Teams and Microsoft 365 as its meeting system of record.
 
-## 2. Anarlog
+## 2. Meeki
 
 **Best for:** People who want bot-free Microsoft Teams notes stored as files they control.
 
-Anarlog is our open-source, local-first meeting notetaker for macOS. It captures the meeting from your computer, transcribes locally, and stores notes as Markdown on disk.
+Meeki is our open-source, local-first meeting notetaker for macOS. It captures the meeting from your computer, transcribes locally, and stores notes as Markdown on disk.
 
-Because capture happens on your device, Anarlog does not need to join the Teams call as a guest participant. It can be used with the Teams desktop or web experience without adding another name to the attendee list.
+Because capture happens on your device, Meeki does not need to join the Teams call as a guest participant. It can be used with the Teams desktop or web experience without adding another name to the attendee list.
 
 You can use a supported AI provider with your own key or connect a local model. This separates the transcription and note files from the model used to summarize them.
 
-![Anarlog desktop quick-start screen with New Note, Start Recording, and Settings actions](/api/assets/blog/library/products/anarlog/desktop/2026-07-22-quick-start.jpg)
+![Meeki desktop quick-start screen with New Note, Start Recording, and Settings actions](/api/assets/blog/library/products/meeki/desktop/2026-07-22-quick-start.jpg)
 
-*The current Anarlog desktop quick-start screen shows the bot-free recording entry point.*
+*The current Meeki desktop quick-start screen shows the bot-free recording entry point.*
 
 If the underlying workflow matters more than a feature checklist, see how [bot-free meeting notes differ from meeting-bot workflows](/blog/ai-meeting-notes-without-bot) and what to evaluate in a [local AI meeting-notes system](/blog/local-ai-meeting-notes).
 
@@ -131,7 +131,7 @@ If the underlying workflow matters more than a feature checklist, see how [bot-f
 - The current download experience is centered on macOS
 - Team distribution requires an intentional file-sharing or knowledge-management workflow
 
-Anarlog is the strongest fit when "private" means controlling the artifact itself: where the transcript lives, which model sees it, and how the notes are retained.
+Meeki is the strongest fit when "private" means controlling the artifact itself: where the transcript lives, which model sees it, and how the notes are retained.
 
 ## 3. Tactiq
 
@@ -235,9 +235,9 @@ Start with the constraint that would make a tool unacceptable.
 
 Use Intelligent Recap or Copilot if your company already governs meetings through Microsoft 365 and wants recordings, transcripts, access, and retention managed in that environment.
 
-### Choose Anarlog when ownership comes first
+### Choose Meeki when ownership comes first
 
-Use Anarlog if you want bot-free capture, local transcription, a local meeting record, and control over the AI model used for summaries.
+Use Meeki if you want bot-free capture, local transcription, a local meeting record, and control over the AI model used for summaries.
 
 ### Choose Tactiq when you work in Teams on the web
 
@@ -279,7 +279,7 @@ Copilot can generate notes and tasks during certain meetings without recording o
 
 ### Can I take AI meeting notes in Teams without a bot?
 
-Yes. A local desktop recorder such as Anarlog captures from your device, while a browser-extension workflow such as Tactiq operates inside Teams on the web. Neither requires an automated guest participant.
+Yes. A local desktop recorder such as Meeki captures from your device, while a browser-extension workflow such as Tactiq operates inside Teams on the web. Neither requires an automated guest participant.
 
 ### Which options work with the Teams desktop app?
 
@@ -295,4 +295,4 @@ Use Microsoft's native recap when Teams is already your organization's system of
 
 Use a local-first tool when you want the meeting record to remain yours.
 
-[Download Anarlog for macOS](/download) if you want Microsoft Teams notes without a meeting bot, with local transcription and meeting data stored on your computer.
+[Download Meeki for macOS](/download) if you want Microsoft Teams notes without a meeting bot, with local transcription and meeting data stored on your computer.

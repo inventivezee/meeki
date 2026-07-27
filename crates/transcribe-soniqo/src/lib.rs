@@ -176,16 +176,16 @@ impl SoniqoModel {
         }
     }
 
-    pub fn supports_language(self, language: &hypr_language::Language) -> bool {
+    pub fn supports_language(self, language: &meeki_language::Language) -> bool {
         match self {
             Self::ParakeetStreaming | Self::ParakeetBatch => {
-                hypr_language::is_parakeet_tdt_v3_language(language)
+                meeki_language::is_parakeet_tdt_v3_language(language)
             }
             Self::Omnilingual | Self::Qwen3Small | Self::Qwen3Large => true,
         }
     }
 
-    pub fn supports_languages(self, languages: &[hypr_language::Language]) -> bool {
+    pub fn supports_languages(self, languages: &[meeki_language::Language]) -> bool {
         languages
             .iter()
             .all(|language| self.supports_language(language))

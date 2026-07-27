@@ -4,7 +4,7 @@ import {
   type CompiledAgentGraph,
   createAgentGraph,
   setupCheckpointer,
-} from "@hypr/agent-core";
+} from "@meeki/agent-core";
 
 import { agentNode } from "../nodes/agent";
 import { tools } from "../tools";

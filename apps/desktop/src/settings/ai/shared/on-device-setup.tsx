@@ -6,14 +6,14 @@ import { useEffect, useRef, useState } from "react";
 import {
   commands as localLlmCommands,
   type GgufLlmModel,
-} from "@hypr/plugin-local-llm";
+} from "@meeki/plugin-local-llm";
 import {
   commands as localSttCommands,
   events as localSttEvents,
   type LocalModel,
-} from "@hypr/plugin-local-stt";
-import { Button } from "@hypr/ui/components/ui/button";
-import { sonnerToast } from "@hypr/ui/components/ui/toast";
+} from "@meeki/plugin-local-stt";
+import { Button } from "@meeki/ui/components/ui/button";
+import { sonnerToast } from "@meeki/ui/components/ui/toast";
 
 import { formatGb, ModelFacts } from "~/settings/ai/shared/model-facts";
 import { setAiProvider } from "~/settings/providers";
@@ -168,7 +168,7 @@ export function OnDeviceSetupCard() {
       <div className="flex flex-col gap-1">
         <p className="text-sm font-medium">Set up on-device AI</p>
         <p className="text-muted-foreground text-xs leading-relaxed">
-          Downloads everything Anarlog needs to work offline: Parakeet and Qwen3
+          Downloads everything Meeki needs to work offline: Parakeet and Qwen3
           for transcription
           {llmModel ? `, and ${llmModel.name} for summaries` : ""}. About{" "}
           {missingGb} GB from Hugging Face. The runtimes are already in the app.

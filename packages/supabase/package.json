@@ -1,5 +1,5 @@
 {
-  "name": "@hypr/supabase",
+  "name": "@meeki/supabase",
   "type": "module",
   "exports": {
     ".": "./src/index.ts",

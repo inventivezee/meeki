@@ -1,4 +1,4 @@
-use hypr_api_auth::{AuthContext, AuthState};
+use meeki_api_auth::{AuthContext, AuthState};
 use octocrab::Octocrab;
 use reqwest::Client as HttpClient;
 use serde::Deserialize;
@@ -13,7 +13,7 @@ pub(crate) struct AppState {
     pub(crate) stripe: StripeClient,
     pub(crate) _auth: AuthState,
     pub(crate) http_client: HttpClient,
-    pub(crate) chatwoot: hypr_chatwoot::Client,
+    pub(crate) chatwoot: meeki_chatwoot::Client,
 }
 
 impl AppState {
@@ -51,7 +51,7 @@ impl AppState {
                 .build()
                 .expect("failed to build chatwoot http client");
 
-            hypr_chatwoot::Client::new_with_client(
+            meeki_chatwoot::Client::new_with_client(
                 &config.chatwoot.chatwoot_base_url,
                 reqwest_client,
             )

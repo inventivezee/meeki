@@ -9,10 +9,10 @@ it("treats missing links as absent", () => {
 });
 
 it("strips the legacy hosted onboarding demo meeting", () => {
-  expect(resolveMeetingLink("https://anarlog.so/onboarding-demo/")).toBeNull();
+  expect(resolveMeetingLink("https://meeki.so/onboarding-demo/")).toBeNull();
   expect(
     resolveMeetingLink(
-      "https://anarlog.so/onboarding-demo/?completion_url=http://127.0.0.1:1/onboarding-demo/complete",
+      "https://meeki.so/onboarding-demo/?completion_url=http://127.0.0.1:1/onboarding-demo/complete",
     ),
   ).toBeNull();
 });

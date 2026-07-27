@@ -3,7 +3,7 @@ mod ext;
 pub mod runtime;
 
 pub use ext::*;
-pub use hypr_fs_sync_core::*;
+pub use meeki_fs_sync_core::*;
 
 const PLUGIN_NAME: &str = "fs-sync";
 

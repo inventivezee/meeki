@@ -8,9 +8,9 @@ import {
   UsersRoundIcon,
 } from "lucide-react";
 
-import { NoteEditor } from "@hypr/editor/note";
-import { commands as openerCommands } from "@hypr/plugin-opener2";
-import { Button } from "@hypr/ui/components/ui/button";
+import { NoteEditor } from "@meeki/editor/note";
+import { commands as openerCommands } from "@meeki/plugin-opener2";
+import { Button } from "@meeki/ui/components/ui/button";
 
 import { useAuth } from "~/auth";
 import { openEditorLink } from "~/editor-bridge/open-editor-link";
@@ -61,7 +61,7 @@ export function TabContentSharedNote({
       <SharedNoteUnavailable
         icon={AlertCircleIcon}
         title={t`Shared note unavailable`}
-        description={t`Anarlog could not read the local shared-note cache.`}
+        description={t`Meeki could not read the local shared-note cache.`}
       />
     );
   }

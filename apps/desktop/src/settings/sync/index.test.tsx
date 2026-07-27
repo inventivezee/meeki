@@ -19,7 +19,7 @@ const mocks = vi.hoisted(() => ({
   } as { user: { id: string }; access_token: string } | null,
 }));
 
-vi.mock("@hypr/plugin-db", () => ({
+vi.mock("@meeki/plugin-db", () => ({
   getCloudsyncStatus: mocks.getCloudsyncStatus,
   getE2eeIdentityStatus: mocks.getE2eeIdentityStatus,
   syncCloudsyncNow: mocks.syncCloudsyncNow,
@@ -129,7 +129,7 @@ describe("SettingsSync", () => {
     expect(await screen.findByText("Synced")).toBeTruthy();
     expect(screen.getByRole("switch", { name: "Cloud sync" })).toBeTruthy();
     expect(screen.getByText("End-to-end encryption")).toBeTruthy();
-    expect(screen.getByText(/Anarlog cannot read them/)).toBeTruthy();
+    expect(screen.getByText(/Meeki cannot read them/)).toBeTruthy();
   });
 
   it("pauses cloud sync from its settings page", async () => {

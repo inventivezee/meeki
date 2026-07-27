@@ -150,7 +150,7 @@ impl Stream for SpeakerStream {
 }
 
 #[cfg(any(test, not(target_os = "macos")))]
-impl hypr_audio_interface::AsyncSource for SpeakerStream {
+impl meeki_audio_interface::AsyncSource for SpeakerStream {
     fn as_stream(&mut self) -> impl Stream<Item = f32> + '_ {
         self
     }
@@ -164,7 +164,7 @@ impl hypr_audio_interface::AsyncSource for SpeakerStream {
 mod tests {
     use super::*;
     use futures_util::StreamExt;
-    use hypr_audio_interface::AsyncSource;
+    use meeki_audio_interface::AsyncSource;
     use serial_test::serial;
     use std::sync::atomic::Ordering;
 

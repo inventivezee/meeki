@@ -11,7 +11,7 @@ import {
 import {
   type SessionContext,
   commands as templateCommands,
-} from "@hypr/plugin-template";
+} from "@meeki/plugin-template";
 
 import type { ContextRef } from "../context/entities";
 import { extractContextRefsFromMessages } from "../context/refs";

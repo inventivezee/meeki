@@ -74,7 +74,7 @@ type Store = State & Actions;
 
 type TabsStoreSingleton = ReturnType<typeof createTabsStore>;
 
-const TABS_STORE_KEY = "__hypr_tabs_store__" as const;
+const TABS_STORE_KEY = "__meeki_tabs_store__" as const;
 
 const createTabsStore = () =>
   create<Store>()(

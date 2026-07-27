@@ -1,7 +1,7 @@
 use std::{collections::HashMap, path::PathBuf, sync::Arc};
 use tauri::{Manager, Runtime, ipc::Channel};
 
-use hypr_model_downloader::{DownloadableModel, ModelDownloadManager, ModelDownloaderRuntime};
+use meeki_model_downloader::{DownloadableModel, ModelDownloadManager, ModelDownloaderRuntime};
 
 struct TauriModelRuntime<R: Runtime> {
     app_handle: tauri::AppHandle<R>,
@@ -9,16 +9,16 @@ struct TauriModelRuntime<R: Runtime> {
 }
 
 impl<R: Runtime> ModelDownloaderRuntime<crate::SupportedModel> for TauriModelRuntime<R> {
-    fn models_base(&self) -> Result<PathBuf, hypr_model_downloader::Error> {
+    fn models_base(&self) -> Result<PathBuf, meeki_model_downloader::Error> {
         Ok(models_base(&self.app_handle))
     }
 
     fn emit_progress(
         &self,
         model: &crate::SupportedModel,
-        status: hypr_model_downloader::DownloadStatus,
+        status: meeki_model_downloader::DownloadStatus,
     ) {
-        use hypr_model_downloader::DownloadStatus;
+        use meeki_model_downloader::DownloadStatus;
 
         let progress: i8 = match &status {
             DownloadStatus::Downloading(p) => *p as i8,
@@ -97,7 +97,7 @@ pub struct LocalLlmExt<'a, R: Runtime, M: Manager<R>> {
 
 impl<'a, R: Runtime, M: Manager<R>> LocalLlmExt<'a, R, M> {
     pub fn models_dir(&self) -> PathBuf {
-        hypr_local_llm_core::llm_models_dir(&models_base(self.manager))
+        meeki_local_llm_core::llm_models_dir(&models_base(self.manager))
     }
 
     #[tracing::instrument(skip_all)]
@@ -188,28 +188,28 @@ impl<'a, R: Runtime, M: Manager<R>> LocalLlmExt<'a, R, M> {
 
     #[tracing::instrument(skip_all)]
     pub async fn list_downloaded_model(&self) -> Result<Vec<crate::SupportedModel>, crate::Error> {
-        Ok(hypr_local_llm_core::list_downloaded_models(
+        Ok(meeki_local_llm_core::list_downloaded_models(
             &self.models_dir(),
         )?)
     }
 
     #[tracing::instrument(skip_all)]
     pub async fn list_custom_models(&self) -> Result<Vec<crate::CustomModelInfo>, crate::Error> {
-        Ok(hypr_local_llm_core::list_custom_models()?)
+        Ok(meeki_local_llm_core::list_custom_models()?)
     }
 
     #[tracing::instrument(skip_all)]
     pub async fn recommended_model(
         &self,
-    ) -> Result<hypr_local_llm_core::ModelRecommendation, crate::Error> {
+    ) -> Result<meeki_local_llm_core::ModelRecommendation, crate::Error> {
         let total_memory_bytes = sysinfo::System::new_with_specifics(
             sysinfo::RefreshKind::nothing().with_memory(sysinfo::MemoryRefreshKind::everything()),
         )
         .total_memory();
 
-        Ok(hypr_local_llm_core::ModelRecommendation {
-            model: hypr_local_llm_core::recommended_model_for_memory(total_memory_bytes)
-                .map(|model| hypr_local_llm_core::supported_model_info(&model)),
+        Ok(meeki_local_llm_core::ModelRecommendation {
+            model: meeki_local_llm_core::recommended_model_for_memory(total_memory_bytes)
+                .map(|model| meeki_local_llm_core::supported_model_info(&model)),
             total_memory_bytes,
         })
     }
@@ -235,7 +235,7 @@ impl<'a, R: Runtime, M: Manager<R>> LocalLlmExt<'a, R, M> {
         let model_path = self.models_dir().join(model.file_name());
         let server_bin = resolve_llama_server_bin(self.manager.app_handle());
 
-        let server = hypr_local_llm_core::LlmServer::start_with_model_path(
+        let server = meeki_local_llm_core::LlmServer::start_with_model_path(
             model_id.to_string(),
             model_path,
             server_bin,

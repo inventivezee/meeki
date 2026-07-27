@@ -4,13 +4,13 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-hypr-analytics = { workspace = true }
-hypr-api-auth = { workspace = true }
-hypr-api-env = { workspace = true }
-hypr-audio-mime = { workspace = true }
-hypr-language = { workspace = true }
-hypr-observability = { workspace = true }
-hypr-supabase-storage = { workspace = true }
+meeki-analytics = { workspace = true }
+meeki-api-auth = { workspace = true }
+meeki-api-env = { workspace = true }
+meeki-audio-mime = { workspace = true }
+meeki-language = { workspace = true }
+meeki-observability = { workspace = true }
+meeki-supabase-storage = { workspace = true }
 owhisper-client = { workspace = true }
 owhisper-interface = { workspace = true, features = ["openapi"] }
 
@@ -38,9 +38,9 @@ urlencoding = { workspace = true }
 utoipa = { workspace = true }
 
 [dev-dependencies]
-hypr-audio-utils = { workspace = true }
-hypr-data = { workspace = true }
-hypr-language = { workspace = true }
+meeki-audio-utils = { workspace = true }
+meeki-data = { workspace = true }
+meeki-language = { workspace = true }
 owhisper-interface = { workspace = true, features = ["openapi"] }
 
 rodio = { workspace = true }

@@ -23,11 +23,11 @@ const { JSDOM } = require("jsdom") as {
 
 test("builds an encoded desktop auth callback", () => {
   assert.equal(
-    buildDesktopAuthDeeplink("anarlog-staging", "fake access", "fake&refresh"),
-    "anarlog-staging://auth/callback?access_token=fake+access&refresh_token=fake%26refresh",
+    buildDesktopAuthDeeplink("meeki-staging", "fake access", "fake&refresh"),
+    "meeki-staging://auth/callback?access_token=fake+access&refresh_token=fake%26refresh",
   );
   assert.equal(
-    buildDesktopAuthDeeplink("anarlog-staging", undefined, "fake-refresh"),
+    buildDesktopAuthDeeplink("meeki-staging", undefined, "fake-refresh"),
     null,
   );
 });
@@ -55,9 +55,9 @@ test("attempts the external protocol through an anchor navigation", () => {
     },
   } as unknown as Document;
 
-  attemptDesktopAppOpen("anarlog-staging://auth/callback", documentRef);
+  attemptDesktopAppOpen("meeki-staging://auth/callback", documentRef);
 
-  assert.equal(link.href, "anarlog-staging://auth/callback");
+  assert.equal(link.href, "meeki-staging://auth/callback");
   assert.equal(link.rel, "noreferrer");
   assert.equal(link.hidden, true);
   assert.equal(link.tabIndex, -1);
@@ -66,7 +66,7 @@ test("attempts the external protocol through an anchor navigation", () => {
 
 test("attempts automatic opening once under StrictMode", async () => {
   const dom = new JSDOM('<div id="root"></div>', {
-    url: "https://anarlog.so",
+    url: "https://meeki.so",
   });
   const previousWindow = globalThis.window;
   const previousDocument = globalThis.document;
@@ -75,7 +75,7 @@ test("attempts automatic opening once under StrictMode", async () => {
     globalThis,
     "IS_REACT_ACT_ENVIRONMENT",
   );
-  const deeplink = "anarlog-staging://auth/callback?access_token=a";
+  const deeplink = "meeki-staging://auth/callback?access_token=a";
   const attempts: string[] = [];
 
   Object.defineProperty(globalThis, "window", {
@@ -99,7 +99,7 @@ test("attempts automatic opening once under StrictMode", async () => {
     const target = event.target;
     if (
       target instanceof dom.window.HTMLAnchorElement &&
-      target.href.startsWith("anarlog-staging:")
+      target.href.startsWith("meeki-staging:")
     ) {
       attempts.push(target.getAttribute("href") ?? "");
       event.preventDefault();
@@ -138,7 +138,7 @@ test("attempts automatic opening once under StrictMode", async () => {
 
 test("keeps the manual open link independently clickable", () => {
   const dom = new JSDOM();
-  const deeplink = "anarlog-staging://auth/callback?access_token=a";
+  const deeplink = "meeki-staging://auth/callback?access_token=a";
   const anchor = dom.window.document.createElement("a");
   const props = getDesktopAppOpenLinkProps(deeplink);
   let clicks = 0;

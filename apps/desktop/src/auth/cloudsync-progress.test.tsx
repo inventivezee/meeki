@@ -6,11 +6,11 @@ const mocks = vi.hoisted(() => ({
   showNotification: vi.fn(),
 }));
 
-vi.mock("@hypr/plugin-db", () => ({
+vi.mock("@meeki/plugin-db", () => ({
   getCloudsyncStatus: mocks.getCloudsyncStatus,
 }));
 
-vi.mock("@hypr/plugin-notification", () => ({
+vi.mock("@meeki/plugin-notification", () => ({
   commands: {
     showNotification: mocks.showNotification,
   },
@@ -82,22 +82,19 @@ describe("CloudSync initial sync progress", () => {
 
     expect(progress.result.current).toEqual({ state: "idle" });
     expect(
-      localStorage.getItem("anarlog:cloudsync_initial_sync_completed:user-1"),
+      localStorage.getItem("meeki:cloudsync_initial_sync_completed:user-1"),
     ).toBe("1");
     expect(mocks.showNotification).toHaveBeenCalledWith(
       expect.objectContaining({
         key: "cloudsync-initial-sync-complete-user-1",
         title: "Cloud sync complete",
-        message: "Your Anarlog data is ready on this device.",
+        message: "Your Meeki data is ready on this device.",
       }),
     );
   });
 
   it("does not restart progress after completion was persisted", () => {
-    localStorage.setItem(
-      "anarlog:cloudsync_initial_sync_completed:user-1",
-      "1",
-    );
+    localStorage.setItem("meeki:cloudsync_initial_sync_completed:user-1", "1");
     const progress = renderHook(() => useCloudsyncInitialSyncProgress());
 
     act(() => startCloudsyncInitialSyncProgress("user-1"));

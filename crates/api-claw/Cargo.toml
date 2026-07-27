@@ -5,7 +5,7 @@ edition = "2024"
 publish = false
 
 [dependencies]
-hypr-exedev = { workspace = true }
+meeki-exedev = { workspace = true }
 
 base64 = { workspace = true }
 chrono = { workspace = true }

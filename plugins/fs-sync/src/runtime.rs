@@ -1,4 +1,4 @@
-use hypr_fs_sync_core::runtime::{AudioImportEvent, AudioImportRuntime};
+use meeki_fs_sync_core::runtime::{AudioImportEvent, AudioImportRuntime};
 use tauri_specta::Event;
 
 pub struct TauriAudioImportRuntime<R: tauri::Runtime> {

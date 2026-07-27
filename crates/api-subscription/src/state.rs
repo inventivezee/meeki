@@ -1,4 +1,4 @@
-use hypr_loops::LoopClient;
+use meeki_loops::LoopClient;
 use stripe::Client as StripeClient;
 
 use crate::config::SubscriptionConfig;

@@ -78,130 +78,130 @@ importers:
       '@handlewithcare/react-prosemirror':
         specifier: ^3.2.6
         version: 3.2.6(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)(prosemirror-view@1.41.7)(react-dom@19.2.5(react@19.2.5))(react-reconciler@0.33.0(react@19.2.5))(react@19.2.5)
-      '@hypr/api-client':
+      '@meeki/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
-      '@hypr/changelog':
+      '@meeki/changelog':
         specifier: workspace:^
         version: link:../../packages/changelog
-      '@hypr/db':
+      '@meeki/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@hypr/db-react':
+      '@meeki/db-react':
         specifier: workspace:*
         version: link:../../packages/db-react
-      '@hypr/db-tauri':
+      '@meeki/db-tauri':
         specifier: workspace:*
         version: link:../../packages/db-tauri
-      '@hypr/editor':
+      '@meeki/editor':
         specifier: workspace:^
         version: link:../../packages/editor
-      '@hypr/plugin-analytics':
+      '@meeki/plugin-analytics':
         specifier: workspace:*
         version: link:../../plugins/analytics
-      '@hypr/plugin-attachment-sync':
+      '@meeki/plugin-attachment-sync':
         specifier: workspace:*
         version: link:../../plugins/attachment-sync
-      '@hypr/plugin-auth':
+      '@meeki/plugin-auth':
         specifier: workspace:*
         version: link:../../plugins/auth
-      '@hypr/plugin-calendar':
+      '@meeki/plugin-calendar':
         specifier: workspace:*
         version: link:../../plugins/calendar
-      '@hypr/plugin-db':
+      '@meeki/plugin-db':
         specifier: workspace:*
         version: link:../../plugins/db
-      '@hypr/plugin-deeplink2':
+      '@meeki/plugin-deeplink2':
         specifier: workspace:*
         version: link:../../plugins/deeplink2
-      '@hypr/plugin-detect':
+      '@meeki/plugin-detect':
         specifier: workspace:*
         version: link:../../plugins/detect
-      '@hypr/plugin-export':
+      '@meeki/plugin-export':
         specifier: workspace:*
         version: link:../../plugins/export
-      '@hypr/plugin-fs-sync':
+      '@meeki/plugin-fs-sync':
         specifier: workspace:*
         version: link:../../plugins/fs-sync
-      '@hypr/plugin-fs2':
+      '@meeki/plugin-fs2':
         specifier: workspace:*
         version: link:../../plugins/fs2
-      '@hypr/plugin-hooks':
+      '@meeki/plugin-hooks':
         specifier: workspace:*
         version: link:../../plugins/hooks
-      '@hypr/plugin-icon':
+      '@meeki/plugin-icon':
         specifier: workspace:*
         version: link:../../plugins/icon
-      '@hypr/plugin-importer':
+      '@meeki/plugin-importer':
         specifier: workspace:*
         version: link:../../plugins/importer
-      '@hypr/plugin-local-llm':
+      '@meeki/plugin-local-llm':
         specifier: workspace:*
         version: link:../../plugins/local-llm
-      '@hypr/plugin-local-stt':
+      '@meeki/plugin-local-stt':
         specifier: workspace:*
         version: link:../../plugins/local-stt
-      '@hypr/plugin-misc':
+      '@meeki/plugin-misc':
         specifier: workspace:*
         version: link:../../plugins/misc
-      '@hypr/plugin-notification':
+      '@meeki/plugin-notification':
         specifier: workspace:*
         version: link:../../plugins/notification
-      '@hypr/plugin-notify':
+      '@meeki/plugin-notify':
         specifier: workspace:*
         version: link:../../plugins/notify
-      '@hypr/plugin-opener2':
+      '@meeki/plugin-opener2':
         specifier: workspace:*
         version: link:../../plugins/opener2
-      '@hypr/plugin-permissions':
+      '@meeki/plugin-permissions':
         specifier: workspace:*
         version: link:../../plugins/permissions
-      '@hypr/plugin-relay':
+      '@meeki/plugin-relay':
         specifier: workspace:*
         version: link:../../plugins/relay
-      '@hypr/plugin-settings':
+      '@meeki/plugin-settings':
         specifier: workspace:*
         version: link:../../plugins/settings
-      '@hypr/plugin-sfx':
+      '@meeki/plugin-sfx':
         specifier: workspace:*
         version: link:../../plugins/sfx
-      '@hypr/plugin-store2':
+      '@meeki/plugin-store2':
         specifier: workspace:*
         version: link:../../plugins/store2
-      '@hypr/plugin-tantivy':
+      '@meeki/plugin-tantivy':
         specifier: workspace:*
         version: link:../../plugins/tantivy
-      '@hypr/plugin-template':
+      '@meeki/plugin-template':
         specifier: workspace:*
         version: link:../../plugins/template
-      '@hypr/plugin-todo':
+      '@meeki/plugin-todo':
         specifier: workspace:*
         version: link:../../plugins/todo
-      '@hypr/plugin-transcription':
+      '@meeki/plugin-transcription':
         specifier: workspace:*
         version: link:../../plugins/transcription
-      '@hypr/plugin-tray':
+      '@meeki/plugin-tray':
         specifier: workspace:*
         version: link:../../plugins/tray
-      '@hypr/plugin-updater2':
+      '@meeki/plugin-updater2':
         specifier: workspace:*
         version: link:../../plugins/updater2
-      '@hypr/plugin-windows':
+      '@meeki/plugin-windows':
         specifier: workspace:*
         version: link:../../plugins/windows
-      '@hypr/pricing':
+      '@meeki/pricing':
         specifier: workspace:^
         version: link:../../packages/pricing
-      '@hypr/store':
+      '@meeki/store':
         specifier: workspace:*
         version: link:../../packages/store
-      '@hypr/supabase':
+      '@meeki/supabase':
         specifier: workspace:*
         version: link:../../packages/supabase
-      '@hypr/ui':
+      '@meeki/ui':
         specifier: workspace:^
         version: link:../../packages/ui
-      '@hypr/utils':
+      '@meeki/utils':
         specifier: workspace:^
         version: link:../../packages/utils
       '@iconify-icon/react':
@@ -430,7 +430,7 @@ importers:
 
   apps/stripe:
     dependencies:
-      '@hypr/supabase':
+      '@meeki/supabase':
         specifier: workspace:*
         version: link:../../packages/supabase
       '@sentry/bun':
@@ -491,25 +491,25 @@ importers:
       '@honeycombio/opentelemetry-web':
         specifier: ^1.3.0
         version: 1.3.0(@opentelemetry/auto-instrumentations-web@0.49.1(@opentelemetry/api@1.9.1)(zone.js@0.15.1))
-      '@hypr/api-client':
+      '@meeki/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
-      '@hypr/changelog':
+      '@meeki/changelog':
         specifier: workspace:^
         version: link:../../packages/changelog
-      '@hypr/editor':
+      '@meeki/editor':
         specifier: workspace:*
         version: link:../../packages/editor
-      '@hypr/pricing':
+      '@meeki/pricing':
         specifier: workspace:^
         version: link:../../packages/pricing
-      '@hypr/supabase':
+      '@meeki/supabase':
         specifier: workspace:*
         version: link:../../packages/supabase
-      '@hypr/ui':
+      '@meeki/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      '@hypr/utils':
+      '@meeki/utils':
         specifier: workspace:*
         version: link:../../packages/utils
       '@iconify-icon/react':
@@ -714,10 +714,10 @@ importers:
       '@dotenvx/dotenvx':
         specifier: ^1.61.0
         version: 1.61.0
-      '@hypr/plugin-auth':
+      '@meeki/plugin-auth':
         specifier: workspace:*
         version: link:../../plugins/auth
-      '@hypr/plugin-deeplink2':
+      '@meeki/plugin-deeplink2':
         specifier: workspace:*
         version: link:../../plugins/deeplink2
       '@tailwindcss/typography':
@@ -804,7 +804,7 @@ importers:
 
   examples/plugins/hello-world:
     devDependencies:
-      '@hypr/plugin-sdk':
+      '@meeki/plugin-sdk':
         specifier: workspace:*
         version: link:../../../packages/plugin-sdk
       '@types/react':
@@ -859,7 +859,7 @@ importers:
 
   packages/agent-designer:
     dependencies:
-      '@hypr/agent-core':
+      '@meeki/agent-core':
         specifier: workspace:^
         version: link:../agent-core
       '@langchain/core':
@@ -905,7 +905,7 @@ importers:
 
   packages/agent-support:
     dependencies:
-      '@hypr/agent-core':
+      '@meeki/agent-core':
         specifier: workspace:^
         version: link:../agent-core
       '@langchain/core':
@@ -969,7 +969,7 @@ importers:
 
   packages/changelog:
     dependencies:
-      '@hypr/utils':
+      '@meeki/utils':
         specifier: workspace:^
         version: link:../utils
       react:
@@ -1025,7 +1025,7 @@ importers:
 
   packages/db:
     dependencies:
-      '@hypr/db-runtime':
+      '@meeki/db-runtime':
         specifier: workspace:*
         version: link:../db-runtime
       drizzle-orm:
@@ -1044,7 +1044,7 @@ importers:
 
   packages/db-react:
     dependencies:
-      '@hypr/db-runtime':
+      '@meeki/db-runtime':
         specifier: workspace:*
         version: link:../db-runtime
       react:
@@ -1075,10 +1075,10 @@ importers:
 
   packages/db-tauri:
     dependencies:
-      '@hypr/db-runtime':
+      '@meeki/db-runtime':
         specifier: workspace:*
         version: link:../db-runtime
-      '@hypr/plugin-db':
+      '@meeki/plugin-db':
         specifier: workspace:*
         version: link:../../plugins/db
     devDependencies:
@@ -1097,13 +1097,13 @@ importers:
       '@handlewithcare/react-prosemirror':
         specifier: ^3.2.6
         version: 3.2.6(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)(prosemirror-view@1.41.7)(react-dom@19.2.5(react@19.2.5))(react-reconciler@0.33.0(react@19.2.5))(react@19.2.5)
-      '@hypr/plugin-opener2':
+      '@meeki/plugin-opener2':
         specifier: workspace:*
         version: link:../../plugins/opener2
-      '@hypr/store':
+      '@meeki/store':
         specifier: workspace:*
         version: link:../store
-      '@hypr/utils':
+      '@meeki/utils':
         specifier: workspace:^
         version: link:../utils
       facehash:
@@ -1204,10 +1204,10 @@ importers:
 
   packages/pricing:
     dependencies:
-      '@hypr/ui':
+      '@meeki/ui':
         specifier: workspace:^
         version: link:../ui
-      '@hypr/utils':
+      '@meeki/utils':
         specifier: workspace:^
         version: link:../utils
       lucide-react:
@@ -1255,7 +1255,7 @@ importers:
 
   packages/ui:
     dependencies:
-      '@hypr/utils':
+      '@meeki/utils':
         specifier: workspace:^
         version: link:../utils
       '@radix-ui/react-accordion':

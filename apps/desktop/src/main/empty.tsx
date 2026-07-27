@@ -1,8 +1,8 @@
 import { Trans } from "@lingui/react/macro";
 import { useCallback } from "react";
 
-import { Kbd } from "@hypr/ui/components/ui/kbd";
-import { cn } from "@hypr/utils";
+import { Kbd } from "@meeki/ui/components/ui/kbd";
+import { cn } from "@meeki/utils";
 
 import { FloatingChatCTA } from "~/shared/chat-cta";
 import { StandardContentWrapper } from "~/shared/main";

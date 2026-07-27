@@ -10,9 +10,9 @@ import {
 } from "lucide-react";
 import { defaultRehypePlugins, Streamdown } from "streamdown";
 
-import { commands as openerCommands } from "@hypr/plugin-opener2";
-import { commands as todoCommands } from "@hypr/plugin-todo";
-import { cn } from "@hypr/utils";
+import { commands as openerCommands } from "@meeki/plugin-opener2";
+import { commands as todoCommands } from "@meeki/plugin-todo";
+import { cn } from "@meeki/utils";
 
 import { streamdownComponents } from "~/session/components/streamdown";
 import { type TaskResource } from "~/store/zustand/tabs";

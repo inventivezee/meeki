@@ -7,14 +7,14 @@ description = ""
 [features]
 default = []
 specta = [
-  "hypr-listener-core/specta",
-  "hypr-listener2-core/specta",
+  "meeki-listener-core/specta",
+  "meeki-listener2-core/specta",
 ]
 tauri-event = [
-  "hypr-listener-core/tauri-event",
-  "hypr-listener2-core/tauri-event",
+  "meeki-listener-core/tauri-event",
+  "meeki-listener2-core/tauri-event",
 ]
 
 [dependencies]
-hypr-listener-core = { workspace = true }
-hypr-listener2-core = { workspace = true }
+meeki-listener-core = { workspace = true }
+meeki-listener2-core = { workspace = true }

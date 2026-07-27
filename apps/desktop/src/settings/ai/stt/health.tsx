@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 
-import { Spinner } from "@hypr/ui/components/ui/spinner";
+import { Spinner } from "@meeki/ui/components/ui/spinner";
 
 import { useConfigValues } from "~/shared/config";
 import {

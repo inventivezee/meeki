@@ -1,4 +1,4 @@
-import type { LocalModel } from "@hypr/plugin-local-stt";
+import type { LocalModel } from "@meeki/plugin-local-stt";
 
 import {
   LOCAL_FINAL_BATCH_MODEL,

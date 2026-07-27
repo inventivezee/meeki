@@ -1,5 +1,5 @@
 use axum::{Json, body::Bytes};
-use hypr_api_auth::AuthContext;
+use meeki_api_auth::AuthContext;
 use owhisper_client::{CallbackSttAdapter, DeepgramAdapter, Provider, SonioxAdapter};
 use owhisper_interface::ListenParams;
 use serde::{Deserialize, Serialize};
@@ -142,7 +142,7 @@ async fn handle_sync_fallback(
     );
 
     let download_response =
-        hypr_observability::with_current_trace_context(state.client.get(audio_url))
+        meeki_observability::with_current_trace_context(state.client.get(audio_url))
             .send()
             .await
             .map_err(|e| RouteError::Internal(format!("failed to download audio: {e}")))?;

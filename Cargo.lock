@@ -385,27 +385,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "anarlog-cli"
-version = "0.1.0"
-dependencies = [
- "agent-access",
- "clap",
- "cli-docs",
- "db-app",
- "db-core",
- "dirs 6.0.0",
- "insta",
- "rmcp",
- "serde",
- "serde_json",
- "sqlx",
- "tempfile",
- "thiserror 2.0.18",
- "tokio",
- "url",
-]
-
-[[package]]
 name = "android_system_properties"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -714,7 +693,7 @@ version = "0.1.0"
 dependencies = [
  "api-error",
  "axum 0.8.9",
- "hypr-http-utils",
+ "meeki-http-utils",
  "serde",
  "serde_json",
  "slack-web",
@@ -4921,13 +4900,13 @@ dependencies = [
  "tauri-plugin-git",
  "tauri-plugin-hooks",
  "tauri-plugin-http",
- "tauri-plugin-hypr-tray",
  "tauri-plugin-icon",
  "tauri-plugin-importer",
  "tauri-plugin-js",
  "tauri-plugin-local-llm",
  "tauri-plugin-local-stt",
  "tauri-plugin-mcp",
+ "tauri-plugin-meeki-tray",
  "tauri-plugin-messenger",
  "tauri-plugin-misc",
  "tauri-plugin-notification",
@@ -6672,7 +6651,7 @@ dependencies = [
 name = "github-issues"
 version = "0.1.0"
 dependencies = [
- "hypr-http-utils",
+ "meeki-http-utils",
  "serde",
  "serde_json",
  "specta",
@@ -8316,7 +8295,7 @@ name = "google-calendar"
 version = "0.1.0"
 dependencies = [
  "chrono",
- "hypr-http-utils",
+ "meeki-http-utils",
  "serde",
  "serde_json",
  "specta",
@@ -8330,7 +8309,7 @@ dependencies = [
 name = "google-drive"
 version = "0.1.0"
 dependencies = [
- "hypr-http-utils",
+ "meeki-http-utils",
  "serde",
  "serde_json",
  "thiserror 2.0.18",
@@ -8342,7 +8321,7 @@ dependencies = [
 name = "google-mail"
 version = "0.1.0"
 dependencies = [
- "hypr-http-utils",
+ "meeki-http-utils",
  "serde",
  "serde_json",
  "specta",
@@ -9216,10 +9195,6 @@ name = "hypher"
 version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bef68590049bab63a464eee1a1158ac04c6f6613a546d8d90f78636b8b94f171"
-
-[[package]]
-name = "hypr-http-utils"
-version = "0.1.0"
 
 [[package]]
 name = "iana-time-zone"
@@ -10629,7 +10604,7 @@ dependencies = [
 name = "linear"
 version = "0.1.0"
 dependencies = [
- "hypr-http-utils",
+ "meeki-http-utils",
  "serde",
  "serde_json",
  "specta",
@@ -11150,6 +11125,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "meeki-cli"
+version = "0.1.0"
+dependencies = [
+ "agent-access",
+ "clap",
+ "cli-docs",
+ "db-app",
+ "db-core",
+ "dirs 6.0.0",
+ "insta",
+ "rmcp",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "url",
+]
+
+[[package]]
+name = "meeki-http-utils"
+version = "0.1.0"
+
+[[package]]
 name = "memchr"
 version = "2.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -11491,7 +11491,7 @@ version = "0.1.0"
 dependencies = [
  "hex",
  "hmac 0.13.0",
- "hypr-http-utils",
+ "meeki-http-utils",
  "reqwest 0.13.2",
  "schemars 1.2.1",
  "serde",
@@ -12793,7 +12793,7 @@ name = "outlook-calendar"
 version = "0.1.0"
 dependencies = [
  "chrono",
- "hypr-http-utils",
+ "meeki-http-utils",
  "serde",
  "serde_json",
  "specta",
@@ -16433,7 +16433,7 @@ checksum = "0c790de23124f9ab44544d7ac05d60440adc586479ce501c1d6d7da3cd8c9cf5"
 name = "slack-web"
 version = "0.1.0"
 dependencies = [
- "hypr-http-utils",
+ "meeki-http-utils",
  "serde",
  "serde_json",
  "thiserror 2.0.18",
@@ -18407,7 +18407,7 @@ dependencies = [
  "objc2-foundation",
  "tauri",
  "tauri-plugin",
- "tauri-plugin-hypr-tray",
+ "tauri-plugin-meeki-tray",
  "tauri-plugin-windows",
 ]
 
@@ -18565,30 +18565,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tauri-plugin-hypr-tray"
-version = "0.1.0"
-dependencies = [
- "host",
- "intercept",
- "open",
- "serde",
- "serde_json",
- "specta",
- "specta-typescript",
- "tauri",
- "tauri-plugin",
- "tauri-plugin-clipboard-manager",
- "tauri-plugin-dialog",
- "tauri-plugin-misc",
- "tauri-plugin-store2",
- "tauri-plugin-updater2",
- "tauri-plugin-windows",
- "tauri-specta",
- "tokio",
- "tracing",
-]
-
-[[package]]
 name = "tauri-plugin-icon"
 version = "0.1.0"
 dependencies = [
@@ -18732,6 +18708,30 @@ dependencies = [
  "tauri-specta",
  "thiserror 2.0.18",
  "tokio",
+]
+
+[[package]]
+name = "tauri-plugin-meeki-tray"
+version = "0.1.0"
+dependencies = [
+ "host",
+ "intercept",
+ "open",
+ "serde",
+ "serde_json",
+ "specta",
+ "specta-typescript",
+ "tauri",
+ "tauri-plugin",
+ "tauri-plugin-clipboard-manager",
+ "tauri-plugin-dialog",
+ "tauri-plugin-misc",
+ "tauri-plugin-store2",
+ "tauri-plugin-updater2",
+ "tauri-plugin-windows",
+ "tauri-specta",
+ "tokio",
+ "tracing",
 ]
 
 [[package]]
@@ -19195,7 +19195,7 @@ dependencies = [
  "api-client",
  "apple-todo",
  "github-issues",
- "hypr-http-utils",
+ "meeki-http-utils",
  "reqwest 0.13.2",
  "serde",
  "specta",
@@ -19249,8 +19249,8 @@ dependencies = [
  "tauri",
  "tauri-plugin",
  "tauri-plugin-hooks",
- "tauri-plugin-hypr-tray",
  "tauri-plugin-local-stt",
+ "tauri-plugin-meeki-tray",
  "tauri-plugin-settings",
  "tauri-specta",
  "thiserror 2.0.18",
@@ -19522,7 +19522,7 @@ dependencies = [
 name = "teems"
 version = "0.1.0"
 dependencies = [
- "hypr-http-utils",
+ "meeki-http-utils",
  "serde",
  "serde_json",
  "thiserror 2.0.18",

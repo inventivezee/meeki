@@ -1,6 +1,6 @@
 import { Trans } from "@lingui/react/macro";
 
-import { Accordion } from "@hypr/ui/components/ui/accordion";
+import { Accordion } from "@meeki/ui/components/ui/accordion";
 
 import { useLlmSettings } from "./context";
 import { ProviderId, PROVIDERS } from "./shared";

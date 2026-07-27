@@ -22,7 +22,7 @@ use crate::menu_items::{
 };
 use tauri_plugin_store2::Store2PluginExt;
 
-const TRAY_ID: &str = "hypr-tray";
+const TRAY_ID: &str = "meeki-tray";
 
 static IS_RECORDING: AtomicBool = AtomicBool::new(false);
 static IS_DEGRADED: AtomicBool = AtomicBool::new(false);
@@ -278,7 +278,7 @@ impl<'a, M: tauri::Manager<tauri::Wry>> Tray<'a, tauri::Wry, M> {
         for (section_index, section) in agenda.iter().enumerate() {
             let heading = MenuItem::with_id(
                 app,
-                format!("hypr_tray_agenda_section_{section_index}"),
+                format!("meeki_tray_agenda_section_{section_index}"),
                 &section.label,
                 false,
                 None::<&str>,

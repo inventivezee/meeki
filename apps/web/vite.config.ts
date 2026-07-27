@@ -14,7 +14,7 @@ const config = defineConfig(() => ({
     tailwindcss(),
     tanstackStart({
       sitemap: {
-        host: "https://anarlog.so",
+        host: "https://meeki.so",
       },
       prerender: {
         enabled: true,
@@ -26,8 +26,8 @@ const config = defineConfig(() => ({
             "/",
             "/blog",
             "/blog/",
-            "/blog/char-is-now-anarlog",
-            "/blog/char-is-now-anarlog/",
+            "/blog/char-is-now-meeki",
+            "/blog/char-is-now-meeki/",
           ].includes(path);
         },
       },

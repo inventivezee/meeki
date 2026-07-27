@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-pub use hypr_importer_core::ir::{
+pub use meeki_importer_core::ir::{
     Collection, CollectionStats, EnhancedNote, Human, Organization, Session, SessionParticipant,
     Tag, TagMapping, Template, TemplateSection, Transcript, Word,
 };
@@ -43,7 +43,7 @@ impl ImportSource {
 
     pub fn hyprnote_stable() -> Option<Self> {
         let path = dirs::data_dir()?
-            .join("com.hyprnote.stable")
+            .join("com.meeki.stable")
             .join("db.sqlite");
         Some(Self {
             kind: Some(ImportSourceKind::HyprnoteV0Stable),
@@ -55,7 +55,7 @@ impl ImportSource {
 
     pub fn hyprnote_nightly() -> Option<Self> {
         let path = dirs::data_dir()?
-            .join("com.hyprnote.nightly")
+            .join("com.meeki.nightly")
             .join("db.sqlite");
         Some(Self {
             kind: Some(ImportSourceKind::HyprnoteV0Nightly),
@@ -66,7 +66,7 @@ impl ImportSource {
     }
 
     pub fn granola() -> Option<Self> {
-        let path = hypr_granola::default_supabase_path();
+        let path = meeki_granola::default_supabase_path();
         Some(Self {
             kind: Some(ImportSourceKind::Granola),
             transform: TransformKind::Granola,

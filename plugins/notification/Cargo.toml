@@ -14,10 +14,10 @@ tauri-plugin = { workspace = true, features = ["build"] }
 specta-typescript = { workspace = true }
 
 [dependencies]
-hypr-detect = { workspace = true }
-hypr-host = { workspace = true }
-hypr-intercept = { workspace = true }
-hypr-notification = { workspace = true, features = ["legacy"] }
+meeki-detect = { workspace = true }
+meeki-host = { workspace = true }
+meeki-intercept = { workspace = true }
+meeki-notification = { workspace = true, features = ["legacy"] }
 
 tauri-plugin-analytics = { workspace = true }
 tauri-plugin-dialog = { workspace = true }

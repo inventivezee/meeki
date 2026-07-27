@@ -3,15 +3,15 @@ import { platform } from "@tauri-apps/plugin-os";
 import { ChevronRight, Loader2Icon, PlusIcon } from "lucide-react";
 import { useCallback, useMemo, type MouseEvent } from "react";
 
-import type { ConnectionItem } from "@hypr/api-client";
+import type { ConnectionItem } from "@meeki/api-client";
 import {
   Accordion,
   AccordionContent,
   AccordionHeader,
   AccordionItem,
   AccordionTriggerPrimitive,
-} from "@hypr/ui/components/ui/accordion";
-import { cn } from "@hypr/utils";
+} from "@meeki/ui/components/ui/accordion";
+import { cn } from "@meeki/utils";
 
 import { AppleCalendarSelection } from "./apple/calendar-selection";
 import { AccessPermissionRow, TroubleShootingLink } from "./apple/permission";

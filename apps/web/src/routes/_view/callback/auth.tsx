@@ -240,7 +240,7 @@ function DesktopAuthHandoffActions({ deeplink }: { deeplink: string }) {
         {...getDesktopAppOpenLinkProps(deeplink)}
         className={authPrimaryButtonClassName}
       >
-        Open Anarlog
+        Open Meeki
       </a>
 
       <div className="rounded-xl border border-[#e5ddcf] bg-[#fbfaf7] p-4 text-center">

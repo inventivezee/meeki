@@ -10,14 +10,14 @@ import {
 } from "lucide-react";
 import { useEffect, useRef } from "react";
 
-import type { NoteEditorRef } from "@hypr/editor/note";
-import { Kbd } from "@hypr/ui/components/ui/kbd";
+import type { NoteEditorRef } from "@meeki/editor/note";
+import { Kbd } from "@meeki/ui/components/ui/kbd";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@hypr/ui/components/ui/tooltip";
-import { cn } from "@hypr/utils";
+} from "@meeki/ui/components/ui/tooltip";
+import { cn } from "@meeki/utils";
 
 import { useSearch } from "./context";
 

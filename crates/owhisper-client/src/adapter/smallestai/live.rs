@@ -1,4 +1,4 @@
-use hypr_ws_client::client::Message;
+use meeki_ws_client::client::Message;
 use owhisper_interface::ListenParams;
 use owhisper_interface::stream::{Alternatives, Channel, Metadata, StreamResponse};
 use serde::Deserialize;
@@ -14,7 +14,7 @@ impl RealtimeSttAdapter for SmallestAIAdapter {
 
     fn is_supported_languages(
         &self,
-        languages: &[hypr_language::Language],
+        languages: &[meeki_language::Language],
         model: Option<&str>,
     ) -> bool {
         SmallestAIAdapter::is_supported_languages_live(languages, model)
@@ -285,7 +285,7 @@ impl SmallestMessageError {
 
 #[cfg(test)]
 mod tests {
-    use hypr_language::ISO639;
+    use meeki_language::ISO639;
 
     use super::*;
 

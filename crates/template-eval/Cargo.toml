@@ -5,9 +5,9 @@ edition = "2024"
 
 [dependencies]
 askama = { workspace = true }
-hypr-openrouter = { workspace = true }
 libtest-mimic = "0.8.1"
 markdown = { workspace = true }
+meeki-openrouter = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 specta = { workspace = true, features = ["derive"] }
@@ -15,5 +15,5 @@ thiserror = { workspace = true }
 tokio = { workspace = true, features = ["rt"] }
 
 [dev-dependencies]
-hypr-askama-utils = { workspace = true }
 insta = { workspace = true }
+meeki-askama-utils = { workspace = true }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { LiveTranscriptSegment } from "@hypr/plugin-transcription";
+import type { LiveTranscriptSegment } from "@meeki/plugin-transcription";
 
 import {
   getCurrentFloatingBarColorScheme,

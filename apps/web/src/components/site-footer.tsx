@@ -14,7 +14,7 @@ export function SiteFooter() {
       </a>
       <nav className="flex flex-wrap gap-x-5 gap-y-2">
         <a
-          href="https://github.com/fastrepl/anarlog"
+          href="https://github.com/fastrepl/meeki"
           className="hover:text-[#181613]"
         >
           GitHub

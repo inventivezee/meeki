@@ -12,5 +12,5 @@ pub(crate) fn mcp_service(
     SupportMcpServer,
     rmcp::transport::streamable_http_server::session::local::LocalSessionManager,
 > {
-    hypr_mcp::create_service(move || Ok(SupportMcpServer::new(state.clone())))
+    meeki_mcp::create_service(move || Ok(SupportMcpServer::new(state.clone())))
 }

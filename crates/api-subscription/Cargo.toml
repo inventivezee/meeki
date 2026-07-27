@@ -4,13 +4,13 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-hypr-analytics = { workspace = true }
-hypr-api-auth = { workspace = true }
-hypr-api-env = { workspace = true }
-hypr-api-error = { workspace = true }
-hypr-loops = { workspace = true }
-hypr-observability = { workspace = true }
-hypr-supabase-storage = { workspace = true }
+meeki-analytics = { workspace = true }
+meeki-api-auth = { workspace = true }
+meeki-api-env = { workspace = true }
+meeki-api-error = { workspace = true }
+meeki-loops = { workspace = true }
+meeki-observability = { workspace = true }
+meeki-supabase-storage = { workspace = true }
 
 utoipa = { workspace = true }
 

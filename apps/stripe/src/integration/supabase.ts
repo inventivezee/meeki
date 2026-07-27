@@ -1,4 +1,4 @@
-import { createClient } from "@hypr/supabase";
+import { createClient } from "@meeki/supabase";
 
 import { env } from "../env";
 

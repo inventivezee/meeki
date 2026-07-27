@@ -1,7 +1,7 @@
 use axum::{Extension, Json};
-use hypr_api_auth::AuthContext;
-use hypr_api_nango::{GoogleMail, NangoConnectionState, NangoIntegrationId};
-use hypr_google_mail::{
+use meeki_api_auth::AuthContext;
+use meeki_api_nango::{GoogleMail, NangoConnectionState, NangoIntegrationId};
+use meeki_google_mail::{
     Attachment, GoogleMailClient, ListHistoryResponse, ListLabelsResponse, ListMessagesResponse,
     ListThreadsResponse, Message, Profile, Thread,
 };
@@ -155,7 +155,7 @@ pub async fn list_messages(
 
     let client = GoogleMailClient::new(http);
 
-    let google_req = hypr_google_mail::ListMessagesRequest {
+    let google_req = meeki_google_mail::ListMessagesRequest {
         q: req.q,
         max_results: req.max_results,
         page_token: req.page_token,
@@ -203,15 +203,15 @@ pub async fn get_message(
         .format
         .as_deref()
         .map(|s| match s {
-            "full" => Ok(hypr_google_mail::MessageFormat::Full),
-            "metadata" => Ok(hypr_google_mail::MessageFormat::Metadata),
-            "minimal" => Ok(hypr_google_mail::MessageFormat::Minimal),
-            "raw" => Ok(hypr_google_mail::MessageFormat::Raw),
+            "full" => Ok(meeki_google_mail::MessageFormat::Full),
+            "metadata" => Ok(meeki_google_mail::MessageFormat::Metadata),
+            "minimal" => Ok(meeki_google_mail::MessageFormat::Minimal),
+            "raw" => Ok(meeki_google_mail::MessageFormat::Raw),
             other => Err(MailError::BadRequest(format!("Invalid format: {other}"))),
         })
         .transpose()?;
 
-    let google_req = hypr_google_mail::GetMessageRequest {
+    let google_req = meeki_google_mail::GetMessageRequest {
         id: req.id,
         format,
         metadata_headers: req.metadata_headers,
@@ -325,7 +325,7 @@ pub async fn list_threads(
 
     let client = GoogleMailClient::new(http);
 
-    let google_req = hypr_google_mail::ListThreadsRequest {
+    let google_req = meeki_google_mail::ListThreadsRequest {
         q: req.q,
         max_results: req.max_results,
         page_token: req.page_token,
@@ -373,15 +373,15 @@ pub async fn get_thread(
         .format
         .as_deref()
         .map(|s| match s {
-            "full" => Ok(hypr_google_mail::MessageFormat::Full),
-            "metadata" => Ok(hypr_google_mail::MessageFormat::Metadata),
-            "minimal" => Ok(hypr_google_mail::MessageFormat::Minimal),
-            "raw" => Ok(hypr_google_mail::MessageFormat::Raw),
+            "full" => Ok(meeki_google_mail::MessageFormat::Full),
+            "metadata" => Ok(meeki_google_mail::MessageFormat::Metadata),
+            "minimal" => Ok(meeki_google_mail::MessageFormat::Minimal),
+            "raw" => Ok(meeki_google_mail::MessageFormat::Raw),
             other => Err(MailError::BadRequest(format!("Invalid format: {other}"))),
         })
         .transpose()?;
 
-    let google_req = hypr_google_mail::GetThreadRequest {
+    let google_req = meeki_google_mail::GetThreadRequest {
         id: req.id,
         format,
         metadata_headers: req.metadata_headers,
@@ -429,10 +429,10 @@ pub async fn list_history(
             types
                 .iter()
                 .map(|s| match s.as_str() {
-                    "messageAdded" => Ok(hypr_google_mail::HistoryType::MessageAdded),
-                    "messageDeleted" => Ok(hypr_google_mail::HistoryType::MessageDeleted),
-                    "labelAdded" => Ok(hypr_google_mail::HistoryType::LabelAdded),
-                    "labelRemoved" => Ok(hypr_google_mail::HistoryType::LabelRemoved),
+                    "messageAdded" => Ok(meeki_google_mail::HistoryType::MessageAdded),
+                    "messageDeleted" => Ok(meeki_google_mail::HistoryType::MessageDeleted),
+                    "labelAdded" => Ok(meeki_google_mail::HistoryType::LabelAdded),
+                    "labelRemoved" => Ok(meeki_google_mail::HistoryType::LabelRemoved),
                     other => Err(MailError::BadRequest(format!(
                         "Invalid history type: {other}"
                     ))),
@@ -441,7 +441,7 @@ pub async fn list_history(
         })
         .transpose()?;
 
-    let google_req = hypr_google_mail::ListHistoryRequest {
+    let google_req = meeki_google_mail::ListHistoryRequest {
         start_history_id: req.start_history_id,
         max_results: req.max_results,
         page_token: req.page_token,

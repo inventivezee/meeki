@@ -15,7 +15,7 @@ elicit_safe!(Confirmation);
 
 use crate::state::AppState;
 
-use hypr_mcp::McpAuth;
+use meeki_mcp::McpAuth;
 
 use super::prompts;
 use super::tools::{

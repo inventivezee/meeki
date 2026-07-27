@@ -10,8 +10,8 @@ import {
 } from "lucide-react";
 import { useRef } from "react";
 
-import { type PermissionStatus } from "@hypr/plugin-permissions";
-import { cn } from "@hypr/utils";
+import { type PermissionStatus } from "@meeki/plugin-permissions";
+import { cn } from "@meeki/utils";
 
 import { OnboardingButton } from "./shared";
 
@@ -158,8 +158,8 @@ function PermissionsSectionContent({
 
       <div className="flex flex-col gap-2">
         <PermissionBlock
-          enabledLabel={t`Anarlog can hear your voice`}
-          enableLabel={t`Help Anarlog listen to you`}
+          enabledLabel={t`Meeki can hear your voice`}
+          enableLabel={t`Help Meeki listen to you`}
           enabledBody={t`Microphone access turned on`}
           enableBody={t`Use your microphone to capture your voice`}
           Icon={MicIcon}
@@ -170,8 +170,8 @@ function PermissionsSectionContent({
         />
 
         <PermissionBlock
-          enabledLabel={t`Anarlog can hear others`}
-          enableLabel={t`Help Anarlog listen to others`}
+          enabledLabel={t`Meeki can hear others`}
+          enableLabel={t`Help Meeki listen to others`}
           enabledBody={t`System audio enabled`}
           enableBody={t`Use system audio to capture other speakers`}
           Icon={Volume2Icon}
@@ -183,7 +183,7 @@ function PermissionsSectionContent({
 
         {accessibility && (
           <PermissionBlock
-            enabledLabel={t`Anarlog can read meeting details`}
+            enabledLabel={t`Meeki can read meeting details`}
             enableLabel={t`Optional: read meeting activity`}
             enabledBody={t`Meeting details access turned on`}
             enableBody={t`Optional. Used for meeting controls, visible chat, mute sync, and participant status — not required to record`}

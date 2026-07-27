@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 
-import { cn } from "@hypr/utils";
+import { cn } from "@meeki/utils";
 
 import { sharedPrimaryButtonClassName } from "@/components/shared-note-viewer";
 import { getShareRouteToken } from "@/lib/share-route-privacy";
@@ -127,24 +127,24 @@ function SharedNoteActionButtons({
           type="button"
           className={sharedPrimaryButtonClassName}
           disabled={isPending}
-          aria-describedby={canEdit ? "open-in-anarlog-tooltip" : undefined}
+          aria-describedby={canEdit ? "open-in-meeki-tooltip" : undefined}
           onClick={onOpen}
         >
           <span className="hidden sm:inline">
-            {isPending ? "Opening…" : "Open in Anarlog"}
+            {isPending ? "Opening…" : "Open in Meeki"}
           </span>
           <span className="sm:hidden">{isPending ? "Opening…" : "Open"}</span>
         </button>
         {canEdit && (
           <span
-            id="open-in-anarlog-tooltip"
+            id="open-in-meeki-tooltip"
             role="tooltip"
             className={cn([
               "surface border-color-subtle text-color-muted pointer-events-none absolute top-full right-0 mt-2 w-max rounded-lg border px-2.5 py-1.5 text-xs shadow-lg",
               "translate-y-[-2px] opacity-0 transition-[opacity,transform] group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:translate-y-0 group-hover:opacity-100",
             ])}
           >
-            Open in Anarlog to edit
+            Open in Meeki to edit
           </span>
         )}
       </div>
@@ -153,7 +153,7 @@ function SharedNoteActionButtons({
           className="text-color-muted basis-full text-right text-xs"
           role="status"
         >
-          Anarlog couldn’t be opened. Try again.
+          Meeki couldn’t be opened. Try again.
         </p>
       )}
     </>

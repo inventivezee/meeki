@@ -37,7 +37,7 @@ it("reuses an existing onboarding welcome note and clears the demo meeting link"
   await expect(getOrCreateWelcomeSession()).resolves.toBe("welcome-session");
   expect(mocks.createSession).not.toHaveBeenCalled();
   expect(mocks.execute).toHaveBeenNthCalledWith(1, expect.any(String), [
-    "anarlog-onboarding-demo-v1",
+    "meeki-onboarding-demo-v1",
   ]);
   expect(mocks.execute).toHaveBeenNthCalledWith(2, expect.any(String), [
     "welcome-session",
@@ -54,9 +54,9 @@ it("creates a welcome note without the hosted demo meeting", async () => {
 
   const [title, , initial] = mocks.createSession.mock.calls[0];
   const event = JSON.parse(initial.event_json);
-  expect(title).toBe("Welcome to Anarlog");
+  expect(title).toBe("Welcome to Meeki");
   expect(event.meeting_link).toBeUndefined();
-  expect(event.tracking_id).toBe("anarlog-onboarding-demo-v1");
+  expect(event.tracking_id).toBe("meeki-onboarding-demo-v1");
   expect(initial.raw_md).toContain("Record");
   expect(initial.raw_md).not.toContain("prerecorded demo meeting");
   expect(initial.raw_md).not.toContain("Join & record");

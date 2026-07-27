@@ -3,7 +3,7 @@ use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 
 use base64::Engine;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
-use hypr_e2ee::{OpenedField, WorkspaceKey};
+use meeki_e2ee::{OpenedField, WorkspaceKey};
 use serde_json::{Value, json};
 use sqlx::sqlite::SqliteRow;
 use sqlx::{Column, QueryBuilder, Row, Sqlite, SqlitePool, Transaction, TypeInfo, ValueRef};
@@ -75,7 +75,7 @@ pub enum E2eeReplicaError {
     #[error(transparent)]
     Sqlx(#[from] sqlx::Error),
     #[error(transparent)]
-    Crypto(#[from] hypr_e2ee::Error),
+    Crypto(#[from] meeki_e2ee::Error),
     #[error("encrypted replica contains an invalid table or field")]
     InvalidField,
     #[error("encrypted replica contains an unsupported SQLite value")]
@@ -97,17 +97,17 @@ pub enum E2eeReplicaError {
 #[cfg(test)]
 mod witness_cancellation_tests {
     use super::*;
-    use hypr_e2ee::RecoveryKey;
+    use meeki_e2ee::RecoveryKey;
     use std::sync::atomic::{AtomicUsize, Ordering};
 
-    async fn test_db() -> hypr_db_core::Db {
-        let db = hypr_db_core::Db::connect_memory_plain().await.unwrap();
+    async fn test_db() -> meeki_db_core::Db {
+        let db = meeki_db_core::Db::connect_memory_plain().await.unwrap();
         crate::prepare_schema(&db).await.unwrap();
         db
     }
 
     fn workspace_key() -> WorkspaceKey {
-        RecoveryKey::parse("anarlog-e2ee-v1:BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc")
+        RecoveryKey::parse("meeki-e2ee-v1:BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc")
             .unwrap()
             .workspace_key("workspace-a")
             .unwrap()
@@ -133,7 +133,7 @@ mod witness_cancellation_tests {
                     sequence: u64::try_from(index + 1).unwrap(),
                     record_id: sealed.record_id,
                     workspace_id: "workspace-a".to_string(),
-                    payload_hash: hypr_e2ee::payload_hash(&sealed.payload),
+                    payload_hash: meeki_e2ee::payload_hash(&sealed.payload),
                     payload: sealed.payload,
                 }
             })
@@ -1221,7 +1221,7 @@ async fn apply_e2ee_replica_changes_inner(
             {
                 return Err(E2eeReplicaError::InvalidField);
             }
-            let payload_hash = hypr_e2ee::payload_hash(&record.payload);
+            let payload_hash = meeki_e2ee::payload_hash(&record.payload);
             check_e2ee_apply_cancellation(is_cancelled)?;
             records.push(DecryptedRecord {
                 record_id: record.id,
@@ -2256,7 +2256,7 @@ fn validate_witness_payload(
     revision: i64,
     writer_id: &str,
 ) -> E2eeReplicaResult<()> {
-    if hypr_e2ee::payload_hash(payload) != payload_hash {
+    if meeki_e2ee::payload_hash(payload) != payload_hash {
         return Err(E2eeReplicaError::RollbackDetected);
     }
     let field = key.open_field(workspace_id, record_id, payload)?;
@@ -2273,7 +2273,7 @@ fn validate_opened_witness_field(
     if !E2EE_DOMAIN_TABLES.contains(&field.table.as_str())
         || i64::try_from(field.revision).ok() != Some(revision)
         || field.writer_id != writer_id
-        || hypr_e2ee::payload_hash(payload) != payload_hash
+        || meeki_e2ee::payload_hash(payload) != payload_hash
     {
         return Err(E2eeReplicaError::RollbackDetected);
     }
@@ -2612,7 +2612,7 @@ fn prepare_encrypted_field(
         deleted,
         value,
     )?;
-    let payload_hash = hypr_e2ee::payload_hash(&sealed.payload);
+    let payload_hash = meeki_e2ee::payload_hash(&sealed.payload);
     Ok(Some(PreparedEncryptedField {
         previous_payload_hash: previous.map(|state| state.payload_hash.clone()),
         expected_witness_version: witness_version.cloned(),
@@ -3107,7 +3107,7 @@ async fn restore_local_payload(
     transaction: &mut Transaction<'_, Sqlite>,
     state: &LocalState,
 ) -> E2eeReplicaResult<()> {
-    if state.payload.is_empty() || hypr_e2ee::payload_hash(&state.payload) != state.payload_hash {
+    if state.payload.is_empty() || meeki_e2ee::payload_hash(&state.payload) != state.payload_hash {
         return Err(E2eeReplicaError::RollbackDetected);
     }
     sqlx::query(
@@ -3268,7 +3268,7 @@ fn sqlite_value(row: &SqliteRow, index: usize) -> E2eeReplicaResult<Value> {
         "REAL" => Ok(json!(row.try_get::<f64, _>(index)?)),
         "TEXT" => Ok(json!(row.try_get::<String, _>(index)?)),
         "BLOB" => Ok(json!({
-            "$anarlog_blob": URL_SAFE_NO_PAD.encode(row.try_get::<Vec<u8>, _>(index)?)
+            "$meeki_blob": URL_SAFE_NO_PAD.encode(row.try_get::<Vec<u8>, _>(index)?)
         })),
         _ => Err(E2eeReplicaError::UnsupportedValue),
     }
@@ -3294,9 +3294,9 @@ fn push_json_bind(query: &mut QueryBuilder<Sqlite>, value: &Value) -> E2eeReplic
         Value::String(value) => {
             query.push_bind(value);
         }
-        Value::Object(value) if value.len() == 1 && value.contains_key("$anarlog_blob") => {
+        Value::Object(value) if value.len() == 1 && value.contains_key("$meeki_blob") => {
             let bytes = value
-                .get("$anarlog_blob")
+                .get("$meeki_blob")
                 .and_then(Value::as_str)
                 .ok_or(E2eeReplicaError::UnsupportedValue)
                 .and_then(|value| {
@@ -3316,17 +3316,17 @@ fn push_json_bind(query: &mut QueryBuilder<Sqlite>, value: &Value) -> E2eeReplic
 #[cfg(test)]
 mod tests {
     use super::*;
-    use hypr_e2ee::RecoveryKey;
+    use meeki_e2ee::RecoveryKey;
 
-    async fn test_db() -> hypr_db_core::Db {
-        let db = hypr_db_core::Db::connect_memory_plain().await.unwrap();
+    async fn test_db() -> meeki_db_core::Db {
+        let db = meeki_db_core::Db::connect_memory_plain().await.unwrap();
         crate::prepare_schema(&db).await.unwrap();
         db
     }
 
     fn keys(workspace_id: &str) -> HashMap<String, WorkspaceKey> {
         let recovery =
-            RecoveryKey::parse("anarlog-e2ee-v1:BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc")
+            RecoveryKey::parse("meeki-e2ee-v1:BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc")
                 .unwrap();
         HashMap::from([(
             workspace_id.to_string(),
@@ -3642,14 +3642,14 @@ mod tests {
                     sequence: 1,
                     record_id: remote_title.record_id,
                     workspace_id: "workspace-a".to_string(),
-                    payload_hash: hypr_e2ee::payload_hash(&remote_title.payload),
+                    payload_hash: meeki_e2ee::payload_hash(&remote_title.payload),
                     payload: remote_title.payload,
                 },
                 E2eeWitnessEvent {
                     sequence: 2,
                     record_id: remote_tombstone.record_id,
                     workspace_id: "workspace-a".to_string(),
-                    payload_hash: hypr_e2ee::payload_hash(&remote_tombstone.payload),
+                    payload_hash: meeki_e2ee::payload_hash(&remote_tombstone.payload),
                     payload: remote_tombstone.payload,
                 },
             ],
@@ -3817,14 +3817,14 @@ mod tests {
                     sequence: 1,
                     record_id: words_id.clone(),
                     workspace_id: "workspace-a".to_string(),
-                    payload_hash: hypr_e2ee::payload_hash(&remote_words.payload),
+                    payload_hash: meeki_e2ee::payload_hash(&remote_words.payload),
                     payload: remote_words.payload.clone(),
                 },
                 E2eeWitnessEvent {
                     sequence: 2,
                     record_id: manifest_id.clone(),
                     workspace_id: "workspace-a".to_string(),
-                    payload_hash: hypr_e2ee::payload_hash(&remote_tombstone.payload),
+                    payload_hash: meeki_e2ee::payload_hash(&remote_tombstone.payload),
                     payload: remote_tombstone.payload.clone(),
                 },
             ],
@@ -4208,14 +4208,14 @@ mod tests {
                     sequence: 1,
                     record_id: title_id.clone(),
                     workspace_id: "workspace-a".to_string(),
-                    payload_hash: hypr_e2ee::payload_hash(&remote_title_payload),
+                    payload_hash: meeki_e2ee::payload_hash(&remote_title_payload),
                     payload: remote_title_payload,
                 },
                 E2eeWitnessEvent {
                     sequence: 2,
                     record_id: manifest_id.clone(),
                     workspace_id: "workspace-a".to_string(),
-                    payload_hash: hypr_e2ee::payload_hash(&remote_manifest_payload),
+                    payload_hash: meeki_e2ee::payload_hash(&remote_manifest_payload),
                     payload: remote_manifest_payload,
                 },
             ],
@@ -4294,7 +4294,7 @@ mod tests {
         let mut wrong_keys = workspace_keys;
         wrong_keys.insert(
             "workspace-b".to_string(),
-            RecoveryKey::parse("anarlog-e2ee-v1:BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc")
+            RecoveryKey::parse("meeki-e2ee-v1:BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc")
                 .unwrap()
                 .workspace_key("workspace-b")
                 .unwrap(),
@@ -4470,7 +4470,7 @@ mod tests {
             )
             .unwrap();
         let (winner, winner_title, replay) =
-            if hypr_e2ee::payload_hash(&third.payload) > hypr_e2ee::payload_hash(&fourth.payload) {
+            if meeki_e2ee::payload_hash(&third.payload) > meeki_e2ee::payload_hash(&fourth.payload) {
                 (third, "Clone A", fourth)
             } else {
                 (fourth, "Clone B", third)
@@ -4612,7 +4612,7 @@ mod tests {
                 sequence: u64::try_from(index + 1).unwrap(),
                 record_id: record_id.clone(),
                 workspace_id: "workspace-a".to_string(),
-                payload_hash: hypr_e2ee::payload_hash(payload),
+                payload_hash: meeki_e2ee::payload_hash(payload),
                 payload: payload.clone(),
             })
             .collect::<Vec<_>>();
@@ -4713,7 +4713,7 @@ mod tests {
                 sequence: 1,
                 record_id: title_record_id.clone(),
                 workspace_id: "workspace-a".to_string(),
-                payload_hash: hypr_e2ee::payload_hash(&title_payload),
+                payload_hash: meeki_e2ee::payload_hash(&title_payload),
                 payload: title_payload,
             }],
         )
@@ -5128,7 +5128,7 @@ mod tests {
                 sequence: 1,
                 record_id: witnessed.record_id,
                 workspace_id: "workspace-a".to_string(),
-                payload_hash: hypr_e2ee::payload_hash(&witnessed.payload),
+                payload_hash: meeki_e2ee::payload_hash(&witnessed.payload),
                 payload: witnessed.payload,
             }],
         )
@@ -5802,7 +5802,7 @@ mod tests {
                 sequence: u64::try_from(index + 1).unwrap(),
                 record_id,
                 workspace_id: "workspace-a".to_string(),
-                payload_hash: hypr_e2ee::payload_hash(&payload),
+                payload_hash: meeki_e2ee::payload_hash(&payload),
                 payload,
             })
             .collect::<Vec<_>>();
@@ -5870,7 +5870,7 @@ mod tests {
                 sequence: u64::try_from(index + 1).unwrap(),
                 record_id: record_id.clone(),
                 workspace_id: "workspace-a".to_string(),
-                payload_hash: hypr_e2ee::payload_hash(payload),
+                payload_hash: meeki_e2ee::payload_hash(payload),
                 payload: payload.clone(),
             })
             .collect::<Vec<_>>();
@@ -5958,7 +5958,7 @@ mod tests {
                     sequence: u64::try_from(index + 1).unwrap(),
                     record_id: sealed.record_id,
                     workspace_id: "workspace-a".to_string(),
-                    payload_hash: hypr_e2ee::payload_hash(&sealed.payload),
+                    payload_hash: meeki_e2ee::payload_hash(&sealed.payload),
                     payload: sealed.payload,
                 }
             })
@@ -6162,7 +6162,7 @@ mod tests {
                     json!(true),
                 )
                 .unwrap();
-            let payload_hash = hypr_e2ee::payload_hash(&sealed.payload);
+            let payload_hash = meeki_e2ee::payload_hash(&sealed.payload);
             sqlx::query(
                 "INSERT INTO e2ee_records (id, workspace_id, payload)
                  VALUES (?, 'workspace-a', ?)",
@@ -6286,7 +6286,7 @@ mod tests {
              )",
         )
         .bind(&sealed.record_id)
-        .bind(hypr_e2ee::payload_hash(&sealed.payload))
+        .bind(meeki_e2ee::payload_hash(&sealed.payload))
         .bind(&sealed.payload)
         .execute(db.pool())
         .await
@@ -6312,7 +6312,7 @@ mod tests {
     #[tokio::test]
     async fn id_collision_does_not_record_unmaterialized_remote_state() {
         let recovery =
-            RecoveryKey::parse("anarlog-e2ee-v1:BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc")
+            RecoveryKey::parse("meeki-e2ee-v1:BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc")
                 .unwrap();
         let workspace_keys = HashMap::from([
             (

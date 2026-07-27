@@ -41,11 +41,11 @@ impl SupabaseClient {
     }
 
     fn with_trace_context(&self, builder: reqwest::RequestBuilder) -> reqwest::RequestBuilder {
-        hypr_observability::with_current_trace_context(builder)
+        meeki_observability::with_current_trace_context(builder)
     }
 
-    pub(crate) fn storage(&self) -> hypr_supabase_storage::SupabaseStorage {
-        hypr_supabase_storage::SupabaseStorage::new(
+    pub(crate) fn storage(&self) -> meeki_supabase_storage::SupabaseStorage {
+        meeki_supabase_storage::SupabaseStorage::new(
             self.http_client.clone(),
             &self.base_url,
             &self.service_role_key,

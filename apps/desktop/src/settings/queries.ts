@@ -1,13 +1,13 @@
 import { disable, enable } from "@tauri-apps/plugin-autostart";
 import { useCallback } from "react";
 
-import { commands as analyticsCommands } from "@hypr/plugin-analytics";
-import { commands as detectCommands } from "@hypr/plugin-detect";
-import { commands as localLlmCommands } from "@hypr/plugin-local-llm";
-import { commands as localSttCommands } from "@hypr/plugin-local-stt";
-import { commands as templateCommands } from "@hypr/plugin-template";
-import { commands as trayCommands } from "@hypr/plugin-tray";
-import { commands as windowsCommands } from "@hypr/plugin-windows";
+import { commands as analyticsCommands } from "@meeki/plugin-analytics";
+import { commands as detectCommands } from "@meeki/plugin-detect";
+import { commands as localLlmCommands } from "@meeki/plugin-local-llm";
+import { commands as localSttCommands } from "@meeki/plugin-local-stt";
+import { commands as templateCommands } from "@meeki/plugin-template";
+import { commands as trayCommands } from "@meeki/plugin-tray";
+import { commands as windowsCommands } from "@meeki/plugin-windows";
 
 import { executeTransaction, liveQueryClient, useLiveQuery } from "~/db";
 import { enqueueDatabaseWrite } from "~/db/write-queue";

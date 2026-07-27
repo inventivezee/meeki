@@ -19,7 +19,7 @@ async fn run_passthrough_live_test<A: RealtimeSttAdapter>(provider: Provider) {
     let sample_rate = provider.default_live_sample_rate();
     let params = owhisper_interface::ListenParams {
         model: Some(provider.default_live_model().to_string()),
-        languages: vec![hypr_language::ISO639::En.into()],
+        languages: vec![meeki_language::ISO639::En.into()],
         sample_rate,
         ..Default::default()
     };
@@ -46,7 +46,7 @@ async fn run_hyprnote_live_test(provider: Provider) {
     let sample_rate = provider.default_live_sample_rate();
     let params = owhisper_interface::ListenParams {
         model: Some(provider.default_live_model().to_string()),
-        languages: vec![hypr_language::ISO639::En.into()],
+        languages: vec![meeki_language::ISO639::En.into()],
         sample_rate,
         custom_query: Some(
             [("provider".to_string(), "hyprnote".to_string())]
@@ -118,7 +118,7 @@ async fn run_passthrough_batch_test(provider: Provider) {
     let addr = start_server_with_provider(provider, api_key).await;
 
     let audio_bytes =
-        std::fs::read(hypr_data::english_1::AUDIO_PATH).expect("failed to read test audio file");
+        std::fs::read(meeki_data::english_1::AUDIO_PATH).expect("failed to read test audio file");
 
     let model = provider.default_batch_model();
     let url = format!(
@@ -137,7 +137,7 @@ async fn run_hyprnote_batch_test(provider: Provider) {
     let addr = start_server_with_provider(provider, api_key).await;
 
     let audio_bytes =
-        std::fs::read(hypr_data::english_1::AUDIO_PATH).expect("failed to read test audio file");
+        std::fs::read(meeki_data::english_1::AUDIO_PATH).expect("failed to read test audio file");
 
     let model = provider.default_batch_model();
     let url = format!(

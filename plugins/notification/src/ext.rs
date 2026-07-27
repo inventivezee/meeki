@@ -7,16 +7,16 @@ pub struct Notification<'a, R: tauri::Runtime, M: tauri::Manager<R>> {
 
 impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Notification<'a, R, M> {
     #[tracing::instrument(skip(self))]
-    pub fn show(&self, v: hypr_notification::Notification) -> Result<(), Error> {
+    pub fn show(&self, v: meeki_notification::Notification) -> Result<(), Error> {
         let _ = self.manager;
-        hypr_notification::show(&v);
+        meeki_notification::show(&v);
         Ok(())
     }
 
     #[tracing::instrument(skip(self))]
     pub fn clear(&self) -> Result<(), Error> {
         let _ = self.manager;
-        hypr_notification::clear();
+        meeki_notification::clear();
         Ok(())
     }
 }

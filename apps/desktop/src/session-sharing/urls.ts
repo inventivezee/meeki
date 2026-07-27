@@ -94,10 +94,10 @@ function withDesktopScheme(
   url: URL,
   desktopScheme: ShareDesktopScheme | undefined,
 ) {
-  if (!desktopScheme || desktopScheme === "anarlog") {
+  if (!desktopScheme || desktopScheme === "meeki") {
     return url;
   }
-  if (desktopScheme !== "anarlog-staging" && desktopScheme !== "anarlog-dev") {
+  if (desktopScheme !== "meeki-staging" && desktopScheme !== "meeki-dev") {
     throw invalidUrl();
   }
   url.searchParams.set("scheme", desktopScheme);

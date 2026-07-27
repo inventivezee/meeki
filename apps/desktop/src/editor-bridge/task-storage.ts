@@ -1,13 +1,13 @@
 import { useMemo } from "react";
 
-import type { JSONContent } from "@hypr/editor/note";
-import type { TaskStorage } from "@hypr/editor/task-storage";
+import type { JSONContent } from "@meeki/editor/note";
+import type { TaskStorage } from "@meeki/editor/task-storage";
 import {
   createTaskSourceKey,
   isSameTask,
   type TaskRecord,
   type TaskSource,
-} from "@hypr/editor/tasks";
+} from "@meeki/editor/tasks";
 
 import { executeTransaction, liveQueryClient } from "~/db";
 import { enqueueDatabaseWrite } from "~/db/write-queue";

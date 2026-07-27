@@ -1,9 +1,9 @@
 import { Trans, useLingui } from "@lingui/react/macro";
 import { AlertCircleIcon, ArrowRightIcon, CheckIcon } from "lucide-react";
 
-import type { PermissionStatus } from "@hypr/plugin-permissions";
-import { Button } from "@hypr/ui/components/ui/button";
-import { cn } from "@hypr/utils";
+import type { PermissionStatus } from "@meeki/plugin-permissions";
+import { Button } from "@meeki/ui/components/ui/button";
+import { cn } from "@meeki/utils";
 
 import { usePermission } from "~/shared/hooks/usePermissions";
 
@@ -131,7 +131,7 @@ export function Permissions() {
       <PermissionGroup title={<Trans>Others</Trans>}>
         <PermissionRow
           title={t`Calendar`}
-          description={t`Required to sync Apple Calendar events into Anarlog`}
+          description={t`Required to sync Apple Calendar events into Meeki`}
           status={calendar.status}
           isPending={calendar.isPending}
           onRequest={calendar.request}

@@ -8,7 +8,7 @@ use whisper_rs::{
     WhisperTokenId,
 };
 
-use hypr_whisper::Language;
+use meeki_whisper::Language;
 
 use crate::Segment;
 
@@ -339,7 +339,7 @@ mod tests {
             .build()
             .unwrap();
 
-        let audio: Vec<f32> = hypr_data::english_1::AUDIO
+        let audio: Vec<f32> = meeki_data::english_1::AUDIO
             .chunks_exact(2)
             .map(|chunk| i16::from_le_bytes([chunk[0], chunk[1]]) as f32 / 32768.0)
             .collect();
