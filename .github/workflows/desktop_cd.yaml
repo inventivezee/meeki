@@ -122,7 +122,22 @@ jobs:
           codesign --verify --strict --verbose=2 "$CLOUDSYNC_DYLIB"
         working-directory: ./apps/desktop
       - run: |
+          if [[ "$CN_APPLICATION" == fastrepl/* ]]; then
+            echo "CN_APPLICATION is still upstream's app ($CN_APPLICATION)." >&2
+            echo "Set it to our own org/app slug before releasing." >&2
+            exit 1
+          fi
+
+          # Derived from CN_APPLICATION so the updater endpoint and the CN
+          # release it reads from can never drift apart. The {{...}} braces are
+          # Tauri's own placeholders and must reach the config unexpanded.
+          # ?channel is required: we draft, upload and publish under
+          # --channel "$RELEASE_CHANNEL", and CN's unnamed default channel is a
+          # different bucket that would 404 on every check.
+          UPDATER_ENDPOINT="https://cdn.crabnebula.app/update/${CN_APPLICATION}/{{target}}-{{arch}}/{{current_version}}?channel=${RELEASE_CHANNEL}"
+
           BUILD_ARGS=(--target "${{ matrix.target }}" --config "${{ env.TAURI_CONF_PATH }}" --verbose)
+          BUILD_ARGS+=(--config "{\"plugins\":{\"updater\":{\"endpoints\":[\"${UPDATER_ENDPOINT}\"]}}}")
           if [[ "${{ matrix.target }}" == "x86_64-apple-darwin" ]]; then
             BUILD_ARGS+=(--config ./src-tauri/tauri.conf.macos-intel.json)
           fi

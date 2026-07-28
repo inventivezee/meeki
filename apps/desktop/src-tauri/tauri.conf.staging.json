@@ -6,11 +6,11 @@
   "plugins": {
     "deep-link": {
       "desktop": {
-        "schemes": ["meeki-staging", "hyprnote-staging"]
+        "schemes": [
+          "meeki-staging",
+          "hyprnote-staging"
+        ]
       }
-    },
-    "updater": {
-      "active": false
     }
   },
   "bundle": {

@@ -2,10 +2,5 @@
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Meeki",
   "mainBinaryName": "hyprnote",
-  "identifier": "com.meeki.Meeki",
-  "plugins": {
-    "updater": {
-      "active": false
-    }
-  }
+  "identifier": "com.meeki.Meeki"
 }

@@ -5,11 +5,12 @@
   "identifier": "com.meeki.stable",
   "plugins": {
     "deep-link": {
-      "desktop": { "schemes": ["meeki", "hyprnote"] }
-    },
-    "updater": {
-      "active": false,
-      "endpoints": []
+      "desktop": {
+        "schemes": [
+          "meeki",
+          "hyprnote"
+        ]
+      }
     }
   }
 }

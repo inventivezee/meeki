@@ -83,9 +83,7 @@
       }
     },
     "updater": {
-      "active": false,
-      "dialog": true,
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEFFNUI0ODhBNzhBMTEwQQpSV1FLRVlxbmlMVGxDdXJvaUVTTnlwNEF5R1Bodzh3WThMZUpNMVk4K0hhbnV4TDZ1TFFucC9Gbwo="
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDhGMDg2OURDRDEwNzBDQkUKUldTK0RBZlIzR2tJajJ1Q2R3bjE0UEtBVnRoZFNHMFJDT0cxck5tMkxPRlNxUmdGTG1HN2dpNjMK"
     }
   }
 }
