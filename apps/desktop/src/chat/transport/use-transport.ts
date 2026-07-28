@@ -30,6 +30,10 @@ Context and local meeting tool guidance:
 - Use typed meeting tools instead of constructing shell commands, crawling files, or accessing SQLite directly.
 - Do not assume meeting contents from chat history when a typed tool can read the current source of truth.
 
+`.trim();
+
+/** Appended only when the web_search tool is actually in the tool set. */
+export const WEB_SEARCH_TOOL_GUIDANCE = `
 Web search guidance:
 - Use web_search for public websites, URLs, companies, products, people, news, or current facts that may be outside local notes.
 - Include source URLs in the final answer when web_search results are used.
@@ -98,16 +102,22 @@ function useToolGuidanceVariant(): "full" | "compact" {
 export function appendMeetingContextToolGuidance(
   prompt: string | undefined,
   variant: "full" | "compact" = "full",
+  webSearch = false,
 ): string | undefined {
   if (prompt === undefined) {
     return undefined;
   }
 
-  const guidance =
+  const parts = [
     variant === "compact"
       ? COMPACT_MEETING_CONTEXT_TOOL_GUIDANCE
-      : MEETING_CONTEXT_TOOL_GUIDANCE;
+      : MEETING_CONTEXT_TOOL_GUIDANCE,
+  ];
+  if (webSearch) {
+    parts.push(WEB_SEARCH_TOOL_GUIDANCE);
+  }
 
+  const guidance = parts.join("\n\n");
   return prompt ? `${prompt}\n\n${guidance}` : guidance;
 }
 
@@ -200,6 +210,7 @@ export function useTransport(
   const effectiveSystemPrompt = appendMeetingContextToolGuidance(
     systemPromptOverride ?? systemPrompt,
     guidanceVariant,
+    hasAuthenticatedBackend,
   );
   const isSystemPromptReady =
     typeof systemPromptOverride === "string" || systemPrompt !== undefined;

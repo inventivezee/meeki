@@ -79,3 +79,20 @@ describe("compact guidance and the on-device tool set", () => {
     expect(compact).not.toContain("web_search");
   });
 });
+
+describe("web search guidance follows the tool", () => {
+  it("is omitted when the tool is not in the tool set", () => {
+    for (const variant of ["full", "compact"] as const) {
+      const guidance =
+        appendMeetingContextToolGuidance("SYSTEM", variant, false) ?? "";
+      expect(guidance).not.toContain("web_search");
+    }
+  });
+
+  it("is included when the backend is reachable", () => {
+    const guidance =
+      appendMeetingContextToolGuidance("SYSTEM", "full", true) ?? "";
+    expect(guidance).toContain("web_search");
+    expect(guidance).toContain("Include source URLs");
+  });
+});
