@@ -9,6 +9,7 @@ import { CustomChatTransport } from "./index";
 import type { ResolvedChatContext } from "./index";
 
 import { useLanguageModel } from "~/ai/hooks";
+import { useAuth } from "~/auth";
 import type { ContextRef } from "~/chat/context/entities";
 import { hydrateSessionContext } from "~/chat/context/session-context-hydrator";
 import { loadHuman, loadOrganization } from "~/contacts/queries";
@@ -194,8 +195,8 @@ export function useTransport(
   }, [language, systemPromptOverride]);
 
   const guidanceVariant = useToolGuidanceVariant();
-  const webSearchUnavailable =
-    useConfigValue("current_llm_provider") === "on_device";
+  const auth = useAuth();
+  const hasAuthenticatedBackend = Boolean(auth?.getHeaders());
   const effectiveSystemPrompt = appendMeetingContextToolGuidance(
     systemPromptOverride ?? systemPrompt,
     guidanceVariant,
@@ -206,12 +207,14 @@ export function useTransport(
   const tools = useMemo(() => {
     const localTools = registry.getTools("chat-general");
 
-    // web_search posts to /research/search on the hosted API, which proxies
-    // Exa and Jina server-side and requires a signed-in user. On device there
-    // is neither, so the tool can only ever answer "Sign in to use web
-    // search" — while still costing prompt tokens and giving a small model one
-    // more wrong option to reach for.
-    if (webSearchUnavailable && "web_search" in localTools) {
+    // No provider wired here has native web search; web_search is entirely our
+    // own /research/search on the hosted API, which proxies Exa and Jina and
+    // needs a signed-in user. Without one it can only ever answer "Sign in to
+    // use web search", so offering it costs prompt tokens on every message and
+    // gives the model a choice that always fails. Gated on the backend being
+    // reachable rather than on which model is selected, so it returns by itself
+    // once the API is deployed and the user signs in.
+    if (!hasAuthenticatedBackend && "web_search" in localTools) {
       delete (localTools as Record<string, unknown>).web_search;
     }
 
@@ -229,7 +232,7 @@ export function useTransport(
       ...localTools,
       ...extraTools,
     };
-  }, [registry, extraTools, webSearchUnavailable]);
+  }, [registry, extraTools, hasAuthenticatedBackend]);
 
   const transport = useMemo(() => {
     if (!model) {
