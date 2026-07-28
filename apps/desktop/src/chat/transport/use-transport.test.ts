@@ -29,3 +29,47 @@ describe("chat transport prompt guidance", () => {
     expect(prompt).not.toContain("read_current_note");
   });
 });
+
+describe("compact tool guidance", () => {
+  it("tells a small model the meeting is already in front of it", () => {
+    const compact = appendMeetingContextToolGuidance("SYSTEM", "compact");
+
+    expect(compact).toContain("Answer from it directly");
+    expect(compact).toContain("Do not call a tool to fetch the meeting");
+    // The phrase that pulled a 4B straight to get_meeting when asked for
+    // action items must not survive in the compact variant.
+    expect(compact).not.toContain(
+      "use get_meeting for the canonical note, summaries, participants, and action items",
+    );
+  });
+
+  it("still names every tool so nothing becomes unreachable", () => {
+    const compact = appendMeetingContextToolGuidance("SYSTEM", "compact") ?? "";
+
+    for (const tool of [
+      "search_meetings",
+      "list_meetings",
+      "get_meeting",
+      "search_contacts",
+      "search_calendar_events",
+      "web_search",
+      "edit_summary",
+      "apply_session_correction",
+    ]) {
+      expect(compact).toContain(tool);
+    }
+  });
+
+  it("is a fraction of the full guidance", () => {
+    const full = appendMeetingContextToolGuidance("", "full") ?? "";
+    const compact = appendMeetingContextToolGuidance("", "compact") ?? "";
+
+    expect(compact.length).toBeLessThan(full.length / 2);
+  });
+
+  it("defaults to the full guidance", () => {
+    expect(appendMeetingContextToolGuidance("SYSTEM")).toBe(
+      appendMeetingContextToolGuidance("SYSTEM", "full"),
+    );
+  });
+});

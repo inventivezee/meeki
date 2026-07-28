@@ -33,18 +33,43 @@ Web search guidance:
 - Do not use web_search for questions that only need local notes, contacts, or calendar events.
 `.trim();
 
+/**
+ * Small on-device models read the full guidance literally and get lost in it.
+ * Asked for action items they matched the phrase in "use get_meeting for the
+ * canonical note, summaries, participants, and action items" and called a tool
+ * instead of reading the transcript sitting in their context.
+ *
+ * Same twelve tools, but ordered around the common case: the meeting is already
+ * here, answer from it, and reach for a tool only to go somewhere else.
+ */
+export const COMPACT_MEETING_CONTEXT_TOOL_GUIDANCE = `
+Answering about the current meeting:
+- The attached meeting context already contains this meeting's summary and full transcript. Answer from it directly. Do not call a tool to fetch the meeting you were given.
+- Only use a tool when the user asks about a different meeting, a person, the calendar, or the public web.
+
+Reaching other meetings:
+- search_meetings for topics, people or decisions across meetings; list_meetings to find one by title or date; get_meeting once you have its ID. Never guess an ID.
+- search_contacts for people, search_calendar_events for scheduled events, web_search for public facts. Cite source URLs when you use web_search.
+
+Changing this meeting's note:
+- edit_summary to rewrite the summary, with the complete replacement markdown.
+- apply_session_correction for an exact old-to-new wording fix.
+`.trim();
+
 export function appendMeetingContextToolGuidance(
   prompt: string | undefined,
+  variant: "full" | "compact" = "full",
 ): string | undefined {
   if (prompt === undefined) {
     return undefined;
   }
 
-  if (!prompt.trim()) {
-    return MEETING_CONTEXT_TOOL_GUIDANCE;
-  }
+  const guidance =
+    variant === "compact"
+      ? COMPACT_MEETING_CONTEXT_TOOL_GUIDANCE
+      : MEETING_CONTEXT_TOOL_GUIDANCE;
 
-  return `${prompt.trim()}\n\n${MEETING_CONTEXT_TOOL_GUIDANCE}`;
+  return prompt ? `${prompt}\n\n${guidance}` : guidance;
 }
 
 async function renderHumanContext(humanId: string): Promise<string | null> {
@@ -130,8 +155,12 @@ export function useTransport(
     };
   }, [language, systemPromptOverride]);
 
+  // Every on-device model here is small next to a frontier one, so they all
+  // get the compact guidance; hosted providers keep the full version.
+  const provider = useConfigValue("current_llm_provider");
   const effectiveSystemPrompt = appendMeetingContextToolGuidance(
     systemPromptOverride ?? systemPrompt,
+    provider === "on_device" ? "compact" : "full",
   );
   const isSystemPromptReady =
     typeof systemPromptOverride === "string" || systemPrompt !== undefined;
