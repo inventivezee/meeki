@@ -1,5 +1,7 @@
+import { Trans } from "@lingui/react/macro";
+import { AudioLinesIcon } from "lucide-react";
 import type { EditorView } from "prosemirror-view";
-import { forwardRef, useCallback, useMemo, useRef } from "react";
+import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
 
 import { parseJsonContent } from "@meeki/editor/markdown";
 import {
@@ -15,6 +17,7 @@ import { AudioDropTarget } from "./audio-drop-target";
 import { useNoteFileHandlerConfig } from "./file-handler";
 import { MeetingChatHighlights } from "./meeting-chat-highlights";
 
+import { useAudioExists } from "~/audio-player";
 import { AppLinkView } from "~/editor-bridge/app-link-view";
 import { useMentionConfig } from "~/editor-bridge/mention-config";
 import { openEditorLink } from "~/editor-bridge/open-editor-link";
@@ -29,8 +32,37 @@ import {
   extractFirstLineTitle,
   documentTitlePlaceholder,
 } from "~/session/title-content";
+import { useTabs } from "~/store/zustand/tabs";
+import { useListener } from "~/stt/contexts";
 
 const extraNodeViews = { appLink: AppLinkView, session: SessionNodeView };
+
+/**
+ * The hint is for a genuinely untouched note. It goes the moment the user does
+ * anything that shows intent — typing, recording, or opening chat — rather than
+ * lingering over content they are creating.
+ */
+export function shouldShowUploadHint({
+  hasTyped,
+  rawMd,
+  audioExists,
+  sessionMode,
+  chatMode,
+}: {
+  hasTyped: boolean;
+  rawMd: string;
+  audioExists: boolean;
+  sessionMode: string;
+  chatMode: string;
+}): boolean {
+  return (
+    !hasTyped &&
+    !hasStoredNoteContent(rawMd) &&
+    !audioExists &&
+    sessionMode === "inactive" &&
+    chatMode === "FloatingClosed"
+  );
+}
 
 export const RawEditor = forwardRef<
   NoteEditorRef,
@@ -116,12 +148,44 @@ export const RawEditor = forwardRef<
 
     const mentionConfig = useMentionConfig();
     const commentAnchors = useSessionCommentAnchors(sessionId);
+
+    // Note persistence is debounced, so rawMd still reads empty for the first
+    // half second of typing. Track the keystroke locally so the hint goes on
+    // the first character rather than after the debounce settles.
+    const [hasTyped, setHasTyped] = useState(false);
+    const audioExists = useAudioExists(sessionId);
+    const sessionMode = useListener((state) => state.getSessionMode(sessionId));
+    const chatMode = useTabs((state) => state.chatMode);
+
+    const showUploadHint = shouldShowUploadHint({
+      hasTyped,
+      rawMd,
+      audioExists,
+      sessionMode,
+      chatMode,
+    });
+
     return (
       <AudioDropTarget
         targetProps={audioDropTargetProps}
         isActive={isAudioDragActive}
       >
-        <>
+        <div className="contents" onInputCapture={() => setHasTyped(true)}>
+          {showUploadHint && (
+            <div
+              aria-hidden="true"
+              className={cn([
+                "pointer-events-none absolute inset-0 z-10",
+                "flex flex-col items-center justify-center gap-2",
+                "text-muted-foreground/70 select-none",
+              ])}
+            >
+              <AudioLinesIcon className="size-6 opacity-60" />
+              <p className="text-sm">
+                <Trans>Drag and drop to upload a recording</Trans>
+              </p>
+            </div>
+          )}
           <NoteEditor
             ref={ref}
             className={cn(["session-note-editor", className])}
@@ -153,7 +217,7 @@ export const RawEditor = forwardRef<
             }}
           />
           <MeetingChatHighlights sessionId={sessionId} />
-        </>
+        </div>
       </AudioDropTarget>
     );
   },

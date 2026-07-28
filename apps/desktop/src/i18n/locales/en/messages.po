@@ -78,7 +78,6 @@ msgstr "Accessibility"
 
 #: src/onboarding/index.tsx
 #: src/settings/general/account.tsx
-#: src/sidebar/settings.tsx
 msgid "Account"
 msgstr "Account"
 
@@ -691,7 +690,6 @@ msgid "Device limit reached"
 msgstr "Device limit reached"
 
 #: src/settings/dictionary/index.tsx
-#: src/sidebar/settings.tsx
 msgid "Dictionary"
 msgstr "Dictionary"
 
@@ -726,6 +724,10 @@ msgstr "Download local & private models (about {totalGb} GB)"
 #: src/settings/general/e2ee-setup.tsx
 msgid "Download recovery key (.txt)"
 msgstr "Download recovery key (.txt)"
+
+#: src/session/components/note-input/raw.tsx
+msgid "Drag and drop to upload a recording"
+msgstr "Drag and drop to upload a recording"
 
 #: src/main/empty.tsx
 msgid "Drop an audio file to transcribe it"
@@ -2287,7 +2289,6 @@ msgid "Symbols"
 msgstr "Symbols"
 
 #: src/settings/sync/index.tsx
-#: src/sidebar/settings.tsx
 msgid "Sync"
 msgstr "Sync"
 

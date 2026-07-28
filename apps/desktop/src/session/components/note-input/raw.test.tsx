@@ -8,7 +8,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { RawEditor as SessionRawEditor } from "./raw";
+import { RawEditor as SessionRawEditor, shouldShowUploadHint } from "./raw";
 
 const hoisted = vi.hoisted(() => ({
   rawMd: JSON.stringify({ type: "doc", content: [] }),
@@ -83,6 +83,20 @@ vi.mock("~/session-sharing/comment-anchors", () => ({
     onViewReady: vi.fn(),
     onViewDisposed: vi.fn(),
   }),
+}));
+
+vi.mock("~/audio-player", () => ({
+  useAudioExists: () => false,
+}));
+
+vi.mock("~/stt/contexts", () => ({
+  useListener: (selector: (state: unknown) => unknown) =>
+    selector({ getSessionMode: () => "inactive" }),
+}));
+
+vi.mock("~/store/zustand/tabs", () => ({
+  useTabs: (selector: (state: unknown) => unknown) =>
+    selector({ chatMode: "FloatingClosed" }),
 }));
 
 vi.mock("~/session/components/shared", () => ({
@@ -393,3 +407,48 @@ function audioDataTransfer(input: File | File[], itemType?: string | string[]) {
     dropEffect: "none",
   } as unknown as DataTransfer;
 }
+
+describe("shouldShowUploadHint", () => {
+  const untouched = {
+    hasTyped: false,
+    rawMd: "",
+    audioExists: false,
+    sessionMode: "inactive",
+    chatMode: "FloatingClosed",
+  };
+
+  it("shows on an untouched new note", () => {
+    expect(shouldShowUploadHint(untouched)).toBe(true);
+  });
+
+  it("goes on the first keystroke, before the note has persisted", () => {
+    // Note writes are debounced, so rawMd still reads empty here.
+    expect(shouldShowUploadHint({ ...untouched, hasTyped: true })).toBe(false);
+  });
+
+  it("goes once the note has stored content", () => {
+    expect(shouldShowUploadHint({ ...untouched, rawMd: "# Standup" })).toBe(
+      false,
+    );
+  });
+
+  it.each(["active", "finalizing", "running_batch"])(
+    "goes while recording (%s)",
+    (sessionMode) => {
+      expect(shouldShowUploadHint({ ...untouched, sessionMode })).toBe(false);
+    },
+  );
+
+  it("goes once audio has been attached", () => {
+    expect(shouldShowUploadHint({ ...untouched, audioExists: true })).toBe(
+      false,
+    );
+  });
+
+  it.each(["FloatingOpen", "RightPanelOpen"])(
+    "goes while chat is open (%s)",
+    (chatMode) => {
+      expect(shouldShowUploadHint({ ...untouched, chatMode })).toBe(false);
+    },
+  );
+});
