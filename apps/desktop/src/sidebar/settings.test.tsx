@@ -115,8 +115,6 @@ describe("SettingsNav", () => {
     [
       "General",
       "App",
-      "Account",
-      "Sync",
       "Notifications",
       "Permissions",
       "Context",
@@ -125,23 +123,27 @@ describe("SettingsNav", () => {
       "AI",
       "Transcription",
       "Intelligence",
-      "Dictionary",
       "Templates",
     ].forEach((label) => {
       expect(screen.getByText(label)).toBeTruthy();
     });
   });
 
-  it("places dictionary and templates in the AI section", () => {
+  it("places templates in the AI section", () => {
     render(<SettingsNav />);
 
-    expect(
-      screen
-        .getByText("Dictionary")
-        .closest("button")
-        ?.querySelector(".lucide-book-open"),
-    ).toBeTruthy();
+    expect(screen.getByText("Templates").closest("button")).toBeTruthy();
     expect(screen.queryByText("Personalization")).toBeNull();
+  });
+
+  it("hides the entries that cannot do anything without a backend", () => {
+    render(<SettingsNav />);
+
+    // Account and Sync need Supabase and api.meeki.org, neither of which
+    // exists; Dictionary terms never reach the on-device recogniser.
+    for (const label of ["Account", "Sync", "Dictionary"]) {
+      expect(screen.queryByText(label)).toBeNull();
+    }
   });
 
   it("opens Templates with Auto selected", () => {
@@ -186,27 +188,5 @@ describe("SettingsNav", () => {
     });
     expect(mocks.select).toHaveBeenCalledWith(templatesTab);
     expect(mocks.openNew).not.toHaveBeenCalled();
-  });
-
-  it("opens Dictionary inside settings", () => {
-    render(<SettingsNav />);
-
-    fireEvent.click(screen.getByRole("button", { name: "Dictionary" }));
-
-    expect(mocks.updateSettingsTabState).toHaveBeenCalledWith(
-      mocks.currentTab,
-      { tab: "dictionary" },
-    );
-  });
-
-  it("opens Sync inside settings", () => {
-    render(<SettingsNav />);
-
-    fireEvent.click(screen.getByRole("button", { name: "Sync" }));
-
-    expect(mocks.updateSettingsTabState).toHaveBeenCalledWith(
-      mocks.currentTab,
-      { tab: "sync" },
-    );
   });
 });
