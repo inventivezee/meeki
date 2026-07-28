@@ -76,7 +76,9 @@ vi.mock("~/session-sharing", () => ({
 }));
 
 vi.mock("../shared", () => ({
-  RecordingIcon: () => <div data-testid="recording-icon" />,
+  RecordingIcon: ({ pulse }: { pulse?: boolean }) => (
+    <div data-testid="recording-icon" data-pulse={pulse ? "true" : "false"} />
+  ),
   useHasTranscript: (sessionId: string) =>
     mocks.hasTranscriptBySession[sessionId] ?? false,
 }));
@@ -735,9 +737,12 @@ describe("OuterHeader", () => {
 
     fireEvent.click(stopButton);
 
-    expect(stopButton.querySelector("svg")?.getAttribute("class")).toContain(
-      "text-red-500",
-    );
+    // The pulse means "capturing now", so it belongs here and nowhere else.
+    expect(
+      stopButton
+        .querySelector("[data-testid='recording-icon']")
+        ?.getAttribute("data-pulse"),
+    ).toBe("true");
     expect(screen.queryByRole("button", { name: "Join & record" })).toBeNull();
     expect(
       screen.getByRole("button", { name: "Open event metadata" }),
@@ -774,5 +779,24 @@ describe("OuterHeader", () => {
     expect(screen.queryByRole("button", { name: "Join & record" })).toBeNull();
     expect(metadataButton.getAttribute("data-tauri-drag-region")).toBe("false");
     expect(mocks.startListening).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("OuterHeader recording indicator", () => {
+  it("does not pulse while idle", () => {
+    mocks.sessionEvents = {};
+    mocks.sessionModes = { "session-1": "inactive" };
+
+    render(
+      <OuterHeader
+        sessionId="session-1"
+        currentView={{ type: "raw" } as EditorView}
+        title={<span>Session title</span>}
+      />,
+    );
+
+    expect(
+      screen.getByTestId("recording-icon").getAttribute("data-pulse"),
+    ).toBe("false");
   });
 });

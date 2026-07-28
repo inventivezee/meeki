@@ -223,8 +223,9 @@ function HeaderMeetingActionPill({
     if (sessionMode === "active") {
       return {
         label: t`Stop`,
-        title: t`Stop listening`,
-        icon: <SquareIcon className="size-3 fill-current text-red-500" />,
+        title: t`Stop recording`,
+        icon: <RecordingIcon pulse />,
+        recording: true,
         onClick: stopListening,
       };
     }
@@ -284,7 +285,14 @@ function HeaderMeetingActionPill({
           {countdown.label}
         </div>
       ) : null}
-      <div className="border-border bg-card text-foreground flex h-7 max-w-56 shrink-0 items-center overflow-hidden rounded-full border">
+      <div
+        className={cn([
+          "flex h-7 max-w-56 shrink-0 items-center overflow-hidden rounded-full border",
+          "recording" in action && action.recording
+            ? "border-red-500/60 bg-red-500/10 text-red-600 dark:text-red-400"
+            : "border-border bg-card text-foreground",
+        ])}
+      >
         <button
           type="button"
           data-tauri-drag-region="false"
