@@ -167,6 +167,21 @@ impl GgufLlmModel {
         }
     }
 
+    /// Total parameters in billions, not active parameters — a 35B MoE with 3B
+    /// active still reasons like a large model, which is what decides whether
+    /// it can hold the full tool guidance.
+    pub fn parameters_billions(&self) -> u32 {
+        match self {
+            GgufLlmModel::HyprLLM => 2,
+            GgufLlmModel::Llama3p2_3bQ4 => 3,
+            GgufLlmModel::Gemma3_4bQ4 | GgufLlmModel::Qwen3_4bQ4Km => 4,
+            GgufLlmModel::Gemma4_12bQ4Km => 12,
+            GgufLlmModel::Gemma4_26bA4bIq4Xs => 26,
+            GgufLlmModel::Qwen36_35bA3bIq4Xs | GgufLlmModel::Qwen36_35bA3bQ4Km => 35,
+            GgufLlmModel::Llama33_70bQ4Km => 70,
+        }
+    }
+
     /// f16 KV-cache bytes per token, counting only the layers whose cache grows
     /// with the context window. Sliding-window layers are capped at the window
     /// by llama.cpp and are accounted for by `kv_window_bytes` instead.

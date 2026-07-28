@@ -1,6 +1,8 @@
+import { useQuery } from "@tanstack/react-query";
 import type { LanguageModel, ToolSet } from "ai";
 import { useEffect, useMemo, useState } from "react";
 
+import { commands as localLlmCommands } from "@meeki/plugin-local-llm";
 import { commands as templateCommands } from "@meeki/plugin-template";
 
 import { CustomChatTransport } from "./index";
@@ -11,7 +13,7 @@ import type { ContextRef } from "~/chat/context/entities";
 import { hydrateSessionContext } from "~/chat/context/session-context-hydrator";
 import { loadHuman, loadOrganization } from "~/contacts/queries";
 import { useToolRegistry } from "~/contexts/tool";
-import { useConfigValue } from "~/shared/config";
+import { useConfigValue, useConfigValues } from "~/shared/config";
 
 export const MEETING_CONTEXT_TOOL_GUIDANCE = `
 Context and local meeting tool guidance:
@@ -55,6 +57,42 @@ Changing this meeting's note:
 - edit_summary to rewrite the summary, with the complete replacement markdown.
 - apply_session_correction for an exact old-to-new wording fix.
 `.trim();
+
+/** Above this, a model holds the full guidance without getting lost in it. */
+const COMPACT_GUIDANCE_MAX_PARAMETERS_B = 6;
+
+function useToolGuidanceVariant(): "full" | "compact" {
+  const { current_llm_provider, current_llm_model } = useConfigValues([
+    "current_llm_provider",
+    "current_llm_model",
+  ] as const);
+
+  // Shares the cache with the settings cards and the ensure loop.
+  const supported = useQuery({
+    enabled: current_llm_provider === "on_device",
+    queryKey: ["local-llm-supported"],
+    queryFn: async () => {
+      const result = await localLlmCommands.listSupportedModel();
+      return result.status === "ok" ? result.data : [];
+    },
+    staleTime: Infinity,
+  });
+
+  if (current_llm_provider !== "on_device") {
+    return "full";
+  }
+
+  const parameters = supported.data?.find(
+    (model) => model.key === current_llm_model,
+  )?.parameters_billions;
+
+  // Unknown model, including a custom GGUF: assume it is small, since that is
+  // the case where over-long guidance actually hurts.
+  return parameters === undefined ||
+    parameters < COMPACT_GUIDANCE_MAX_PARAMETERS_B
+    ? "compact"
+    : "full";
+}
 
 export function appendMeetingContextToolGuidance(
   prompt: string | undefined,
@@ -155,12 +193,10 @@ export function useTransport(
     };
   }, [language, systemPromptOverride]);
 
-  // Every on-device model here is small next to a frontier one, so they all
-  // get the compact guidance; hosted providers keep the full version.
-  const provider = useConfigValue("current_llm_provider");
+  const guidanceVariant = useToolGuidanceVariant();
   const effectiveSystemPrompt = appendMeetingContextToolGuidance(
     systemPromptOverride ?? systemPrompt,
-    provider === "on_device" ? "compact" : "full",
+    guidanceVariant,
   );
   const isSystemPromptReady =
     typeof systemPromptOverride === "string" || systemPrompt !== undefined;

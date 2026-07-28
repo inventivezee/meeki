@@ -28,6 +28,7 @@ pub struct ModelInfo {
     pub size_bytes: u64,
     pub min_memory_bytes: u64,
     pub warmup_seconds: u32,
+    pub parameters_billions: u32,
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -53,6 +54,7 @@ pub fn supported_model_info(model: &SupportedModel) -> ModelInfo {
         size_bytes: model.model_size(),
         min_memory_bytes: model.min_memory_bytes(),
         warmup_seconds: model.warmup_seconds(),
+        parameters_billions: model.parameters_billions(),
     }
 }
 

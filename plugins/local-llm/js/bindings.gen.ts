@@ -136,7 +136,7 @@ async stopServer() : Promise<Result<null, string>> {
 
 export type CustomModelInfo = { path: string; name: string }
 export type GgufLlmModel = "qwen3.6-35b-a3b" | "qwen3.6-35b-a3b-q4km" | "gemma-4-26b-a4b" | "gemma-4-12b" | "qwen3-4b" | "llama-3.3-70b" | "Llama3p2_3bQ4" | "Gemma3_4bQ4" | "HyprLLM"
-export type ModelInfo = { key: GgufLlmModel; name: string; description: string; size_bytes: number; min_memory_bytes: number; warmup_seconds: number }
+export type ModelInfo = { key: GgufLlmModel; name: string; description: string; size_bytes: number; min_memory_bytes: number; warmup_seconds: number; parameters_billions: number }
 export type ModelRecommendation = { model: ModelInfo | null; total_memory_bytes: number }
 export type TAURI_CHANNEL<TSend> = null
 

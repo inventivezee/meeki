@@ -2191,6 +2191,10 @@ msgstr ""
 msgid "Something went wrong while generating the summary."
 msgstr ""
 
+#: src/chat/components/message/error.tsx
+msgid "Something went wrong. Please try again."
+msgstr ""
+
 #: src/contacts/shared.tsx
 msgid "Sort options"
 msgstr ""
