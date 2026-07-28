@@ -1,3 +1,4 @@
+import { Trans } from "@lingui/react/macro";
 import { useCallback } from "react";
 
 import { Spinner } from "@meeki/ui/components/ui/spinner";
@@ -19,14 +20,26 @@ import {
 } from "~/stt/window-control";
 
 export function ListenActionButton({ sessionId }: { sessionId: string }) {
-  const { shouldRender, isDisabled, warningMessage } =
+  const { shouldRender, recording, finalizing, isDisabled, warningMessage } =
     useListenButtonState(sessionId);
   const loading = useListener(
     (state) => state.live.loading && state.live.sessionId === sessionId,
   );
 
-  if (loading) {
-    return <StopListeningButton sessionId={sessionId} />;
+  // Stop used to render only while starting up. Once capture was actually
+  // running, loading went false and shouldRender was !active, so the control
+  // vanished — mid-meeting there was nothing on screen saying it was recording
+  // and no way to stop it from here.
+  if (loading || recording) {
+    return <StopListeningButton sessionId={sessionId} starting={loading} />;
+  }
+
+  if (finalizing) {
+    return (
+      <FloatingButton disabled icon={<Spinner />}>
+        <Trans>Stopping...</Trans>
+      </FloatingButton>
+    );
   }
 
   if (!shouldRender) {
@@ -42,7 +55,13 @@ export function ListenActionButton({ sessionId }: { sessionId: string }) {
   );
 }
 
-function StopListeningButton({ sessionId }: { sessionId: string }) {
+function StopListeningButton({
+  sessionId,
+  starting,
+}: {
+  sessionId: string;
+  starting?: boolean;
+}) {
   const stop = useListener((state) => state.stop);
 
   const handleStop = useCallback(() => {
@@ -57,8 +76,13 @@ function StopListeningButton({ sessionId }: { sessionId: string }) {
   }, [sessionId, stop]);
 
   return (
-    <FloatingButton onClick={handleStop}>
-      <Spinner />
+    <FloatingButton
+      onClick={handleStop}
+      icon={starting ? <Spinner /> : <RecordingIcon pulse />}
+      className="border-red-500/60 bg-red-500/10 text-red-600 dark:text-red-400"
+      tooltip={{ content: <Trans>Stop recording</Trans> }}
+    >
+      {starting ? <Trans>Starting...</Trans> : <Trans>Stop recording</Trans>}
     </FloatingButton>
   );
 }

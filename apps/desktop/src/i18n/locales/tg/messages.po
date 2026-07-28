@@ -2233,13 +2233,21 @@ msgstr ""
 msgid "Starting your trial..."
 msgstr ""
 
+#: src/session/components/listen-action.tsx
+msgid "Starting..."
+msgstr ""
+
 #: src/session/components/outer-header/index.tsx
 msgid "Stop"
 msgstr ""
 
-#: src/session/components/outer-header/index.tsx
 #: src/sidebar/timeline/item.tsx
 msgid "Stop listening"
+msgstr ""
+
+#: src/session/components/listen-action.tsx
+#: src/session/components/outer-header/index.tsx
+msgid "Stop recording"
 msgstr ""
 
 #: src/chat/components/input/index.tsx
@@ -2253,6 +2261,10 @@ msgstr ""
 #: src/settings/general/app-settings.tsx
 msgid "Stop when meeting ends"
 msgstr "Ҳангоми ба охир расидани вохӯрӣ қатъ кунед"
+
+#: src/session/components/listen-action.tsx
+msgid "Stopping..."
+msgstr ""
 
 #: src/onboarding/index.tsx
 #: src/settings/general/storage/index.tsx

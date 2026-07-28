@@ -2233,14 +2233,22 @@ msgstr "Starting"
 msgid "Starting your trial..."
 msgstr "Starting your trial..."
 
+#: src/session/components/listen-action.tsx
+msgid "Starting..."
+msgstr "Starting..."
+
 #: src/session/components/outer-header/index.tsx
 msgid "Stop"
 msgstr "Stop"
 
-#: src/session/components/outer-header/index.tsx
 #: src/sidebar/timeline/item.tsx
 msgid "Stop listening"
 msgstr "Stop listening"
+
+#: src/session/components/listen-action.tsx
+#: src/session/components/outer-header/index.tsx
+msgid "Stop recording"
+msgstr "Stop recording"
 
 #: src/chat/components/input/index.tsx
 msgid "Stop response"
@@ -2253,6 +2261,10 @@ msgstr "Stop transcription"
 #: src/settings/general/app-settings.tsx
 msgid "Stop when meeting ends"
 msgstr "Stop when meeting ends"
+
+#: src/session/components/listen-action.tsx
+msgid "Stopping..."
+msgstr "Stopping..."
 
 #: src/onboarding/index.tsx
 #: src/settings/general/storage/index.tsx

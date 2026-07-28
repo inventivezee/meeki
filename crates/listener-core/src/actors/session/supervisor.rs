@@ -115,7 +115,7 @@ impl Actor for SessionActor {
                 }
                 Err(error) => {
                     tracing::warn!(?error, "listener_spawn_failed");
-                    let degraded = if should_stop_on_listener_failure(state) {
+                    let degraded = if listener_failure_is_terminal(state) {
                         DegradedError::StreamError {
                             message: error.to_string(),
                         }
@@ -332,7 +332,7 @@ async fn refresh_listener(myself: ActorRef<SessionMsg>, state: &mut SessionState
         }
         Err(error) => {
             tracing::warn!(?error, "listener_refresh_failed");
-            let degraded = if should_stop_on_listener_failure(state) {
+            let degraded = if listener_failure_is_terminal(state) {
                 DegradedError::StreamError {
                     message: error.to_string(),
                 }
@@ -380,15 +380,20 @@ async fn handle_listener_failure(
     state: &mut SessionState,
     degraded: DegradedError,
 ) {
-    if should_stop_on_listener_failure(state) {
-        tracing::warn!("listener_failed_stopping_session");
-        stop_after_listener_failure(myself, state, degraded).await;
-    } else {
-        let should_retry = should_retry_listener_failure(&degraded);
-        enter_batch_fallback(state, degraded).await;
-        if should_retry {
-            schedule_listener_retry(myself, state);
-        }
+    // Never tear the session down here. The recorder is a sibling of the
+    // listener, not a consumer of it, so degrading to batch keeps the audio
+    // being written while the transcript falls back to a post-stop pass.
+    // Stopping meant a mid-meeting transcription failure also ended the
+    // recording, which is the one outcome a user cannot recover from.
+    let terminal = listener_failure_is_terminal(state);
+    if terminal {
+        tracing::warn!("listener_failed_recording_continues");
+    }
+
+    let should_retry = !terminal && should_retry_listener_failure(&degraded);
+    enter_batch_fallback(state, degraded).await;
+    if should_retry {
+        schedule_listener_retry(myself, state);
     }
 }
 
@@ -446,7 +451,10 @@ async fn retry_listener(myself: ActorRef<SessionMsg>, state: &mut SessionState) 
     }
 }
 
-fn should_stop_on_listener_failure(state: &SessionState) -> bool {
+/// These listeners do not recover on their own, so retrying them just burns
+/// the ladder. It says nothing about whether to keep recording — a transcript
+/// is worth losing, a meeting is not.
+fn listener_failure_is_terminal(state: &SessionState) -> bool {
     state.ctx.params.uses_local_soniqo_live_model()
         || matches!(
             AdapterKind::from_url_and_languages(
@@ -456,18 +464,6 @@ fn should_stop_on_listener_failure(state: &SessionState) -> bool {
             ),
             AdapterKind::Soniox
         )
-}
-
-async fn stop_after_listener_failure(
-    myself: &ActorRef<SessionMsg>,
-    state: &mut SessionState,
-    degraded: DegradedError,
-) {
-    emit_active_lifecycle_event(state, Some(degraded.clone())).await;
-    state.shutting_down = true;
-    children::shutdown_children(state, "listener_failure").await;
-    let reason = serde_json::to_string(&degraded).ok();
-    myself.stop(reason);
 }
 
 async fn meltdown(myself: ActorRef<SessionMsg>, state: &mut SessionState) {
@@ -727,23 +723,48 @@ mod tests {
     }
 
     #[test]
-    fn local_soniqo_live_listener_failure_stops_session() {
+    fn local_soniqo_live_listener_failure_is_terminal_but_keeps_recording() {
         let mut ctx = test_ctx();
         ctx.params.base_url = meeki_transcribe_soniqo::LOCAL_BASE_URL.to_string();
         ctx.params.model = "soniqo-parakeet-streaming".to_string();
         let state = test_state(ctx);
 
-        assert!(should_stop_on_listener_failure(&state));
+        assert!(listener_failure_is_terminal(&state));
     }
 
     #[test]
-    fn direct_soniox_listener_failure_stops_session() {
+    fn direct_soniox_listener_failure_is_terminal_but_keeps_recording() {
         let mut ctx = test_ctx();
         ctx.params.base_url = "https://api.soniox.com".to_string();
         ctx.params.model = "stt-v4".to_string();
         let state = test_state(ctx);
 
-        assert!(should_stop_on_listener_failure(&state));
+        assert!(listener_failure_is_terminal(&state));
+    }
+
+    #[tokio::test]
+    async fn a_terminal_listener_failure_leaves_the_session_running() {
+        let mut ctx = test_ctx();
+        ctx.params.base_url = meeki_transcribe_soniqo::LOCAL_BASE_URL.to_string();
+        ctx.params.model = "soniqo-parakeet-streaming".to_string();
+        let mut state = test_state(ctx);
+
+        assert!(listener_failure_is_terminal(&state));
+
+        enter_batch_fallback(
+            &mut state,
+            DegradedError::StreamError {
+                message: "local server died".to_string(),
+            },
+        )
+        .await;
+
+        // Terminal means "stop retrying the listener", never "stop the
+        // meeting". Losing a transcript is survivable; losing the audio is not.
+        assert!(
+            !state.shutting_down,
+            "a dead listener tore down the session"
+        );
     }
 
     #[test]
@@ -753,14 +774,14 @@ mod tests {
         ctx.params.model = "cloud".to_string();
         let state = test_state(ctx);
 
-        assert!(!should_stop_on_listener_failure(&state));
+        assert!(!listener_failure_is_terminal(&state));
     }
 
     #[test]
     fn non_soniqo_listener_failure_enters_batch_fallback() {
         let state = test_state(test_ctx());
 
-        assert!(!should_stop_on_listener_failure(&state));
+        assert!(!listener_failure_is_terminal(&state));
     }
 
     #[test]
@@ -783,16 +804,21 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn stop_after_listener_failure_emits_degraded_active_event() {
+    async fn a_terminal_listener_failure_degrades_without_stopping() {
         let runtime = Arc::new(RecordingRuntime {
             lifecycle_events: std::sync::Mutex::new(vec![]),
         });
         let mut ctx = test_ctx();
         ctx.runtime = runtime.clone();
+        // The adapter that used to tear the whole session down.
+        ctx.params.base_url = meeki_transcribe_soniqo::LOCAL_BASE_URL.to_string();
+        ctx.params.model = "soniqo-parakeet-streaming".to_string();
         let mut state = test_state(ctx);
         let (actor_ref, handle) = Actor::spawn(None, SessionStopProbe, ()).await.unwrap();
 
-        stop_after_listener_failure(
+        assert!(listener_failure_is_terminal(&state));
+
+        handle_listener_failure(
             &actor_ref,
             &mut state,
             DegradedError::StreamError {
@@ -800,6 +826,14 @@ mod tests {
             },
         )
         .await;
+
+        // Terminal means "stop retrying the listener", never "stop the
+        // meeting" — the recorder is a sibling of the listener, so the audio
+        // keeps being written while the transcript falls back to a batch pass.
+        assert!(
+            !state.shutting_down,
+            "a dead listener tore down the session"
+        );
 
         {
             let events = runtime.lifecycle_events.lock().unwrap();
@@ -813,9 +847,9 @@ mod tests {
                 panic!("expected degraded active event");
             };
             assert_eq!(*requested_transcription_mode, TranscriptionMode::Live);
-            assert_eq!(*current_transcription_mode, TranscriptionMode::Live);
             assert_eq!(message, "listener failed");
         }
+        actor_ref.stop(None);
         let _ = handle.await;
     }
 

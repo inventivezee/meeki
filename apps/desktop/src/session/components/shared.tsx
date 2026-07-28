@@ -137,6 +137,8 @@ export function useListenButtonState(sessionId: string) {
 
   const shouldRender = !active;
   const isDisabled = batching;
+  const recording = sessionMode === "active";
+  const finalizing = sessionMode === "finalizing";
 
   let warningMessage = "";
   if (lastError) {
@@ -147,6 +149,8 @@ export function useListenButtonState(sessionId: string) {
 
   return {
     shouldRender,
+    recording,
+    finalizing,
     isDisabled,
     warningMessage,
   };
