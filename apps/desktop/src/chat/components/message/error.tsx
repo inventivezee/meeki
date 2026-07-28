@@ -9,6 +9,31 @@ import { env } from "~/env";
 
 const WEB_APP_BASE_URL = env.VITE_APP_URL ?? "http://localhost:3000";
 
+/**
+ * The SDK types this as an Error, but a transport failure can surface as a
+ * plain object or a string — and reading `.message` off one of those crashed
+ * the whole app, because this runs inside render and takes the error boundary
+ * with it. The one place guaranteed to be handed a broken value should not be
+ * the one place that assumes a good one.
+ */
+function errorText(error: unknown): string {
+  if (typeof error === "string") {
+    return error;
+  }
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof (error as { message: unknown }).message === "string"
+  ) {
+    return (error as { message: string }).message;
+  }
+  return "";
+}
+
 function isContextLengthError(message: string): boolean {
   const lowerMessage = message.toLowerCase();
   return (
@@ -23,11 +48,12 @@ export function ErrorMessage({
   error,
   onRetry,
 }: {
-  error: Error;
+  error: unknown;
   onRetry?: () => void;
 }) {
   const { t } = useLingui();
-  const showContextLengthHelp = isContextLengthError(error.message);
+  const message = errorText(error);
+  const showContextLengthHelp = isContextLengthError(message);
 
   const handleOpenFaq = () => {
     void openerCommands.openUrl(
@@ -39,7 +65,9 @@ export function ErrorMessage({
   return (
     <MessageContainer align="start">
       <MessageBubble variant="error" withActionButton={!!onRetry}>
-        <p className="text-sm">{error.message}</p>
+        <p className="text-sm">
+          {message || t`Something went wrong. Please try again.`}
+        </p>
         {showContextLengthHelp && (
           <button
             onClick={handleOpenFaq}
