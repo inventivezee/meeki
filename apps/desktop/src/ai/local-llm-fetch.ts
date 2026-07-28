@@ -1,10 +1,6 @@
 import { commands as localLlmCommands } from "@meeki/plugin-local-llm";
 
-import {
-  createWarmupFetch,
-  markWarmupFinished,
-  markWarmupStarted,
-} from "~/ai/local-llm-warmup";
+import { markWarmupFinished, markWarmupStarted } from "~/ai/local-llm-warmup";
 
 /**
  * llama-server binds an ephemeral port, so the persisted base_url is only valid
@@ -56,12 +52,11 @@ function retarget(input: RequestInfo | URL, origin: string) {
 }
 
 export function createLocalLlmFetch(baseFetch: typeof fetch): typeof fetch {
-  const warmupFetch = createWarmupFetch(baseFetch);
-
   return async (input, init) => {
-    // Hold the indicator for the whole wait rather than guessing from request
-    // latency, so it stays up continuously until the server is really ready
-    // instead of flickering off the moment the process exists.
+    // Hold the indicator for exactly the wait for a ready server, and never
+    // infer one from request latency: prefill of a long note takes ~13s, which
+    // is indistinguishable from a reload by timing alone. Guessing made the UI
+    // flip from "Loading" to "Answering" and back mid-request.
     let waited = false;
     const ready = await localLlmCommands.serverUrl();
     if (ready.status !== "ok" || !ready.data) {
@@ -79,12 +74,12 @@ export function createLocalLlmFetch(baseFetch: typeof fetch): typeof fetch {
     }
 
     if (!origin) {
-      return warmupFetch(input, init);
+      return baseFetch(input, init);
     }
     const target = retarget(input, origin);
     if (typeof input === "string" || input instanceof URL) {
-      return warmupFetch(target, init);
+      return baseFetch(target, init);
     }
-    return warmupFetch(new Request(target, input), init);
+    return baseFetch(new Request(target, input), init);
   };
 }

@@ -12,8 +12,6 @@ export type WarmupState = {
   estimateMs: number;
 } | null;
 
-/** Below this a slow request is just a slow request, not a reload. */
-const WARMUP_SUSPICION_MS = 900;
 const FALLBACK_ESTIMATE_SECONDS = 10;
 
 let state: WarmupState = null;
@@ -95,31 +93,6 @@ export function markWarmupFinished() {
   endWarmup();
 }
 
-/**
- * Wraps the on-device transport. A request that hasn't produced response
- * headers within `WARMUP_SUSPICION_MS` is treated as a reload in progress;
- * headers arriving (or the request failing) ends it.
- */
-export function createWarmupFetch(baseFetch: typeof fetch): typeof fetch {
-  return async (input, init) => {
-    const startedAt = Date.now();
-    let began = false;
-    const timer = setTimeout(() => {
-      began = true;
-      beginWarmup(startedAt);
-    }, WARMUP_SUSPICION_MS);
-
-    try {
-      return await baseFetch(input, init);
-    } finally {
-      clearTimeout(timer);
-      if (began) {
-        endWarmup();
-      }
-    }
-  };
-}
-
 export const WARMUP_TEST_ONLY = {
   reset() {
     state = null;
@@ -127,6 +100,5 @@ export const WARMUP_TEST_ONLY = {
     estimateSeconds = FALLBACK_ESTIMATE_SECONDS;
     listeners.clear();
   },
-  WARMUP_SUSPICION_MS,
   FALLBACK_ESTIMATE_SECONDS,
 };
