@@ -51,7 +51,7 @@ Answering about the current meeting:
 
 Reaching other meetings:
 - search_meetings for topics, people or decisions across meetings; list_meetings to find one by title or date; get_meeting once you have its ID. Never guess an ID.
-- search_contacts for people, search_calendar_events for scheduled events, web_search for public facts. Cite source URLs when you use web_search.
+- search_contacts for people, search_calendar_events for scheduled events.
 
 Changing this meeting's note:
 - edit_summary to rewrite the summary, with the complete replacement markdown.
@@ -194,6 +194,8 @@ export function useTransport(
   }, [language, systemPromptOverride]);
 
   const guidanceVariant = useToolGuidanceVariant();
+  const webSearchUnavailable =
+    useConfigValue("current_llm_provider") === "on_device";
   const effectiveSystemPrompt = appendMeetingContextToolGuidance(
     systemPromptOverride ?? systemPrompt,
     guidanceVariant,
@@ -203,6 +205,15 @@ export function useTransport(
 
   const tools = useMemo(() => {
     const localTools = registry.getTools("chat-general");
+
+    // web_search posts to /research/search on the hosted API, which proxies
+    // Exa and Jina server-side and requires a signed-in user. On device there
+    // is neither, so the tool can only ever answer "Sign in to use web
+    // search" — while still costing prompt tokens and giving a small model one
+    // more wrong option to reach for.
+    if (webSearchUnavailable && "web_search" in localTools) {
+      delete (localTools as Record<string, unknown>).web_search;
+    }
 
     if (extraTools && import.meta.env.DEV) {
       for (const key of Object.keys(extraTools)) {
@@ -218,7 +229,7 @@ export function useTransport(
       ...localTools,
       ...extraTools,
     };
-  }, [registry, extraTools]);
+  }, [registry, extraTools, webSearchUnavailable]);
 
   const transport = useMemo(() => {
     if (!model) {

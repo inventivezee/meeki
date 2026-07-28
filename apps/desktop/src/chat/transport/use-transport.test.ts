@@ -52,7 +52,6 @@ describe("compact tool guidance", () => {
       "get_meeting",
       "search_contacts",
       "search_calendar_events",
-      "web_search",
       "edit_summary",
       "apply_session_correction",
     ]) {
@@ -71,5 +70,12 @@ describe("compact tool guidance", () => {
     expect(appendMeetingContextToolGuidance("SYSTEM")).toBe(
       appendMeetingContextToolGuidance("SYSTEM", "full"),
     );
+  });
+});
+
+describe("compact guidance and the on-device tool set", () => {
+  it("does not advertise web_search, which on-device cannot reach", () => {
+    const compact = appendMeetingContextToolGuidance("SYSTEM", "compact") ?? "";
+    expect(compact).not.toContain("web_search");
   });
 });
