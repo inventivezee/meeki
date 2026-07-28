@@ -200,7 +200,6 @@ msgid "Ask & search about anything, or be creative!"
 msgstr "Ask & search about anything, or be creative!"
 
 #: src/chat/components/input/index.tsx
-#: src/shared/chat-sphere.tsx
 msgid "Ask anything"
 msgstr "Ask anything"
 
@@ -209,8 +208,8 @@ msgid "Ask Meeki about your notes"
 msgstr "Ask Meeki about your notes"
 
 #: src/shared/chat-sphere.tsx
-msgid "Ask Meeki anything"
-msgstr "Ask Meeki anything"
+#~ msgid "Ask Meeki anything"
+#~ msgstr "Ask Meeki anything"
 
 #: src/task/resource-view.tsx
 msgid "Assignees:"
