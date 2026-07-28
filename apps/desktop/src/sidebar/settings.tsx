@@ -4,15 +4,12 @@ import {
   AudioLinesIcon,
   ArrowUpRightIcon,
   BellIcon,
-  BookOpenIcon,
   BookText,
   CalendarIcon,
   CogIcon,
-  RefreshCwIcon,
   LockIcon,
   SparklesIcon,
   type LucideIcon,
-  UserIcon,
   UsersIcon,
 } from "lucide-react";
 import { useCallback } from "react";
@@ -77,8 +74,10 @@ export function SettingsNav() {
       label: t`General`,
       items: [
         { id: "app", label: t`App`, icon: CogIcon },
-        { id: "account", label: t`Account`, icon: UserIcon },
-        { id: "sync", label: t`Sync`, icon: RefreshCwIcon },
+        // Account and Sync are hidden, not deleted. The Supabase client is
+        // null without credentials and meeki.org does not resolve, so both
+        // pages could only open dead URLs. Restore these two entries once the
+        // API is deployed.
         { id: "notifications", label: t`Notifications`, icon: BellIcon },
       ],
     },
@@ -102,11 +101,9 @@ export function SettingsNav() {
       items: [
         { id: "transcription", label: t`Transcription`, icon: AudioLinesIcon },
         { id: "intelligence", label: t`Intelligence`, icon: SparklesIcon },
-        {
-          id: "dictionary",
-          label: t`Dictionary`,
-          icon: BookOpenIcon,
-        },
+        // Dictionary is hidden: the terms are stored and handed to Rust, then
+        // dropped before they reach Soniqo, so it changes nothing for any
+        // on-device model. It only ever biased third-party cloud STT.
         {
           action: "open-templates",
           label: t`Templates`,
