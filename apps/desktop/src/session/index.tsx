@@ -4,7 +4,6 @@ import React, { useEffect, useRef } from "react";
 
 import { commands as fsSyncCommands } from "@meeki/plugin-fs-sync";
 
-import { FloatingActionButton } from "./components/floating";
 import {
   NoteInput,
   shouldShowTranscriptTabSpinner,
@@ -35,7 +34,7 @@ import {
   subscribeCanonicalSessionImportLocks,
 } from "~/session-sharing/editor-activity";
 import { useSession } from "~/session/queries";
-import { FloatingChatSphere } from "~/shared/chat-cta";
+import { FloatingChatSphere } from "~/shared/chat-sphere";
 import { type Tab, useTabs } from "~/store/zustand/tabs";
 import { useListener } from "~/stt/contexts";
 import { consumePendingUpload } from "~/stt/pending-upload";
@@ -189,7 +188,7 @@ function TabContentNoteInner({
   });
   const updateSessionTabState = useTabs((state) => state.updateSessionTabState);
 
-  const { skipReason } = useAutoEnhance(tab);
+  useAutoEnhance(tab);
   const isTranscribing = shouldShowTranscriptTabSpinner(sessionMode);
   const isLiveSessionActive = sessionMode === "active";
   const editorTabs = React.useMemo(
@@ -245,13 +244,6 @@ function TabContentNoteInner({
         }
         floatingButton={
           <>
-            <FloatingActionButton
-              allowListening={!standaloneWindow}
-              audioExists={audioExists}
-              currentView={currentView}
-              skipReason={skipReason}
-              tab={tab}
-            />
             <FloatingChatSphere />
           </>
         }

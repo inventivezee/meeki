@@ -23,7 +23,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.channel }}
   cancel-in-progress: true
 env:
-  CN_APPLICATION: "fastrepl/hyprnote2"
+  CN_APPLICATION: "innovateabundance/meeki"
   RELEASE_CHANNEL: ${{ inputs.channel }}
   TAURI_CONF_PATH: ./src-tauri/tauri.conf.${{ inputs.channel }}.json
   NODE_OPTIONS: "--max-old-space-size=4096"

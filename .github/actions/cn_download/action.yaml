@@ -1,6 +1,6 @@
 inputs:
   app:
-    description: "Fully qualified application slug (e.g., fastrepl/hyprnote2)"
+    description: "Fully qualified application slug (e.g., innovateabundance/meeki)"
     required: true
   version:
     description: "Version to download"

@@ -7,7 +7,7 @@ on:
         type: string
 
 env:
-  CN_APPLICATION: "fastrepl/hyprnote2"
+  CN_APPLICATION: "innovateabundance/meeki"
 
 jobs:
   parse:

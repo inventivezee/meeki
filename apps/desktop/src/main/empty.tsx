@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { Kbd } from "@meeki/ui/components/ui/kbd";
 import { cn } from "@meeki/utils";
 
-import { FloatingChatSphere } from "~/shared/chat-cta";
+import { FloatingChatSphere } from "~/shared/chat-sphere";
 import { StandardContentWrapper } from "~/shared/main";
 import {
   useNewNote,

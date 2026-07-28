@@ -1,17 +1,18 @@
-import { Trans } from "@lingui/react/macro";
+import { useLingui } from "@lingui/react/macro";
 import { useCallback, useRef, useState } from "react";
 
 import { cn } from "@meeki/utils";
 
 import { ResourceView } from "./resource-view";
 
-import { ChatCTA } from "~/shared/chat-cta";
+import { ChatSphere } from "~/shared/chat-sphere";
 import { StandardContentWrapper } from "~/shared/main";
 import { type Tab, type TaskResource } from "~/store/zustand/tabs";
 
 type TaskTab = Extract<Tab, { type: "task" }>;
 
 export function TabContentTask({ tab }: { tab: TaskTab }) {
+  const { t } = useLingui();
   const scrollRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const [activeKey, setActiveKey] = useState<string | null>(null);
@@ -56,7 +57,7 @@ export function TabContentTask({ tab }: { tab: TaskTab }) {
 
   const floatingButton = (
     <div className="absolute bottom-4 left-1/2 z-20 -translate-x-1/2">
-      <ChatCTA label={<Trans>Work on this task</Trans>} />
+      <ChatSphere ariaLabel={t`Work on this task`} />
     </div>
   );
 
