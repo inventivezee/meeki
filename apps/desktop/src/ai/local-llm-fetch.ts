@@ -1,6 +1,10 @@
 import { commands as localLlmCommands } from "@meeki/plugin-local-llm";
 
-import { createWarmupFetch } from "~/ai/local-llm-warmup";
+import {
+  createWarmupFetch,
+  markWarmupFinished,
+  markWarmupStarted,
+} from "~/ai/local-llm-warmup";
 
 /**
  * llama-server binds an ephemeral port, so the persisted base_url is only valid
@@ -55,7 +59,25 @@ export function createLocalLlmFetch(baseFetch: typeof fetch): typeof fetch {
   const warmupFetch = createWarmupFetch(baseFetch);
 
   return async (input, init) => {
-    const origin = await liveOrigin(init?.signal);
+    // Hold the indicator for the whole wait rather than guessing from request
+    // latency, so it stays up continuously until the server is really ready
+    // instead of flickering off the moment the process exists.
+    let waited = false;
+    const ready = await localLlmCommands.serverUrl();
+    if (ready.status !== "ok" || !ready.data) {
+      waited = true;
+      markWarmupStarted();
+    }
+
+    let origin: string | null;
+    try {
+      origin = await liveOrigin(init?.signal);
+    } finally {
+      if (waited) {
+        markWarmupFinished();
+      }
+    }
+
     if (!origin) {
       return warmupFetch(input, init);
     }

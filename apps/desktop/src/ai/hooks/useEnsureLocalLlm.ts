@@ -11,11 +11,7 @@ import {
   resetLocalLlmEngagement,
   useLocalLlmWanted,
 } from "~/ai/local-llm-demand";
-import {
-  markWarmupFinished,
-  markWarmupStarted,
-  setWarmupEstimateSeconds,
-} from "~/ai/local-llm-warmup";
+import { setWarmupEstimateSeconds } from "~/ai/local-llm-warmup";
 import { getStoredAiProvider, setAiProvider } from "~/settings/providers";
 import { getStoredSettingValues } from "~/settings/queries";
 import { useConfigValues } from "~/shared/config";
@@ -69,17 +65,16 @@ export function useEnsureLocalLlm() {
       // start_server reuses a live server for the same model, so this doubles
       // as the liveness check. The first call loads the weights, which is the
       // long wait the user sees if they send a message straight away.
-      markWarmupStarted();
-      let url: string;
-      try {
-        const started = await localLlmCommands.startServer(model);
-        if (started.status === "error") {
-          throw new Error(started.error);
-        }
-        url = started.data;
-      } finally {
-        markWarmupFinished();
+      // Deliberately does not touch the warm-up indicator: this query polls
+      // every 5s, so toggling here flashed it on and off, and it cleared as
+      // soon as the process was up while prefill was still running. The fetch
+      // path owns the indicator instead, because it knows when the server is
+      // actually answering.
+      const started = await localLlmCommands.startServer(model);
+      if (started.status === "error") {
+        throw new Error(started.error);
       }
+      const url = started.data;
 
       // Loading weights can take a while; the user may have moved to a cloud
       // provider in the meantime.
