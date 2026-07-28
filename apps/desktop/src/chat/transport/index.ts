@@ -183,17 +183,22 @@ export class CustomChatTransport implements ChatTransport<HyprUIMessage> {
       cache,
     );
 
-    let lastUserMessageIndex = -1;
-    for (let i = options.messages.length - 1; i >= 0; i -= 1) {
-      if (options.messages[i]?.role === "user") {
-        lastUserMessageIndex = i;
-        break;
-      }
-    }
+    // The context block lives in the instructions rather than on a message.
+    // It used to be prepended to whichever user message was last, so it moved
+    // every turn, rewrote text the model had already seen, and llama.cpp threw
+    // away the whole KV cache — each follow-up reprocessed the entire note
+    // (~13s at 153 tok/s, against 0.1s for a prefix that holds). Anchoring it
+    // to a message instead is not enough: prepareStep below windows to the last
+    // MESSAGE_WINDOW_SIZE messages, which would drop the note out of long
+    // conversations entirely. Instructions are passed separately and survive
+    // that window.
+    const instructions = effectiveContextBlock
+      ? `${this.systemPrompt ?? ""}\n\n${effectiveContextBlock}`.trim()
+      : this.systemPrompt;
 
     const agent = new ToolLoopAgent({
       model: this.model,
-      instructions: this.systemPrompt,
+      instructions,
       tools,
       stopWhen: stepCountIs(MAX_TOOL_STEPS),
       prepareStep: async ({ messages }) => {
@@ -206,24 +211,9 @@ export class CustomChatTransport implements ChatTransport<HyprUIMessage> {
 
     const messagesWithContext: HyprUIMessage[] = [];
 
-    for (const [index, msg] of options.messages.entries()) {
+    for (const msg of options.messages) {
       if (msg.role === "user") {
-        if (
-          !effectiveContextBlock ||
-          lastUserMessageIndex === -1 ||
-          index !== lastUserMessageIndex
-        ) {
-          messagesWithContext.push(msg);
-          continue;
-        }
-
-        messagesWithContext.push({
-          ...msg,
-          parts: [
-            { type: "text" as const, text: `${effectiveContextBlock}\n\n` },
-            ...msg.parts,
-          ],
-        });
+        messagesWithContext.push(msg);
       } else if (msg.role === "assistant") {
         const expandedParts = await Promise.all(
           msg.parts.map((part) => {
