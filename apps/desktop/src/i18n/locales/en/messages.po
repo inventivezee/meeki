@@ -1097,6 +1097,10 @@ msgstr "LinkedIn"
 msgid "Live"
 msgstr "Live"
 
+#: src/settings/general/app-settings.tsx
+msgid "Load the language model only when you ask for a summary or open chat, and unload it after five minutes idle. Turn this off to keep it in memory so the first answer is instant."
+msgstr "Load the language model only when you ask for a summary or open chat, and unload it after five minutes idle. Turn this off to keep it in memory so the first answer is instant."
+
 #: src/session-sharing/index.tsx
 msgid "Loading access…"
 msgstr "Loading access…"
@@ -1813,6 +1817,10 @@ msgstr "Save"
 #: src/session/components/outer-header/metadata/date.tsx
 msgid "Save date"
 msgstr "Save date"
+
+#: src/settings/general/app-settings.tsx
+msgid "Save memory when possible"
+msgstr "Save memory when possible"
 
 #: src/settings/general/e2ee-setup.tsx
 msgid "Save this key in a password manager. You need it to add a new device, and it will not be shown again."

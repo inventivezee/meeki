@@ -1097,6 +1097,10 @@ msgstr ""
 msgid "Live"
 msgstr ""
 
+#: src/settings/general/app-settings.tsx
+msgid "Load the language model only when you ask for a summary or open chat, and unload it after five minutes idle. Turn this off to keep it in memory so the first answer is instant."
+msgstr ""
+
 #: src/session-sharing/index.tsx
 msgid "Loading access…"
 msgstr ""
@@ -1812,6 +1816,10 @@ msgstr ""
 
 #: src/session/components/outer-header/metadata/date.tsx
 msgid "Save date"
+msgstr ""
+
+#: src/settings/general/app-settings.tsx
+msgid "Save memory when possible"
 msgstr ""
 
 #: src/settings/general/e2ee-setup.tsx
