@@ -14,11 +14,16 @@ import { useSyncExternalStore } from "react";
 export const BROWSING_GRACE_MS = 60_000;
 export const ENGAGED_GRACE_MS = 5 * 60_000;
 
-const claims = new Map<string, number>();
+const claims = new Set<string>();
 const listeners = new Set<() => void>();
 
-/** Peak grace across the claims held during the current run of demand. */
-let graceMs = ENGAGED_GRACE_MS;
+/**
+ * Sticky for as long as the model stays up, deliberately. Engagement used to be
+ * carried on the claim itself, but the chat-mode effect releases and re-claims
+ * on every re-run, and sending clears the draft — so both the "typed" signal
+ * and the ratchet were lost and the grace fell back to browsing.
+ */
+let engaged = false;
 
 function emit() {
   for (const listener of listeners) {
@@ -26,23 +31,27 @@ function emit() {
   }
 }
 
-export function claimLocalLlm(
-  reason: string,
-  claimGraceMs: number = ENGAGED_GRACE_MS,
-) {
+export function claimLocalLlm(reason: string, engagedClaim = true) {
   const release = () => releaseLocalLlm(reason);
-  if (claims.get(reason) === claimGraceMs) {
+  if (engagedClaim) {
+    markLocalLlmEngaged();
+  }
+  if (claims.has(reason)) {
     return release;
   }
-  const wasEmpty = claims.size === 0;
-  claims.set(reason, claimGraceMs);
-  // Recompute from the live set on the first claim so a previous run's long
-  // grace doesn't leak into this one; afterwards only ever ratchet up.
-  graceMs = wasEmpty
-    ? claimGraceMs
-    : Math.max(...Array.from(claims.values()), graceMs);
+  claims.add(reason);
   emit();
   return release;
+}
+
+/** Typing or sending — anything that means the user actually wants an answer. */
+export function markLocalLlmEngaged() {
+  engaged = true;
+}
+
+/** Called once the server is actually stopped, so the next visit starts fresh. */
+export function resetLocalLlmEngagement() {
+  engaged = false;
 }
 
 export function releaseLocalLlm(reason: string) {
@@ -57,7 +66,7 @@ export function isLocalLlmWanted() {
 
 /** Grace to honour once the last claim drops. Read when the timer is armed. */
 export function getLocalLlmGraceMs() {
-  return graceMs;
+  return engaged ? ENGAGED_GRACE_MS : BROWSING_GRACE_MS;
 }
 
 export function useLocalLlmWanted() {
@@ -75,6 +84,6 @@ export const LOCAL_LLM_DEMAND_TEST_ONLY = {
   reset() {
     claims.clear();
     listeners.clear();
-    graceMs = ENGAGED_GRACE_MS;
+    engaged = false;
   },
 };

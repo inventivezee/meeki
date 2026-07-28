@@ -239,6 +239,7 @@ impl<'a, R: Runtime, M: Manager<R>> LocalLlmExt<'a, R, M> {
             model_id.to_string(),
             model_path,
             server_bin,
+            Some(&model),
         )
         .await?;
         let url = server.url().to_string();

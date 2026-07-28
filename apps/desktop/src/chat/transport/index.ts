@@ -249,8 +249,10 @@ export class CustomChatTransport implements ChatTransport<HyprUIMessage> {
     const result = await agent.stream({
       messages: await convertToModelMessages(messagesWithContext),
       abortSignal: options.abortSignal,
+      // Word, not line: on a slow local model a long sentence buffers for tens
+      // of seconds and then lands as a blob, which reads as a hung stream.
       experimental_transform: smoothStream({
-        chunking: "line",
+        chunking: "word",
         delayInMs: null,
       }),
     });

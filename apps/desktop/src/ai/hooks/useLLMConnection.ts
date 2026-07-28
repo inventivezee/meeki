@@ -11,7 +11,7 @@ import { useMemo } from "react";
 import type { CharTask } from "@meeki/api-client";
 import type { AIProviderStorage } from "@meeki/store";
 
-import { createWarmupFetch } from "~/ai/local-llm-warmup";
+import { createLocalLlmFetch } from "~/ai/local-llm-fetch";
 import { useAuth } from "~/auth";
 import { useBillingAccess } from "~/auth/billing-context";
 import { type ProviderId, PROVIDERS } from "~/settings/ai/llm/shared";
@@ -292,10 +292,11 @@ const createLanguageModel = (conn: LLMConnectionInfo): LanguageModelV3 => {
       return wrapWithThinkingMiddleware(provider.chatModel(conn.modelId));
     }
 
-    // Only the bundled llama-server sleeps, so only it needs the warm-up probe.
+    // Only the bundled llama-server sleeps and moves port, so only it needs the
+    // warm-up probe and the live-endpoint retarget.
     case "on_device": {
       const provider = createOpenAICompatible({
-        fetch: createWarmupFetch(tauriFetch),
+        fetch: createLocalLlmFetch(tauriFetch),
         name: conn.providerId,
         baseURL: conn.baseUrl,
         apiKey: conn.apiKey,

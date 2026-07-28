@@ -298,7 +298,8 @@ keeps `min_memory_bytes()` and `recommended_model_for_memory()` from drifting ap
 
 ```
 --model <path> --host 127.0.0.1 --port <free>
---ctx-size 65536            # MEEKI_LLM_CTX_SIZE, clamped 8192–262144
+--ctx-size <adaptive>       # MEEKI_LLM_CTX_SIZE overrides, clamped 8192–262144
+--parallel 1                # one slot; each slot gets its own sliding-window KV cache
 --reasoning-format deepseek # thoughts land in reasoning_content, never in the note
 --reasoning-budget -1       # MEEKI_LLM_THINK_BUDGET
 --chat-template-kwargs {"enable_thinking":false}
@@ -307,7 +308,13 @@ keeps `min_memory_bytes()` and `recommended_model_for_memory()` from drifting ap
 ```
 
 The KV cache is allocated up front, so `--ctx-size` costs memory whether or not a
-conversation fills it (~20 KB/token for Gemma-class models; 64k ≈ 1.3 GB).
+conversation fills it — and the per-token cost varies by an order of magnitude across the
+catalog, so the window is derived from detected RAM and the model rather than fixed. Read off
+the shipped GGUFs: Gemma 4 12B costs 16 KiB/token (only 8 of its 48 layers use full attention,
+at 1 KV head × 512 head dim) plus a fixed 480 MiB for the 40 sliding-window layers, while the
+much smaller Qwen 3 4B costs 144 KiB/token because all 36 of its layers keep 8 KV heads and it
+has no sliding window. A fixed 64k therefore reserved 9 GiB of KV for Qwen 3 4B on the 8 GiB
+Macs it is recommended to, and 20 GiB for Llama 3.3 70B.
 
 **Idle sleep.** After 300 s without a request llama-server unloads the weights and drops to
 ~80 MB RSS; the next request reloads them. Measured on an M4 / 16 GB Mac against b10067 with
@@ -727,7 +734,7 @@ Runtime env read by the Rust side (not Vite):
 
 | Variable | Purpose |
 |----------|---------|
-| `MEEKI_LLM_CTX_SIZE` | Local LLM context window; default 65536, clamped 8192–262144 |
+| `MEEKI_LLM_CTX_SIZE` | Local LLM context window; default derived from total RAM and the model's KV cost (capped at 32768), clamped 8192–262144 |
 | `MEEKI_LLM_THINK_BUDGET` | Reasoning token budget; default `-1` (unrestricted) |
 | `MEEKI_LLM_SLEEP_IDLE_SECONDS` | Idle seconds before llama-server unloads its weights; default 300, floored at 30, any value ≤ 0 disables sleeping |
 | `MEEKI_LLAMA_CPP_RELEASE` | llama.cpp release tag fetched by `llama:prepare` |

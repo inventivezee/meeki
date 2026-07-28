@@ -174,6 +174,10 @@ msgstr "Analyzing structure..."
 msgid "Animals & Nature"
 msgstr "Animals & Nature"
 
+#: src/chat/components/message/loading.tsx
+msgid "Answering..."
+msgstr "Answering..."
+
 #: src/settings/ai/shared/index.tsx
 msgid "API Key"
 msgstr "API Key"
@@ -2375,7 +2379,6 @@ msgstr "The note may have been unshared or moved out of a workspace you can acce
 msgid "Thinking"
 msgstr "Thinking"
 
-#: src/chat/components/message/loading.tsx
 #: src/session/components/note-input/enhanced/thinking.tsx
 msgid "Thinking..."
 msgstr "Thinking..."
@@ -2578,6 +2581,10 @@ msgstr "While listening, use Accessibility access to copy visible chat from supp
 #: src/task/tab-content.tsx
 msgid "Work on this task"
 msgstr "Work on this task"
+
+#: src/chat/components/message/loading.tsx
+#~ msgid "Working..."
+#~ msgstr "Working..."
 
 #: src/session-sharing/comments.tsx
 msgid "You"

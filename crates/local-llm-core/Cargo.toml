@@ -15,6 +15,7 @@ meeki-local-model = { workspace = true }
 dirs = { workspace = true }
 reqwest = { workspace = true }
 serde = { workspace = true }
+sysinfo = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["process", "time", "macros", "rt"] }
 

@@ -6,7 +6,11 @@ import {
   type GgufLlmModel,
 } from "@meeki/plugin-local-llm";
 
-import { getLocalLlmGraceMs, useLocalLlmWanted } from "~/ai/local-llm-demand";
+import {
+  getLocalLlmGraceMs,
+  resetLocalLlmEngagement,
+  useLocalLlmWanted,
+} from "~/ai/local-llm-demand";
 import {
   markWarmupFinished,
   markWarmupStarted,
@@ -116,6 +120,9 @@ export function useEnsureLocalLlm() {
 
     const timer = setTimeout(() => {
       void localLlmCommands.stopServer();
+      // The next visit starts as browsing again, not carrying this session's
+      // engagement into a model the user may never ask anything of.
+      resetLocalLlmEngagement();
     }, getLocalLlmGraceMs());
     return () => clearTimeout(timer);
   }, [selected, save_memory, wanted]);

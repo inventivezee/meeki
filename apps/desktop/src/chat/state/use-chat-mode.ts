@@ -3,7 +3,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 
 import { useChatContext } from "./chat-context";
 
-import { BROWSING_GRACE_MS, claimLocalLlm } from "~/ai/local-llm-demand";
+import { claimLocalLlm } from "~/ai/local-llm-demand";
 import { useTabs } from "~/store/zustand/tabs";
 
 export type { ChatEvent, ChatMode } from "~/store/zustand/tabs";
@@ -19,7 +19,7 @@ export function useChatMode() {
     if (mode === "FloatingClosed") {
       return;
     }
-    return claimLocalLlm("chat", BROWSING_GRACE_MS);
+    return claimLocalLlm("chat", false);
   }, [mode]);
   const transitionChatMode = useTabs((state) => state.transitionChatMode);
 

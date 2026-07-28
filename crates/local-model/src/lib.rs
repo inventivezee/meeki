@@ -167,6 +167,54 @@ impl GgufLlmModel {
         }
     }
 
+    /// f16 KV-cache bytes per token, counting only the layers whose cache grows
+    /// with the context window. Sliding-window layers are capped at the window
+    /// by llama.cpp and are accounted for by `kv_window_bytes` instead.
+    ///
+    /// Gemma 4 12B is read off the shipped GGUF: 48 layers in a 5:1
+    /// sliding-window:full pattern, so the 8 full-attention layers cost
+    /// 1 KV head x 512 head dim x 2 (K and V) x 2 bytes = 2 KiB each, 16 KiB per
+    /// token in total. Note how much this varies: Qwen 3 4B has no sliding
+    /// window and 8 KV heads on all 36 layers, so it costs nine times more per
+    /// token than a model three times its size.
+    pub fn kv_bytes_per_token(&self) -> u64 {
+        const KIB: u64 = 1024;
+
+        match self {
+            GgufLlmModel::Gemma4_12bQ4Km => 16 * KIB,
+            GgufLlmModel::Gemma4_26bA4bIq4Xs => 24 * KIB,
+            GgufLlmModel::Qwen36_35bA3bIq4Xs | GgufLlmModel::Qwen36_35bA3bQ4Km => 20 * KIB,
+            GgufLlmModel::Gemma3_4bQ4 => 24 * KIB,
+            GgufLlmModel::Qwen3_4bQ4Km => 144 * KIB,
+            GgufLlmModel::Llama3p2_3bQ4 | GgufLlmModel::HyprLLM => 112 * KIB,
+            GgufLlmModel::Llama33_70bQ4Km => 320 * KIB,
+        }
+    }
+
+    /// f16 KV-cache bytes for sliding-window layers, which llama.cpp sizes to
+    /// the window instead of the context and therefore charges once rather than
+    /// per context token. Every server slot gets its own copy.
+    ///
+    /// Gemma 4 12B: 40 window layers x 8 KV heads x 256 head dim x 2 (K and V)
+    /// x 2 bytes = 320 KiB per token, held over a 1024-token window plus one
+    /// 512-token ubatch = 480 MiB per slot.
+    pub fn kv_window_bytes(&self, slots: u32) -> u64 {
+        const MIB: u64 = 1024 * 1024;
+
+        let per_slot = match self {
+            GgufLlmModel::Gemma4_12bQ4Km => 480 * MIB,
+            GgufLlmModel::Gemma4_26bA4bIq4Xs => 600 * MIB,
+            GgufLlmModel::Qwen36_35bA3bIq4Xs | GgufLlmModel::Qwen36_35bA3bQ4Km => 360 * MIB,
+            GgufLlmModel::Gemma3_4bQ4 => 120 * MIB,
+            GgufLlmModel::Qwen3_4bQ4Km
+            | GgufLlmModel::Llama3p2_3bQ4
+            | GgufLlmModel::HyprLLM
+            | GgufLlmModel::Llama33_70bQ4Km => 0,
+        };
+
+        per_slot * slots as u64
+    }
+
     /// Rough seconds to get from "no weights resident" to "answering", used to
     /// pace the warm-up indicator. Measured on an M-series SSD against
     /// llama-server b10067: a 7.1 GB model takes ~3 s with the file still in the

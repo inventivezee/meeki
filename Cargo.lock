@@ -10829,6 +10829,7 @@ dependencies = [
  "reqwest 0.13.2",
  "serde",
  "specta",
+ "sysinfo",
  "thiserror 2.0.18",
  "tokio",
 ]
