@@ -64,8 +64,13 @@ impl SpeakerLabeler {
 
 impl SegmentKey {
     pub fn is_known_speaker(&self, ctx: Option<&SpeakerLabelContext>) -> bool {
-        if self.speaker_human_id.is_some() {
-            return true;
+        if let Some(human_id) = self.speaker_human_id.as_deref() {
+            return ctx.is_some_and(|ctx| {
+                ctx.human_name_by_id
+                    .get(human_id)
+                    .is_some_and(|name| !name.trim().is_empty())
+                    || ctx.self_human_id.as_deref() == Some(human_id)
+            });
         }
 
         matches!(
@@ -83,24 +88,33 @@ pub fn render_speaker_label(
     ctx: Option<&SpeakerLabelContext>,
     mut labeler: Option<&mut SpeakerLabeler>,
 ) -> String {
+    // Never fall back to the raw id. Nameless humans are dropped from the name
+    // map, so an unnamed self-speaker used to label every line of the
+    // transcript with their uuid — which then reached the model as the only
+    // id-shaped string in its context, and it dutifully passed that to
+    // get_meeting, where it is not a session id and never resolves.
     if let Some(ctx) = ctx {
-        if let Some(human_id) = key.speaker_human_id.as_ref() {
-            if let Some(name) = ctx.human_name_by_id.get(human_id) {
-                return name.clone();
+        let human_id = key.speaker_human_id.as_deref().or_else(|| {
+            if key.channel == ChannelProfile::DirectMic {
+                ctx.self_human_id.as_deref()
+            } else {
+                None
             }
-            return human_id.clone();
-        }
+        });
 
-        if key.channel == ChannelProfile::DirectMic
-            && let Some(self_human_id) = ctx.self_human_id.as_ref()
-        {
-            if let Some(name) = ctx.human_name_by_id.get(self_human_id) {
-                return name.clone();
+        if let Some(human_id) = human_id {
+            if let Some(name) = ctx
+                .human_name_by_id
+                .get(human_id)
+                .map(|name| name.trim())
+                .filter(|name| !name.is_empty())
+            {
+                return name.to_string();
             }
-            return "You".to_string();
+            if ctx.self_human_id.as_deref() == Some(human_id) {
+                return "You".to_string();
+            }
         }
-    } else if let Some(human_id) = key.speaker_human_id.as_ref() {
-        return human_id.clone();
     }
 
     if let Some(labeler) = labeler.as_mut() {
@@ -143,6 +157,67 @@ mod tests {
             render_speaker_label(&direct_mic_key(), Some(&ctx), None),
             "You"
         );
+    }
+
+    #[test]
+    fn renders_you_when_the_self_human_is_stamped_on_the_segment() {
+        // The pipeline assigns the self human to the mic channel, so
+        // speaker_human_id is Some in practice — the None case the older test
+        // covers never happens for a real recording.
+        let key = SegmentKey {
+            channel: ChannelProfile::DirectMic,
+            speaker_index: None,
+            speaker_human_id: Some("997b6783".to_string()),
+        };
+        let ctx = SpeakerLabelContext {
+            self_human_id: Some("997b6783".to_string()),
+            human_name_by_id: HashMap::new(),
+        };
+
+        assert_eq!(render_speaker_label(&key, Some(&ctx), None), "You");
+    }
+
+    #[test]
+    fn never_renders_a_raw_human_id_as_a_name() {
+        // A uuid in the transcript reaches the model as the only id-shaped
+        // string in its context, and it passes that to get_meeting, where it
+        // is not a session id.
+        let key = SegmentKey {
+            channel: ChannelProfile::RemoteParty,
+            speaker_index: Some(0),
+            speaker_human_id: Some("997b6783-b45c-420a-ac95-8c97124281a1".to_string()),
+        };
+        let ctx = SpeakerLabelContext {
+            self_human_id: Some("someone-else".to_string()),
+            human_name_by_id: HashMap::new(),
+        };
+
+        let label = render_speaker_label(&key, Some(&ctx), None);
+        assert!(
+            !label.contains("997b6783"),
+            "leaked a raw human id as a speaker label: {label}"
+        );
+
+        let no_ctx = render_speaker_label(&key, None, None);
+        assert!(
+            !no_ctx.contains("997b6783"),
+            "leaked a raw human id with no context: {no_ctx}"
+        );
+    }
+
+    #[test]
+    fn treats_a_blank_name_as_no_name() {
+        let key = SegmentKey {
+            channel: ChannelProfile::DirectMic,
+            speaker_index: None,
+            speaker_human_id: Some("self".to_string()),
+        };
+        let ctx = SpeakerLabelContext {
+            self_human_id: Some("self".to_string()),
+            human_name_by_id: HashMap::from([("self".to_string(), "   ".to_string())]),
+        };
+
+        assert_eq!(render_speaker_label(&key, Some(&ctx), None), "You");
     }
 
     #[test]

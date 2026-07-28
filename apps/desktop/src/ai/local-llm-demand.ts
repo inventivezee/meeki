@@ -11,8 +11,8 @@ import { useSyncExternalStore } from "react";
  * on shouldn't hold several GB; typing buys the long one, because someone
  * mid-sentence is very likely about to send.
  */
-export const BROWSING_GRACE_MS = 60_000;
-export const ENGAGED_GRACE_MS = 5 * 60_000;
+export const BROWSING_GRACE_MS = 120_000;
+export const ENGAGED_GRACE_MS = 10 * 60_000;
 
 const claims = new Set<string>();
 const listeners = new Set<() => void>();
