@@ -21,6 +21,10 @@ const MIB: u64 = 1024 * 1024;
 /// desktop app only ever has a single request in flight.
 const SERVER_SLOTS: u32 = 1;
 
+/// Smallest run of tokens worth KV-shifting rather than reprocessing. Chunks
+/// below this cost more in shifting bookkeeping than the prefill they save.
+const CACHE_REUSE_MIN_CHUNK: u32 = 256;
+
 /// Graph, logits and Metal scratch buffers. These scale with batch size rather
 /// than context, so they are a constant rather than a per-token cost.
 const COMPUTE_OVERHEAD_BYTES: u64 = 384 * MIB;
@@ -176,6 +180,13 @@ impl LlmServer {
             .arg(resolve_ctx_size(model).to_string())
             .arg("--parallel")
             .arg(SERVER_SLOTS.to_string())
+            // Prefill dominates the wait — measured 153 tok/s, so a note plus
+            // system prompt plus tool definitions costs ~13 s before the first
+            // token can exist. An exact prefix match already reuses the cache
+            // (1996 tokens in 0.1 s); this rescues the near-miss case by
+            // KV-shifting the common prefix instead of reprocessing it.
+            .arg("--cache-reuse")
+            .arg(CACHE_REUSE_MIN_CHUNK.to_string())
             // Thoughts go to `reasoning_content` so they never land in a note,
             // and short tasks (titles, key facts) opt out by default; the
             // summary opts back in per request.
