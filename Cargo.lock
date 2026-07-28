@@ -20646,6 +20646,7 @@ dependencies = [
 name = "transcript"
 version = "0.1.0"
 dependencies = [
+ "askama 0.15.6",
  "json-patch 4.1.0",
  "owhisper-interface",
  "serde",

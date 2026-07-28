@@ -15,6 +15,7 @@ Default permissions for the plugin
 - `allow-list-custom-models`
 - `allow-recommended-model`
 - `allow-server-url`
+- `allow-sleep-idle-seconds`
 - `allow-start-server`
 - `allow-stop-server`
 
@@ -309,6 +310,32 @@ Enables the server_url command without any pre-configured scope.
 <td>
 
 Denies the server_url command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`local-llm:allow-sleep-idle-seconds`
+
+</td>
+<td>
+
+Enables the sleep_idle_seconds command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`local-llm:deny-sleep-idle-seconds`
+
+</td>
+<td>
+
+Denies the sleep_idle_seconds command without any pre-configured scope.
 
 </td>
 </tr>

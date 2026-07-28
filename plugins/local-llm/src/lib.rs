@@ -44,6 +44,7 @@ fn make_specta_builder<R: tauri::Runtime>() -> tauri_specta::Builder<R> {
             commands::list_custom_models::<Wry>,
             commands::recommended_model::<Wry>,
             commands::server_url::<Wry>,
+            commands::sleep_idle_seconds,
             commands::start_server::<Wry>,
             commands::stop_server::<Wry>,
         ])

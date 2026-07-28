@@ -12,6 +12,7 @@ permissions = [
     "allow-list-custom-models",
     "allow-recommended-model",
     "allow-server-url",
+    "allow-sleep-idle-seconds",
     "allow-start-server",
     "allow-stop-server",
 ]

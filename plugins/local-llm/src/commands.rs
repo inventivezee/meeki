@@ -116,6 +116,14 @@ pub async fn server_url<R: tauri::Runtime>(
         .map_err(|e| e.to_string())
 }
 
+/// Seconds of idleness after which llama-server unloads its weights, or -1 when
+/// sleeping is disabled.
+#[tauri::command]
+#[specta::specta]
+pub async fn sleep_idle_seconds() -> Result<i64, String> {
+    Ok(meeki_local_llm_core::sleep_idle_seconds())
+}
+
 #[tauri::command]
 #[specta::specta]
 pub async fn start_server<R: tauri::Runtime>(

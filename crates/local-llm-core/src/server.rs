@@ -125,6 +125,14 @@ fn parse_sleep_idle_seconds(raw: Option<&str>) -> i64 {
         .unwrap_or(DEFAULT_SLEEP_IDLE_SECONDS)
 }
 
+/// Exposed so the UI can tell, without probing, whether the next request will
+/// have to wake the server. llama-server answers /health identically asleep and
+/// awake, and any request that would reveal the difference wakes it — so the
+/// only honest signal is knowing the timeout and our own last-request time.
+pub fn sleep_idle_seconds() -> i64 {
+    resolve_sleep_idle_seconds()
+}
+
 fn resolve_sleep_idle_seconds() -> i64 {
     parse_sleep_idle_seconds(std::env::var(SLEEP_IDLE_ENV).ok().as_deref())
 }

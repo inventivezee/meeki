@@ -13,3 +13,6 @@ serde_json = { workspace = true }
 specta = { workspace = true }
 thiserror = { workspace = true }
 uuid = { workspace = true, features = ["v4"] }
+
+[dev-dependencies]
+askama = { workspace = true }

@@ -94,6 +94,18 @@ async serverUrl() : Promise<Result<string | null, string>> {
     else return { status: "error", error: e  as any };
 }
 },
+/**
+ * Seconds of idleness after which llama-server unloads its weights, or -1 when
+ * sleeping is disabled.
+ */
+async sleepIdleSeconds() : Promise<Result<number, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|sleep_idle_seconds") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async startServer(model: GgufLlmModel) : Promise<Result<string, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|start_server", { model }) };

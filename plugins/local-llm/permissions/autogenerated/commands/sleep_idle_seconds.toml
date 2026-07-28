@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-sleep-idle-seconds"
+description = "Enables the sleep_idle_seconds command without any pre-configured scope."
+commands.allow = ["sleep_idle_seconds"]
+
+[[permission]]
+identifier = "deny-sleep-idle-seconds"
+description = "Denies the sleep_idle_seconds command without any pre-configured scope."
+commands.deny = ["sleep_idle_seconds"]
