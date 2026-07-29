@@ -157,6 +157,10 @@ msgstr "After recording"
 msgid "AI-generated summary of all interactions and notes with this contact will appear here. This will synthesize key discussion points, action items, and relationship context across all meetings and notes."
 msgstr "AI-generated summary of all interactions and notes with this contact will appear here. This will synthesize key discussion points, action items, and relationship context across all meetings and notes."
 
+#: src/session/components/outer-header/overflow/export-modal.tsx
+msgid "All notes"
+msgstr "All notes"
+
 #: src/shared/open-note-dialog.tsx
 msgid "All Notes"
 msgstr "All Notes"
@@ -329,8 +333,8 @@ msgid "Checking trial eligibility..."
 msgstr "Checking trial eligibility..."
 
 #: src/session/components/outer-header/overflow/export-modal.tsx
-msgid "Choose a file format and what to include."
-msgstr "Choose a file format and what to include."
+#~ msgid "Choose a file format and what to include."
+#~ msgstr "Choose a file format and what to include."
 
 #: src/settings/recordings/index.tsx
 msgid "Choose a folder for your recordings"
@@ -359,6 +363,10 @@ msgstr "Choose storage location"
 #: src/templates/template-icon-picker.tsx
 msgid "Choose template icon"
 msgstr "Choose template icon"
+
+#: src/session/components/outer-header/overflow/export-modal.tsx
+msgid "Choose what to export and in which format."
+msgstr "Choose what to export and in which format."
 
 #: src/session-sharing/index.tsx
 msgid "Choose who can open this note."
@@ -1495,6 +1503,7 @@ msgid "Note breadcrumb"
 msgstr "Note breadcrumb"
 
 #: src/contacts/details.tsx
+#: src/session/components/outer-header/overflow/export-modal.tsx
 msgid "Notes"
 msgstr "Notes"
 
@@ -2445,6 +2454,10 @@ msgstr "This account already syncs on 5 devices. Remove another device to sync h
 #: src/main/sync-status.tsx
 msgid "This device's sync identity does not match your account. Sign in again or check Sync settings."
 msgstr "This device's sync identity does not match your account. Sign in again or check Sync settings."
+
+#: src/session/components/outer-header/overflow/export-modal.tsx
+msgid "This note"
+msgstr "This note"
 
 #. placeholder {0}: status.fileCount
 #. placeholder {1}: formatBytes(status.totalBytes)

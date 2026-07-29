@@ -13,45 +13,20 @@ import {
   buildExportName,
   type RecordingForExport,
 } from "~/session/recordings/export-name";
-
-type RecordingRow = {
-  id: string;
-  title: string;
-  created_at: string;
-  started_at: string | null;
-  timezone: string | null;
-};
+import { loadExportableRecordings } from "~/session/recordings/queries";
 
 function useRecordings() {
-  const { data: sessions = [] } = useLiveQuery<RecordingRow, RecordingRow[]>({
-    sql: `
-      SELECT id, title, created_at, started_at, timezone
-      FROM sessions
-      WHERE deleted_at IS NULL
-      ORDER BY COALESCE(started_at, created_at) DESC, id
-    `,
+  // Re-runs when sessions change so a new recording appears without a reopen.
+  const { data: sessions = [] } = useLiveQuery<
+    { id: string },
+    { id: string }[]
+  >({
+    sql: `SELECT id FROM sessions WHERE deleted_at IS NULL`,
   });
 
-  // Audio existence is only knowable from disk: a legacy-vault import has the
-  // file with no attachment row, so the database cannot answer this.
   return useQuery({
-    enabled: sessions.length > 0,
-    queryKey: ["recordings-with-audio", sessions.map((s) => s.id).join(",")],
-    queryFn: async () => {
-      const withAudio: RecordingForExport[] = [];
-      for (const session of sessions) {
-        const exists = await fsSyncCommands.audioExist(session.id);
-        if (exists.status === "ok" && exists.data) {
-          withAudio.push({
-            sessionId: session.id,
-            title: session.title,
-            startedAt: session.started_at ?? session.created_at,
-            timezone: session.timezone,
-          });
-        }
-      }
-      return withAudio;
-    },
+    queryKey: ["exportable-recordings", sessions.length],
+    queryFn: loadExportableRecordings,
   });
 }
 

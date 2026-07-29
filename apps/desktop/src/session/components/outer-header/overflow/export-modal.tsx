@@ -11,6 +11,7 @@ import {
   type ExportMetadata,
   type TranscriptItem,
 } from "@meeki/plugin-export";
+import { commands as fsSyncCommands } from "@meeki/plugin-fs-sync";
 import { commands as fs2Commands } from "@meeki/plugin-fs2";
 import { commands as openerCommands } from "@meeki/plugin-opener2";
 import { cn } from "@meeki/utils";
@@ -23,11 +24,14 @@ import {
   useSession,
   useSessionParticipants,
 } from "~/session/queries";
+import { buildExportName } from "~/session/recordings/export-name";
+import { loadExportableRecordings } from "~/session/recordings/queries";
 import { getSessionEvent } from "~/session/utils";
 import type { EditorView } from "~/store/zustand/tabs/schema";
 import { useSessionTranscripts } from "~/stt/queries";
 
-type FileFormat = "pdf" | "txt" | "md" | "org";
+type FileFormat = "pdf" | "txt" | "md" | "org" | "audio";
+type ExportScope = "current" | "all";
 
 function markdownToText(content: string): string {
   return content
@@ -69,6 +73,7 @@ export function ExportModal({
 }) {
   const { t } = useLingui();
   const [format, setFormat] = useState<FileFormat>("pdf");
+  const [scope, setScope] = useState<ExportScope>("current");
   const [includeMemo, setIncludeMemo] = useState(false);
   const [includeSummary, setIncludeSummary] = useState(true);
   const [includeTranscript, setIncludeTranscript] = useState(false);
@@ -339,15 +344,57 @@ export function ExportModal({
     };
   };
 
+  const isAudio = format === "audio";
+
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
       const downloadsPath = await downloadDir();
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+
+      // Many files need somewhere of their own; dropping a whole library
+      // loose into Downloads is worse than not offering it.
+      const destDir =
+        scope === "all"
+          ? await join(downloadsPath, `Meeki export ${timestamp}`)
+          : downloadsPath;
+
+      if (isAudio) {
+        const targets =
+          scope === "all"
+            ? await loadExportableRecordings()
+            : [
+                {
+                  sessionId,
+                  title: sessionTitle ?? "",
+                  startedAt: sessionCreatedAt ?? new Date().toISOString(),
+                  timezone: null,
+                },
+              ];
+
+        let firstPath: string | null = null;
+        for (const target of targets) {
+          const result = await fsSyncCommands.audioExport(
+            target.sessionId,
+            destDir,
+            buildExportName(target),
+          );
+          // A note with no recording is normal, not a failure worth aborting on.
+          if (result.status === "ok") {
+            firstPath ??= result.data;
+          }
+        }
+
+        if (!firstPath) {
+          throw new Error("no_audio_to_export");
+        }
+        return scope === "all" ? destDir : firstPath;
+      }
+
       const sanitizedTitle = (
         (sessionTitle ?? t`Untitled`).trim() || t`Untitled`
       ).replace(/[<>:"/\\|?*]/g, "_");
-      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
       const filename = `${sanitizedTitle}_${timestamp}.${format}`;
-      const path = await join(downloadsPath, filename);
+      const path = await join(destDir, filename);
 
       if (format === "pdf") {
         const exportContent = buildPdfContent();
@@ -386,7 +433,7 @@ export function ExportModal({
   });
 
   const hasAnyContentSelected =
-    includeMemo || includeSummary || includeTranscript;
+    isAudio || includeMemo || includeSummary || includeTranscript;
   const isTranscriptPending = includeTranscript && isTranscriptLoading;
   if (!open) {
     return null;
@@ -413,17 +460,45 @@ export function ExportModal({
               <Trans>Export</Trans>
             </h2>
             <p className="text-muted-foreground text-sm">
-              <Trans>Choose a file format and what to include.</Trans>
+              <Trans>Choose what to export and in which format.</Trans>
             </p>
           </div>
 
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
               <span className="text-sm font-medium">
+                <Trans>Notes</Trans>
+              </span>
+              <div className="flex justify-center gap-4">
+                {(
+                  [
+                    ["current", <Trans>This note</Trans>],
+                    ["all", <Trans>All notes</Trans>],
+                  ] as const
+                ).map(([value, label]) => (
+                  <label
+                    key={value}
+                    className="flex cursor-pointer items-center gap-1.5 text-sm"
+                  >
+                    <input
+                      type="radio"
+                      name="export-scope"
+                      checked={scope === value}
+                      onChange={() => setScope(value)}
+                      className="accent-primary"
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-medium">
                 <Trans>File format</Trans>
               </span>
               <div className="flex justify-center gap-4">
-                {(["pdf", "txt", "md", "org"] as const).map((f) => (
+                {(["pdf", "txt", "md", "org", "audio"] as const).map((f) => (
                   <label
                     key={f}
                     className="flex cursor-pointer items-center gap-1.5 text-sm"
@@ -439,13 +514,20 @@ export function ExportModal({
                       ? "Markdown"
                       : f === "org"
                         ? "Org"
-                        : f.toUpperCase()}
+                        : f === "audio"
+                          ? "MP3"
+                          : f.toUpperCase()}
                   </label>
                 ))}
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div
+              className={cn([
+                "flex flex-col gap-2",
+                isAudio && "pointer-events-none opacity-40",
+              ])}
+            >
               <span className="text-sm font-medium">
                 <Trans>Include</Trans>
               </span>

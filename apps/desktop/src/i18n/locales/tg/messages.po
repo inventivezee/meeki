@@ -157,6 +157,10 @@ msgstr ""
 msgid "AI-generated summary of all interactions and notes with this contact will appear here. This will synthesize key discussion points, action items, and relationship context across all meetings and notes."
 msgstr ""
 
+#: src/session/components/outer-header/overflow/export-modal.tsx
+msgid "All notes"
+msgstr ""
+
 #: src/shared/open-note-dialog.tsx
 msgid "All Notes"
 msgstr ""
@@ -329,8 +333,8 @@ msgid "Checking trial eligibility..."
 msgstr ""
 
 #: src/session/components/outer-header/overflow/export-modal.tsx
-msgid "Choose a file format and what to include."
-msgstr ""
+#~ msgid "Choose a file format and what to include."
+#~ msgstr ""
 
 #: src/settings/recordings/index.tsx
 msgid "Choose a folder for your recordings"
@@ -358,6 +362,10 @@ msgstr ""
 
 #: src/templates/template-icon-picker.tsx
 msgid "Choose template icon"
+msgstr ""
+
+#: src/session/components/outer-header/overflow/export-modal.tsx
+msgid "Choose what to export and in which format."
 msgstr ""
 
 #: src/session-sharing/index.tsx
@@ -1495,6 +1503,7 @@ msgid "Note breadcrumb"
 msgstr ""
 
 #: src/contacts/details.tsx
+#: src/session/components/outer-header/overflow/export-modal.tsx
 msgid "Notes"
 msgstr ""
 
@@ -2444,6 +2453,10 @@ msgstr ""
 
 #: src/main/sync-status.tsx
 msgid "This device's sync identity does not match your account. Sign in again or check Sync settings."
+msgstr ""
+
+#: src/session/components/outer-header/overflow/export-modal.tsx
+msgid "This note"
 msgstr ""
 
 #. placeholder {0}: status.fileCount

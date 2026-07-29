@@ -98,6 +98,25 @@ export function useSessionTranscripts(sessionId: string): TranscriptRecord[] {
   return sessionId ? data : EMPTY_TRANSCRIPTS;
 }
 
+/** Imperative twin of useSessionTranscripts, for exporting many notes at once. */
+export async function loadSessionTranscripts(
+  sessionId: string,
+): Promise<TranscriptRecord[]> {
+  if (!sessionId) {
+    return [];
+  }
+  const rows = await liveQueryClient.execute<TranscriptSqlRow>(
+    `
+      SELECT ${TRANSCRIPT_COLUMNS}
+      FROM transcripts
+      WHERE session_id = ? AND deleted_at IS NULL
+      ORDER BY started_at_ms, created_at, id
+    `,
+    [sessionId],
+  );
+  return rows.map(mapTranscriptRow);
+}
+
 export function useTranscript(transcriptId: string): TranscriptRecord | null {
   const { data = null } = useLiveQuery<
     TranscriptSqlRow,
