@@ -8,6 +8,7 @@ import {
   CalendarIcon,
   CogIcon,
   LockIcon,
+  MicIcon,
   SparklesIcon,
   type LucideIcon,
   UsersIcon,
@@ -100,6 +101,7 @@ export function SettingsNav() {
       label: "AI",
       items: [
         { id: "transcription", label: t`Transcription`, icon: AudioLinesIcon },
+        { id: "recordings", label: t`Recordings`, icon: MicIcon },
         { id: "intelligence", label: t`Intelligence`, icon: SparklesIcon },
         // Dictionary is hidden: the terms are stored and handed to Rust, then
         // dropped before they reach Soniqo, so it changes nothing for any

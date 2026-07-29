@@ -12,6 +12,7 @@ import { LLM } from "~/settings/ai/llm";
 import { STT } from "~/settings/ai/stt";
 import { SettingsDictionary } from "~/settings/dictionary";
 import { SettingsHydrationBoundary } from "~/settings/hydration-boundary";
+import { SettingsRecordings } from "~/settings/recordings";
 import { SettingsSync } from "~/settings/sync";
 import { StandardContentWrapper } from "~/shared/main";
 import { type Tab } from "~/store/zustand/tabs";
@@ -53,6 +54,8 @@ function SettingsView({ tab }: { tab: Extract<Tab, { type: "settings" }> }) {
         return <SettingsPermissions />;
       case "dictionary":
         return <SettingsDictionary />;
+      case "recordings":
+        return <SettingsRecordings />;
       case "transcription":
         return <STT />;
       case "intelligence":

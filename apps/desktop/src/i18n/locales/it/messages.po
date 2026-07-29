@@ -332,6 +332,10 @@ msgstr ""
 msgid "Choose a file format and what to include."
 msgstr ""
 
+#: src/settings/recordings/index.tsx
+msgid "Choose a folder for your recordings"
+msgstr ""
+
 #: src/onboarding/index.tsx
 msgid "Choose between on-device models and the cloud"
 msgstr ""
@@ -816,7 +820,24 @@ msgstr ""
 msgid "Export"
 msgstr ""
 
+#: src/settings/recordings/index.tsx
+msgid "Export all"
+msgstr ""
+
+#. placeholder {0}: exportAll.data.exported
+#. placeholder {1}: exportAll.data.destDir
+#: src/settings/recordings/index.tsx
+msgid "Exported {0} recordings to {1}"
+msgstr ""
+
+#. placeholder {0}: exportAll.data.exported
+#. placeholder {1}: exportAll.data.failed.length
+#: src/settings/recordings/index.tsx
+msgid "Exported {0}, and could not read {1}."
+msgstr ""
+
 #: src/session/components/outer-header/overflow/export-modal.tsx
+#: src/settings/recordings/index.tsx
 msgid "Exporting..."
 msgstr ""
 
@@ -1143,6 +1164,10 @@ msgstr ""
 msgid "Login"
 msgstr ""
 
+#: src/settings/recordings/index.tsx
+msgid "Looking for recordings..."
+msgstr ""
+
 #: src/settings/ai/shared/index.tsx
 msgid "macOS cannot access your login Keychain. Repairing briefly locks it and asks for your Mac password before Meeki retries this API key."
 msgstr ""
@@ -1201,6 +1226,10 @@ msgstr ""
 
 #: src/main/sync-status.tsx
 msgid "Meeki is repairing cloud sync in the background. Your notes remain available locally."
+msgstr ""
+
+#: src/settings/recordings/index.tsx
+msgid "Meeki keeps each recording beside its note. Export copies them into one folder, named by date and note title, leaving the originals untouched."
 msgstr ""
 
 #: src/onboarding/index.tsx
@@ -1444,6 +1473,10 @@ msgstr ""
 msgid "No recent chats"
 msgstr ""
 
+#: src/settings/recordings/index.tsx
+msgid "No recordings yet."
+msgstr ""
+
 #: src/contacts/details.tsx
 msgid "No related notes found"
 msgstr ""
@@ -1674,6 +1707,11 @@ msgstr ""
 
 #: src/session/components/outer-header/index.tsx
 msgid "Record"
+msgstr ""
+
+#: src/settings/recordings/index.tsx
+#: src/sidebar/settings.tsx
+msgid "Recordings"
 msgstr ""
 
 #: src/settings/general/account.tsx

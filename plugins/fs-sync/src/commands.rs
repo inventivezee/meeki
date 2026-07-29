@@ -395,6 +395,80 @@ pub(crate) async fn audio_path<R: tauri::Runtime>(
         .ok_or_else(|| "audio_path_not_found".to_string())
 }
 
+/// Copies a session's audio out to a folder the user picked, under a readable
+/// name. Deliberately a copy, not a rename: the on-disk name is load-bearing in
+/// four places — the two resolver lists, CloudSync's attachment path allowlist,
+/// and the session_attachments rows that allowlist validates — so renaming in
+/// place would break sharing and sync for audio nobody can re-record.
+#[tauri::command]
+#[specta::specta]
+pub(crate) async fn audio_export<R: tauri::Runtime>(
+    app: tauri::AppHandle<R>,
+    session_id: String,
+    dest_dir: String,
+    file_stem: String,
+) -> Result<String, String> {
+    let session_dir = resolve_session_dir(&app, &session_id)?;
+    let source =
+        crate::audio::path(&session_dir).ok_or_else(|| "audio_path_not_found".to_string())?;
+
+    let extension = source
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .unwrap_or("mp3")
+        .to_string();
+
+    spawn_blocking!({
+        let dest_dir = PathBuf::from(dest_dir);
+        std::fs::create_dir_all(&dest_dir).map_err(|e| e.to_string())?;
+
+        let stem = sanitize_file_stem(&file_stem);
+        let mut target = dest_dir.join(format!("{stem}.{extension}"));
+        // Two meetings can start in the same minute, and a stem is only as
+        // unique as the title and timestamp that built it.
+        let mut suffix = 2;
+        while target.exists() {
+            target = dest_dir.join(format!("{stem} ({suffix}).{extension}"));
+            suffix += 1;
+        }
+
+        std::fs::copy(&source, &target).map_err(|e| e.to_string())?;
+        Ok(target.to_string_lossy().to_string())
+    })
+}
+
+/// Keeps a note title usable as a filename without silently producing an empty
+/// one. HFS+ and APFS cap a component at 255 bytes; titles are truncated well
+/// under that to leave room for the collision suffix and extension.
+fn sanitize_file_stem(stem: &str) -> String {
+    const MAX_STEM_BYTES: usize = 180;
+
+    let cleaned: String = stem
+        .chars()
+        .map(|c| match c {
+            '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|' => '-',
+            c if c.is_control() => ' ',
+            c => c,
+        })
+        .collect();
+
+    let trimmed = cleaned.trim().trim_matches('.').trim();
+    let mut out = String::new();
+    for c in trimmed.chars() {
+        if out.len() + c.len_utf8() > MAX_STEM_BYTES {
+            break;
+        }
+        out.push(c);
+    }
+
+    let out = out.trim_end().to_string();
+    if out.is_empty() {
+        "recording".to_string()
+    } else {
+        out
+    }
+}
+
 #[tauri::command]
 #[specta::specta]
 pub(crate) async fn session_dir<R: tauri::Runtime>(

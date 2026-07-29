@@ -332,6 +332,10 @@ msgstr "Checking trial eligibility..."
 msgid "Choose a file format and what to include."
 msgstr "Choose a file format and what to include."
 
+#: src/settings/recordings/index.tsx
+msgid "Choose a folder for your recordings"
+msgstr "Choose a folder for your recordings"
+
 #: src/onboarding/index.tsx
 msgid "Choose between on-device models and the cloud"
 msgstr "Choose between on-device models and the cloud"
@@ -816,7 +820,24 @@ msgstr "Exclude apps from detection"
 msgid "Export"
 msgstr "Export"
 
+#: src/settings/recordings/index.tsx
+msgid "Export all"
+msgstr "Export all"
+
+#. placeholder {0}: exportAll.data.exported
+#. placeholder {1}: exportAll.data.destDir
+#: src/settings/recordings/index.tsx
+msgid "Exported {0} recordings to {1}"
+msgstr "Exported {0} recordings to {1}"
+
+#. placeholder {0}: exportAll.data.exported
+#. placeholder {1}: exportAll.data.failed.length
+#: src/settings/recordings/index.tsx
+msgid "Exported {0}, and could not read {1}."
+msgstr "Exported {0}, and could not read {1}."
+
 #: src/session/components/outer-header/overflow/export-modal.tsx
+#: src/settings/recordings/index.tsx
 msgid "Exporting..."
 msgstr "Exporting..."
 
@@ -1143,6 +1164,10 @@ msgstr "Loading..."
 msgid "Login"
 msgstr "Login"
 
+#: src/settings/recordings/index.tsx
+msgid "Looking for recordings..."
+msgstr "Looking for recordings..."
+
 #: src/settings/ai/shared/index.tsx
 msgid "macOS cannot access your login Keychain. Repairing briefly locks it and asks for your Mac password before Meeki retries this API key."
 msgstr "macOS cannot access your login Keychain. Repairing briefly locks it and asks for your Mac password before Meeki retries this API key."
@@ -1202,6 +1227,10 @@ msgstr "Meeki couldn't sign you out. Try again."
 #: src/main/sync-status.tsx
 msgid "Meeki is repairing cloud sync in the background. Your notes remain available locally."
 msgstr "Meeki is repairing cloud sync in the background. Your notes remain available locally."
+
+#: src/settings/recordings/index.tsx
+msgid "Meeki keeps each recording beside its note. Export copies them into one folder, named by date and note title, leaving the originals untouched."
+msgstr "Meeki keeps each recording beside its note. Export copies them into one folder, named by date and note title, leaving the originals untouched."
 
 #: src/onboarding/index.tsx
 msgid "Meeki needs access to your microphone and system audio to record and transcribe your meetings"
@@ -1444,6 +1473,10 @@ msgstr "No people in this organization"
 msgid "No recent chats"
 msgstr "No recent chats"
 
+#: src/settings/recordings/index.tsx
+msgid "No recordings yet."
+msgstr "No recordings yet."
+
 #: src/contacts/details.tsx
 msgid "No related notes found"
 msgstr "No related notes found"
@@ -1675,6 +1708,11 @@ msgstr "Reconnect required"
 #: src/session/components/outer-header/index.tsx
 msgid "Record"
 msgstr "Record"
+
+#: src/settings/recordings/index.tsx
+#: src/sidebar/settings.tsx
+msgid "Recordings"
+msgstr "Recordings"
 
 #: src/settings/general/account.tsx
 msgid "Refresh billing status"
