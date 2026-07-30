@@ -39,7 +39,7 @@ Tagline framing in README: *“Granola, rearranged.”*
 
 ### 1.4 Name / branding history
 
-Hyprnote → brief “char” naming → split: **[char](https://char.com)** is the team’s current commercial productivity app; **this repo** remains the OSS meeting notetaker (meeki). Docs: https://docs.meeki.org
+Hyprnote → brief “char” naming → split: **[char](https://char.com)** is the team’s current commercial productivity app; **this repo** remains the OSS meeting notetaker (meeki). Docs: https://docs.meeki.ai
 
 ---
 
@@ -183,7 +183,7 @@ packages/      # Shared TS (@meeki/db, editor, ui, supabase, pricing, …)
 plugins/       # Tauri plugins (Rust + JS bindings)
 crates/        # Rust domain (db-app, audio, STT, sync, API modules, …)
 supabase/      # Cloud Postgres migrations + RLS tests
-docs/          # User docs (Mintlify → docs.meeki.org)
+docs/          # User docs (Mintlify → docs.meeki.ai)
 legacy/        # Importers / legacy parsers
 ```
 
@@ -828,12 +828,12 @@ Meeki fork P0 posture (2026-07-25):
 - Stable auto-updater **disabled** (no `desktop2.hyprnote.com`)
 - Whisper / common GGUF models download from Hugging Face (not hyprnote S3)
 - Argmax/AM packs and HyprLLM downloads disabled unless `MEEKI_AM_*_URL` / `MEEKI_HYPR_LLM_URL` set
-- Resource suggestions do not call `meeki.org` unless `VITE_RESOURCE_SUGGESTIONS_URL` is set
+- Resource suggestions do not call `meeki.ai` unless `VITE_RESOURCE_SUGGESTIONS_URL` is set
 - Web prod `VITE_API_URL` has no upstream default (`api.char.com` removed)
 - Desktop upstream links removed (2026-07-26): changelog no longer fetches from
   `raw.githubusercontent.com/fastrepl/char` (this phoned home on every changelog view),
   onboarding Discord/GitHub/X buttons, tray "Report Bug" / "Suggest Feature" (which opened
-  `meeki.org/discord`), `docs.meeki.org` links in LM Studio / Ollama / CLI / MCP / calendar,
+  `meeki.ai/discord`), `docs.meeki.ai` links in LM Studio / Ollama / CLI / MCP / calendar,
   and `fastrepl/char` issue links. Publisher is now `Meeki`.
 - Local LLM weights come from Hugging Face (`unsloth/*`); the runtime comes from the
   `ggml-org/llama.cpp` GitHub release
@@ -853,7 +853,7 @@ Hardening notes for forks: broad Tauri HTTP capability, unscoped `write_text_fil
 
 ## 13. User-facing documentation map
 
-Published at https://docs.meeki.org — sources under `docs/`:
+Published at https://docs.meeki.ai — sources under `docs/`:
 
 | Doc | Topic |
 |-----|-------|
@@ -895,7 +895,7 @@ Use these as “current product still works” checks when editing:
 14. **Signed bundle** — a fresh `tauri:build:app` produces a bundle whose `codesign -dv` reports
     the real bundle id with `Info.plist` bound and the audio-input entitlement present.
 15. **No upstream phone-home** — opening the changelog, onboarding, or tray menus issues no
-    requests to `meeki.org`, `hyprnote.com`, or `fastrepl/*`.
+    requests to `meeki.ai`, `hyprnote.com`, or `fastrepl/*`.
 
 ---
 

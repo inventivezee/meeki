@@ -99,7 +99,7 @@ describe("Metadata controls", () => {
           startedAt: "2026-07-25T19:38:00.000Z",
           endedAt: undefined,
           location: undefined,
-          meetingLink: "https://meeki.org/onboarding-demo/",
+          meetingLink: "https://meeki.ai/onboarding-demo/",
           description: "A private, prerecorded introduction to Meeki.",
           calendarId: undefined,
         }}
@@ -107,7 +107,7 @@ describe("Metadata controls", () => {
     );
 
     expect(screen.queryByRole("button", { name: "Join" })).toBeNull();
-    expect(screen.queryByText("meeki.org")).toBeNull();
+    expect(screen.queryByText("meeki.ai")).toBeNull();
   });
 
   it("keeps Join for real meeting links", () => {

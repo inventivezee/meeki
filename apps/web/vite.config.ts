@@ -14,7 +14,7 @@ const config = defineConfig(() => ({
     tailwindcss(),
     tanstackStart({
       sitemap: {
-        host: "https://meeki.org",
+        host: "https://meeki.ai",
       },
       prerender: {
         enabled: true,

@@ -236,7 +236,7 @@
     }
   },
   "externalDocs": {
-    "url": "https://docs.meeki.org/",
+    "url": "https://docs.meeki.ai/",
     "description": "More information about Char webhooks"
   }
 }

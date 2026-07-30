@@ -10,7 +10,7 @@
   "favicon": "/favicon.svg",
   "seo": {
     "metatags": {
-      "canonical": "https://docs.meeki.org"
+      "canonical": "https://docs.meeki.ai"
     }
   },
   "navigation": {
@@ -66,7 +66,7 @@
       "anchors": [
         {
           "anchor": "Meeki",
-          "href": "https://meeki.org",
+          "href": "https://meeki.ai",
           "icon": "house"
         },
         {
@@ -85,13 +85,13 @@
     "links": [
       {
         "label": "Support",
-        "href": "mailto:hello@meeki.org"
+        "href": "mailto:hello@meeki.ai"
       }
     ],
     "primary": {
       "type": "button",
       "label": "Download Meeki",
-      "href": "https://meeki.org/download"
+      "href": "https://meeki.ai/download"
     }
   },
   "contextual": {

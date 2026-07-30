@@ -357,7 +357,7 @@ describe("session share management client", () => {
 
     await expect(
       sendSessionAccessInvitationEmail({
-        apiBaseUrl: "https://api.meeki.org",
+        apiBaseUrl: "https://api.meeki.ai",
         session: session(),
         shareId,
         invitationId,
@@ -369,7 +369,7 @@ describe("session share management client", () => {
 
     const [url, init] = fetcher.mock.calls[0];
     expect(url.toString()).toBe(
-      `https://api.meeki.org/shared-notes/invitations/${invitationId}/email`,
+      `https://api.meeki.ai/shared-notes/invitations/${invitationId}/email`,
     );
     expect(init.method).toBe("POST");
     expect(init.headers.Authorization).toBe(

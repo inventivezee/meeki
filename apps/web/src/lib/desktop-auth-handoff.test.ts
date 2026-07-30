@@ -66,7 +66,7 @@ test("attempts the external protocol through an anchor navigation", () => {
 
 test("attempts automatic opening once under StrictMode", async () => {
   const dom = new JSDOM('<div id="root"></div>', {
-    url: "https://meeki.org",
+    url: "https://meeki.ai",
   });
   const previousWindow = globalThis.window;
   const previousDocument = globalThis.document;

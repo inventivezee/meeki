@@ -9,7 +9,7 @@ import {
 test("restores desktop recovery context from the encoded Supabase redirect", () => {
   const context = resolveAuthFlowContext({
     redirectTo:
-      "https://meeki.org/callback/auth?flow=desktop&scheme=meeki-staging&redirect=%2Fshare%2Finvite%2Fabc%2F",
+      "https://meeki.ai/callback/auth?flow=desktop&scheme=meeki-staging&redirect=%2Fshare%2Finvite%2Fabc%2F",
   });
 
   assert.deepEqual(context, {
@@ -23,8 +23,7 @@ test("restores desktop recovery context from the encoded Supabase redirect", () 
 test("keeps legacy desktop schemes valid during migration", () => {
   assert.deepEqual(
     resolveAuthFlowContext({
-      redirectTo:
-        "https://meeki.org/callback/auth?flow=desktop&scheme=hyprnote",
+      redirectTo: "https://meeki.ai/callback/auth?flow=desktop&scheme=hyprnote",
     }),
     { flow: "desktop", scheme: "hyprnote" },
   );
@@ -59,7 +58,7 @@ test("explicit route context takes precedence over template redirect context", (
     resolveAuthFlowContext({
       flow: "web",
       redirect: "/app/account/",
-      redirectTo: "https://meeki.org/callback/auth?flow=desktop&scheme=char",
+      redirectTo: "https://meeki.ai/callback/auth?flow=desktop&scheme=char",
     }),
     { flow: "web", scheme: "char", redirect: "/app/account/" },
   );

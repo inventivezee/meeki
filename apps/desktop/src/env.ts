@@ -26,7 +26,7 @@ export const env = createEnv({
     VITE_SENTRY_DSN: z.string().min(1).optional(),
     VITE_POSTHOG_API_KEY: z.string().min(1).optional(),
     VITE_POSTHOG_HOST: z.string().min(1).default("https://us.i.posthog.com"),
-    // Optional base for template/resource suggestions (no default — avoids meeki.org).
+    // Optional base for template/resource suggestions (no default — avoids meeki.ai).
     VITE_RESOURCE_SUGGESTIONS_URL: z.string().url().optional(),
     VITE_APP_VERSION: z.string().min(1).optional(),
   },

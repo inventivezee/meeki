@@ -76,7 +76,7 @@ export function SettingsNav() {
       items: [
         { id: "app", label: t`App`, icon: CogIcon },
         // Account and Sync are hidden, not deleted. The Supabase client is
-        // null without credentials and meeki.org does not resolve, so both
+        // null without credentials and meeki.ai does not resolve, so both
         // pages could only open dead URLs. Restore these two entries once the
         // API is deployed.
         { id: "notifications", label: t`Notifications`, icon: BellIcon },

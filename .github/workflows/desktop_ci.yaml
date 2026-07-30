@@ -172,8 +172,8 @@ jobs:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN_HYPRNOTE_2 }}
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-          VITE_APP_URL: https://meeki.org
-          VITE_API_URL: https://api.meeki.org
+          VITE_APP_URL: https://meeki.ai
+          VITE_API_URL: https://api.meeki.ai
           VITE_PRO_PRODUCT_ID: ${{ secrets.VITE_PRO_PRODUCT_ID }}
       - if: github.event_name == 'workflow_dispatch'
         shell: pwsh

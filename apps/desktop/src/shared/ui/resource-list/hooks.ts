@@ -4,7 +4,7 @@ import { env } from "~/env";
 
 /**
  * Optional remote suggestions. Disabled unless VITE_RESOURCE_SUGGESTIONS_URL is set
- * so Meeki does not phone home to meeki.org by default.
+ * so Meeki does not phone home to meeki.ai by default.
  */
 export function useWebResources<T>(endpoint: string) {
   const baseUrl = env.VITE_RESOURCE_SUGGESTIONS_URL?.replace(/\/$/, "");

@@ -35,7 +35,7 @@ export function getSitemap(): Sitemap<TRoutes> {
   const changelogVersions = getChangelogVersions();
 
   return {
-    siteUrl: "https://meeki.org",
+    siteUrl: "https://meeki.ai",
     defaultPriority: 0.5,
     defaultChangeFreq: "monthly",
     routes: {

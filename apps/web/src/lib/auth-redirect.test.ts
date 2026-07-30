@@ -21,7 +21,7 @@ test("accepts only internal paths with one leading slash", () => {
     "share/invite/abc",
     "//attacker.example/share",
     "/\\attacker.example/share",
-    "https://meeki.org/share",
+    "https://meeki.ai/share",
     "javascript:alert(1)",
   ]) {
     assert.equal(sanitizeInternalReturnPath(value), DEFAULT_AUTH_RETURN_PATH);
@@ -33,7 +33,7 @@ test("new web accounts enter the card-required onboarding checkout", () => {
     newAccount: true,
     returnTo: "/share/invite/abc/?scheme=hyprnote",
   });
-  const url = new URL(destination, "https://meeki.org");
+  const url = new URL(destination, "https://meeki.ai");
 
   assert.equal(url.pathname, "/app/checkout");
   assert.equal(url.searchParams.get("period"), "monthly");
@@ -77,16 +77,13 @@ test("checkout results preserve invitation query and hash state", () => {
 test("absolute Stripe return URLs cannot change the app origin", () => {
   assert.equal(
     toAbsoluteInternalReturnUrl(
-      "https://meeki.org",
+      "https://meeki.ai",
       "/share/invite/abc/?scheme=hyprnote",
     ),
-    "https://meeki.org/share/invite/abc/?scheme=hyprnote",
+    "https://meeki.ai/share/invite/abc/?scheme=hyprnote",
   );
   assert.equal(
-    toAbsoluteInternalReturnUrl(
-      "https://meeki.org",
-      "//attacker.example/share",
-    ),
-    "https://meeki.org/app/account/",
+    toAbsoluteInternalReturnUrl("https://meeki.ai", "//attacker.example/share"),
+    "https://meeki.ai/app/account/",
   );
 });

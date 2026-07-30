@@ -409,7 +409,7 @@ async fn send_shared_note_invitation_email(
         .unwrap_or("An Meeki user")
         .to_string();
     let invitation_url = format!(
-        "https://meeki.org/share/invite/{invitation_id}/#token={}",
+        "https://meeki.ai/share/invite/{invitation_id}/#token={}",
         input.invite_token
     );
     let invitation_email = state

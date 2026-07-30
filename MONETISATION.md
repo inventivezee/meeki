@@ -38,12 +38,12 @@ survive from *link click* to *checkout*. It never has to enter the app at all.
 ### Proposed architecture
 
 ```
-meeki.org/r/ZEE10
+meeki.ai/r/ZEE10
    │  set first-party cookie referral=ZEE10, 90 days, HttpOnly
    │  302 → /download   (the same signed, notarized binary as everyone else)
    ▼
 User installs, uses the free tier, hits the limit
-   │  "Upgrade" opens meeki.org/buy in the browser
+   │  "Upgrade" opens meeki.ai/buy in the browser
    ▼
 /buy reads the cookie server-side
    │  Stripe Checkout Session, metadata: { referral_code: "ZEE10" }
@@ -201,7 +201,7 @@ easier to justify, easier to price, and does not degrade the free product.
 
 ## Recommended sequence
 
-1. **Deploy the API and get DNS working.** `meeki.org` and `api.meeki.org` are
+1. **Deploy the API and get DNS working.** `meeki.ai` and `api.meeki.ai` are
    both NXDOMAIN today. Nothing here — checkout, referrals, entitlements,
    signed time — functions without that. It is the gate on everything else.
 2. **Local soft metering.** Count hours, show usage, prompt at the limit. No

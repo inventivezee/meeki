@@ -1,1 +1,1 @@
-https://docs.meeki.org
+https://docs.meeki.ai

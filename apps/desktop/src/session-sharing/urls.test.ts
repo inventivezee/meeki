@@ -16,7 +16,7 @@ describe("session share URLs", () => {
   it("places bearer link tokens only in the fragment", () => {
     const url = new URL(
       buildSessionShareLinkUrl({
-        appBaseUrl: "https://meeki.org",
+        appBaseUrl: "https://meeki.ai",
         shareId,
         linkToken: token,
       }),
@@ -30,7 +30,7 @@ describe("session share URLs", () => {
   it("places invitation tokens only in the fragment", () => {
     const url = new URL(
       buildSessionInvitationUrl({
-        appBaseUrl: "https://meeki.org",
+        appBaseUrl: "https://meeki.ai",
         invitationId,
         inviteToken: token,
       }),
@@ -44,22 +44,22 @@ describe("session share URLs", () => {
   it("builds token-free account and public URLs", () => {
     expect(
       buildAccountSessionShareUrl({
-        appBaseUrl: "https://meeki.org",
+        appBaseUrl: "https://meeki.ai",
         shareId,
       }),
-    ).toBe(`https://meeki.org/share/${shareId}/`);
+    ).toBe(`https://meeki.ai/share/${shareId}/`);
     expect(
       buildPublicSessionShareUrl({
-        appBaseUrl: "https://meeki.org",
+        appBaseUrl: "https://meeki.ai",
         publicSlug,
       }),
-    ).toBe(`https://meeki.org/share/public/${publicSlug}/`);
+    ).toBe(`https://meeki.ai/share/public/${publicSlug}/`);
   });
 
   it("targets non-stable builds without changing stable canonical URLs", () => {
     const linkUrl = new URL(
       buildSessionShareLinkUrl({
-        appBaseUrl: "https://meeki.org",
+        appBaseUrl: "https://meeki.ai",
         shareId,
         linkToken: token,
         desktopScheme: "meeki-staging",
@@ -70,7 +70,7 @@ describe("session share URLs", () => {
 
     const publicUrl = new URL(
       buildPublicSessionShareUrl({
-        appBaseUrl: "https://meeki.org",
+        appBaseUrl: "https://meeki.ai",
         publicSlug,
         desktopScheme: "meeki-dev",
       }),
@@ -79,7 +79,7 @@ describe("session share URLs", () => {
 
     const stableUrl = new URL(
       buildAccountSessionShareUrl({
-        appBaseUrl: "https://meeki.org",
+        appBaseUrl: "https://meeki.ai",
         shareId,
         desktopScheme: "meeki",
       }),
@@ -97,14 +97,14 @@ describe("session share URLs", () => {
     ).toThrow("Share URL is unavailable");
     expect(() =>
       buildSessionShareLinkUrl({
-        appBaseUrl: "https://meeki.org?token=old",
+        appBaseUrl: "https://meeki.ai?token=old",
         shareId,
         linkToken: token,
       }),
     ).toThrow("Share URL is unavailable");
     expect(() =>
       buildSessionShareLinkUrl({
-        appBaseUrl: "https://meeki.org",
+        appBaseUrl: "https://meeki.ai",
         shareId,
         linkToken: "bad?token",
       }),

@@ -27,7 +27,7 @@ mod tests {
         assert!(AGENTS_CONTENT.contains("--db-path ABSOLUTE_APP_DB"));
         assert!(AGENTS_CONTENT.contains("Do not use `find`,"));
         assert!(AGENTS_CONTENT.contains("direct SQLite queries"));
-        assert!(AGENTS_CONTENT.contains("https://docs.meeki.org"));
-        assert!(AGENTS_CONTENT.contains("https://docs.meeki.org/skill.md"));
+        assert!(AGENTS_CONTENT.contains("https://docs.meeki.ai"));
+        assert!(AGENTS_CONTENT.contains("https://docs.meeki.ai/skill.md"));
     }
 }

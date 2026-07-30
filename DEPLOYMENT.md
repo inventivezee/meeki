@@ -1,6 +1,6 @@
 # Meeki deployment runbook
 
-What to set up, in what order, to bring `meeki.org` online. Nothing here blocks
+What to set up, in what order, to bring `meeki.ai` online. Nothing here blocks
 local development or the desktop app: the current build points `VITE_API_URL`
 and `VITE_APP_URL` at localhost, cloud features are opt-in, and the app is
 local-first by design. Until these steps are done, sign-in/Pro, hosted share
@@ -12,40 +12,40 @@ links, CloudSync, and the docs links in the UI are simply dead.
   export, CLI/MCP — everything local.
 - Model downloads (Hugging Face directly).
 - What does NOT work: sign-in (needs Supabase), Pro entitlements (Stripe),
-  share links and CloudSync (needs the API), `docs.meeki.org` help links (404
+  share links and CloudSync (needs the API), `docs.meeki.ai` help links (404
   until docs are deployed), auto-updates (endpoint deliberately empty).
 
-## 1. DNS (registrar for meeki.org)
+## 1. DNS (registrar for meeki.ai)
 
 | Record | Host | Points to | For |
 |--------|------|-----------|-----|
-| A/ALIAS | `meeki.org` | Netlify load balancer | web app |
+| A/ALIAS | `meeki.ai` | Netlify load balancer | web app |
 | CNAME | `www` | Netlify site | redirect to apex |
 | CNAME | `docs` | Mintlify (`cname.mintlify.app` — confirm in dashboard) | docs |
 | CNAME | `api` | Fly.io app hostname | API |
 
 Add each only when the service below is live; a dangling CNAME helps nobody.
 
-## 2. meeki.org — web app (Netlify)
+## 2. meeki.ai — web app (Netlify)
 
 Config is already in [netlify.toml](apps/web/netlify.toml); `VITE_APP_URL` is
-already `https://meeki.org`.
+already `https://meeki.ai`.
 
 1. Create a Netlify site from this repo; it picks up `apps/web/netlify.toml`.
-2. Set the custom domain `meeki.org` (+ `www` redirect) in Site settings.
+2. Set the custom domain `meeki.ai` (+ `www` redirect) in Site settings.
 3. Fix the leftovers in `netlify.toml`:
    - `remote_images` still allowlists `hyprnote.com`, `char.com`, and
      upstream's Supabase project (`ijoptyyjrfqwaqhyxkxj.supabase.co`). Replace
      with your own Supabase project host once created (step 4).
 
-## 3. docs.meeki.org — docs (Mintlify)
+## 3. docs.meeki.ai — docs (Mintlify)
 
 The `docs/` directory is a Mintlify site; [docs.json](docs/docs.json) already
-declares `"name": "Meeki"` and canonical `https://docs.meeki.org`.
+declares `"name": "Meeki"` and canonical `https://docs.meeki.ai`.
 
 1. Create a Mintlify project pointed at this repo, docs root `docs/`.
-2. Set the custom domain `docs.meeki.org`; add the CNAME it gives you.
-3. Until then, every `docs.meeki.org/...` link inside the desktop app 404s —
+2. Set the custom domain `docs.meeki.ai`; add the CNAME it gives you.
+3. Until then, every `docs.meeki.ai/...` link inside the desktop app 404s —
    they are plain links, nothing crashes.
 
 ## 4. Supabase — auth + database (prerequisite for the API)
@@ -62,7 +62,7 @@ declares `"name": "Meeki"` and canonical `https://docs.meeki.org`.
    - Admin Pro grants without Stripe: `private.pro_grants` (see PRD §2.2) or
      client-side `VITE_FORCE_PRO` / `VITE_PRO_GRANT_EMAILS` for testing.
 
-## 5. api.meeki.org — API server (Fly.io)
+## 5. api.meeki.ai — API server (Fly.io)
 
 `apps/api` has a `Dockerfile` and `fly.toml`, **but `fly.toml` still says
 `app = 'hyprnote-ai'` — that is upstream's Fly app name and must be changed**
@@ -72,8 +72,8 @@ before `fly deploy` (e.g. `app = 'meeki-api'`).
 2. Set secrets per `crates/api-env` / PRD §10.2: `SUPABASE_*`, `STRIPE_*`,
    STT/LLM provider keys for the proxies, `SQLITECLOUD_*` if using CloudSync,
    optional `POSTHOG_API_KEY` / `SENTRY_DSN`.
-3. `fly certs add api.meeki.org`, then add the CNAME.
-4. Point the desktop at it: set `VITE_API_URL=https://api.meeki.org` in
+3. `fly certs add api.meeki.ai`, then add the CNAME.
+4. Point the desktop at it: set `VITE_API_URL=https://api.meeki.ai` in
    `apps/desktop/.env.build` and rebuild. (Today it is localhost, so shipped
    builds make no cloud calls at all.)
 
@@ -112,10 +112,10 @@ NEW name; create the external side under that name (do not revert the repo).
 
 - `hyprnote.com/x`, Discord invite links in docs/UI copy — point at your own
   socials or delete.
-- `hello@meeki.org` is now the legal-contact address in privacy/terms — set up
+- `hello@meeki.ai` is now the legal-contact address in privacy/terms — set up
   MX records + a mailbox before publishing those pages.
 - Google & Outlook OAuth (Nango) callback flows go through
-  `meeki.org/oauth/callback` (Netlify edge function) — register that redirect
+  `meeki.ai/oauth/callback` (Netlify edge function) — register that redirect
   URL with each provider when enabling calendar integrations.
 - Deliberately frozen OLD names (do not "fix"): the importer reads
   `com.hyprnote.stable`/`com.hyprnote.nightly` to import Hyprnote v0 data; the

@@ -147,7 +147,7 @@ The stable workflow should:
 - build both Apple Silicon and Intel macOS artifacts
 - draft, upload, and publish the CrabNebula release when `publish=true`
 - create or update `desktop_v<version>`
-- create the GitHub release pointing to `https://meeki.org/changelog/<version>`
+- create the GitHub release pointing to `https://meeki.ai/changelog/<version>`
 
 ## Final Checks
 

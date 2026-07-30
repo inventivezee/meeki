@@ -9,7 +9,7 @@ test("redirects OAuth callbacks to Nango without changing the query string", () 
   const query =
     "code=a%2Fb+c&state=first&scope=Calendars.Read%20offline_access&state=second&empty=";
   const response = oauthCallback(
-    new Request(`https://meeki.org/oauth/callback?${query}`),
+    new Request(`https://meeki.ai/oauth/callback?${query}`),
   );
 
   assert.equal(response.status, 308);

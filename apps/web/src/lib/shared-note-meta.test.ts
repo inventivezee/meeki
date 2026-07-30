@@ -52,7 +52,7 @@ test("available public notes receive canonical indexable metadata", () => {
   assert.deepEqual(head.links, [
     {
       rel: "canonical",
-      href: "https://meeki.org/share/public/s_0123456789abcdef0123456789abcdef/",
+      href: "https://meeki.ai/share/public/s_0123456789abcdef0123456789abcdef/",
     },
   ]);
   assert.ok(
@@ -65,7 +65,7 @@ test("available public notes receive canonical indexable metadata", () => {
       (meta) =>
         meta.property === "og:image" &&
         meta.content ===
-          "https://meeki.org/api/og/share/public/s_0123456789abcdef0123456789abcdef",
+          "https://meeki.ai/api/og/share/public/s_0123456789abcdef0123456789abcdef",
     ),
   );
   assert.ok(

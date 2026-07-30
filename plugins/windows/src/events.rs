@@ -119,7 +119,7 @@ mod test {
     fn navigate_from_str() {
         let test_cases = vec![
             (
-                "meeki://meeki.org/app/new?calendarEventId=123&record=true",
+                "meeki://meeki.ai/app/new?calendarEventId=123&record=true",
                 "/app/new",
                 Some(serde_json::json!({ "calendarEventId": "123", "record": "true" })),
             ),

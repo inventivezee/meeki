@@ -9,10 +9,10 @@ it("treats missing links as absent", () => {
 });
 
 it("strips the legacy hosted onboarding demo meeting", () => {
-  expect(resolveMeetingLink("https://meeki.org/onboarding-demo/")).toBeNull();
+  expect(resolveMeetingLink("https://meeki.ai/onboarding-demo/")).toBeNull();
   expect(
     resolveMeetingLink(
-      "https://meeki.org/onboarding-demo/?completion_url=http://127.0.0.1:1/onboarding-demo/complete",
+      "https://meeki.ai/onboarding-demo/?completion_url=http://127.0.0.1:1/onboarding-demo/complete",
     ),
   ).toBeNull();
 });

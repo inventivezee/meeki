@@ -139,7 +139,7 @@ describe("SettingsNav", () => {
   it("hides the entries that cannot do anything without a backend", () => {
     render(<SettingsNav />);
 
-    // Account and Sync need Supabase and api.meeki.org, neither of which
+    // Account and Sync need Supabase and api.meeki.ai, neither of which
     // exists; Dictionary terms never reach the on-device recogniser.
     for (const label of ["Account", "Sync", "Dictionary"]) {
       expect(screen.queryByText(label)).toBeNull();

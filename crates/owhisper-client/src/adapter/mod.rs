@@ -279,7 +279,7 @@ pub(crate) fn host_matches(base_url: &str, predicate: impl Fn(&str) -> bool) -> 
         .unwrap_or(false)
 }
 
-const HYPRNOTE_PROXY_DOMAINS: &[&str] = &["hyprnote.com", "char.com", "meeki.org"];
+const HYPRNOTE_PROXY_DOMAINS: &[&str] = &["hyprnote.com", "char.com", "meeki.ai"];
 
 fn is_hyprnote_cloud_host(host: &str) -> bool {
     HYPRNOTE_PROXY_DOMAINS.iter().any(|domain| {
@@ -666,8 +666,8 @@ mod tests {
         assert!(is_hyprnote_proxy("https://api.hyprnote.com"));
         assert!(is_hyprnote_proxy("https://api.char.com/stt"));
         assert!(is_hyprnote_proxy("https://api.char.com"));
-        assert!(is_hyprnote_proxy("https://api.meeki.org/stt"));
-        assert!(is_hyprnote_proxy("https://api.meeki.org"));
+        assert!(is_hyprnote_proxy("https://api.meeki.ai/stt"));
+        assert!(is_hyprnote_proxy("https://api.meeki.ai"));
         assert!(is_hyprnote_proxy("http://localhost:3001/stt"));
         assert!(is_hyprnote_proxy("http://127.0.0.1:3001/stt"));
 
@@ -705,7 +705,7 @@ mod tests {
                 AdapterKind::Hyprnote,
             ),
             (
-                "https://api.meeki.org/stt",
+                "https://api.meeki.ai/stt",
                 &[En, Ko],
                 Some("cloud"),
                 AdapterKind::Hyprnote,
@@ -845,9 +845,9 @@ mod tests {
                 )),
             ),
             (
-                "https://api.meeki.org/stt?provider=hyprnote",
+                "https://api.meeki.ai/stt?provider=hyprnote",
                 Some((
-                    "wss://api.meeki.org/stt/listen",
+                    "wss://api.meeki.ai/stt/listen",
                     vec![("provider", "hyprnote")],
                 )),
             ),
@@ -921,7 +921,7 @@ mod tests {
         let proxy_urls = &[
             "https://api.hyprnote.com/stt",
             "https://api.char.com/stt",
-            "https://api.meeki.org/stt",
+            "https://api.meeki.ai/stt",
             "http://localhost:3001/stt",
             "http://127.0.0.1:3001/stt",
         ];

@@ -6,7 +6,7 @@ All content created under this directory must follow the positioning below.
 
 Meeki is the open-source AI meeting notetaker. It runs on your machine, keeps its canonical meeting data in local SQLite, and is MIT-licensed. The app you previously knew as "Char" is now Meeki.
 
-> Note: This blog lives at meeki.org. The brand "Char" still exists, but it's a different product now (an agentic todo notepad — see char.com). All content under this directory is for **Meeki**, the meeting notetaker.
+> Note: This blog lives at meeki.ai. The brand "Char" still exists, but it's a different product now (an agentic todo notepad — see char.com). All content under this directory is for **Meeki**, the meeting notetaker.
 
 ## Core Philosophy
 

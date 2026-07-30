@@ -38,4 +38,4 @@ Disallow: /press-kit
 # AI crawlers can find detailed content at /llms.txt
 
 # Sitemap location
-Sitemap: https://meeki.org/sitemap.xml
+Sitemap: https://meeki.ai/sitemap.xml
