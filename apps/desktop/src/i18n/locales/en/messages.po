@@ -337,8 +337,8 @@ msgstr "Checking trial eligibility..."
 #~ msgstr "Choose a file format and what to include."
 
 #: src/settings/recordings/index.tsx
-msgid "Choose a folder for your recordings"
-msgstr "Choose a folder for your recordings"
+#~ msgid "Choose a folder for your recordings"
+#~ msgstr "Choose a folder for your recordings"
 
 #: src/onboarding/index.tsx
 msgid "Choose between on-device models and the cloud"
@@ -832,20 +832,15 @@ msgstr "Export"
 msgid "Export all"
 msgstr "Export all"
 
-#. placeholder {0}: exportAll.data.exported
-#. placeholder {1}: exportAll.data.destDir
 #: src/settings/recordings/index.tsx
-msgid "Exported {0} recordings to {1}"
-msgstr "Exported {0} recordings to {1}"
+#~ msgid "Exported {0} recordings to {1}"
+#~ msgstr "Exported {0} recordings to {1}"
 
-#. placeholder {0}: exportAll.data.exported
-#. placeholder {1}: exportAll.data.failed.length
 #: src/settings/recordings/index.tsx
-msgid "Exported {0}, and could not read {1}."
-msgstr "Exported {0}, and could not read {1}."
+#~ msgid "Exported {0}, and could not read {1}."
+#~ msgstr "Exported {0}, and could not read {1}."
 
 #: src/session/components/outer-header/overflow/export-modal.tsx
-#: src/settings/recordings/index.tsx
 msgid "Exporting..."
 msgstr "Exporting..."
 
@@ -2491,6 +2486,10 @@ msgstr "Transcription"
 #: src/settings/ai/stt/select.tsx
 msgid "Transcription model is needed to make Meeki listen to your conversations."
 msgstr "Transcription model is needed to make Meeki listen to your conversations."
+
+#: src/session/components/outer-header/overflow/export-modal.tsx
+msgid "Transcripts are only available when exporting a single note."
+msgstr "Transcripts are only available when exporting a single note."
 
 #: src/templates/template-icon-picker.tsx
 msgid "Travel & Places"

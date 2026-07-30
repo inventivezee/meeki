@@ -1,19 +1,16 @@
-import { Trans, useLingui } from "@lingui/react/macro";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { open } from "@tauri-apps/plugin-dialog";
+import { Trans } from "@lingui/react/macro";
+import { useQuery } from "@tanstack/react-query";
 import { FolderOpenIcon, MicIcon } from "lucide-react";
 import { useState } from "react";
 
-import { commands as fsSyncCommands } from "@meeki/plugin-fs-sync";
 import { Button } from "@meeki/ui/components/ui/button";
 import { cn } from "@meeki/utils";
 
 import { useLiveQuery } from "~/db";
-import {
-  buildExportName,
-  type RecordingForExport,
-} from "~/session/recordings/export-name";
+import { ExportModal } from "~/session/components/outer-header/overflow/export-modal";
+import { buildExportName } from "~/session/recordings/export-name";
 import { loadExportableRecordings } from "~/session/recordings/queries";
+import type { EditorView } from "~/store/zustand/tabs/schema";
 
 function useRecordings() {
   // Re-runs when sessions change so a new recording appears without a reopen.
@@ -31,43 +28,8 @@ function useRecordings() {
 }
 
 export function SettingsRecordings() {
-  const { t } = useLingui();
   const recordings = useRecordings();
-  const [lastFolder, setLastFolder] = useState<string | null>(null);
-
-  const exportAll = useMutation({
-    mutationFn: async (items: RecordingForExport[]) => {
-      const destDir = await open({
-        directory: true,
-        multiple: false,
-        title: t`Choose a folder for your recordings`,
-      });
-      if (typeof destDir !== "string") {
-        return null;
-      }
-
-      let exported = 0;
-      const failed: string[] = [];
-      for (const item of items) {
-        const result = await fsSyncCommands.audioExport(
-          item.sessionId,
-          destDir,
-          buildExportName(item),
-        );
-        if (result.status === "ok") {
-          exported += 1;
-        } else {
-          failed.push(item.title || item.sessionId);
-        }
-      }
-      return { destDir, exported, failed };
-    },
-    onSuccess: (result) => {
-      if (result) {
-        setLastFolder(result.destDir);
-      }
-    },
-  });
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
   const items = recordings.data ?? [];
 
@@ -87,38 +49,11 @@ export function SettingsRecordings() {
           </p>
         </div>
 
-        <Button
-          disabled={items.length === 0 || exportAll.isPending}
-          onClick={() => exportAll.mutate(items)}
-        >
+        <Button onClick={() => setIsExportOpen(true)}>
           <FolderOpenIcon className="size-4" />
-          {exportAll.isPending ? (
-            <Trans>Exporting...</Trans>
-          ) : (
-            <Trans>Export all</Trans>
-          )}
+          <Trans>Export all</Trans>
         </Button>
       </div>
-
-      {exportAll.data && (
-        <p className="text-muted-foreground text-sm">
-          {exportAll.data.failed.length === 0 ? (
-            <Trans>
-              Exported {exportAll.data.exported} recordings to{" "}
-              {exportAll.data.destDir}
-            </Trans>
-          ) : (
-            <Trans>
-              Exported {exportAll.data.exported}, and could not read{" "}
-              {exportAll.data.failed.length}.
-            </Trans>
-          )}
-        </p>
-      )}
-
-      {lastFolder && !exportAll.isPending && (
-        <p className="text-muted-foreground text-xs">{lastFolder}</p>
-      )}
 
       <div className="flex flex-col divide-y rounded-lg border">
         {recordings.isLoading && (
@@ -143,6 +78,16 @@ export function SettingsRecordings() {
           </div>
         ))}
       </div>
+
+      {isExportOpen && (
+        <ExportModal
+          sessionId=""
+          currentView={{ type: "raw" } as EditorView}
+          open={isExportOpen}
+          onOpenChange={setIsExportOpen}
+          lockedScope="all"
+        />
+      )}
     </div>
   );
 }

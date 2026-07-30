@@ -20,6 +20,10 @@ import { formatDate, formatDuration } from "./export-utils";
 
 import { useTranscriptExportSegments } from "~/session/components/note-input/transcript/export-data";
 import {
+  loadActiveSessionIds,
+  loadSessionContentSnapshot,
+} from "~/session/content-queries";
+import {
   useEnhancedNote,
   useSession,
   useSessionParticipants,
@@ -32,6 +36,16 @@ import { useSessionTranscripts } from "~/stt/queries";
 
 type FileFormat = "pdf" | "txt" | "md" | "org" | "audio";
 type ExportScope = "current" | "all";
+
+type ExportBundle = {
+  title: string;
+  createdAt?: string | null;
+  participantNames: string[];
+  duration: string | null;
+  memoMd: string;
+  summaryMd: string;
+  transcriptText: string;
+};
 
 function markdownToText(content: string): string {
   return content
@@ -65,15 +79,21 @@ export function ExportModal({
   currentView,
   open,
   onOpenChange,
+  /** Settings exports the whole library, so the choice is not offered there. */
+  lockedScope,
 }: {
   sessionId: string;
   currentView: EditorView;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  lockedScope?: ExportScope;
 }) {
   const { t } = useLingui();
   const [format, setFormat] = useState<FileFormat>("pdf");
-  const [scope, setScope] = useState<ExportScope>("current");
+  const [chosenScope, setScope] = useState<ExportScope>(
+    lockedScope ?? "current",
+  );
+  const scope = lockedScope ?? chosenScope;
   const [includeMemo, setIncludeMemo] = useState(false);
   const [includeSummary, setIncludeSummary] = useState(true);
   const [includeTranscript, setIncludeTranscript] = useState(false);
@@ -154,25 +174,27 @@ export function ExportModal({
       .join("\n\n");
   };
 
-  const buildMdContent = (): string => {
+  const buildMdContent = (bundle: ExportBundle): string => {
     const sections: string[] = [];
-    const title = sessionTitle || t`Untitled`;
+    const title = bundle.title || t`Untitled`;
     sections.push(`# ${title}`);
 
-    if (sessionCreatedAt) {
-      sections.push(`- ${t`Created`}: ${formatDate(sessionCreatedAt)}`);
+    if (bundle.createdAt) {
+      sections.push(`- ${t`Created`}: ${formatDate(bundle.createdAt)}`);
     }
 
-    if (participantNames.length > 0) {
-      sections.push(`- ${t`Participants`}: ${participantNames.join(", ")}`);
+    if (bundle.participantNames.length > 0) {
+      sections.push(
+        `- ${t`Participants`}: ${bundle.participantNames.join(", ")}`,
+      );
     }
 
-    if (transcriptDuration) {
-      sections.push(`- ${t`Duration`}: ${transcriptDuration}`);
+    if (bundle.duration) {
+      sections.push(`- ${t`Duration`}: ${bundle.duration}`);
     }
 
     if (includeMemo) {
-      const memo = getMemoMd();
+      const memo = bundle.memoMd;
       if (memo) {
         sections.push("");
         sections.push(`## ${t`Memo`}`);
@@ -181,7 +203,7 @@ export function ExportModal({
     }
 
     if (includeSummary) {
-      const summary = getSummaryMd();
+      const summary = bundle.summaryMd;
       if (summary) {
         sections.push("");
         sections.push(`## ${t`Summary`}`);
@@ -190,7 +212,7 @@ export function ExportModal({
     }
 
     if (includeTranscript) {
-      const transcript = getTranscriptText();
+      const transcript = bundle.transcriptText;
       if (transcript) {
         sections.push("");
         sections.push(`## ${t`Transcript`}`);
@@ -201,26 +223,28 @@ export function ExportModal({
     return sections.join("\n");
   };
 
-  const buildTxtContent = (): string => {
+  const buildTxtContent = (bundle: ExportBundle): string => {
     const sections: string[] = [];
-    const title = sessionTitle || t`Untitled`;
+    const title = bundle.title || t`Untitled`;
     sections.push(title);
     sections.push("=".repeat(title.length));
 
-    if (sessionCreatedAt) {
-      sections.push(formatDate(sessionCreatedAt));
+    if (bundle.createdAt) {
+      sections.push(formatDate(bundle.createdAt));
     }
 
-    if (participantNames.length > 0) {
-      sections.push(`${t`Participants`}: ${participantNames.join(", ")}`);
+    if (bundle.participantNames.length > 0) {
+      sections.push(
+        `${t`Participants`}: ${bundle.participantNames.join(", ")}`,
+      );
     }
 
-    if (transcriptDuration) {
-      sections.push(`${t`Duration`}: ${transcriptDuration}`);
+    if (bundle.duration) {
+      sections.push(`${t`Duration`}: ${bundle.duration}`);
     }
 
     if (includeMemo) {
-      const memo = getMemoMd();
+      const memo = bundle.memoMd;
       if (memo) {
         sections.push("");
         sections.push(t`Memo`);
@@ -230,7 +254,7 @@ export function ExportModal({
     }
 
     if (includeSummary) {
-      const summary = getSummaryMd();
+      const summary = bundle.summaryMd;
       if (summary) {
         sections.push("");
         sections.push(t`Summary`);
@@ -240,7 +264,7 @@ export function ExportModal({
     }
 
     if (includeTranscript) {
-      const transcript = getTranscriptText();
+      const transcript = bundle.transcriptText;
       if (transcript) {
         sections.push("");
         sections.push(t`Transcript`);
@@ -252,32 +276,34 @@ export function ExportModal({
     return sections.join("\n");
   };
 
-  const buildOrgContent = (): string => {
+  const buildOrgContent = (bundle: ExportBundle): string => {
     const sections: string[] = [];
-    const title = sessionTitle || t`Untitled`;
+    const title = bundle.title || t`Untitled`;
     sections.push(`#+TITLE: ${title}`);
 
-    if (sessionCreatedAt) {
-      sections.push(`#+DATE: ${formatDate(sessionCreatedAt)}`);
+    if (bundle.createdAt) {
+      sections.push(`#+DATE: ${formatDate(bundle.createdAt)}`);
     }
 
     sections.push("");
     sections.push(`* ${t`Metadata`}`);
 
-    if (sessionCreatedAt) {
-      sections.push(`- ${t`Created`} :: ${formatDate(sessionCreatedAt)}`);
+    if (bundle.createdAt) {
+      sections.push(`- ${t`Created`} :: ${formatDate(bundle.createdAt)}`);
     }
 
-    if (participantNames.length > 0) {
-      sections.push(`- ${t`Participants`} :: ${participantNames.join(", ")}`);
+    if (bundle.participantNames.length > 0) {
+      sections.push(
+        `- ${t`Participants`} :: ${bundle.participantNames.join(", ")}`,
+      );
     }
 
-    if (transcriptDuration) {
-      sections.push(`- ${t`Duration`} :: ${transcriptDuration}`);
+    if (bundle.duration) {
+      sections.push(`- ${t`Duration`} :: ${bundle.duration}`);
     }
 
     if (includeMemo) {
-      const memo = getMemoMd();
+      const memo = bundle.memoMd;
       if (memo) {
         sections.push("");
         sections.push(`* ${t`Memo`}`);
@@ -286,7 +312,7 @@ export function ExportModal({
     }
 
     if (includeSummary) {
-      const summary = getSummaryMd();
+      const summary = bundle.summaryMd;
       if (summary) {
         sections.push("");
         sections.push(`* ${t`Summary`}`);
@@ -295,7 +321,7 @@ export function ExportModal({
     }
 
     if (includeTranscript) {
-      const transcript = getTranscriptText();
+      const transcript = bundle.transcriptText;
       if (transcript) {
         sections.push("");
         sections.push(`* ${t`Transcript`}`);
@@ -306,30 +332,32 @@ export function ExportModal({
     return sections.join("\n");
   };
 
-  const buildPdfContent = (): {
+  const buildPdfContent = (
+    bundle: ExportBundle,
+  ): {
     enhancedMd: string;
     memoMd: string | null;
     transcript: { items: TranscriptItem[] } | null;
     metadata: ExportMetadata | null;
   } => {
     const metadata: ExportMetadata = {
-      title: sessionTitle || t`Untitled`,
-      createdAt: sessionCreatedAt ? formatDate(sessionCreatedAt) : "",
-      participants: participantNames,
+      title: bundle.title || t`Untitled`,
+      createdAt: bundle.createdAt ? formatDate(bundle.createdAt) : "",
+      participants: bundle.participantNames,
       eventTitle: eventTitle || null,
-      duration: transcriptDuration,
+      duration: bundle.duration,
     };
 
     let memoMd: string | null = null;
     if (includeMemo) {
-      const memo = getMemoMd();
+      const memo = bundle.memoMd;
       if (memo) memoMd = memo;
     }
 
     const parts: string[] = [];
 
     if (includeSummary) {
-      const summary = getSummaryMd();
+      const summary = bundle.summaryMd;
       if (summary) parts.push(summary);
     }
 
@@ -341,6 +369,41 @@ export function ExportModal({
           ? { items: transcriptItems }
           : null,
       metadata,
+    };
+  };
+
+  const currentBundle = (): ExportBundle => ({
+    title: sessionTitle ?? "",
+    createdAt: sessionCreatedAt,
+    participantNames,
+    duration: transcriptDuration,
+    memoMd: includeMemo ? getMemoMd() : "",
+    summaryMd: includeSummary ? getSummaryMd() : "",
+    transcriptText: includeTranscript ? getTranscriptText() : "",
+  });
+
+  /**
+   * Exporting a second note cannot use per-session hooks, so the bundle comes
+   * from the same rows the hooks read. Transcripts are omitted deliberately:
+   * rendering them with speaker labels runs through a hook-built request, and
+   * silently exporting an unlabelled transcript would be worse than saying so.
+   */
+  const loadBundle = async (id: string): Promise<ExportBundle | null> => {
+    const snapshot = await loadSessionContentSnapshot(id);
+    if (!snapshot) {
+      return null;
+    }
+
+    return {
+      title: snapshot.title,
+      createdAt: snapshot.createdAt,
+      participantNames: [],
+      duration: null,
+      memoMd: includeMemo ? snapshot.rawMarkdown : "",
+      summaryMd: includeSummary
+        ? (snapshot.enhancedNotes[0]?.markdown ?? "")
+        : "",
+      transcriptText: "",
     };
   };
 
@@ -390,32 +453,60 @@ export function ExportModal({
         return scope === "all" ? destDir : firstPath;
       }
 
-      const sanitizedTitle = (
-        (sessionTitle ?? t`Untitled`).trim() || t`Untitled`
-      ).replace(/[<>:"/\\|?*]/g, "_");
-      const filename = `${sanitizedTitle}_${timestamp}.${format}`;
-      const path = await join(destDir, filename);
+      const writeBundle = async (bundle: ExportBundle) => {
+        const sanitizedTitle = (
+          (bundle.title || t`Untitled`).trim() || t`Untitled`
+        ).replace(/[<>:"/\\|?*]/g, "_");
+        const filename =
+          scope === "all"
+            ? `${sanitizedTitle}.${format}`
+            : `${sanitizedTitle}_${timestamp}.${format}`;
+        const path = await join(destDir, filename);
 
-      if (format === "pdf") {
-        const exportContent = buildPdfContent();
-        const result = await exportCommands.export(path, exportContent);
-        if (result.status === "error") {
-          throw new Error(result.error);
+        if (format === "pdf") {
+          const result = await exportCommands.export(
+            path,
+            buildPdfContent(bundle),
+          );
+          if (result.status === "error") {
+            throw new Error(result.error);
+          }
+        } else {
+          const textContent =
+            format === "md"
+              ? buildMdContent(bundle)
+              : format === "org"
+                ? buildOrgContent(bundle)
+                : buildTxtContent(bundle);
+          const result = await fs2Commands.writeTextFile(path, textContent);
+          if (result.status === "error") {
+            throw new Error(result.error);
+          }
         }
-      } else {
-        const textContent =
-          format === "md"
-            ? buildMdContent()
-            : format === "org"
-              ? buildOrgContent()
-              : buildTxtContent();
-        const result = await fs2Commands.writeTextFile(path, textContent);
-        if (result.status === "error") {
-          throw new Error(result.error);
-        }
+        return path;
+      };
+
+      if (scope === "current") {
+        return writeBundle(currentBundle());
       }
 
-      return path;
+      const ids = await loadActiveSessionIds();
+      let written = 0;
+      for (const id of ids) {
+        const bundle = await loadBundle(id);
+        // An empty note is skipped rather than writing a file with a heading
+        // and nothing under it.
+        if (!bundle || (!bundle.memoMd && !bundle.summaryMd)) {
+          continue;
+        }
+        await writeBundle(bundle);
+        written += 1;
+      }
+
+      if (written === 0) {
+        throw new Error("nothing_to_export");
+      }
+      return destDir;
     },
     onSuccess: (path) => {
       if (path) {
@@ -445,14 +536,14 @@ export function ExportModal({
       onClick={() => onOpenChange(false)}
     >
       <div
-        className="absolute top-1/2 left-1/2 w-full max-w-xs -translate-x-1/2 -translate-y-1/2 px-4"
+        className="absolute top-1/2 left-1/2 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 px-4"
         onClick={(e) => e.stopPropagation()}
       >
         <div
           className={cn([
             "border-border/80 bg-background rounded-xl border",
             "shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]",
-            "flex flex-col gap-4 p-5 text-center",
+            "flex flex-col gap-5 p-7 text-center",
           ])}
         >
           <div className="flex flex-col gap-1">
@@ -465,7 +556,9 @@ export function ExportModal({
           </div>
 
           <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
+            <div
+              className={cn(["flex flex-col gap-2", lockedScope && "hidden"])}
+            >
               <span className="text-sm font-medium">
                 <Trans>Notes</Trans>
               </span>
@@ -531,6 +624,13 @@ export function ExportModal({
               <span className="text-sm font-medium">
                 <Trans>Include</Trans>
               </span>
+              {scope === "all" && !isAudio && (
+                <p className="text-muted-foreground text-xs">
+                  <Trans>
+                    Transcripts are only available when exporting a single note.
+                  </Trans>
+                </p>
+              )}
               <div className="flex justify-center gap-4">
                 {(
                   [
@@ -544,7 +644,7 @@ export function ExportModal({
                     [
                       "transcript",
                       <Trans>Transcript</Trans>,
-                      includeTranscript,
+                      includeTranscript && scope === "current",
                       setIncludeTranscript,
                     ],
                   ] as const
