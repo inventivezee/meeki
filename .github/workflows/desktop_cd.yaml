@@ -76,7 +76,11 @@ jobs:
     if: ${{ !cancelled() && (needs.cn-draft.result == 'success' || needs.cn-draft.result == 'skipped') }}
     permissions:
       contents: write
-    runs-on: depot-macos-26
+    # GitHub-hosted rather than Depot: the depot-* labels are upstream's paid
+    # runner service, and a job requesting one queues forever rather than
+    # failing, which is a miserable way to discover you do not have an account.
+    # macos-latest is Apple Silicon, matching the aarch64 target.
+    runs-on: macos-latest
     strategy:
       fail-fast: true
       matrix:
