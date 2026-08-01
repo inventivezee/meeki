@@ -129,6 +129,25 @@ jobs:
           codesign --force --sign "${{ steps.apple-cert.outputs.cert-id }}" --timestamp --options runtime "$CLOUDSYNC_DYLIB"
           codesign --verify --strict --verbose=2 "$CLOUDSYNC_DYLIB"
         working-directory: ./apps/desktop
+      - name: Sign the llama.cpp runtime
+        run: |
+          set -euo pipefail
+          # These come straight from a llama.cpp GitHub release, so they carry
+          # no signature of ours. Notarization rejects every one of them:
+          # no Developer ID, no hardened runtime, no secure timestamp.
+          #
+          # They must be signed BEFORE tauri bundles and signs the app, because
+          # macOS signing is inside-out — signing the outer bundle does not
+          # reach nested Mach-O files, and re-signing afterwards would
+          # invalidate the bundle seal.
+          find src-tauri/resources/llama-cpp \
+            -type f \( -name "*.dylib" -o -name "llama-server" \) -print0 |
+            while IFS= read -r -d "" binary; do
+              codesign --force --sign "${{ steps.apple-cert.outputs.cert-id }}" \
+                --timestamp --options runtime "$binary"
+              codesign --verify --strict "$binary"
+            done
+        working-directory: ./apps/desktop
       - run: |
           if [[ "$CN_APPLICATION" == fastrepl/* ]]; then
             echo "CN_APPLICATION is still upstream's app ($CN_APPLICATION)." >&2
