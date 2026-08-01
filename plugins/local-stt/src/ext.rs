@@ -520,6 +520,9 @@ async fn start_external_server<R: Runtime, T: Manager<R>>(
 
     let app_handle = manager.app_handle().clone();
     let cmd_builder = external::CommandBuilder::new(move || {
+        // Only the debug branch below reassigns this, so release builds warn
+        // about the `mut` — removing it would break the debug build instead.
+        #[cfg_attr(not(debug_assertions), allow(unused_mut))]
         let mut cmd = app_handle
             .sidecar2()
             .sidecar("char-sidecar-stt")?

@@ -74,3 +74,8 @@ runs:
       with:
         cache-targets: "true"
         prefix-key: v0-rust${{ steps.cache-key.outputs.suffix }}
+        # Defaults to false, which means a failed build discards everything it
+        # compiled. This workspace is ~1,960 crates, so a release that fails at
+        # bundling or notarization made the next attempt pay the full ~35 minute
+        # rebuild for a fix that touched neither.
+        cache-on-failure: "true"
