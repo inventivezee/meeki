@@ -111,6 +111,10 @@ jobs:
       - run: pnpm -F ui build
       - run: |
           TAURI_ENV_TARGET_TRIPLE=${{ matrix.target }} cargo xtask prepare-binaries
+          # tauri.conf.json declares resources/llama-cpp, and only the local
+          # tauri:build:app script prepared it. CI calls `tauri build` directly,
+          # so without this the bundle step fails on a missing resource path.
+          TAURI_ENV_TARGET_TRIPLE=${{ matrix.target }} pnpm -F desktop llama:prepare
           ./scripts/sidecar.sh "./apps/desktop/${{ env.TAURI_CONF_PATH }}" "binaries/char-chrome-native-host"
           ./scripts/sidecar.sh "./apps/desktop/${{ env.TAURI_CONF_PATH }}" "binaries/check-permissions"
           ./scripts/sidecar.sh "./apps/desktop/${{ env.TAURI_CONF_PATH }}" "resources/cli/meeki-cli"

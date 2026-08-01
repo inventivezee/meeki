@@ -7,6 +7,20 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const release = process.env.MEEKI_LLAMA_CPP_RELEASE ?? "b10067";
+
+// The arch has to follow the build target, not the machine doing the building.
+// A universal/Intel release built on an Apple Silicon runner would otherwise
+// ship arm64 llama-server binaries inside an x86_64 app, which only fails at
+// runtime on the user's Mac.
+const target = process.env.TAURI_ENV_TARGET_TRIPLE ?? "";
+const arch = target.startsWith("x86_64")
+  ? "x64"
+  : target.startsWith("aarch64")
+    ? "arm64"
+    : process.arch === "x64"
+      ? "x64"
+      : "arm64";
+
 const dest = join(__dirname, "../resources/llama-cpp");
 const serverPath = join(dest, "llama-server");
 
@@ -15,9 +29,11 @@ if (existsSync(serverPath)) {
   process.exit(0);
 }
 
-const url = `https://github.com/ggml-org/llama.cpp/releases/download/${release}/llama-${release}-bin-macos-arm64.tar.gz`;
-const tmpTar = join("/tmp", `llama-${release}-bin-macos-arm64.tar.gz`);
-const tmpDir = join("/tmp", `llama-${release}-extract`);
+console.log(`Preparing llama.cpp ${release} for macos-${arch}`);
+
+const url = `https://github.com/ggml-org/llama.cpp/releases/download/${release}/llama-${release}-bin-macos-${arch}.tar.gz`;
+const tmpTar = join("/tmp", `llama-${release}-bin-macos-${arch}.tar.gz`);
+const tmpDir = join("/tmp", `llama-${release}-extract-${arch}`);
 
 console.log(`Downloading ${url}`);
 const response = await fetch(url);
