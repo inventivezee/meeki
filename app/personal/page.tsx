@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
 
-import NotekeeperLanding from "./NotekeeperLanding";
+import NotekeeperLanding from "../NotekeeperLanding";
 
-const title = "Meeki — Your private meeting notekeeper";
+const title = "Meeki — Your personal meeting notekeeper";
 const description =
-  "A fully private, open-source meeting note-taker that runs locally, works with your own AI, and can be self-hosted.";
+  "A personal, fully private, open-source meeting note-taker that keeps decisions and next steps under your control.";
 
 export const metadata: Metadata = {
   title,
   description,
-  alternates: { canonical: "/" },
+  alternates: { canonical: "/personal" },
   openGraph: {
     type: "website",
-    url: "/",
+    url: "/personal",
     title,
     description,
     images: [
@@ -32,6 +32,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Home() {
-  return <NotekeeperLanding variant="private" />;
+export default function PersonalNotekeeperPage() {
+  return <NotekeeperLanding variant="personal" />;
 }

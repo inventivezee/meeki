@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import styles from "./MeekiLanding.module.css";
 
-const DOWNLOAD_URL = "https://github.com/inventivezee/meeki/releases";
-const GITHUB_URL = "https://github.com/inventivezee/meeki";
+import { DOWNLOAD_URL, GITHUB_URL } from "./links";
 
 type DemoTab = "notes" | "enhanced" | "transcript";
 

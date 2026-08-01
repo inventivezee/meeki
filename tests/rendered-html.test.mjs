@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-async function render() {
+async function render(path = "/") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
+  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}-${path}`);
   const { default: worker } = await import(workerUrl.href);
 
   return worker.fetch(
-    new Request("http://localhost/", {
+    new Request(`http://localhost${path}`, {
       headers: { accept: "text/html" },
     }),
     {
@@ -22,22 +22,39 @@ async function render() {
   );
 }
 
-test("server-renders the Meeki landing page", async () => {
-  const response = await render();
+async function htmlFor(path) {
+  const response = await render(path);
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
+  return response.text();
+}
 
-  const html = await response.text();
-  assert.match(
-    html,
-    /<title>Meeki — Your meetings should stay yours<\/title>/i,
-  );
-  assert.match(html, /Your meetings/i);
-  assert.match(html, /should stay/i);
+function assertSharedProof(html) {
+  assert.match(html, /Fully private/i);
+  assert.match(html, /Fully open source/i);
   assert.match(html, /Download Meeki/i);
-  assert.match(html, /View on GitHub/i);
+  assert.match(html, /View Meeki on GitHub/i);
   assert.match(html, /https:\/\/github\.com\/inventivezee\/meeki/);
   assert.match(html, /\/og\.png/i);
   assert.doesNotMatch(html, /Meeki design study|Glassbox|Quiet Companion/i);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
+}
+
+test("server-renders the private notekeeper variation", async () => {
+  const html = await htmlFor("/");
+  assert.match(html, /<title>Meeki — Your private meeting notekeeper<\/title>/i);
+  assert.match(html, /Meeki is your[\s\S]*<strong>private<\/strong>[\s\S]*meeting/i);
+  assert.match(html, /<em>notekeeper\.<\/em>/i);
+  assert.match(html, /A keeper, not a collector/i);
+  assertSharedProof(html);
+});
+
+test("server-renders the personal notekeeper variation", async () => {
+  const html = await htmlFor("/personal");
+  assert.match(html, /<title>Meeki — Your personal meeting notekeeper<\/title>/i);
+  assert.match(html, /Meeki is your[\s\S]*<strong>personal<\/strong>[\s\S]*meeting/i);
+  assert.match(html, /<em>notekeeper\.<\/em>/i);
+  assert.match(html, /Listens\. Tidies\. Remembers\./i);
+  assert.match(html, /meeki-logo-rabbit-feisty-3d-1024\.png/i);
+  assertSharedProof(html);
 });

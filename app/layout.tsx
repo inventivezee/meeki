@@ -9,9 +9,9 @@ export async function generateMetadata(): Promise<Metadata> {
     requestHeaders.get("x-forwarded-proto") ??
     (host.startsWith("localhost") ? "http" : "https");
   const origin = `${protocol}://${host}`;
-  const title = "Meeki — Your meetings should stay yours";
+  const title = "Meeki — Your private meeting notekeeper";
   const description =
-    "Private, open-source meeting notes for founders and product teams. Run locally, bring your own AI, self-host, or choose Meeki managed.";
+    "A fully private, open-source meeting note-taker that runs locally, works with your own AI, and can be self-hosted.";
 
   return {
     metadataBase: new URL(origin),
@@ -19,6 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description,
     applicationName: "Meeki",
     keywords: [
+      "meeting notekeeper",
       "private meeting notes",
       "open-source meeting note-taker",
       "local AI transcription",
@@ -34,9 +35,9 @@ export async function generateMetadata(): Promise<Metadata> {
       images: [
         {
           url: `${origin}/og.png`,
-          width: 1734,
-          height: 907,
-          alt: "Meeki — Your meetings should stay yours",
+          width: 1536,
+          height: 1024,
+          alt: "Meeki — Your private meeting notekeeper",
         },
       ],
     },
