@@ -84,7 +84,10 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        include: ${{ inputs.channel == 'staging' && fromJSON('[{"target":"aarch64-apple-darwin","arch":"aarch64","artifact_name":"silicon"}]') || fromJSON('[{"target":"aarch64-apple-darwin","arch":"aarch64","artifact_name":"silicon"},{"target":"x86_64-apple-darwin","arch":"x86_64","artifact_name":"intel"}]') }}
+        # Apple Silicon only. The app bundles MLX, which has no Intel
+        # implementation, so an x86_64 DMG would install and then fail at
+        # transcription — worse than not offering it.
+        include: ${{ fromJSON('[{"target":"aarch64-apple-darwin","arch":"aarch64","artifact_name":"silicon"}]') }}
     defaults:
       run:
         shell: bash
@@ -180,15 +183,19 @@ jobs:
           VITE_POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN_HYPRNOTE_2 }}
           APP_VERSION: ${{ needs.compute-version.outputs.version }}
-          # APPLE_ID / APPLE_PASSWORD / APPLE_TEAM_ID are deliberately absent:
-          # their presence is what makes tauri notarize the .app inline, and its
-          # HTTP polling has no retry. A submission Apple had already Accepted
-          # was lost to a dropped connection after 57 minutes of waiting.
+          # These three are what make tauri notarize and STAPLE the .app before
+          # it builds the DMG around it. Removing them to dodge tauri's flaky
+          # polling shipped a DMG whose nested app had no ticket, which fails on
+          # any Mac that has not already cached one — verified on a clean
+          # machine. Two-phase bundling is not an alternative: `--bundles dmg`
+          # re-bundles and re-signs the app, discarding any staple applied
+          # between passes (measured).
           #
-          # Tauri still signs — that uses APPLE_SIGNING_IDENTITY and the
-          # keychain. Notarization moves to the macos_notarize_dmg step below,
-          # which uses `notarytool submit --wait`, Apple's own client, and
-          # covers the nested app as the outermost shipped container.
+          # The polling can still drop a connection. That costs a retry, which
+          # is now cheap because cache-on-failure keeps the compiled artifacts.
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           APPLE_SIGNING_IDENTITY: ${{ steps.apple-cert.outputs.cert-id }}
