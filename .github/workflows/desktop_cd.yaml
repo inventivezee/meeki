@@ -180,9 +180,15 @@ jobs:
           VITE_POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN_HYPRNOTE_2 }}
           APP_VERSION: ${{ needs.compute-version.outputs.version }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # APPLE_ID / APPLE_PASSWORD / APPLE_TEAM_ID are deliberately absent:
+          # their presence is what makes tauri notarize the .app inline, and its
+          # HTTP polling has no retry. A submission Apple had already Accepted
+          # was lost to a dropped connection after 57 minutes of waiting.
+          #
+          # Tauri still signs — that uses APPLE_SIGNING_IDENTITY and the
+          # keychain. Notarization moves to the macos_notarize_dmg step below,
+          # which uses `notarytool submit --wait`, Apple's own client, and
+          # covers the nested app as the outermost shipped container.
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           APPLE_SIGNING_IDENTITY: ${{ steps.apple-cert.outputs.cert-id }}
