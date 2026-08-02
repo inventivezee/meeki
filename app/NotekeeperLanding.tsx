@@ -234,18 +234,22 @@ export default function NotekeeperLanding({
           </div>
 
           <div className={styles.heroVisual} id="product">
-            {variant === "personal" && (
-              <div className={styles.mascot} aria-hidden="true">
+            <div className={styles.mascot}>
+              <div className={styles.mascotPortrait}>
                 <Image
-                  src="/meeki-logo-rabbit-feisty-3d-1024.png"
-                  alt=""
-                  width={1024}
-                  height={1024}
+                  src="/og.png"
+                  alt="Meeki’s rabbit notekeeper holding a notepad beside the local notebook"
+                  fill
+                  sizes="(max-width: 680px) 150px, 240px"
                   priority
                 />
-                <span>I kept the useful bits.</span>
               </div>
-            )}
+              <span>
+                {variant === "private"
+                  ? "Private notes, neatly kept."
+                  : "I kept the useful bits."}
+              </span>
+            </div>
 
             <div className={styles.previewCard}>
               <div className={styles.previewTopbar}>
