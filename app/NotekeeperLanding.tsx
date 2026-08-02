@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { DOWNLOAD_URL, GITHUB_URL } from "./links";
@@ -162,20 +161,6 @@ export default function NotekeeperLanding({
         </nav>
 
         <div className={styles.headerActions}>
-          <div className={styles.variantSwitch} aria-label="Website variations">
-            <Link
-              href="/"
-              aria-current={variant === "private" ? "page" : undefined}
-            >
-              Private
-            </Link>
-            <Link
-              href="/personal"
-              aria-current={variant === "personal" ? "page" : undefined}
-            >
-              Personal
-            </Link>
-          </div>
           <a
             className={styles.navCta}
             href={DOWNLOAD_URL}
