@@ -36,7 +36,9 @@ function assertSharedProof(html) {
   assert.match(html, /View Meeki on GitHub/i);
   assert.match(html, /https:\/\/github\.com\/inventivezee\/meeki/);
   assert.match(html, /\/og\.png/i);
+  assert.match(html, /meeki-rabbit-notekeeper-cutout\.png/i);
   assert.match(html, /Meeki’s rabbit notekeeper holding a notepad/i);
+  assert.match(html, /object-fit:contain/i);
   assert.doesNotMatch(html, /Meeki design study|Glassbox|Quiet Companion/i);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
 }

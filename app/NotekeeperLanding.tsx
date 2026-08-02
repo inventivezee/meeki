@@ -237,18 +237,15 @@ export default function NotekeeperLanding({
             <div className={styles.mascot}>
               <div className={styles.mascotPortrait}>
                 <Image
-                  src="/og.png"
-                  alt="Meeki’s rabbit notekeeper holding a notepad beside the local notebook"
+                  src="/meeki-rabbit-notekeeper-cutout.png"
+                  alt="Meeki’s rabbit notekeeper holding a notepad"
                   fill
+                  unoptimized
                   sizes="(max-width: 680px) 150px, 240px"
                   priority
+                  style={{ objectFit: "contain", objectPosition: "center bottom" }}
                 />
               </div>
-              <span>
-                {variant === "private"
-                  ? "Private notes, neatly kept."
-                  : "I kept the useful bits."}
-              </span>
             </div>
 
             <div className={styles.previewCard}>

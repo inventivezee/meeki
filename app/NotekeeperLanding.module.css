@@ -864,42 +864,15 @@
 
 .mascotPortrait {
   position: relative;
-  overflow: hidden;
   width: 100%;
-  aspect-ratio: 0.73;
-  border: 2px solid rgba(248, 244, 233, 0.7);
-  border-radius: 120px 120px 38px 38px;
-  background: #16251c;
-  box-shadow: 0 24px 34px rgba(0, 0, 0, 0.26);
+  aspect-ratio: 1;
+  filter: drop-shadow(0 20px 18px rgba(0, 0, 0, 0.24));
   transform: rotate(-2.5deg);
 }
 
-.personal .mascotPortrait {
-  border-color: rgba(78, 52, 36, 0.16);
-  box-shadow: 0 22px 34px rgba(70, 48, 30, 0.22);
-}
-
 .mascotPortrait img {
-  object-fit: cover;
-  object-position: right bottom;
-}
-
-.mascot span {
-  position: absolute;
-  top: 35%;
-  left: -24px;
-  width: 132px;
-  padding: 9px 11px;
-  border: 1px solid rgba(78, 52, 36, 0.16);
-  border-radius: 12px 12px 3px 12px;
-  color: #584034;
-  background: #fff9ee;
-  box-shadow: 0 8px 20px rgba(82, 55, 37, 0.12);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 10px;
-  font-style: italic;
-  line-height: 1.25;
-  transform: rotate(-5deg);
+  object-fit: contain;
+  object-position: center bottom;
 }
 
 .proofBand {
@@ -1651,10 +1624,6 @@
     bottom: auto;
     left: 2px;
     width: 146px;
-  }
-
-  .mascot span {
-    display: none;
   }
 
   .previewTopbar {
