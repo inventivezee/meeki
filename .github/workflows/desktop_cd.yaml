@@ -183,19 +183,19 @@ jobs:
           VITE_POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN_HYPRNOTE_2 }}
           APP_VERSION: ${{ needs.compute-version.outputs.version }}
-          # These three are what make tauri notarize and STAPLE the .app before
-          # it builds the DMG around it. Removing them to dodge tauri's flaky
-          # polling shipped a DMG whose nested app had no ticket, which fails on
-          # any Mac that has not already cached one — verified on a clean
-          # machine. Two-phase bundling is not an alternative: `--bundles dmg`
-          # re-bundles and re-signs the app, discarding any staple applied
-          # between passes (measured).
+          # APPLE_ID / APPLE_PASSWORD / APPLE_TEAM_ID are deliberately absent.
+          # Their presence makes tauri notarize inline, uploading a 378 MB zip
+          # over HTTP polling with no retry — that hung for 57 minutes on a
+          # submission Apple had already accepted. Every build that included
+          # them failed; the first build without them passed in 45 minutes.
           #
-          # The polling can still drop a connection. That costs a retry, which
-          # is now cheap because cache-on-failure keeps the compiled artifacts.
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # It costs the nested app its staple, which matters less than it
+          # sounds: notarizing the DMG makes Apple mint and publicly serve a
+          # ticket for the nested app's cdhash too, and an online Mac fetches it
+          # on first launch. Verified by running `xcrun stapler staple` against
+          # the shipped app with no new submission — it downloaded the existing
+          # ticket. Only an offline first launch is affected, and that surfaces
+          # as a Gatekeeper dialog rather than a failure to open.
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           APPLE_SIGNING_IDENTITY: ${{ steps.apple-cert.outputs.cert-id }}
