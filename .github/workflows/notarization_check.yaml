@@ -1,0 +1,57 @@
+# Asks Apple what happened to a notarization submission, using the credentials
+# already in repo secrets. Notarization failures in desktop_cd often report a
+# transport error while polling, which says nothing about whether Apple actually
+# accepted the build — the submission id in that error is the only way to find
+# out, and checking it locally would mean re-creating an app-specific password.
+on:
+  workflow_dispatch:
+    inputs:
+      submission_id:
+        description: "Notarization submission id (from the failing build log)"
+        required: true
+        type: string
+      fetch_log:
+        description: "Also fetch Apple's detailed issue log"
+        type: boolean
+        default: true
+
+jobs:
+  check:
+    runs-on: macos-latest
+    steps:
+      - name: Ask Apple about the submission
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+
+          echo "::group::Status"
+          xcrun notarytool info "${{ inputs.submission_id }}" \
+            --apple-id "$APPLE_ID" \
+            --password "$APPLE_PASSWORD" \
+            --team-id "$APPLE_TEAM_ID"
+          echo "::endgroup::"
+
+          if [[ "${{ inputs.fetch_log }}" == "true" ]]; then
+            echo "::group::Apple's issue log"
+            # Not fatal: a submission still in progress has no log yet, and that
+            # is itself a useful answer rather than a reason to fail the job.
+            xcrun notarytool log "${{ inputs.submission_id }}" \
+              --apple-id "$APPLE_ID" \
+              --password "$APPLE_PASSWORD" \
+              --team-id "$APPLE_TEAM_ID" || echo "No log available yet."
+            echo "::endgroup::"
+          fi
+
+      - name: Recent submissions for context
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          xcrun notarytool history \
+            --apple-id "$APPLE_ID" \
+            --password "$APPLE_PASSWORD" \
+            --team-id "$APPLE_TEAM_ID" | head -40
