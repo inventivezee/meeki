@@ -5,6 +5,10 @@ on:
         description: "Version to publish (e.g., 1.0.2)"
         required: true
         type: string
+      force_publish:
+        description: "Publish even when every expected asset is already present"
+        type: boolean
+        default: true
 
 env:
   CN_APPLICATION: "innovateabundance/meeki"
@@ -40,14 +44,23 @@ jobs:
         env:
           ASSETS: ${{ steps.existing-release.outputs.raw }}
         run: |
+          # Asset presence is not the same as being published: cn-draft creates
+          # the release up front and the build uploads into it, so a fully
+          # populated release can still be an unpublished draft. Dispatching
+          # this workflow is an explicit instruction to publish, so honour it.
+          if [[ "${{ inputs.force_publish }}" == "true" ]]; then
+            echo "publish_needed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           if [[ "${{ steps.existing-release.outcome }}" != "success" ]]; then
             echo "publish_needed=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
+          # Apple Silicon only: the bundle ships MLX, which has no Intel build.
           EXPECTED_PLATFORMS=(
             "dmg-aarch64"
-            "dmg-x86_64"
           )
 
           MISSING_PLATFORMS=()
@@ -92,33 +105,28 @@ jobs:
           version: ${{ needs.parse.outputs.version }}
           channel: ${{ needs.parse.outputs.channel }}
           platform: dmg-aarch64
-          output: char-macos-aarch64.dmg
-          key: ${{ secrets.CN_API_KEY }}
-      - id: download-macos-x86_64
-        uses: ./.github/actions/cn_download
-        with:
-          app: ${{ env.CN_APPLICATION }}
-          version: ${{ needs.parse.outputs.version }}
-          channel: ${{ needs.parse.outputs.channel }}
-          platform: dmg-x86_64
-          output: char-macos-x86_64.dmg
+          output: Meeki_${{ needs.parse.outputs.version }}_apple-silicon.dmg
           key: ${{ secrets.CN_API_KEY }}
       - id: checksums
         uses: ./.github/actions/generate_checksums
         with:
           files: |
-            char-macos-aarch64.dmg
-            char-macos-x86_64.dmg
-      - id: release-body
-        run: |
-          echo "value=https://meeki.ai/changelog/${{ needs.parse.outputs.version }}" >> "$GITHUB_OUTPUT"
+            Meeki_${{ needs.parse.outputs.version }}_apple-silicon.dmg
       - uses: ncipollo/release-action@v1
         with:
           tag: desktop_v${{ needs.parse.outputs.version }}
           name: desktop_v${{ needs.parse.outputs.version }}
-          body: ${{ steps.release-body.outputs.value }}
+          body: |
+            Meeki is a local-first meeting notetaker for macOS. Recording,
+            transcription and the assistant all run on your own machine.
+
+            **Requirements** — Apple Silicon (M1 or newer), macOS 14 or later.
+
+            **Install** — download the `.dmg` below, open it, and drag Meeki to
+            Applications. The build is signed and notarized by Apple, so it
+            opens without a security warning.
           prerelease: false
-          artifacts: char-macos-aarch64.dmg,char-macos-x86_64.dmg,${{ steps.checksums.outputs.checksum_files }}
+          artifacts: Meeki_${{ needs.parse.outputs.version }}_apple-silicon.dmg,${{ steps.checksums.outputs.checksum_files }}
           allowUpdates: true
           makeLatest: true
           replacesArtifacts: true

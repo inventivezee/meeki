@@ -285,8 +285,18 @@ jobs:
             exit 1
           fi
 
-          git tag -f "$TAG" "$TARGET"
-          git push origin "refs/tags/$TAG" --force
+          # Created through the API rather than `git push`. GitHub refuses a
+          # token-authenticated push of any ref whose commit touches
+          # .github/workflows without the `workflows` permission — which is not
+          # grantable from the permissions block, only via a PAT. Creating a ref
+          # that points at a commit already on the remote introduces no new
+          # objects, so the API accepts it with plain contents: write.
+          gh api "repos/$GITHUB_REPOSITORY/git/refs/tags/$TAG" \
+            --method PATCH -f sha="$TARGET" -F force=true \
+            || gh api "repos/$GITHUB_REPOSITORY/git/refs" \
+              --method POST -f ref="refs/tags/$TAG" -f sha="$TARGET"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   cn-publish:
     if: ${{ inputs.channel != 'staging' && inputs.publish }}
@@ -323,28 +333,18 @@ jobs:
           version: ${{ needs.compute-version.outputs.version }}
           channel: ${{ env.RELEASE_CHANNEL }}
           platform: dmg-aarch64
-          output: hyprnote-macos-aarch64.dmg
-          key: ${{ secrets.CN_API_KEY }}
-      - if: ${{ needs.build-macos.result == 'success' }}
-        uses: ./.github/actions/cn_download
-        with:
-          app: ${{ env.CN_APPLICATION }}
-          version: ${{ needs.compute-version.outputs.version }}
-          channel: ${{ env.RELEASE_CHANNEL }}
-          platform: dmg-x86_64
-          output: hyprnote-macos-x86_64.dmg
+          output: Meeki_${{ needs.compute-version.outputs.version }}_apple-silicon.dmg
           key: ${{ secrets.CN_API_KEY }}
       - id: checksums
         uses: ./.github/actions/generate_checksums
         with:
           files: |
-            ${{ needs.build-macos.result == 'success' && 'hyprnote-macos-aarch64.dmg' || '' }}
-            ${{ needs.build-macos.result == 'success' && 'hyprnote-macos-x86_64.dmg' || '' }}
+            ${{ needs.build-macos.result == 'success' && format('Meeki_{0}_apple-silicon.dmg', needs.compute-version.outputs.version) || '' }}
       - id: artifacts
         run: |
           ARTIFACTS=""
           if [[ "${{ needs.build-macos.result }}" == "success" ]]; then
-            ARTIFACTS="hyprnote-macos-aarch64.dmg,hyprnote-macos-x86_64.dmg"
+            ARTIFACTS="Meeki_${{ needs.compute-version.outputs.version }}_apple-silicon.dmg"
           fi
           if [[ -z "$ARTIFACTS" ]]; then
             echo "No artifacts to release" >&2
