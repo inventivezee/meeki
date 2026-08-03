@@ -41,28 +41,12 @@ BEGIN
       TO authenticated
       USING (
         (SELECT lower(auth.jwt() ->> 'email')) = ANY (ARRAY[
-          'yujonglee@hyprnote.com',
-          'yujonglee.dev@gmail.com',
-          'john@hyprnote.com',
-          'marketing@hyprnote.com',
-          'yunhyungjo@yonsei.ac.kr',
-          'goranmoomin@daum.net',
-          'artem@hyprnote.com',
-          'stua@fastmail.com',
-          'thestua@gmail.com'
+          'hk@innovateabundance.com'
         ])
       )
       WITH CHECK (
         (SELECT lower(auth.jwt() ->> 'email')) = ANY (ARRAY[
-          'yujonglee@hyprnote.com',
-          'yujonglee.dev@gmail.com',
-          'john@hyprnote.com',
-          'marketing@hyprnote.com',
-          'yunhyungjo@yonsei.ac.kr',
-          'goranmoomin@daum.net',
-          'artem@hyprnote.com',
-          'stua@fastmail.com',
-          'thestua@gmail.com'
+          'hk@innovateabundance.com'
         ])
       );
   END IF;

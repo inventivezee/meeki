@@ -61,6 +61,7 @@ mod tests {
             title: "Test Meeting".to_string(),
             created_at: "2024-01-01T14:00:00Z".to_string(),
             updated_at: "2024-01-01T15:00:00Z".to_string(),
+            raw: serde_json::Value::Null,
         };
 
         let segments = vec![

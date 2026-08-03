@@ -65,17 +65,10 @@ export const AUTHORS = Object.values(EDITORS).map((m) => ({
   avatar: m.avatar,
 }));
 
-export const ADMIN_EMAILS = [
-  "yujonglee@hyprnote.com",
-  "yujonglee.dev@gmail.com",
-  "john@hyprnote.com",
-  "marketing@hyprnote.com",
-  "yunhyungjo@yonsei.ac.kr",
-  "goranmoomin@daum.net",
-  "artem@hyprnote.com",
-  "stua@fastmail.com",
-  "thestua@gmail.com",
-];
+// The upstream maintainers were still listed here, which granted nine people
+// admin over this deployment and the owner none. Update this if the product's
+// admin address differs from the account email.
+export const ADMIN_EMAILS = ["hk@innovateabundance.com"];
 
 export const TEAM_PHOTOS = [
   { id: "john-1", name: "john-1.jpg", url: "/api/assets/team/john-1.jpg" },

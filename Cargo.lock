@@ -8374,7 +8374,6 @@ dependencies = [
  "dirs 6.0.0",
  "importer-core",
  "regex",
- "reqwest 0.13.2",
  "serde",
  "serde_json",
  "serde_yaml",

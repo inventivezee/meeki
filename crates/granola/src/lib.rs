@@ -1,5 +1,5 @@
-pub mod api;
 pub mod cache;
+pub mod document;
 pub mod error;
 pub mod fs;
 pub mod importer;
@@ -7,18 +7,16 @@ pub mod markdown;
 pub mod prosemirror;
 pub mod transcript;
 
-use crate::api::GranolaClient;
 use crate::cache::read_cache;
-use crate::error::{Error, Result};
+use crate::document::Document;
+use crate::error::Result;
 use crate::fs::{write_notes, write_transcripts};
 use std::path::PathBuf;
-use std::time::Duration;
 
 #[derive(Debug, Clone)]
 pub struct NotesConfig {
-    pub supabase_path: PathBuf,
+    pub cache_path: PathBuf,
     pub output_dir: PathBuf,
-    pub timeout: Duration,
 }
 
 #[derive(Debug, Clone)]
@@ -27,17 +25,13 @@ pub struct TranscriptsConfig {
     pub output_dir: PathBuf,
 }
 
-pub fn default_supabase_path() -> PathBuf {
-    dirs::config_dir()
-        .map(|config| config.join("Granola/supabase.json"))
-        .unwrap_or_else(|| PathBuf::from("supabase.json"))
-}
-
-pub async fn export_notes(config: &NotesConfig) -> Result<usize> {
-    let supabase_content = std::fs::read(&config.supabase_path).map_err(Error::SupabaseFileRead)?;
-
-    let client = GranolaClient::new(&supabase_content, config.timeout)?;
-    let documents = client.get_documents().await?;
+pub fn export_notes(config: &NotesConfig) -> Result<usize> {
+    let cache_data = read_cache(&config.cache_path)?;
+    let documents: Vec<Document> = cache_data
+        .documents
+        .iter()
+        .filter_map(|(id, doc)| Document::from_cache_value(id, &doc.raw))
+        .collect();
 
     write_notes(&documents, &config.output_dir)
 }

@@ -1,4 +1,4 @@
-use crate::api::{ProseMirrorDoc, ProseMirrorNode};
+use crate::document::{ProseMirrorDoc, ProseMirrorNode};
 use regex::Regex;
 use std::sync::OnceLock;
 
@@ -156,7 +156,7 @@ fn extract_text(node: &ProseMirrorNode) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::api::{ProseMirrorDoc, ProseMirrorNode};
+    use crate::document::{ProseMirrorDoc, ProseMirrorNode};
     use serde_json::json;
 
     #[test]

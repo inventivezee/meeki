@@ -3,9 +3,12 @@ use std::path::{Path, PathBuf};
 pub const VAULT_CONFIG_FILENAME: &str = "global.json";
 const STAGING_BUNDLE_ID: &str = "com.meeki.staging";
 const RELEASE_APP_FOLDER: &str = "meeki";
-/// Most-recent first: this fork shipped as "anarlog" before the Meeki rebrand,
-/// and as "hyprnote" upstream before that.
-const LEGACY_RELEASE_APP_FOLDERS: &[&str] = &["anarlog", "hyprnote"];
+/// Only our own former name. "hyprnote" was here too, which meant a fresh
+/// Meeki install on a machine that had tried upstream Hyprnote silently adopted
+/// *their* vault — and the people most likely to try Meeki are exactly the
+/// people who tried Hyprnote. Continuity with our own rename is ours to claim;
+/// another product's data is not.
+const LEGACY_RELEASE_APP_FOLDERS: &[&str] = &["anarlog"];
 
 pub fn compute_vault_config_path(base: &Path) -> PathBuf {
     base.join(VAULT_CONFIG_FILENAME)

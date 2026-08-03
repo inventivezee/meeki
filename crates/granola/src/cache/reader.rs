@@ -21,6 +21,10 @@ pub struct CacheDocument {
     pub title: String,
     pub created_at: String,
     pub updated_at: String,
+    /// The entry exactly as Granola stored it. Kept so a full document — notes,
+    /// tags, AI panel — can be recovered without a second source; the named
+    /// fields above are only what the transcript writer needs.
+    pub raw: Value,
 }
 
 #[derive(Debug)]
@@ -87,6 +91,7 @@ fn parse_cache_document(id: &str, value: &Value) -> Option<CacheDocument> {
         title: raw.title.unwrap_or_default(),
         created_at: raw.created_at.unwrap_or_default(),
         updated_at: raw.updated_at.unwrap_or_default(),
+        raw: value.clone(),
     })
 }
 

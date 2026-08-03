@@ -1,4 +1,4 @@
-use crate::api::Document;
+use crate::document::Document;
 use crate::error::Result;
 use crate::prosemirror::convert_to_markdown;
 use serde::Serialize;

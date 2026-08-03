@@ -133,6 +133,44 @@ pub struct ProseMirrorNode {
     pub attrs: Option<serde_json::Map<String, Value>>,
 }
 
+impl Document {
+    /// Builds a document from an entry in Granola's local cache.
+    ///
+    /// Read field by field on purpose. The cache is Granola's private on-disk
+    /// format with no stability guarantee, so an unfamiliar or renamed field
+    /// should cost that one value — not the whole note. `id` falls back to the
+    /// map key the entry was stored under.
+    pub fn from_cache_value(id: &str, value: &Value) -> Option<Self> {
+        let object = value.as_object()?;
+        let text = |key: &str| object.get(key).and_then(Value::as_str).map(str::to_string);
+
+        Some(Self {
+            id: text("id").unwrap_or_else(|| id.to_string()),
+            title: text("title").unwrap_or_default(),
+            content: text("content").unwrap_or_default(),
+            created_at: text("created_at").unwrap_or_default(),
+            updated_at: text("updated_at").unwrap_or_default(),
+            tags: object
+                .get("tags")
+                .and_then(Value::as_array)
+                .map(|tags| {
+                    tags.iter()
+                        .filter_map(Value::as_str)
+                        .map(str::to_string)
+                        .collect()
+                })
+                .unwrap_or_default(),
+            notes: object.get("notes").and_then(parse_maybe_stringified_json),
+            notes_plain: text("notes_plain"),
+            // Best effort: losing the AI panel costs the generated summary,
+            // while losing the document would cost the meeting.
+            last_viewed_panel: object
+                .get("last_viewed_panel")
+                .and_then(|panel| serde_json::from_value(panel.clone()).ok()),
+        })
+    }
+}
+
 fn parse_maybe_stringified_json(value: &Value) -> Option<ProseMirrorDoc> {
     match value {
         Value::Null => None,

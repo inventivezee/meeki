@@ -1,17 +1,24 @@
-use crate::api::{Document, GranolaClient};
 use crate::cache::{CacheData, CacheDocument, TranscriptSegment, read_cache};
+use crate::document::Document;
 use crate::error::Result;
 use crate::prosemirror::convert_to_plain_text;
 use meeki_importer_core::ir::{Collection, Session, Tag, TagMapping, Transcript, Word};
 use std::collections::HashMap;
 use std::path::Path;
-use std::time::Duration;
 
+/// Imports from Granola's local cache file, and only from there.
+///
+/// This used to lift the user's Granola access token out of `supabase.json` and
+/// call api.granola.ai with a spoofed `User-Agent`, impersonating their client.
+/// The cache holds the same documents alongside the transcripts, so the network
+/// call bought nothing that reading the user's own disk does not.
 pub async fn import_all_from_path(path: &Path) -> Result<Collection> {
-    let supabase_content = std::fs::read(path)?;
-
-    let client = GranolaClient::new(&supabase_content, Duration::from_secs(30))?;
-    let documents = client.get_documents().await?;
+    let cache_data = read_cache(path)?;
+    let documents: Vec<Document> = cache_data
+        .documents
+        .iter()
+        .filter_map(|(id, doc)| Document::from_cache_value(id, &doc.raw))
+        .collect();
 
     let mut sessions = Vec::new();
     let mut tags: Vec<Tag> = Vec::new();
@@ -47,16 +54,7 @@ pub async fn import_all_from_path(path: &Path) -> Result<Collection> {
         sessions.push(session);
     }
 
-    let cache_path = path
-        .parent()
-        .map(|p| p.join("cache"))
-        .unwrap_or_else(crate::cache::default_cache_path);
-    let transcripts = if cache_path.exists() {
-        let cache_data = read_cache(&cache_path)?;
-        cache_data_to_transcripts(&cache_data)
-    } else {
-        vec![]
-    };
+    let transcripts = cache_data_to_transcripts(&cache_data);
 
     Ok(Collection {
         sessions,
@@ -128,6 +126,7 @@ fn cache_data_to_transcripts(cache_data: &CacheData) -> Vec<Transcript> {
                     title: doc_id.clone(),
                     created_at: String::new(),
                     updated_at: String::new(),
+                    raw: serde_json::Value::Null,
                 });
 
             Some(cache_document_to_transcript(&doc, segments))
@@ -189,4 +188,72 @@ fn parse_timestamp_to_ms(timestamp: &str) -> Option<f64> {
     };
 
     Some((hours * 3600.0 + minutes * 60.0 + seconds) * 1000.0 + millis)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::Write;
+
+    /// Granola stores its cache as JSON-inside-a-JSON-string.
+    fn write_cache(documents: &str, transcripts: &str) -> tempfile::NamedTempFile {
+        let inner =
+            format!(r#"{{"state":{{"documents":{documents},"transcripts":{transcripts}}}}}"#);
+        let outer = serde_json::json!({ "cache": inner }).to_string();
+        let mut file = tempfile::NamedTempFile::new().unwrap();
+        file.write_all(outer.as_bytes()).unwrap();
+        file
+    }
+
+    #[tokio::test]
+    async fn imports_notes_and_tags_from_the_cache_without_any_network_call() {
+        // The whole point of dropping the API client: everything the import
+        // needs is already in the file on the user's own disk.
+        let documents = r#"{
+            "doc-1": {
+                "title": "Launch review",
+                "created_at": "2026-01-01T00:00:00Z",
+                "updated_at": "2026-01-01T00:00:00Z",
+                "tags": ["launch", "product"],
+                "notes": {"type":"doc","content":[
+                    {"type":"paragraph","content":[{"type":"text","text":"Ship on Monday."}]}
+                ]}
+            }
+        }"#;
+        let transcripts = r#"{
+            "doc-1": [{
+                "id": "seg-1", "document_id": "doc-1",
+                "start_timestamp": "2026-01-01T14:00:00Z",
+                "end_timestamp": "2026-01-01T14:00:05Z",
+                "text": "Ship on Monday.", "source": "system", "is_final": true
+            }]
+        }"#;
+        let file = write_cache(documents, transcripts);
+
+        let collection = import_all_from_path(file.path()).await.unwrap();
+
+        assert_eq!(collection.sessions.len(), 1);
+        let session = &collection.sessions[0];
+        assert_eq!(session.title, "Launch review");
+        assert_eq!(
+            session.raw_md.as_deref(),
+            Some("Ship on Monday."),
+            "notes should survive the cache round trip"
+        );
+        assert_eq!(collection.tags.len(), 2, "tags should survive too");
+        assert_eq!(collection.transcripts.len(), 1);
+    }
+
+    #[tokio::test]
+    async fn keeps_a_document_whose_optional_fields_are_missing() {
+        // The cache is Granola's private format with no stability promise, so a
+        // sparse or renamed field must cost that value, not the meeting.
+        let file = write_cache(r#"{"doc-1":{"title":"Bare minimum"}}"#, r#"{}"#);
+
+        let collection = import_all_from_path(file.path()).await.unwrap();
+
+        assert_eq!(collection.sessions.len(), 1);
+        assert_eq!(collection.sessions[0].title, "Bare minimum");
+        assert!(collection.tags.is_empty());
+    }
 }

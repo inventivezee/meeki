@@ -1,5 +1,5 @@
-use crate::api::Document;
 use crate::cache::{CacheDocument, TranscriptSegment};
+use crate::document::Document;
 use crate::error::{Error, Result};
 use crate::markdown::document_to_markdown;
 use crate::transcript::format_transcript;
@@ -69,6 +69,7 @@ pub fn write_transcripts(
                 title: doc_id.clone(),
                 created_at: String::new(),
                 updated_at: String::new(),
+                raw: serde_json::Value::Null,
             });
 
         let filename =

@@ -66,7 +66,7 @@ impl ImportSource {
     }
 
     pub fn granola() -> Option<Self> {
-        let path = meeki_granola::default_supabase_path();
+        let path = meeki_granola::cache::default_cache_path();
         Some(Self {
             kind: Some(ImportSourceKind::Granola),
             transform: TransformKind::Granola,
