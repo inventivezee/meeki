@@ -22,6 +22,10 @@ pub enum Error {
         "Meeki is running from a location it cannot update in place ({path}). Move Meeki to your Applications folder and try again."
     )]
     AppNotInWritableLocation { path: String },
+    #[error(
+        "Meeki does not have permission to update itself at {path}. Reinstall it from meeki.ai, or check the folder's permissions."
+    )]
+    AppNotWritable { path: String },
     #[error("failed to determine current app path")]
     FailedToDetermineCurrentAppPath,
     #[error("failed to schedule installed app launch at {path}: {details}")]

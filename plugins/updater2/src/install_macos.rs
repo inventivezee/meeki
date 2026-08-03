@@ -33,26 +33,34 @@ fn install_bundle_at(bundle: &Path, bytes: &[u8]) -> Result<(), crate::Error> {
         .parent()
         .ok_or(crate::Error::FailedToDetermineCurrentAppPath)?;
 
-    let staging = match tempfile::Builder::new()
-        .prefix(STAGING_PREFIX)
-        .tempdir_in(parent)
-    {
-        Ok(staging) => staging,
-        Err(error) if is_unwritable(&error) || is_translocated(bundle) => {
-            return Err(crate::Error::AppNotInWritableLocation {
-                path: bundle.display().to_string(),
-            });
-        }
-        Err(error) => return Err(error.into()),
-    };
-
-    // Translocation can present a writable-looking parent, so check the path
-    // itself: an update written there would vanish with the mount.
+    // Checked first, and by path: Gatekeeper's translocated mount can look
+    // writable, but anything written there disappears when the app quits.
     if is_translocated(bundle) {
         return Err(crate::Error::AppNotInWritableLocation {
             path: bundle.display().to_string(),
         });
     }
+
+    let staging = match tempfile::Builder::new()
+        .prefix(STAGING_PREFIX)
+        .tempdir_in(parent)
+    {
+        Ok(staging) => staging,
+        // A read-only volume and a bundle we simply lack rights to are
+        // different problems with different remedies, and telling someone to
+        // move an app that is already in /Applications is worse than useless.
+        Err(error) if error.kind() == io::ErrorKind::ReadOnlyFilesystem => {
+            return Err(crate::Error::AppNotInWritableLocation {
+                path: bundle.display().to_string(),
+            });
+        }
+        Err(error) if error.kind() == io::ErrorKind::PermissionDenied => {
+            return Err(crate::Error::AppNotWritable {
+                path: bundle.display().to_string(),
+            });
+        }
+        Err(error) => return Err(error.into()),
+    };
 
     let new_bundle = staging.path().join(NEW_BUNDLE);
     // A subdirectory rather than the tempdir root, which is mode 0700 — moving
@@ -103,13 +111,6 @@ fn unpack(bytes: &[u8], destination: &Path) -> Result<(), crate::Error> {
 fn filetime_now(path: &Path) -> io::Result<()> {
     let now = std::time::SystemTime::now();
     fs::File::open(path)?.set_times(fs::FileTimes::new().set_modified(now))
-}
-
-fn is_unwritable(error: &io::Error) -> bool {
-    matches!(
-        error.kind(),
-        io::ErrorKind::PermissionDenied | io::ErrorKind::ReadOnlyFilesystem
-    )
 }
 
 /// Gatekeeper runs a quarantined app from a read-only mount under
@@ -238,7 +239,7 @@ mod tests {
     }
 
     #[test]
-    fn reports_a_read_only_location_rather_than_an_errno() {
+    fn reports_a_permission_problem_rather_than_an_errno() {
         let root = tempfile::TempDir::new().unwrap();
         let bundle = existing_bundle(root.path());
         let mut perms = root.path().metadata().unwrap().permissions();
@@ -257,8 +258,8 @@ mod tests {
         fs::set_permissions(root.path(), perms).unwrap();
 
         assert!(
-            matches!(error, crate::Error::AppNotInWritableLocation { .. }),
-            "expected an actionable message, got {error:?}"
+            matches!(error, crate::Error::AppNotWritable { .. }),
+            "a permission problem must not tell the user to move the app: {error:?}"
         );
         assert!(!error.to_string().contains("os error"));
     }
