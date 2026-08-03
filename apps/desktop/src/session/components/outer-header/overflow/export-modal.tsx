@@ -14,6 +14,7 @@ import {
 import { commands as fsSyncCommands } from "@meeki/plugin-fs-sync";
 import { commands as fs2Commands } from "@meeki/plugin-fs2";
 import { commands as openerCommands } from "@meeki/plugin-opener2";
+import { sonnerToast } from "@meeki/ui/components/ui/toast";
 import { cn } from "@meeki/utils";
 
 import { formatDate, formatDuration } from "./export-utils";
@@ -520,7 +521,13 @@ export function ExportModal({
       }
       onOpenChange(false);
     },
-    onError: console.error,
+    onError: (error) => {
+      console.error(error);
+      // These were thrown as sentinels and then swallowed, so the button just
+      // flipped back to "Export" and the modal sat there looking functional.
+      sonnerToast.error(exportFailureMessage(error), { id: "export-failed" });
+      onOpenChange(false);
+    },
   });
 
   const hasAnyContentSelected =
@@ -667,7 +674,7 @@ export function ExportModal({
           </div>
 
           <button
-            onClick={() => mutate(null)}
+            onClick={() => mutate()}
             disabled={
               isPending || isTranscriptPending || !hasAnyContentSelected
             }
@@ -684,4 +691,15 @@ export function ExportModal({
     </div>,
     document.body,
   );
+}
+
+function exportFailureMessage(error: unknown) {
+  const reason = error instanceof Error ? error.message : String(error);
+  if (reason === "no_audio_to_export") {
+    return "None of these notes have a recording to export.";
+  }
+  if (reason === "nothing_to_export") {
+    return "There was nothing to export.";
+  }
+  return `Couldn’t finish the export: ${reason}`;
 }

@@ -6,7 +6,7 @@ import { commands as detectCommands } from "@meeki/plugin-detect";
 import { commands as fsSyncCommands } from "@meeki/plugin-fs-sync";
 import { sonnerToast } from "@meeki/ui/components/ui/toast";
 
-import { useListener } from "./contexts";
+import { useListener, useListenerStore } from "./contexts";
 import { startMeetingChatCapture } from "./meeting-chat-capture";
 import {
   hasMicrophone,
@@ -1086,6 +1086,7 @@ export function useResumeListeningLifecycle(sessionId: string) {
 }
 
 export function useStartListening(sessionId: string) {
+  const listenerStore = useListenerStore();
   const {
     conn,
     createCaptureLifecycle,
@@ -1241,6 +1242,15 @@ export function useStartListening(sessionId: string) {
     }
 
     if (!started) {
+      // The only toast here used to fire when *cleanup* failed, so the far more
+      // common case — the capture backend refusing, usually a denied microphone
+      // or system-audio prompt — reverted the button and said nothing at all.
+      sonnerToast.error(
+        listenerStore.getState().live.lastError ??
+          "Recording could not be started.",
+        { id: "capture-start-failed" },
+      );
+
       await stopMeetingChatTasks();
       try {
         await lifecycle.cleanupFailedStart();

@@ -243,7 +243,7 @@ export const markLiveInactive = (live: LiveState, error: string | null) => {
   live.triggerAppIds = null;
 };
 
-export const markLiveStartFailed = (live: LiveState) => {
+export const markLiveStartFailed = (live: LiveState, reason?: string) => {
   if (live.sessionId) {
     releaseLiveCaptureGeneration(live, live.sessionId);
   }
@@ -255,7 +255,9 @@ export const markLiveStartFailed = (live: LiveState) => {
   live.seconds = 0;
   live.sessionId = null;
   live.muted = initialLiveState.muted;
-  live.lastError = null;
+  // Kept, not cleared: this was the only record of why a start failed, and
+  // nulling it left the record button silently reverting with nothing to show.
+  live.lastError = reason ?? null;
   live.device = null;
   live.degraded = null;
   live.requestedLiveTranscription = null;

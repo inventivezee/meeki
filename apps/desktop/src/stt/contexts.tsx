@@ -860,6 +860,23 @@ export const useListener = <T,>(
   return useStore(store, useShallow(selector));
 };
 
+/**
+ * The raw store, for reading state outside render. A selector's value is
+ * captured at render time, which is already stale inside an async handler that
+ * needs to know why something just failed.
+ */
+export const useListenerStore = () => {
+  const store = useContext(ListenerContext);
+
+  if (!store) {
+    throw new Error(
+      "'useListenerStore' must be used within a 'ListenerProvider'",
+    );
+  }
+
+  return store;
+};
+
 function getMicDetectedNotificationTitle(event: NearbyEvent | null): string {
   if (!event) {
     return "Are you in a meeting?";

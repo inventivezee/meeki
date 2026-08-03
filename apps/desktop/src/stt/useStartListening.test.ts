@@ -122,8 +122,17 @@ vi.mock("@meeki/plugin-transcription", () => ({
   },
 }));
 
+const listenerLastError = vi.hoisted(() => ({
+  current: null as string | null,
+}));
+
 vi.mock("./contexts", () => ({
   useListener: useListenerMock,
+  // Read imperatively when a start fails, so the toast reports the reason the
+  // store recorded rather than a stale render-time value.
+  useListenerStore: () => ({
+    getState: () => ({ live: { lastError: listenerLastError.current } }),
+  }),
 }));
 
 vi.mock("@meeki/plugin-detect", () => ({
@@ -526,6 +535,42 @@ describe("useStartListening", () => {
     );
     expect(clearCaptureLifecycleMarkerMock).toHaveBeenCalledBefore(
       endCloudsyncActivityMock,
+    );
+  });
+
+  test("says why a recording could not start", async () => {
+    // The whole failure was silent: the only toast in this branch fired when
+    // *cleanup* failed, so a denied microphone prompt reverted the button and
+    // reported nothing at all.
+    startMock.mockResolvedValue(false);
+    listenerLastError.current =
+      "Meeki needs microphone and system audio access. Grant it in System Settings › Privacy & Security, then try again.";
+
+    const { result } = renderHook(() => useStartListening("session-1"));
+
+    await act(async () => {
+      await result.current();
+    });
+
+    expect(sonnerToastErrorMock).toHaveBeenCalledWith(
+      "Meeki needs microphone and system audio access. Grant it in System Settings › Privacy & Security, then try again.",
+      { id: "capture-start-failed" },
+    );
+  });
+
+  test("still says something when the store recorded no reason", async () => {
+    startMock.mockResolvedValue(false);
+    listenerLastError.current = null;
+
+    const { result } = renderHook(() => useStartListening("session-1"));
+
+    await act(async () => {
+      await result.current();
+    });
+
+    expect(sonnerToastErrorMock).toHaveBeenCalledWith(
+      "Recording could not be started.",
+      { id: "capture-start-failed" },
     );
   });
 

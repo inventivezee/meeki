@@ -1,5 +1,5 @@
 import { getIdentifier } from "@tauri-apps/api/app";
-import { Effect, Exit } from "effect";
+import { Cause, Effect, Exit } from "effect";
 import type { StoreApi } from "zustand";
 
 import { commands as detectCommands } from "@meeki/plugin-detect";
@@ -404,6 +404,7 @@ export const startLiveSession = <T extends LiveStore>(
     Exit.match(exit, {
       onFailure: (cause) => {
         console.error(JSON.stringify(cause));
+        const reason = describeStartFailure(cause);
         const currentLive = get().live;
         clearLiveInterval(currentLive.intervalId);
         clearLiveEventUnlisteners(
@@ -411,7 +412,7 @@ export const startLiveSession = <T extends LiveStore>(
         );
         setLiveState(set, (live) => {
           delete live.eventUnlistenersBySession[targetSessionId];
-          markLiveStartFailed(live);
+          markLiveStartFailed(live, reason);
         });
         return false;
       },
@@ -722,3 +723,28 @@ export const stopLiveSession = <T extends GeneralState>(
     });
   });
 };
+
+/**
+ * A sentence for the record button to show. Without this the only trace of a
+ * failed start was a JSON blob in the console, so denying the microphone
+ * prompt made Meeki look like a button that does nothing.
+ */
+function describeStartFailure(cause: Cause.Cause<unknown>): string {
+  const failure = Cause.failureOption(cause);
+  const raw =
+    failure._tag === "Some"
+      ? String(
+          failure.value instanceof Error
+            ? failure.value.message
+            : failure.value,
+        )
+      : Cause.pretty(cause);
+
+  if (/permission|denied|not authorized|unauthorized|tcc/i.test(raw)) {
+    return "Meeki needs microphone and system audio access. Grant it in System Settings › Privacy & Security, then try again.";
+  }
+  if (/no microphone|no input device|device not found/i.test(raw)) {
+    return "No microphone was available. Connect one and try again.";
+  }
+  return raw.trim() || "Recording could not be started.";
+}
