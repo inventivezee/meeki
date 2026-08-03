@@ -354,14 +354,21 @@ jobs:
             ARTIFACTS="$ARTIFACTS,${{ steps.checksums.outputs.checksum_files }}"
           fi
           echo "list=$ARTIFACTS" >> $GITHUB_OUTPUT
-      - id: release-body
-        run: |
-          echo "value=https://meeki.ai/changelog/${{ needs.compute-version.outputs.version }}" >> "$GITHUB_OUTPUT"
       - uses: ncipollo/release-action@v1
         with:
           tag: desktop_v${{ needs.compute-version.outputs.version }}
           name: desktop_v${{ needs.compute-version.outputs.version }}
-          body: ${{ steps.release-body.outputs.value }}
+          body: |
+            Meeki is a local-first meeting notetaker for macOS. Recording,
+            transcription and the assistant all run on your own machine.
+
+            **Requirements** — Apple Silicon (M1 or newer), macOS 14 or later.
+
+            **Install** — download the `.dmg` below, open it, and drag Meeki to
+            Applications. The build is signed and notarized by Apple, so it
+            opens without a security warning.
+
+            Already running Meeki? Use the in-app update prompt instead.
           prerelease: false
           makeLatest: true
           artifacts: ${{ steps.artifacts.outputs.list }}
