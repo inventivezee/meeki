@@ -1,6 +1,7 @@
 use std::ffi::c_void;
+use std::sync::Mutex;
 
-use cidre::{arc, cf, ns};
+use cidre::{arc, cf, io::pm, ns};
 
 use crate::{Error, PowerSource, Snapshot, ThermalState};
 
@@ -121,5 +122,98 @@ fn thermal_state(value: ns::ProcessInfoThermalState) -> ThermalState {
         ns::ProcessInfoThermalState::Serious => ThermalState::Serious,
         ns::ProcessInfoThermalState::Critical => ThermalState::Critical,
         _ => ThermalState::Unknown,
+    }
+}
+
+/// One process-wide assertion shared by every caller, with a refcount, so that
+/// concurrent downloads do not each register their own entry in
+/// `pmset -g assertions`. The assertion is released when the last guard drops.
+static KEEP_AWAKE: Mutex<Option<(usize, pm::Assertion)>> = Mutex::new(None);
+
+/// Releases its share of the sleep assertion when dropped.
+pub struct KeepAwake(());
+
+/// Holds off *idle* system sleep until the returned guard is dropped. Closing
+/// the lid still sleeps, so callers doing long work must also be resumable.
+///
+/// `reason` is user-visible in `pmset -g assertions`. Only the first caller
+/// names the shared assertion; later callers join the existing one.
+pub fn keep_awake(reason: &str) -> Result<KeepAwake, Error> {
+    let mut state = KEEP_AWAKE.lock().unwrap_or_else(|e| e.into_inner());
+
+    match state.as_mut() {
+        Some((count, _)) => *count += 1,
+        None => {
+            let name = cf::String::from_str(reason);
+            let assertion = pm::Assertion::with_name(
+                &*name,
+                pm::assertions::prevent_user_idle_system_sleep(),
+                pm::AssertionLevel::ON,
+            )
+            .map_err(|_| Error::Unavailable("IOPMAssertionCreateWithName"))?;
+            *state = Some((1, assertion));
+        }
+    }
+
+    Ok(KeepAwake(()))
+}
+
+impl Drop for KeepAwake {
+    fn drop(&mut self) {
+        let mut state = KEEP_AWAKE.lock().unwrap_or_else(|e| e.into_inner());
+        let Some((count, _)) = state.as_mut() else {
+            return;
+        };
+        *count -= 1;
+        if *count == 0 {
+            // Dropping the assertion calls IOPMAssertionRelease.
+            *state = None;
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const REASON: &str = "power-crate-keep-awake-test";
+
+    fn registered_with_os() -> bool {
+        let out = std::process::Command::new("pmset")
+            .args(["-g", "assertions"])
+            .output()
+            .expect("pmset should be present on macOS");
+        String::from_utf8_lossy(&out.stdout).contains(REASON)
+    }
+
+    /// One test, not three: the assertion is process-wide shared state, so
+    /// parallel tests would see each other's guards.
+    #[test]
+    fn holds_one_shared_assertion_until_the_last_guard_drops() {
+        assert!(!registered_with_os(), "leaked from an earlier run");
+
+        let first = keep_awake(REASON).expect("assertion should be created");
+        assert!(
+            registered_with_os(),
+            "the OS should report our assertion by name"
+        );
+
+        let second = keep_awake(REASON).expect("second caller should join");
+        {
+            let state = KEEP_AWAKE.lock().unwrap();
+            assert_eq!(state.as_ref().map(|(count, _)| *count), Some(2));
+        }
+
+        drop(second);
+        assert!(
+            registered_with_os(),
+            "one guard remains, so sleep must still be held off"
+        );
+
+        drop(first);
+        assert!(
+            !registered_with_os(),
+            "the last drop must release the assertion"
+        );
     }
 }

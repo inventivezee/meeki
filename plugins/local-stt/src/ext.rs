@@ -402,6 +402,15 @@ fn spawn_soniqo_progress_poller<R: Runtime>(
     soniqo_model: meeki_transcribe_soniqo::SoniqoModel,
 ) {
     tokio::spawn(async move {
+        // The Soniqo transfer is owned by the Swift bridge, not by
+        // model-downloader, so it needs its own assertion. The poller lives for
+        // as long as the download does.
+        let _keep_awake = meeki_power::keep_awake("Meeki is downloading a model")
+            .inspect_err(|error| {
+                tracing::warn!(error = %error, "soniqo_download_keep_awake_failed");
+            })
+            .ok();
+
         for _ in 0..7200 {
             let status = tokio::task::spawn_blocking(move || {
                 meeki_transcribe_soniqo::model_download_state(soniqo_model)

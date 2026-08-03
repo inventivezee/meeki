@@ -11415,6 +11415,7 @@ version = "0.1.0"
 dependencies = [
  "download-interface",
  "file",
+ "power",
  "serde",
  "specta",
  "tempfile",
@@ -18711,6 +18712,7 @@ dependencies = [
  "owhisper-interface",
  "port-killer",
  "port_check",
+ "power",
  "ractor",
  "reqwest 0.13.2",
  "rodio",

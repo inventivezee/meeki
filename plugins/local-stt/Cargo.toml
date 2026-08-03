@@ -44,6 +44,7 @@ meeki-language = { workspace = true, features = ["whisper"] }
 meeki-local-model = { workspace = true }
 meeki-local-stt-core = { workspace = true, features = ["specta"] }
 meeki-model-downloader = { workspace = true, features = ["specta"] }
+meeki-power = { workspace = true }
 meeki-transcribe-soniqo = { workspace = true }
 meeki-transcribe-whisper-local = { workspace = true, optional = true }
 meeki-whisper-local = { workspace = true, optional = true }

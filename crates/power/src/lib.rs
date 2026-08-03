@@ -1,7 +1,7 @@
 mod error;
 pub use error::Error;
 
-pub use imp::snapshot;
+pub use imp::{KeepAwake, keep_awake, snapshot};
 
 #[cfg(target_os = "macos")]
 mod macos;
@@ -15,6 +15,15 @@ mod unsupported {
 
     pub fn snapshot() -> Result<Snapshot, Error> {
         Err(Error::UnsupportedPlatform)
+    }
+
+    pub struct KeepAwake(());
+
+    /// Inert, so callers that only want to keep a long transfer alive do not
+    /// have to branch on platform. Unlike [`snapshot`], failing to hold off
+    /// sleep is not worth propagating as an error.
+    pub fn keep_awake(_reason: &str) -> Result<KeepAwake, Error> {
+        Ok(KeepAwake(()))
     }
 }
 

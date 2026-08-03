@@ -9,6 +9,7 @@ specta = ["dep:specta"]
 [dependencies]
 meeki-download-interface = { workspace = true }
 meeki-file = { workspace = true }
+meeki-power = { workspace = true }
 
 serde = { workspace = true }
 specta = { workspace = true, optional = true }

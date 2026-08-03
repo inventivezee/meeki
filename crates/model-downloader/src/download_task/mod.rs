@@ -22,6 +22,17 @@ pub(crate) fn spawn_download_task<M: DownloadableModel>(
             return;
         }
 
+        // Bound to the whole task body so every early return, failure and
+        // cancellation below releases it. Models run to several gigabytes, and
+        // an idle sleep part-way through strands the transfer.
+        let _keep_awake = match meeki_power::keep_awake("Meeki is downloading a model") {
+            Ok(guard) => Some(guard),
+            Err(error) => {
+                tracing::warn!(error = %error, "model_download_keep_awake_failed");
+                None
+            }
+        };
+
         let progress_callback =
             make_progress_callback(params.runtime.clone(), params.model.clone());
 
