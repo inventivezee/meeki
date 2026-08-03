@@ -100,14 +100,6 @@ msgstr "Add \"{0}\""
 msgid "Add {0} account"
 msgstr "Add {0} account"
 
-#: src/onboarding/calendar.tsx
-#~ msgid "Add another account"
-#~ msgstr "Add another account"
-
-#: src/session/components/note-input/enhanced/config-error.tsx
-#~ msgid "Add API key"
-#~ msgstr "Add API key"
-
 #: src/settings/general/spoken-languages.tsx
 msgid "Add language"
 msgstr "Add language"
@@ -212,10 +204,6 @@ msgstr "Ask anything"
 #: src/shared/chat-sphere.tsx
 msgid "Ask Meeki about your notes"
 msgstr "Ask Meeki about your notes"
-
-#: src/shared/chat-sphere.tsx
-#~ msgid "Ask Meeki anything"
-#~ msgstr "Ask Meeki anything"
 
 #: src/task/resource-view.tsx
 msgid "Assignees:"
@@ -330,14 +318,6 @@ msgstr "Checking migration..."
 #: src/onboarding/account/after-login.tsx
 msgid "Checking trial eligibility..."
 msgstr "Checking trial eligibility..."
-
-#: src/session/components/outer-header/overflow/export-modal.tsx
-#~ msgid "Choose a file format and what to include."
-#~ msgstr "Choose a file format and what to include."
-
-#: src/settings/recordings/index.tsx
-#~ msgid "Choose a folder for your recordings"
-#~ msgstr "Choose a folder for your recordings"
 
 #: src/chat/components/message/error.tsx
 msgid "Choose a model with more context"
@@ -546,14 +526,6 @@ msgstr "Connect calendar"
 msgid "Connect GitHub for private repos."
 msgstr "Connect GitHub for private repos."
 
-#: src/onboarding/calendar.tsx
-#~ msgid "Connect Google Calendar"
-#~ msgstr "Connect Google Calendar"
-
-#: src/onboarding/calendar.tsx
-#~ msgid "Connect Outlook"
-#~ msgstr "Connect Outlook"
-
 #: src/instruction/index.tsx
 msgid "Connect your integration"
 msgstr "Connect your integration"
@@ -603,10 +575,6 @@ msgstr "Could not start trial"
 #: src/settings/general/e2ee-setup.tsx
 msgid "Create a recovery key"
 msgstr "Create a recovery key"
-
-#: src/onboarding/index.tsx
-#~ msgid "Create account"
-#~ msgstr "Create account"
 
 #: src/main/sync-status.tsx
 msgid "Create or enter your recovery key in Sync settings to start syncing."
@@ -695,10 +663,6 @@ msgstr "Describe the template purpose..."
 #: src/settings/general/notification.tsx
 msgid "Detection delay"
 msgstr "Detection delay"
-
-#: src/sidebar/settings.tsx
-#~ msgid "Developers"
-#~ msgstr "Developers"
 
 #: src/main/sync-status.tsx
 msgid "Device limit reached"
@@ -850,21 +814,9 @@ msgstr "Export"
 msgid "Export all"
 msgstr "Export all"
 
-#: src/settings/recordings/index.tsx
-#~ msgid "Exported {0} recordings to {1}"
-#~ msgstr "Exported {0} recordings to {1}"
-
-#: src/settings/recordings/index.tsx
-#~ msgid "Exported {0}, and could not read {1}."
-#~ msgstr "Exported {0}, and could not read {1}."
-
 #: src/session/components/outer-header/overflow/export-modal.tsx
 msgid "Exporting..."
 msgstr "Exporting..."
-
-#: src/onboarding/calendar.tsx
-#~ msgid "Failed to load Google Calendar"
-#~ msgstr "Failed to load Google Calendar"
 
 #: src/settings/todo/provider-content.tsx
 msgid "Failed to load integration status"
@@ -873,10 +825,6 @@ msgstr "Failed to load integration status"
 #: src/task/resource-view.tsx
 msgid "Failed to load issue"
 msgstr "Failed to load issue"
-
-#: src/onboarding/calendar.tsx
-#~ msgid "Failed to load Outlook Calendar"
-#~ msgstr "Failed to load Outlook Calendar"
 
 #: src/task/resource-view.tsx
 msgid "Failed to load pull request"
@@ -960,10 +908,6 @@ msgstr "Generating title..."
 msgid "Get notified 5 minutes before calendar events start"
 msgstr "Get notified 5 minutes before calendar events start"
 
-#: src/session/components/note-input/enhanced/config-error.tsx
-#~ msgid "Get Pro"
-#~ msgstr "Get Pro"
-
 #: src/onboarding/account/before-login.tsx
 #: src/settings/general/account.tsx
 msgid "Get started"
@@ -1004,10 +948,6 @@ msgstr "Help Meeki listen to others"
 #: src/onboarding/permissions.tsx
 msgid "Help Meeki listen to you"
 msgstr "Help Meeki listen to you"
-
-#: src/onboarding/permissions.tsx
-#~ msgid "Help Meeki read meeting activity"
-#~ msgstr "Help Meeki read meeting activity"
 
 #: src/sidebar/timeline/index.tsx
 msgid "Hide Deleted Events"
@@ -1082,10 +1022,6 @@ msgstr "Join & record"
 msgid "Join meeting and record"
 msgstr "Join meeting and record"
 
-#: src/onboarding/final.tsx
-#~ msgid "Join our community and stay updated:"
-#~ msgstr "Join our community and stay updated:"
-
 #: src/settings/general/app-settings.tsx
 msgid "Join scheduled meetings"
 msgstr "Join scheduled meetings"
@@ -1123,10 +1059,6 @@ msgstr "Language model is needed to make Meeki summarize and chat about your con
 #: src/settings/sync/index.tsx
 msgid "Last synced {0}"
 msgstr "Last synced {0}"
-
-#: src/chat/components/message/error.tsx
-#~ msgid "Learn how to fix this"
-#~ msgstr "Learn how to fix this"
 
 #: src/settings/general/storage/legacy-cleanup.tsx
 msgid "Legacy JSON and Markdown files were removed"
@@ -1256,10 +1188,6 @@ msgstr "Meeki keeps each recording beside its note. Export copies them into one 
 #: src/onboarding/index.tsx
 msgid "Meeki needs access to your microphone and system audio to record and transcribe your meetings"
 msgstr "Meeki needs access to your microphone and system audio to record and transcribe your meetings"
-
-#: src/onboarding/index.tsx
-#~ msgid "Meeki needs microphone and system audio to transcribe your meetings, plus Accessibility to read meeting controls, visible chat, and participant status."
-#~ msgstr "Meeki needs microphone and system audio to transcribe your meetings, plus Accessibility to read meeting controls, visible chat, and participant status."
 
 #: src/main/sync-status.tsx
 msgid "Meeki Pro is required to use cloud sync."
@@ -1710,10 +1638,6 @@ msgstr "Pro trial"
 msgid "Protect cloud sync"
 msgstr "Protect cloud sync"
 
-#: src/onboarding/permissions.tsx
-#~ msgid "Read meeting controls, visible chat, and participant status"
-#~ msgstr "Read meeting controls, visible chat, and participant status"
-
 #: src/onboarding/index.tsx
 msgid "Ready to go"
 msgstr "Ready to go"
@@ -2000,10 +1924,6 @@ msgstr "Select timezone"
 msgid "Select..."
 msgstr "Select..."
 
-#: src/settings/general/app-settings.tsx
-#~ msgid "Send anonymous usage analytics to help improve Meeki."
-#~ msgstr "Send anonymous usage analytics to help improve Meeki."
-
 #: src/contacts/organization-details.tsx
 msgid "Send email"
 msgstr "Send email"
@@ -2174,10 +2094,6 @@ msgstr "Sign in for private repo access."
 msgid "Sign in for Pro"
 msgstr "Sign in for Pro"
 
-#: src/onboarding/calendar.tsx
-#~ msgid "Sign in to connect"
-#~ msgstr "Sign in to connect"
-
 #. placeholder {0}: config.displayName
 #: src/settings/todo/provider-content.tsx
 msgid "Sign in to connect {0}"
@@ -2194,10 +2110,6 @@ msgstr "Sign in to Meeki"
 #: src/settings/general/account.tsx
 msgid "Sign in to unlock cloud transcription and AI models, plus Pro features like sharing."
 msgstr "Sign in to unlock cloud transcription and AI models, plus Pro features like sharing."
-
-#: src/onboarding/index.tsx
-#~ msgid "Sign in to unlock powerful AI models, sync across devices, and personalization."
-#~ msgstr "Sign in to unlock powerful AI models, sync across devices, and personalization."
 
 #: src/settings/sync/index.tsx
 msgid "Sign in to use cloud sync"
@@ -2236,10 +2148,6 @@ msgstr "Skip"
 msgid "Skip Accessibility"
 msgstr "Skip Accessibility"
 
-#: src/onboarding/index.tsx
-#~ msgid "Skipped"
-#~ msgstr "Skipped"
-
 #: src/templates/template-icon-picker.tsx
 msgid "Smileys & People"
 msgstr "Smileys & People"
@@ -2263,10 +2171,6 @@ msgstr "Sort options"
 #: src/settings/general/storage/legacy-cleanup.tsx
 msgid "SQLite migration verification is incomplete"
 msgstr "SQLite migration verification is incomplete"
-
-#: src/session/components/note-input/enhanced/config-error.tsx
-#~ msgid "Start a Pro trial or add your own LLM API key to generate a summary from this transcript."
-#~ msgstr "Start a Pro trial or add your own LLM API key to generate a summary from this transcript."
 
 #: src/settings/general/app-settings.tsx
 msgid "Start Meeki at login"
@@ -2677,10 +2581,6 @@ msgstr "While listening, use Accessibility access to copy visible chat from supp
 #: src/task/tab-content.tsx
 msgid "Work on this task"
 msgstr "Work on this task"
-
-#: src/chat/components/message/loading.tsx
-#~ msgid "Working..."
-#~ msgstr "Working..."
 
 #: src/session-sharing/comments.tsx
 msgid "You"
