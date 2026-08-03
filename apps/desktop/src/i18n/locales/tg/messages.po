@@ -76,7 +76,6 @@ msgstr ""
 msgid "Accessibility"
 msgstr ""
 
-#: src/onboarding/index.tsx
 #: src/settings/general/account.tsx
 msgid "Account"
 msgstr ""
@@ -102,8 +101,8 @@ msgid "Add {0} account"
 msgstr ""
 
 #: src/onboarding/calendar.tsx
-msgid "Add another account"
-msgstr ""
+#~ msgid "Add another account"
+#~ msgstr ""
 
 #: src/session/components/note-input/enhanced/config-error.tsx
 #~ msgid "Add API key"
@@ -340,6 +339,10 @@ msgstr ""
 #~ msgid "Choose a folder for your recordings"
 #~ msgstr ""
 
+#: src/chat/components/message/error.tsx
+msgid "Choose a model with more context"
+msgstr ""
+
 #: src/onboarding/index.tsx
 msgid "Choose between on-device models and the cloud"
 msgstr ""
@@ -544,12 +547,12 @@ msgid "Connect GitHub for private repos."
 msgstr ""
 
 #: src/onboarding/calendar.tsx
-msgid "Connect Google Calendar"
-msgstr ""
+#~ msgid "Connect Google Calendar"
+#~ msgstr ""
 
 #: src/onboarding/calendar.tsx
-msgid "Connect Outlook"
-msgstr ""
+#~ msgid "Connect Outlook"
+#~ msgstr ""
 
 #: src/instruction/index.tsx
 msgid "Connect your integration"
@@ -602,8 +605,8 @@ msgid "Create a recovery key"
 msgstr ""
 
 #: src/onboarding/index.tsx
-msgid "Create account"
-msgstr ""
+#~ msgid "Create account"
+#~ msgstr ""
 
 #: src/main/sync-status.tsx
 msgid "Create or enter your recovery key in Sync settings to start syncing."
@@ -860,8 +863,8 @@ msgid "Exporting..."
 msgstr ""
 
 #: src/onboarding/calendar.tsx
-msgid "Failed to load Google Calendar"
-msgstr ""
+#~ msgid "Failed to load Google Calendar"
+#~ msgstr ""
 
 #: src/settings/todo/provider-content.tsx
 msgid "Failed to load integration status"
@@ -872,8 +875,8 @@ msgid "Failed to load issue"
 msgstr ""
 
 #: src/onboarding/calendar.tsx
-msgid "Failed to load Outlook Calendar"
-msgstr ""
+#~ msgid "Failed to load Outlook Calendar"
+#~ msgstr ""
 
 #: src/task/resource-view.tsx
 msgid "Failed to load pull request"
@@ -1122,8 +1125,8 @@ msgid "Last synced {0}"
 msgstr ""
 
 #: src/chat/components/message/error.tsx
-msgid "Learn how to fix this"
-msgstr ""
+#~ msgid "Learn how to fix this"
+#~ msgstr ""
 
 #: src/settings/general/storage/legacy-cleanup.tsx
 msgid "Legacy JSON and Markdown files were removed"
@@ -2172,8 +2175,8 @@ msgid "Sign in for Pro"
 msgstr ""
 
 #: src/onboarding/calendar.tsx
-msgid "Sign in to connect"
-msgstr ""
+#~ msgid "Sign in to connect"
+#~ msgstr ""
 
 #. placeholder {0}: config.displayName
 #: src/settings/todo/provider-content.tsx
@@ -2193,8 +2196,8 @@ msgid "Sign in to unlock cloud transcription and AI models, plus Pro features li
 msgstr ""
 
 #: src/onboarding/index.tsx
-msgid "Sign in to unlock powerful AI models, sync across devices, and personalization."
-msgstr ""
+#~ msgid "Sign in to unlock powerful AI models, sync across devices, and personalization."
+#~ msgstr ""
 
 #: src/settings/sync/index.tsx
 msgid "Sign in to use cloud sync"
@@ -2217,7 +2220,6 @@ msgid "Sign out and sign in again to resume cloud sync."
 msgstr ""
 
 #: src/onboarding/account/after-login.tsx
-#: src/onboarding/index.tsx
 #: src/settings/general/account.tsx
 msgid "Signed in"
 msgstr ""
@@ -2235,8 +2237,8 @@ msgid "Skip Accessibility"
 msgstr ""
 
 #: src/onboarding/index.tsx
-msgid "Skipped"
-msgstr ""
+#~ msgid "Skipped"
+#~ msgstr ""
 
 #: src/templates/template-icon-picker.tsx
 msgid "Smileys & People"

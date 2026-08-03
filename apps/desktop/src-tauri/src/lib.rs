@@ -235,7 +235,13 @@ pub async fn main() {
         builder = builder.plugin(tauri_plugin_sentry::init_with_no_injection(client));
     }
 
-    #[cfg(any(debug_assertions, feature = "devtools"))]
+    // debug_assertions only, deliberately not `feature = "devtools"`: staging
+    // DMGs are built with that feature, and this plugin listens on a TCP port
+    // with `allow_origin(Any)` and a websocket that invokes Tauri commands.
+    // WebSockets are not CORS-gated, so any page a tester had open could drive
+    // the app and read their notes. It also only proxies to a Vite dev server,
+    // which no packaged build has — so it was liability with no upside.
+    #[cfg(debug_assertions)]
     {
         builder = builder.plugin(tauri_plugin_relay::init());
     }

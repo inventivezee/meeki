@@ -10,14 +10,18 @@ export type OnboardingStep =
   | "folder-location"
   | "final";
 
+// "login" is gone, not reordered: it offered to "unlock powerful AI models,
+// sync across devices, and personalization" by opening meeki.ai/auth, which
+// returns 404. The user came back from the browser still signed out, with no
+// feedback. Promising an account there is no way to create is worse than not
+// mentioning accounts at all.
 const STEPS_MACOS: OnboardingStep[] = [
   "permissions",
-  "login",
   "calendar",
   "models",
   "final",
 ];
-const STEPS_OTHER: OnboardingStep[] = ["login", "calendar", "models", "final"];
+const STEPS_OTHER: OnboardingStep[] = ["calendar", "models", "final"];
 
 function getOnboardingSteps(): OnboardingStep[] {
   return platform() === "macos" ? STEPS_MACOS : STEPS_OTHER;

@@ -1,13 +1,9 @@
 import { Trans, useLingui } from "@lingui/react/macro";
-import { ExternalLink, RotateCcw } from "lucide-react";
-
-import { commands as openerCommands } from "@meeki/plugin-opener2";
+import { RotateCcw, SettingsIcon } from "lucide-react";
 
 import { ActionButton, MessageBubble, MessageContainer } from "./shared";
 
-import { env } from "~/env";
-
-const WEB_APP_BASE_URL = env.VITE_APP_URL ?? "http://localhost:3000";
+import { useTabs } from "~/store/zustand/tabs";
 
 /**
  * The SDK types this as an Error, but a transport failure can surface as a
@@ -52,14 +48,15 @@ export function ErrorMessage({
   onRetry?: () => void;
 }) {
   const { t } = useLingui();
+  const openNew = useTabs((state) => state.openNew);
   const message = errorText(error);
   const showContextLengthHelp = isContextLengthError(message);
 
-  const handleOpenFaq = () => {
-    void openerCommands.openUrl(
-      `${WEB_APP_BASE_URL}/docs/faq/local-llm-setup#context-length-error`,
-      null,
-    );
+  // Was a link to /docs/faq/local-llm-setup, a page that has never existed on
+  // any deployment. Settings is somewhere the user can actually act: pick a
+  // model with more context, or point at a provider that has it.
+  const openModelSettings = () => {
+    openNew({ type: "settings", state: { tab: "intelligence" } });
   };
 
   return (
@@ -70,11 +67,11 @@ export function ErrorMessage({
         </p>
         {showContextLengthHelp && (
           <button
-            onClick={handleOpenFaq}
+            onClick={openModelSettings}
             className="mt-2 flex items-center gap-1 text-xs text-red-700 underline hover:text-red-900"
           >
-            <ExternalLink className="h-3 w-3" />
-            <Trans>Learn how to fix this</Trans>
+            <SettingsIcon className="h-3 w-3" />
+            <Trans>Choose a model with more context</Trans>
           </button>
         )}
         {onRetry && (
