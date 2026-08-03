@@ -189,6 +189,9 @@ export default function NotekeeperLanding({
             <p className={styles.categoryLine}>
               An open-source, local-first meeting note-taker.
             </p>
+            <p className={styles.categoryLine}>
+              Requires macOS 14 or later on Apple Silicon.
+            </p>
 
             <div className={styles.heroActions}>
               <a
@@ -509,6 +512,9 @@ export default function NotekeeperLanding({
               View on GitHub <span aria-hidden="true">↗</span>
             </a>
           </div>
+          <p className={styles.categoryLine}>
+            Requires macOS 14 or later on Apple Silicon.
+          </p>
         </section>
       </main>
 
