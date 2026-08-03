@@ -1,17 +1,12 @@
+# Manual only: this needs OPENROUTER_API_KEY and an Infisical token, none of
+# which are set. On push it swapped a job that queued forever for one that fails
+# every time — neither is a signal. Re-add push/pull_request when the keys exist.
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - crates/llm-proxy/**
-  pull_request:
-    paths:
-      - crates/llm-proxy/**
 
 jobs:
   proxy-non-streaming:
-    runs-on: depot-ubuntu-24.04-8
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rust_install
@@ -25,7 +20,7 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
 
   proxy-streaming:
-    runs-on: depot-ubuntu-24.04-8
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rust_install
