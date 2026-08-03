@@ -106,8 +106,8 @@ msgid "Add another account"
 msgstr "Add another account"
 
 #: src/session/components/note-input/enhanced/config-error.tsx
-msgid "Add API key"
-msgstr "Add API key"
+#~ msgid "Add API key"
+#~ msgstr "Add API key"
 
 #: src/settings/general/spoken-languages.tsx
 msgid "Add language"
@@ -729,6 +729,16 @@ msgstr "Done"
 msgid "Download"
 msgstr "Download"
 
+#. placeholder {0}: model.name
+#. placeholder {1}: formatGb(model.size_bytes)
+#: src/session/components/note-input/enhanced/config-error.tsx
+msgid "Download {0} ({1} GB)"
+msgstr "Download {0} ({1} GB)"
+
+#: src/session/components/note-input/enhanced/config-error.tsx
+msgid "Download a local model"
+msgstr "Download a local model"
+
 #: src/onboarding/models.tsx
 msgid "Download local & private models (about {totalGb} GB)"
 msgstr "Download local & private models (about {totalGb} GB)"
@@ -736,6 +746,11 @@ msgstr "Download local & private models (about {totalGb} GB)"
 #: src/settings/general/e2ee-setup.tsx
 msgid "Download recovery key (.txt)"
 msgstr "Download recovery key (.txt)"
+
+#. placeholder {0}: downloading.progress
+#: src/session/components/note-input/enhanced/config-error.tsx
+msgid "Downloading… {0}%"
+msgstr "Downloading… {0}%"
 
 #: src/session/components/note-input/raw.tsx
 msgid "Drag and drop to upload a recording"
@@ -943,8 +958,8 @@ msgid "Get notified 5 minutes before calendar events start"
 msgstr "Get notified 5 minutes before calendar events start"
 
 #: src/session/components/note-input/enhanced/config-error.tsx
-msgid "Get Pro"
-msgstr "Get Pro"
+#~ msgid "Get Pro"
+#~ msgstr "Get Pro"
 
 #: src/onboarding/account/before-login.tsx
 #: src/settings/general/account.tsx
@@ -2248,8 +2263,8 @@ msgid "SQLite migration verification is incomplete"
 msgstr "SQLite migration verification is incomplete"
 
 #: src/session/components/note-input/enhanced/config-error.tsx
-msgid "Start a Pro trial or add your own LLM API key to generate a summary from this transcript."
-msgstr "Start a Pro trial or add your own LLM API key to generate a summary from this transcript."
+#~ msgid "Start a Pro trial or add your own LLM API key to generate a summary from this transcript."
+#~ msgstr "Start a Pro trial or add your own LLM API key to generate a summary from this transcript."
 
 #: src/settings/general/app-settings.tsx
 msgid "Start Meeki at login"
@@ -2324,6 +2339,10 @@ msgstr "Storage Updated"
 #: src/instruction/index.tsx
 msgid "Submit callback URL"
 msgstr "Submit callback URL"
+
+#: src/session/components/note-input/enhanced/config-error.tsx
+msgid "Summaries need a language model. Download one that runs on this Mac, or connect a provider you already use."
+msgstr "Summaries need a language model. Download one that runs on this Mac, or connect a provider you already use."
 
 #: src/contacts/details.tsx
 #: src/session/components/outer-header/overflow/export-modal.tsx
@@ -2425,6 +2444,10 @@ msgstr "The app will restart after onboarding to apply your storage changes"
 #: src/shared-notes/index.tsx
 msgid "The link may have expired or its access may have changed."
 msgstr "The link may have expired or its access may have changed."
+
+#: src/session/components/note-input/enhanced/config-error.tsx
+msgid "The local model runs entirely on this Mac."
+msgstr "The local model runs entirely on this Mac."
 
 #: src/settings/general/spoken-languages.tsx
 msgid "The main language is always included for transcription"
@@ -2591,6 +2614,10 @@ msgstr "Upload audio"
 #: src/session/components/outer-header/overflow/index.tsx
 msgid "Upload transcript"
 msgstr "Upload transcript"
+
+#: src/session/components/note-input/enhanced/config-error.tsx
+msgid "Use an API key"
+msgstr "Use an API key"
 
 #: src/settings/general/e2ee-setup.tsx
 msgid "Use an existing key"
