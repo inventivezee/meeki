@@ -55,12 +55,13 @@ export const useSTTConnection = () => {
         return null;
       }
 
-      // Local Soniqo meetings: Parakeet for live preview + selected/default batch model.
-      const requiredModels = isLocalSoniqoSttModel(
-        current_stt_provider,
-        localModel,
-      )
-        ? [LOCAL_LIVE_PREVIEW_MODEL, getLocalFinalBatchModel(localModel)]
+      // Parakeet is the only model that can transcribe while recording, but it
+      // is not required to record: the saved transcript always comes from a
+      // second batch pass. Treating it as mandatory turned "no live captions"
+      // into "cannot record at all".
+      const isSoniqo = isLocalSoniqoSttModel(current_stt_provider, localModel);
+      const requiredModels = isSoniqo
+        ? [getLocalFinalBatchModel(localModel)]
         : [localModel];
 
       for (const model of requiredModels) {
@@ -70,10 +71,14 @@ export const useSTTConnection = () => {
         }
       }
 
+      const livePreview = await localSttCommands.isModelDownloaded(
+        LOCAL_LIVE_PREVIEW_MODEL,
+      );
+      const canPreviewLive =
+        isSoniqo && livePreview.status === "ok" && livePreview.data;
+
       const serverResult = await localSttCommands.getServerForModel(
-        requiredModels.includes(LOCAL_LIVE_PREVIEW_MODEL)
-          ? LOCAL_LIVE_PREVIEW_MODEL
-          : localModel,
+        canPreviewLive ? LOCAL_LIVE_PREVIEW_MODEL : requiredModels[0]!,
       );
 
       if (serverResult.status !== "ok") {
@@ -88,6 +93,9 @@ export const useSTTConnection = () => {
           connection: {
             provider: current_stt_provider!,
             model: localModel,
+            // Absent when Parakeet is not on disk, which downgrades the
+            // session to batch-only rather than failing it.
+            liveModel: canPreviewLive ? LOCAL_LIVE_PREVIEW_MODEL : null,
             baseUrl: server.url,
             apiKey: "",
           },

@@ -49,7 +49,6 @@ import type {
   OnStoppedCallback,
 } from "~/store/zustand/listener/transcript";
 import {
-  LOCAL_LIVE_PREVIEW_MODEL,
   getLiveTranscriptionConfig,
   getLocalFinalBatchModel,
   getTranscriptionLanguages,
@@ -1130,8 +1129,13 @@ export function useStartListening(sessionId: string) {
       conn?.provider,
       conn?.model,
     );
+    // Falls back to the batch model when Parakeet is absent, which
+    // getOnDeviceTranscriptionConfig reads as "batch mode": the recording and
+    // the saved transcript both still happen, only live captions are lost.
     const liveModel = localSoniqoPreview
-      ? LOCAL_LIVE_PREVIEW_MODEL
+      ? ((conn as { liveModel?: string | null } | null)?.liveModel ??
+        conn?.model ??
+        "")
       : (conn?.model ?? "");
     const liveTranscriptionConfig = await getLiveTranscriptionConfig({
       provider: conn?.provider,
@@ -1205,9 +1209,10 @@ export function useStartListening(sessionId: string) {
           api_key: conn?.apiKey ?? "",
           keywords,
           mic_device: microphoneDevice || null,
-          transcription_mode: localSoniqoPreview
-            ? "live"
-            : liveTranscriptionConfig.transcriptionMode,
+          // Derived rather than forced to "live" for local Soniqo: the config
+          // already answers live-vs-batch from the model being started, which
+          // is Parakeet when it is on disk and the batch model when it is not.
+          transcription_mode: liveTranscriptionConfig.transcriptionMode,
           participant_human_ids: participantHumanIds,
           self_human_id: session?.user_id || null,
         },

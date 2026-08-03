@@ -2692,6 +2692,7 @@ describe("useStartListening", () => {
       conn: {
         provider: "hyprnote",
         model: "soniqo-qwen3-small",
+        liveModel: "soniqo-parakeet-streaming",
         baseUrl: "http://localhost:8080",
         apiKey: "",
       },
@@ -2706,6 +2707,34 @@ describe("useStartListening", () => {
     expect(startMock.mock.calls[0]?.[0]).toMatchObject({
       model: "soniqo-parakeet-streaming",
       transcription_mode: "live",
+      base_url: "soniqo://local",
+    });
+  });
+
+  test("records in batch mode when Parakeet is not downloaded", async () => {
+    // Parakeet is the only live-capable local model, but the saved transcript
+    // always comes from a second batch pass — so its absence should cost live
+    // captions and nothing else. This used to fail the session outright.
+    useSTTConnectionMock.mockReturnValue({
+      conn: {
+        provider: "hyprnote",
+        model: "soniqo-qwen3-small",
+        liveModel: null,
+        baseUrl: "http://localhost:8080",
+        apiKey: "",
+      },
+    });
+
+    const { result } = renderHook(() => useStartListening("session-1"));
+
+    await act(async () => {
+      await result.current();
+    });
+
+    expect(startMock).toHaveBeenCalled();
+    expect(startMock.mock.calls[0]?.[0]).toMatchObject({
+      model: "soniqo-qwen3-small",
+      transcription_mode: "batch",
       base_url: "soniqo://local",
     });
   });
