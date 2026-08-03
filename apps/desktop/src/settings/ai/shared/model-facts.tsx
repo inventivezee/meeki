@@ -10,6 +10,21 @@ export function formatGb(bytes: number) {
   return (bytes / 1e9).toFixed(1);
 }
 
+/**
+ * "342 MB of 15.5 GB". A percentage alone gives no sense of pace on a download
+ * measured in gigabytes, where a single percent can take a minute.
+ *
+ * Units are chosen per side, so the running total stays legible while it is
+ * still small rather than sitting at "0.3 GB" for several minutes.
+ */
+export function formatBytesProgress(downloaded: number, total: number) {
+  const done =
+    downloaded < 1e9
+      ? `${Math.round(downloaded / 1e6)} MB`
+      : `${(downloaded / 1e9).toFixed(1)} GB`;
+  return `${done} of ${formatGb(total)} GB`;
+}
+
 /** Memory is binary and reads as whole tiers ("24 GB Mac"), never as 24.0. */
 export function formatMemoryGb(bytes: number) {
   return Math.round(bytes / (1024 * 1024 * 1024));

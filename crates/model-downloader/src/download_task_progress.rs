@@ -1,52 +1,77 @@
-use std::sync::{
-    Arc,
-    atomic::{AtomicU8, Ordering},
-};
+use std::sync::{Arc, Mutex};
+use std::time::{Duration, Instant};
 
 use meeki_download_interface::DownloadProgress;
 
 use crate::model::DownloadableModel;
 use crate::runtime::{DownloadStatus, ModelDownloaderRuntime};
 
+/// One percent of a 13.6 GB model is 136 MB, so emitting only on percent change
+/// leaves the byte counter visibly frozen for a minute at a time on a slow link.
+const MIN_EMIT_INTERVAL: Duration = Duration::from_millis(250);
+
+struct EmitState {
+    percent: u8,
+    last_emit: Option<Instant>,
+}
+
 pub(crate) fn make_progress_callback<M: DownloadableModel>(
     runtime: Arc<dyn ModelDownloaderRuntime<M>>,
     model: M,
 ) -> impl Fn(DownloadProgress) + Send + Sync {
-    let last = Arc::new(AtomicU8::new(0));
+    let state = Arc::new(Mutex::new(EmitState {
+        percent: 0,
+        last_emit: None,
+    }));
 
-    move |progress: DownloadProgress| match progress {
-        DownloadProgress::Started => {
-            last.store(0, Ordering::Relaxed);
-            runtime.emit_progress(&model, DownloadStatus::Downloading(0));
-        }
-        DownloadProgress::Progress(downloaded, total_size) => {
-            if total_size == 0 {
-                return;
+    move |progress: DownloadProgress| {
+        let mut state = state.lock().unwrap_or_else(|e| e.into_inner());
+
+        match progress {
+            DownloadProgress::Started => {
+                state.percent = 0;
+                state.last_emit = Some(Instant::now());
+                runtime.emit_progress(&model, DownloadStatus::downloading(0));
             }
-
-            let percent = (downloaded as f64 / total_size as f64) * 100.0;
-            let current = percent.floor().clamp(0.0, 99.0) as u8;
-
-            let mut prev = last.load(Ordering::Relaxed);
-            while current > prev {
-                match last.compare_exchange_weak(
-                    prev,
-                    current,
-                    Ordering::Relaxed,
-                    Ordering::Relaxed,
-                ) {
-                    Ok(_) => {
-                        runtime.emit_progress(&model, DownloadStatus::Downloading(current));
-                        break;
-                    }
-                    Err(p) => prev = p,
+            DownloadProgress::Progress(downloaded, total_size) => {
+                if total_size == 0 {
+                    return;
                 }
+
+                let percent = ((downloaded as f64 / total_size as f64) * 100.0)
+                    .floor()
+                    .clamp(0.0, 99.0) as u8;
+
+                // Ratcheted: chunks complete out of order, so a later callback
+                // can report fewer bytes. The bar must never travel backwards.
+                let advanced = percent > state.percent;
+                let due = state
+                    .last_emit
+                    .is_none_or(|at| at.elapsed() >= MIN_EMIT_INTERVAL);
+                if !advanced && !due {
+                    return;
+                }
+
+                if advanced {
+                    state.percent = percent;
+                }
+                state.last_emit = Some(Instant::now());
+
+                runtime.emit_progress(
+                    &model,
+                    DownloadStatus::Downloading {
+                        percent: state.percent,
+                        downloaded_bytes: downloaded,
+                        total_bytes: total_size,
+                    },
+                );
             }
-        }
-        DownloadProgress::Finished => {
-            let prev = last.swap(99, Ordering::Relaxed);
-            if prev < 99 {
-                runtime.emit_progress(&model, DownloadStatus::Downloading(99));
+            DownloadProgress::Finished => {
+                if state.percent < 99 {
+                    state.percent = 99;
+                    state.last_emit = Some(Instant::now());
+                    runtime.emit_progress(&model, DownloadStatus::downloading(99));
+                }
             }
         }
     }

@@ -91,7 +91,7 @@ export function useLocalModelDownload(
           setProgress(100);
         } else if (typeof status === "object" && "downloading" in status) {
           setErrorMessage(null);
-          setProgress(Math.max(0, Math.min(100, status.downloading)));
+          setProgress(Math.max(0, Math.min(100, status.downloading.percent)));
         }
       }
     });

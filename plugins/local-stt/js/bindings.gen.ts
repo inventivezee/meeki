@@ -121,8 +121,14 @@ downloadProgressPayload: "plugin:local-stt:download-progress-payload"
 
 export type AmModel = "am-parakeet-v2" | "am-parakeet-v3" | "am-whisper-large-v3"
 export type DownloadProgressPayload = { model: LocalModel; status: DownloadStatus }
-export type DownloadStatus = { downloading: number } | "completed" | { failed: string }
-export type GgufLlmModel = "Llama3p2_3bQ4" | "Gemma3_4bQ4" | "HyprLLM"
+export type DownloadStatus = 
+/**
+ * `total_bytes` is 0 when the source never reported a size. Consumers
+ * should fall back to the model's declared size rather than treat the
+ * transfer as complete.
+ */
+{ downloading: { percent: number; downloadedBytes: number; totalBytes: number } } | "completed" | { failed: string }
+export type GgufLlmModel = "qwen3.6-35b-a3b" | "qwen3.6-35b-a3b-q4km" | "gemma-4-26b-a4b" | "gemma-4-12b" | "qwen3-4b" | "llama-3.3-70b" | "Llama3p2_3bQ4" | "Gemma3_4bQ4" | "HyprLLM"
 export type LocalModel = SoniqoModel | WhisperModel | AmModel | GgufLlmModel
 export type ServerInfo = { url: string | null; status: ServerStatus; model: LocalModel | null }
 export type ServerStatus = "unreachable" | "loading" | "ready"

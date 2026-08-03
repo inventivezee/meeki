@@ -10,6 +10,9 @@ export type DownloadProgress = {
   model: string;
   displayName: string;
   progress: number;
+  /** 0 when the source never reported a size; prefer the declared model size. */
+  downloadedBytes: number;
+  totalBytes: number;
 };
 
 export type ToastType = {

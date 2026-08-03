@@ -6,14 +6,9 @@ import { useCallback } from "react";
 import { commands as localLlmCommands } from "@meeki/plugin-local-llm";
 import { Button } from "@meeki/ui/components/ui/button";
 
+import { formatGb } from "~/settings/ai/shared/model-facts";
 import { useTabs } from "~/store/zustand/tabs";
-
-/** Parakeet live preview + the default Qwen3 batch model. */
-const STT_PACK_BYTES = 1_820 * 1024 * 1024;
-
-function formatGb(bytes: number) {
-  return (bytes / 1e9).toFixed(1);
-}
+import { sttPackBytes } from "~/stt/on-device-pack";
 
 /**
  * A fresh install can neither transcribe nor summarise until several GB have
@@ -37,7 +32,7 @@ export function ModelsSection({ onContinue }: { onContinue: () => void }) {
   });
 
   const llmBytes = recommended.data?.model?.size_bytes ?? 0;
-  const totalGb = formatGb(STT_PACK_BYTES + llmBytes);
+  const totalGb = formatGb(sttPackBytes() + llmBytes);
 
   const openSettings = useCallback(() => {
     openCurrent({ type: "settings", state: { tab: "transcription" } });

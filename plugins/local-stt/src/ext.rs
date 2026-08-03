@@ -425,7 +425,18 @@ fn spawn_soniqo_progress_poller<R: Runtime>(
                             .error
                             .unwrap_or_else(|| "Soniqo model download failed".to_string()),
                     ),
-                    _ => DownloadStatus::Downloading(state.progress_percent.unwrap_or(0)),
+                    _ => {
+                        // Swift reports a fraction and no byte counts, so these
+                        // are derived from the declared size to give the UI a
+                        // single shape across every download path.
+                        let percent = state.progress_percent.unwrap_or(0).min(100);
+                        let total_bytes = soniqo_model.size_bytes();
+                        DownloadStatus::Downloading {
+                            percent,
+                            downloaded_bytes: total_bytes / 100 * percent as u64,
+                            total_bytes,
+                        }
+                    }
                 },
                 Ok(Err(error)) => DownloadStatus::Failed(error.to_string()),
                 Err(error) => DownloadStatus::Failed(error.to_string()),

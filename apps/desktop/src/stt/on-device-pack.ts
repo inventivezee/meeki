@@ -79,6 +79,21 @@ export const ON_DEVICE_STT_PACK = [
   LOCAL_FINAL_BATCH_MODEL,
 ] as const satisfies readonly LocalModel[];
 
+/** Mirrors `SoniqoModel::ParakeetStreaming` in crates/transcribe-soniqo. */
+const LIVE_PREVIEW_BYTES = 120 * 1024 * 1024;
+
+/**
+ * The one place the pack's download size is computed. It used to be a literal
+ * in two files that disagreed — the settings card claimed 2.6 GB against
+ * onboarding's 1.82 GB for the identical download.
+ */
+export function sttPackBytes(batchModel: LocalModel = DEFAULT_BATCH_MODEL) {
+  const batch = BATCH_MODEL_CHOICES.find(
+    (choice) => choice.model === batchModel,
+  );
+  return LIVE_PREVIEW_BYTES + (batch?.sizeBytes ?? 0);
+}
+
 export function isOnDeviceSttPackModel(
   model?: string | null,
 ): model is LocalModel {

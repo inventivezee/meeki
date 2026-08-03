@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Channel } from "@tauri-apps/api/core";
 import { Loader2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import {
   commands as localLlmCommands,
@@ -9,22 +9,23 @@ import {
 } from "@meeki/plugin-local-llm";
 import {
   commands as localSttCommands,
-  events as localSttEvents,
   type LocalModel,
 } from "@meeki/plugin-local-stt";
 import { Button } from "@meeki/ui/components/ui/button";
 import { sonnerToast } from "@meeki/ui/components/ui/toast";
 
-import { formatGb, ModelFacts } from "~/settings/ai/shared/model-facts";
+import { useNotifications } from "~/contexts/notifications";
+import {
+  formatBytesProgress,
+  formatGb,
+  ModelFacts,
+} from "~/settings/ai/shared/model-facts";
 import { setAiProvider } from "~/settings/providers";
 import { setSettingValues } from "~/settings/queries";
 import { LOCAL_FINAL_BATCH_MODEL } from "~/stt/capabilities";
-import { ON_DEVICE_STT_PACK } from "~/stt/on-device-pack";
+import { ON_DEVICE_STT_PACK, sttPackBytes } from "~/stt/on-device-pack";
 
 const SETUP_TOAST_ID = "on-device-setup";
-
-/** Parakeet streaming + Qwen3 large, the fixed transcription pair. */
-const STT_PACK_BYTES = 2.6e9;
 
 /**
  * Single entry point for on-device AI. Transcription always uses the fixed
@@ -32,9 +33,8 @@ const STT_PACK_BYTES = 2.6e9;
  */
 export function OnDeviceSetupCard() {
   const queryClient = useQueryClient();
-  const [progress, setProgress] = useState<number | null>(null);
-  const [step, setStep] = useState<string | null>(null);
-  const sttProgressRef = useRef<Record<string, number>>({});
+  const { activeDownloads } = useNotifications();
+  const sawInFlight = useRef(false);
 
   const recommended = useQuery({
     queryKey: ["local-llm-recommended"],
@@ -76,47 +76,42 @@ export function OnDeviceSetupCard() {
     llmModel && llmDownloaded.data?.includes(llmModel.key),
   );
 
-  useEffect(() => {
-    const unlisten = localSttEvents.downloadProgressPayload.listen((event) => {
-      const { model, status } = event.payload;
-      if (typeof status === "object" && "downloading" in status) {
-        sttProgressRef.current[String(model)] = status.downloading;
-      } else if (status === "completed") {
-        sttProgressRef.current[String(model)] = 100;
+  // Asked of the backend rather than tracked in component state: a download
+  // outlives this card, so remounting it after a tab switch must not offer to
+  // start the same multi-gigabyte transfer a second time.
+  const inFlight = useQuery({
+    queryKey: ["on-device-setup-in-flight", llmModel?.key ?? null],
+    refetchInterval: 1_000,
+    queryFn: async () => {
+      for (const model of ON_DEVICE_STT_PACK) {
+        const result = await localSttCommands.isModelDownloading(model);
+        if (result.status === "ok" && result.data) {
+          return true;
+        }
       }
-    });
-    return () => {
-      void unlisten.then((fn) => fn());
-    };
-  }, []);
+      if (llmModel) {
+        const result = await localLlmCommands.isModelDownloading(llmModel.key);
+        if (result.status === "ok" && result.data) {
+          return true;
+        }
+      }
+      return false;
+    },
+  });
 
   const setup = useMutation({
     mutationFn: async () => {
-      const total =
-        (sttReady.data ? 0 : ON_DEVICE_STT_PACK.length) +
-        (llmReady || !llmModel ? 0 : 1);
-      let done = 0;
-
       if (!sttReady.data) {
         for (const model of ON_DEVICE_STT_PACK) {
-          setStep(`Transcription model ${done + 1} of ${total}`);
-          await downloadSttModel(model, (value) => {
-            setProgress(Math.round(((done + value / 100) / total) * 100));
-          });
-          done += 1;
+          await downloadSttModel(model);
         }
       }
 
       if (llmModel && !llmReady) {
-        setStep(`Downloading ${llmModel.name}`);
+        // The channel only feeds this component; the durable progress the UI
+        // renders comes from the app-wide event. It stays because cancelling
+        // the download still relies on it.
         const channel = new Channel<number>();
-        channel.onmessage = (value) => {
-          if (value >= 0) {
-            setProgress(
-              Math.round(((done + Math.min(value, 100) / 100) / total) * 100),
-            );
-          }
-        };
         const result = await localLlmCommands.downloadModel(
           llmModel.key,
           channel,
@@ -125,11 +120,8 @@ export function OnDeviceSetupCard() {
           throw new Error(result.error);
         }
         await waitForLlmDownload(llmModel.key);
-        done += 1;
       }
 
-      setStep("Starting on-device models");
-      setProgress(100);
       await activateOnDevice(llmModel?.key ?? null);
     },
     onSuccess: async () => {
@@ -147,21 +139,43 @@ export function OnDeviceSetupCard() {
         description: error instanceof Error ? error.message : String(error),
       });
     },
-    onSettled: () => {
-      setProgress(null);
-      setStep(null);
-    },
   });
+
+  // A download outlives this card, so the mutation that would have selected the
+  // models can die with it. Without this, navigating away mid-download leaves
+  // the user with the weights on disk and nothing using them.
+  useEffect(() => {
+    if (inFlight.data) {
+      sawInFlight.current = true;
+      return;
+    }
+    if (!sawInFlight.current || setup.isPending) {
+      return;
+    }
+    if (!sttReady.data || !llmReady) {
+      return;
+    }
+    sawInFlight.current = false;
+    void activateOnDevice(llmModel?.key ?? null).catch((error: unknown) => {
+      sonnerToast.error("Downloaded, but couldn’t start the models", {
+        id: SETUP_TOAST_ID,
+        description: error instanceof Error ? error.message : String(error),
+      });
+    });
+  }, [inFlight.data, sttReady.data, llmReady, llmModel?.key, setup.isPending]);
 
   if (sttReady.data && llmReady) {
     return null;
   }
 
-  const missingGb =
-    llmModel && !llmReady
-      ? formatGb(llmModel.size_bytes + STT_PACK_BYTES)
-      : "2.6";
-  const running = setup.isPending;
+  const packBytes = sttPackBytes();
+  const totalBytes =
+    (sttReady.data ? 0 : packBytes) +
+    (llmModel && !llmReady ? llmModel.size_bytes : 0);
+
+  const running = setup.isPending || inFlight.data === true;
+  const current = activeDownloads[0] ?? null;
+  const percent = current?.progress ?? null;
 
   return (
     <div className="border-border/60 bg-card/70 flex flex-col gap-3 rounded-2xl border px-4 py-3">
@@ -171,7 +185,8 @@ export function OnDeviceSetupCard() {
           Downloads everything Meeki needs to work offline: Parakeet and Qwen3
           for transcription
           {llmModel ? `, and ${llmModel.name} for summaries` : ""}. About{" "}
-          {missingGb} GB from Hugging Face. The runtimes are already in the app.
+          {formatGb(totalBytes)} GB from Hugging Face. The runtimes are already
+          in the app.
         </p>
         {llmModel ? (
           <div className="border-border/60 mt-1 flex flex-col gap-0.5 border-l-2 pl-2.5">
@@ -189,21 +204,28 @@ export function OnDeviceSetupCard() {
           <div className="text-muted-foreground flex items-center gap-2 text-xs">
             <Loader2 className="size-3.5 shrink-0 animate-spin" />
             <span className="truncate">
-              {step ?? "Downloading"}
-              {progress === null ? "" : ` · ${progress}%`}
+              {current
+                ? `Downloading ${current.displayName}`
+                : "Preparing download"}
+              {percent === null ? "" : ` · ${percent}%`}
             </span>
           </div>
+          {current && current.totalBytes > 0 ? (
+            <p className="text-muted-foreground text-xs tabular-nums">
+              {formatBytesProgress(current.downloadedBytes, current.totalBytes)}
+            </p>
+          ) : null}
           <div
             className="bg-muted h-1.5 w-full overflow-hidden rounded-full"
             role="progressbar"
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-valuenow={progress ?? undefined}
+            aria-valuenow={percent ?? undefined}
             aria-label="On-device model download progress"
           >
             <div
               className="bg-foreground/80 h-full rounded-full transition-[width] duration-300 ease-out"
-              style={{ width: `${Math.max(progress ?? 2, 2)}%` }}
+              style={{ width: `${Math.max(percent ?? 2, 2)}%` }}
             />
           </div>
         </div>
@@ -220,13 +242,9 @@ export function OnDeviceSetupCard() {
   );
 }
 
-async function downloadSttModel(
-  model: LocalModel,
-  onProgress: (value: number) => void,
-) {
+async function downloadSttModel(model: LocalModel) {
   const already = await localSttCommands.isModelDownloaded(model);
   if (already.status === "ok" && already.data) {
-    onProgress(100);
     return;
   }
 
@@ -240,7 +258,6 @@ async function downloadSttModel(
     await new Promise((resolve) => setTimeout(resolve, 1_000));
     const done = await localSttCommands.isModelDownloaded(model);
     if (done.status === "ok" && done.data) {
-      onProgress(100);
       return;
     }
     const downloading = await localSttCommands.isModelDownloading(model);

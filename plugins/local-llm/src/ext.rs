@@ -19,9 +19,16 @@ impl<R: Runtime> ModelDownloaderRuntime<crate::SupportedModel> for TauriModelRun
         status: meeki_model_downloader::DownloadStatus,
     ) {
         use meeki_model_downloader::DownloadStatus;
+        use tauri_specta::Event as _;
+
+        let _ = crate::types::DownloadProgressPayload {
+            model: model.clone(),
+            status: status.clone(),
+        }
+        .emit(&self.app_handle);
 
         let progress: i8 = match &status {
-            DownloadStatus::Downloading(p) => *p as i8,
+            DownloadStatus::Downloading { percent, .. } => *percent as i8,
             DownloadStatus::Completed => 100,
             DownloadStatus::Failed(_) => -1,
         };

@@ -11,6 +11,7 @@ mod commands;
 mod error;
 mod ext;
 mod migrate;
+mod types;
 
 pub use error::*;
 pub use ext::*;
@@ -18,6 +19,7 @@ pub use meeki_local_llm_core::{
     CustomModelInfo, ModelIdentifier, ModelInfo, ModelRecommendation, SUPPORTED_MODELS,
     SupportedModel,
 };
+pub use types::*;
 
 const PLUGIN_NAME: &str = "local-llm";
 
@@ -47,6 +49,9 @@ fn make_specta_builder<R: tauri::Runtime>() -> tauri_specta::Builder<R> {
             commands::sleep_idle_seconds,
             commands::start_server::<Wry>,
             commands::stop_server::<Wry>,
+        ])
+        .events(tauri_specta::collect_events![
+            types::DownloadProgressPayload
         ])
         .error_handling(tauri_specta::ErrorHandlingMode::Result)
 }

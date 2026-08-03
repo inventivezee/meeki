@@ -9,6 +9,10 @@ import {
 } from "react";
 
 import {
+  events as localLlmEvents,
+  type GgufLlmModel,
+} from "@meeki/plugin-local-llm";
+import {
   commands as localSttCommands,
   events as localSttEvents,
   type ServerStatus,
@@ -38,7 +42,15 @@ interface NotificationState {
 
 const NotificationContext = createContext<NotificationState | null>(null);
 
-const MODEL_DISPLAY_NAMES: Partial<Record<LocalModel, string>> = {
+type TrackedModel = LocalModel | GgufLlmModel;
+
+type DownloadSnapshot = {
+  progress: number;
+  downloadedBytes: number;
+  totalBytes: number;
+};
+
+const MODEL_DISPLAY_NAMES: Partial<Record<TrackedModel, string>> = {
   "soniqo-parakeet-streaming": "Soniqo Parakeet Streaming",
   "soniqo-parakeet-batch": "Soniqo Parakeet Batch",
   "am-parakeet-v2": "Parakeet v2",
@@ -91,34 +103,52 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const localSttStatus = isLocalSttModel ? (localSttQuery.data ?? null) : null;
 
   const [activeDownloads, setActiveDownloads] = useState<
-    Map<LocalModel, number>
+    Map<TrackedModel, DownloadSnapshot>
   >(new Map());
 
   useEffect(() => {
-    const unlisten = localSttEvents.downloadProgressPayload.listen((event) => {
-      const { model: eventModel, status } = event.payload;
-      const isFailed = typeof status === "object" && "failed" in status;
+    // Both plugins emit the same payload shape. Listening app-wide rather than
+    // per-component is what lets a settings tab re-attach to a download that
+    // started before it mounted.
+    const subscribe = (
+      listen: typeof localSttEvents.downloadProgressPayload.listen,
+    ) =>
+      listen((event) => {
+        const { model: eventModel, status } = event.payload;
+        const isFailed = typeof status === "object" && "failed" in status;
 
-      if (isFailed) {
-        const modelName = MODEL_DISPLAY_NAMES[eventModel] ?? eventModel;
-        sonnerToast.error(`Couldn’t download ${modelName}`, {
-          description: status.failed,
-        });
-      }
-
-      setActiveDownloads((prev) => {
-        const next = new Map(prev);
-        if (isFailed || status === "completed") {
-          next.delete(eventModel);
-        } else if (typeof status === "object" && "downloading" in status) {
-          next.set(eventModel, Math.max(0, Math.min(100, status.downloading)));
+        if (isFailed) {
+          const modelName = MODEL_DISPLAY_NAMES[eventModel] ?? eventModel;
+          sonnerToast.error(`Couldn’t download ${modelName}`, {
+            description: status.failed,
+          });
         }
-        return next;
+
+        setActiveDownloads((prev) => {
+          const next = new Map(prev);
+          if (isFailed || status === "completed") {
+            next.delete(eventModel);
+          } else if (typeof status === "object" && "downloading" in status) {
+            const { percent, downloadedBytes, totalBytes } = status.downloading;
+            next.set(eventModel, {
+              progress: Math.max(0, Math.min(100, percent)),
+              downloadedBytes,
+              totalBytes,
+            });
+          }
+          return next;
+        });
       });
-    });
+
+    const unlisteners = [
+      subscribe(localSttEvents.downloadProgressPayload.listen),
+      subscribe(localLlmEvents.downloadProgressPayload.listen),
+    ];
 
     return () => {
-      void unlisten.then((fn) => fn());
+      for (const unlisten of unlisteners) {
+        void unlisten.then((fn) => fn());
+      }
     };
   }, []);
 
@@ -139,10 +169,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
     const downloadsArray: DownloadProgress[] = Array.from(
       activeDownloads.entries(),
-    ).map(([model, progress]) => ({
+    ).map(([model, snapshot]) => ({
       model,
       displayName: MODEL_DISPLAY_NAMES[model] ?? model,
-      progress,
+      ...snapshot,
     }));
 
     const firstDownload = downloadsArray[0];

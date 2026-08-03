@@ -6,9 +6,27 @@ use crate::model::DownloadableModel;
 #[cfg_attr(feature = "specta", derive(specta::Type))]
 #[serde(rename_all = "camelCase")]
 pub enum DownloadStatus {
-    Downloading(u8),
+    /// `total_bytes` is 0 when the source never reported a size. Consumers
+    /// should fall back to the model's declared size rather than treat the
+    /// transfer as complete.
+    #[serde(rename_all = "camelCase")]
+    Downloading {
+        percent: u8,
+        downloaded_bytes: u64,
+        total_bytes: u64,
+    },
     Completed,
     Failed(String),
+}
+
+impl DownloadStatus {
+    pub fn downloading(percent: u8) -> Self {
+        Self::Downloading {
+            percent,
+            downloaded_bytes: 0,
+            total_bytes: 0,
+        }
+    }
 }
 
 pub trait ModelDownloaderRuntime<M: DownloadableModel>: Send + Sync + 'static {

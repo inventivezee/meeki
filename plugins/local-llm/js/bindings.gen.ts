@@ -127,6 +127,11 @@ async stopServer() : Promise<Result<null, string>> {
 /** user-defined events **/
 
 
+export const events = __makeEvents__<{
+downloadProgressPayload: DownloadProgressPayload
+}>({
+downloadProgressPayload: "plugin:local-llm:download-progress-payload"
+})
 
 /** user-defined constants **/
 
@@ -135,10 +140,25 @@ async stopServer() : Promise<Result<null, string>> {
 /** user-defined types **/
 
 export type CustomModelInfo = { path: string; name: string }
+/**
+ * Broadcast alongside the per-call `Channel<i8>` that `download_model` takes.
+ * 
+ * The channel is owned by whichever component started the download, so it dies
+ * when that component unmounts — navigating away from a settings tab used to
+ * lose all progress for a 13.6 GB transfer that was still running. An app-wide
+ * event lets any surface re-attach to a download already in flight.
+ */
+export type DownloadProgressPayload = { model: GgufLlmModel; status: DownloadStatus }
+export type DownloadStatus = 
+/**
+ * `total_bytes` is 0 when the source never reported a size. Consumers
+ * should fall back to the model's declared size rather than treat the
+ * transfer as complete.
+ */
+{ downloading: { percent: number; downloadedBytes: number; totalBytes: number } } | "completed" | { failed: string }
 export type GgufLlmModel = "qwen3.6-35b-a3b" | "qwen3.6-35b-a3b-q4km" | "gemma-4-26b-a4b" | "gemma-4-12b" | "qwen3-4b" | "llama-3.3-70b" | "Llama3p2_3bQ4" | "Gemma3_4bQ4" | "HyprLLM"
 export type ModelInfo = { key: GgufLlmModel; name: string; description: string; size_bytes: number; min_memory_bytes: number; warmup_seconds: number; parameters_billions: number }
 export type ModelRecommendation = { model: ModelInfo | null; total_memory_bytes: number }
-export type TAURI_CHANNEL<TSend> = null
 
 /** tauri-specta globals **/
 

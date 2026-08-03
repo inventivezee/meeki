@@ -239,7 +239,7 @@ async fn download_success() {
 
     let events = runtime.progress_statuses();
     assert!(
-        events.contains(&DownloadStatus::Downloading(0)),
+        events.contains(&DownloadStatus::downloading(0)),
         "should emit Downloading(0) (started): {events:?}"
     );
     assert!(

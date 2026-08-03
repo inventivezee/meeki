@@ -19,7 +19,7 @@ tauri-plugin-store = { workspace = true }
 [dependencies]
 meeki-local-llm-core = { workspace = true, features = ["specta"] }
 meeki-local-model = { workspace = true }
-meeki-model-downloader = { workspace = true }
+meeki-model-downloader = { workspace = true, features = ["specta"] }
 
 tauri = { workspace = true, features = ["test"] }
 tauri-specta = { workspace = true, features = ["derive", "typescript"] }
