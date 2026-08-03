@@ -27,9 +27,12 @@ impl<R: Runtime> ModelDownloaderRuntime<crate::SupportedModel> for TauriModelRun
         }
         .emit(&self.app_handle);
 
+        // -2 rather than -1: consumers of this legacy channel read -1 as a
+        // failure, and a pause is not one. They ignore anything below zero.
         let progress: i8 = match &status {
             DownloadStatus::Downloading { percent, .. } => *percent as i8,
             DownloadStatus::Completed => 100,
+            DownloadStatus::Paused { .. } => -2,
             DownloadStatus::Failed(_) => -1,
         };
 
@@ -43,7 +46,7 @@ impl<R: Runtime> ModelDownloaderRuntime<crate::SupportedModel> for TauriModelRun
         let send_result = channel.send(progress);
         let is_terminal = matches!(
             status,
-            DownloadStatus::Completed | DownloadStatus::Failed(_)
+            DownloadStatus::Completed | DownloadStatus::Failed(_) | DownloadStatus::Paused { .. }
         );
         if send_result.is_err() || is_terminal {
             guard.remove(&key);
@@ -156,7 +159,8 @@ impl<'a, R: Runtime, M: Manager<R>> LocalLlmExt<'a, R, M> {
             )
         };
 
-        dl.cancel_download(&model).await?;
+        // Not cancel_download: that deletes the partial, which is exactly what
+        // a resume needs. `download` already replaces any in-flight transfer.
 
         {
             let mut guard = channels.lock().unwrap();
@@ -185,6 +189,21 @@ impl<'a, R: Runtime, M: Manager<R>> LocalLlmExt<'a, R, M> {
             .await
             .cancel_download(&model)
             .await?)
+    }
+
+    /// Stops the transfer but keeps what has already landed, so a later
+    /// `download_model` picks up from there instead of refetching 13.6 GB.
+    pub async fn pause_download(&self, model: crate::SupportedModel) -> Result<bool, crate::Error> {
+        Ok(downloader(self.manager)
+            .await
+            .pause_download(&model)
+            .await?)
+    }
+
+    /// Bytes waiting to be resumed. Non-zero means the UI should offer Resume
+    /// rather than a fresh Download, even after a restart.
+    pub async fn paused_bytes(&self, model: crate::SupportedModel) -> Result<u64, crate::Error> {
+        Ok(downloader(self.manager).await.paused_bytes(&model).await?)
     }
 
     #[tracing::instrument(skip_all)]

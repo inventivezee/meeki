@@ -13,6 +13,8 @@ export type DownloadProgress = {
   /** 0 when the source never reported a size; prefer the declared model size. */
   downloadedBytes: number;
   totalBytes: number;
+  /** Stopped on purpose, with the fetched bytes kept for a resume. */
+  paused: boolean;
 };
 
 export type ToastType = {

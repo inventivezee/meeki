@@ -6,6 +6,8 @@ permissions = [
     "allow-is-model-downloaded",
     "allow-download-model",
     "allow-cancel-download",
+    "allow-pause-download",
+    "allow-paused-bytes",
     "allow-delete-model",
     "allow-list-downloaded-model",
     "allow-list-supported-model",

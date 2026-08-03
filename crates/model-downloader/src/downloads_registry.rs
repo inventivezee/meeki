@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
 
 use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
@@ -15,6 +16,11 @@ pub(crate) struct DownloadEntry {
     pub(crate) token: CancellationToken,
     pub(crate) generation: u64,
     pub(crate) download_path: PathBuf,
+    pub(crate) final_destination: PathBuf,
+    pub(crate) expected_bytes: u64,
+    /// Distinguishes a pause from a cancel: both cancel the token, only one
+    /// keeps the bytes already fetched.
+    pub(crate) paused: Arc<AtomicBool>,
 }
 
 impl DownloadsRegistry {

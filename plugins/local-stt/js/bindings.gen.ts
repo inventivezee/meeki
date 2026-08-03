@@ -127,7 +127,13 @@ export type DownloadStatus =
  * should fall back to the model's declared size rather than treat the
  * transfer as complete.
  */
-{ downloading: { percent: number; downloadedBytes: number; totalBytes: number } } | "completed" | { failed: string }
+{ downloading: { percent: number; downloadedBytes: number; totalBytes: number } } | 
+/**
+ * Stopped on purpose, with the partial file left on disk. Distinct from
+ * `Failed` because the bytes already fetched are still good and resuming
+ * picks up from them.
+ */
+{ paused: { downloadedBytes: number; totalBytes: number } } | "completed" | { failed: string }
 export type GgufLlmModel = "qwen3.6-35b-a3b" | "qwen3.6-35b-a3b-q4km" | "gemma-4-26b-a4b" | "gemma-4-12b" | "qwen3-4b" | "llama-3.3-70b" | "Llama3p2_3bQ4" | "Gemma3_4bQ4" | "HyprLLM"
 export type LocalModel = SoniqoModel | WhisperModel | AmModel | GgufLlmModel
 export type ServerInfo = { url: string | null; status: ServerStatus; model: LocalModel | null }

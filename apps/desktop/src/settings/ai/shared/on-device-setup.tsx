@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Channel } from "@tauri-apps/api/core";
-import { Loader2 } from "lucide-react";
+import { Loader2, PauseIcon, PlayIcon } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 import {
@@ -141,6 +141,49 @@ export function OnDeviceSetupCard() {
     },
   });
 
+  const pause = useMutation({
+    mutationFn: async () => {
+      if (!llmModel) return;
+      const result = await localLlmCommands.pauseDownload(llmModel.key);
+      if (result.status === "error") {
+        throw new Error(result.error);
+      }
+    },
+    onError: (error) => {
+      sonnerToast.error("Couldn’t pause the download", {
+        description: error instanceof Error ? error.message : String(error),
+      });
+    },
+  });
+
+  const resume = useMutation({
+    mutationFn: async () => {
+      if (!llmModel) return;
+      // Resuming is just downloading again: the partial on disk is picked up
+      // by a Range request rather than refetched.
+      const result = await localLlmCommands.downloadModel(
+        llmModel.key,
+        new Channel<number>(),
+      );
+      if (result.status === "error") {
+        throw new Error(result.error);
+      }
+    },
+    onError: (error) => {
+      sonnerToast.error("Couldn’t resume the download", {
+        description: error instanceof Error ? error.message : String(error),
+      });
+    },
+  });
+
+  const current = activeDownloads[0] ?? null;
+  const percent = current?.progress ?? null;
+  const paused = current?.paused === true;
+  // Only the GGUF leg can be paused; the Soniqo transfer is owned by the Swift
+  // bridge, which exposes start and poll but no stop.
+  const pausable = Boolean(llmModel && current?.model === llmModel.key);
+  const running = setup.isPending || inFlight.data === true || paused;
+
   // A download outlives this card, so the mutation that would have selected the
   // models can die with it. Without this, navigating away mid-download leaves
   // the user with the weights on disk and nothing using them.
@@ -149,7 +192,7 @@ export function OnDeviceSetupCard() {
       sawInFlight.current = true;
       return;
     }
-    if (!sawInFlight.current || setup.isPending) {
+    if (!sawInFlight.current || setup.isPending || paused) {
       return;
     }
     if (!sttReady.data || !llmReady) {
@@ -162,7 +205,14 @@ export function OnDeviceSetupCard() {
         description: error instanceof Error ? error.message : String(error),
       });
     });
-  }, [inFlight.data, sttReady.data, llmReady, llmModel?.key, setup.isPending]);
+  }, [
+    inFlight.data,
+    sttReady.data,
+    llmReady,
+    llmModel?.key,
+    setup.isPending,
+    paused,
+  ]);
 
   if (sttReady.data && llmReady) {
     return null;
@@ -172,10 +222,6 @@ export function OnDeviceSetupCard() {
   const totalBytes =
     (sttReady.data ? 0 : packBytes) +
     (llmModel && !llmReady ? llmModel.size_bytes : 0);
-
-  const running = setup.isPending || inFlight.data === true;
-  const current = activeDownloads[0] ?? null;
-  const percent = current?.progress ?? null;
 
   return (
     <div className="border-border/60 bg-card/70 flex flex-col gap-3 rounded-2xl border px-4 py-3">
@@ -204,11 +250,32 @@ export function OnDeviceSetupCard() {
           <div className="text-muted-foreground flex items-center gap-2 text-xs">
             <Loader2 className="size-3.5 shrink-0 animate-spin" />
             <span className="truncate">
-              {current
-                ? `Downloading ${current.displayName}`
-                : "Preparing download"}
+              {paused
+                ? `Paused · ${current?.displayName ?? ""}`
+                : current
+                  ? `Downloading ${current.displayName}`
+                  : "Preparing download"}
               {percent === null ? "" : ` · ${percent}%`}
             </span>
+            {pausable ? (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="ml-auto h-6 gap-1 px-2 text-xs"
+                onClick={() => (paused ? resume.mutate() : pause.mutate())}
+                disabled={pause.isPending || resume.isPending}
+              >
+                {paused ? (
+                  <>
+                    <PlayIcon className="size-3" /> Resume
+                  </>
+                ) : (
+                  <>
+                    <PauseIcon className="size-3" /> Pause
+                  </>
+                )}
+              </Button>
+            ) : null}
           </div>
           {current && current.totalBytes > 0 ? (
             <p className="text-muted-foreground text-xs tabular-nums">

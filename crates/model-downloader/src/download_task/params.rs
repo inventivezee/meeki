@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
 
 use tokio_util::sync::CancellationToken;
 
@@ -18,4 +19,5 @@ pub(crate) struct DownloadTaskParams<M: DownloadableModel> {
     pub(crate) key: String,
     pub(crate) generation: u64,
     pub(crate) cancellation_token: CancellationToken,
+    pub(crate) paused: Arc<AtomicBool>,
 }

@@ -62,6 +62,30 @@ pub async fn cancel_download<R: tauri::Runtime>(
 
 #[tauri::command]
 #[specta::specta]
+pub async fn pause_download<R: tauri::Runtime>(
+    app: tauri::AppHandle<R>,
+    model: crate::SupportedModel,
+) -> Result<bool, String> {
+    app.local_llm()
+        .pause_download(model)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn paused_bytes<R: tauri::Runtime>(
+    app: tauri::AppHandle<R>,
+    model: crate::SupportedModel,
+) -> Result<u64, String> {
+    app.local_llm()
+        .paused_bytes(model)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+#[specta::specta]
 pub async fn delete_model<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     model: crate::SupportedModel,

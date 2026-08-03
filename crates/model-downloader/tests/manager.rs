@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-use wiremock::matchers::{method, path};
+use wiremock::matchers::{header_exists, method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
 use model_downloader::{
@@ -180,7 +180,7 @@ fn part_files_in(dir: &Path) -> Vec<PathBuf> {
             let is_part = path
                 .file_name()
                 .and_then(|s| s.to_str())
-                .is_some_and(|s| s.contains(".part-"));
+                .is_some_and(|s| s.contains(".part"));
             if is_part {
                 out.push(path);
             }
@@ -270,7 +270,7 @@ async fn stale_cleanup_does_not_remove_replacement_download() {
     assert!(!manager.is_downloading(&second).await);
     assert!(
         part_files_in(runtime.temp_dir.path()).is_empty(),
-        "should not leave .part-* files behind"
+        "should not leave .part files behind"
     );
 }
 
@@ -340,7 +340,7 @@ async fn cancel_download_returns_true_and_cleans_up() {
     );
     assert!(
         part_files_in(runtime.temp_dir.path()).is_empty(),
-        "should not leave .part-* files behind"
+        "should not leave .part files behind"
     );
 }
 
@@ -379,7 +379,7 @@ async fn download_failure_cleans_up_part_file() {
     );
     assert!(
         part_files_in(runtime.temp_dir.path()).is_empty(),
-        "should not leave .part-* files behind"
+        "should not leave .part files behind"
     );
 }
 
@@ -406,7 +406,7 @@ async fn checksum_mismatch_cleans_up_part_file() {
     );
     assert!(
         part_files_in(runtime.temp_dir.path()).is_empty(),
-        "should not leave .part-* files behind"
+        "should not leave .part files behind"
     );
 }
 
@@ -492,4 +492,135 @@ async fn delete_not_downloaded_returns_error() {
     let result = manager.delete(&model).await;
 
     assert!(matches!(result, Err(Error::ModelNotDownloaded(_))));
+}
+
+/// Answers Range requests with a real 206, the way Hugging Face's CDN does.
+/// Without this a mock replies 200, and meeki_file discards the partial on its
+/// own — which would hide whether the sidecar guard does anything.
+async fn start_resumable_mock_server(route: &str, body: Vec<u8>) -> MockServer {
+    let server = MockServer::start().await;
+    let len = body.len();
+
+    Mock::given(method("HEAD"))
+        .and(path(route))
+        .respond_with(
+            ResponseTemplate::new(200)
+                .insert_header("content-length", len.to_string().as_str())
+                .insert_header("accept-ranges", "bytes"),
+        )
+        .mount(&server)
+        .await;
+
+    let suffix = body.clone();
+    Mock::given(method("GET"))
+        .and(path(route))
+        .and(header_exists("range"))
+        .respond_with(move |req: &wiremock::Request| {
+            let raw = req
+                .headers
+                .get("range")
+                .and_then(|v| v.to_str().ok())
+                .unwrap_or("");
+            let start: usize = raw
+                .trim_start_matches("bytes=")
+                .split('-')
+                .next()
+                .and_then(|v| v.parse().ok())
+                .unwrap_or(0);
+            let start = start.min(suffix.len());
+            let rest = suffix[start..].to_vec();
+            ResponseTemplate::new(206)
+                .insert_header(
+                    "content-range",
+                    format!("bytes {}-{}/{}", start, suffix.len() - 1, suffix.len()).as_str(),
+                )
+                .set_body_bytes(rest)
+        })
+        .mount(&server)
+        .await;
+
+    Mock::given(method("GET"))
+        .and(path(route))
+        .respond_with(
+            ResponseTemplate::new(200)
+                .set_body_bytes(body)
+                .insert_header("content-length", len.to_string().as_str()),
+        )
+        .mount(&server)
+        .await;
+
+    server
+}
+
+#[tokio::test]
+async fn a_partial_with_no_sidecar_is_discarded_rather_than_resumed_into() {
+    let server = start_resumable_mock_server("/model.bin", b"fresh weights".to_vec()).await;
+    let url = format!("{}/model.bin", server.uri());
+
+    let runtime = TestRuntime::new();
+    let manager = ModelDownloadManager::new(runtime.clone());
+    let model = TestModel::with_url("stale", url);
+
+    // Left by an earlier, unrelated attempt. The server will happily serve the
+    // rest of the file from this offset, so resuming yields a corrupt mixture
+    // of old and new bytes — and these models carry no checksum to catch it.
+    let part = runtime.temp_dir.path().join("stale.bin.part");
+    std::fs::write(&part, b"XXXXX").unwrap();
+
+    manager.download(&model).await.unwrap();
+    wait_until_done(&manager, &model).await;
+
+    assert_eq!(
+        std::fs::read(manager.model_path(&model).unwrap()).unwrap(),
+        b"fresh weights",
+        "an unvouched-for partial must not survive into the finished model"
+    );
+}
+
+#[tokio::test]
+async fn pause_keeps_the_partial_while_cancel_discards_it() {
+    let paused_server =
+        start_mock_server_with_delay("/model.bin", vec![1u8; 4096], Duration::from_millis(1_500))
+            .await;
+    let cancelled_server =
+        start_mock_server_with_delay("/model.bin", vec![2u8; 4096], Duration::from_millis(1_500))
+            .await;
+
+    let runtime = TestRuntime::new();
+    let manager = ModelDownloadManager::new(runtime.clone());
+
+    let paused_model = TestModel::with_url("paused", format!("{}/model.bin", paused_server.uri()));
+    let cancelled_model =
+        TestModel::with_url("cancelled", format!("{}/model.bin", cancelled_server.uri()));
+
+    manager.download(&paused_model).await.unwrap();
+    manager.download(&cancelled_model).await.unwrap();
+    tokio::time::sleep(Duration::from_millis(150)).await;
+
+    assert!(manager.pause_download(&paused_model).await.unwrap());
+    assert!(manager.cancel_download(&cancelled_model).await.unwrap());
+
+    // The sidecar is the deterministic signal: it survives a pause because the
+    // partial it vouches for is still usable, and is removed by a cancel.
+    let base = runtime.temp_dir.path();
+    assert!(
+        base.join("paused.bin.part.json").exists(),
+        "pausing must leave the partial resumable"
+    );
+    assert!(
+        !base.join("cancelled.bin.part.json").exists(),
+        "cancelling must not leave a partial behind"
+    );
+    assert!(
+        !base.join("cancelled.bin.part").exists(),
+        "cancelling must not leave a partial behind"
+    );
+
+    let events = runtime.progress_statuses();
+    assert!(
+        events
+            .iter()
+            .any(|s| matches!(s, DownloadStatus::Paused { .. })),
+        "pausing should report Paused, not Failed: {events:?}"
+    );
 }

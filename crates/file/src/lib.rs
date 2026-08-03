@@ -385,6 +385,12 @@ pub async fn download_file_parallel_cancellable<F: Fn(DownloadProgress) + Send +
 
     progress_callback(DownloadProgress::Started);
 
+    // Otherwise a resumed download reports 0% until the first new chunk lands,
+    // so a transfer that is 80% done briefly looks like it restarted.
+    if existing_size > 0 {
+        progress_callback(DownloadProgress::Progress(existing_size, total_size));
+    }
+
     for chunk_idx in 0..num_chunks {
         // Check for cancellation before starting new chunks
         if let Some(ref token) = cancellation_token

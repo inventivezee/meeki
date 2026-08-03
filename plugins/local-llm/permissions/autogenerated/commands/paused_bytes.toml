@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-paused-bytes"
+description = "Enables the paused_bytes command without any pre-configured scope."
+commands.allow = ["paused_bytes"]
+
+[[permission]]
+identifier = "deny-paused-bytes"
+description = "Denies the paused_bytes command without any pre-configured scope."
+commands.deny = ["paused_bytes"]

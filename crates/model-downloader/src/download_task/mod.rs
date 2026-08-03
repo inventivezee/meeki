@@ -1,7 +1,9 @@
 use tokio::sync::oneshot;
 use tokio::task::JoinHandle;
 
-use crate::download_task::failure::cleanup_for_failure;
+use std::sync::atomic::Ordering;
+
+use crate::download_task::failure::{cleanup_for_failure, forget_without_cleanup};
 use crate::download_task::steps::{ChecksumError, FinalizeError};
 use crate::download_task_progress::make_progress_callback;
 use crate::model::DownloadableModel;
@@ -37,6 +39,12 @@ pub(crate) fn spawn_download_task<M: DownloadableModel>(
             make_progress_callback(params.runtime.clone(), params.model.clone());
 
         if let Err(error) = steps::download(&params, progress_callback).await {
+            // A pause cancels the same token a cancel does, so the flag is the
+            // only thing that says whether the partial should survive.
+            if params.paused.load(Ordering::Relaxed) {
+                forget_without_cleanup(&params).await;
+                return;
+            }
             let reason = log_download_error(&error);
             fail_task(&params, reason).await;
             return;
@@ -64,6 +72,13 @@ pub(crate) fn spawn_download_task<M: DownloadableModel>(
             fail_task(&params, Some(reason)).await;
             return;
         }
+
+        // The sidecar only vouches for a partial. Once the real file is in
+        // place it is stale metadata that a later download would test against.
+        let _ = tokio::fs::remove_file(crate::download_paths::download_sidecar_path(
+            &params.final_destination,
+        ))
+        .await;
 
         params
             .runtime

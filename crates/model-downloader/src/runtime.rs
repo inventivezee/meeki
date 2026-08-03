@@ -15,6 +15,14 @@ pub enum DownloadStatus {
         downloaded_bytes: u64,
         total_bytes: u64,
     },
+    /// Stopped on purpose, with the partial file left on disk. Distinct from
+    /// `Failed` because the bytes already fetched are still good and resuming
+    /// picks up from them.
+    #[serde(rename_all = "camelCase")]
+    Paused {
+        downloaded_bytes: u64,
+        total_bytes: u64,
+    },
     Completed,
     Failed(String),
 }

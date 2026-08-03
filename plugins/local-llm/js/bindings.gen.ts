@@ -54,6 +54,22 @@ async cancelDownload(model: GgufLlmModel) : Promise<Result<boolean, string>> {
     else return { status: "error", error: e  as any };
 }
 },
+async pauseDownload(model: GgufLlmModel) : Promise<Result<boolean, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|pause_download", { model }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async pausedBytes(model: GgufLlmModel) : Promise<Result<number, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|paused_bytes", { model }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async deleteModel(model: GgufLlmModel) : Promise<Result<null, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|delete_model", { model }) };
@@ -155,7 +171,13 @@ export type DownloadStatus =
  * should fall back to the model's declared size rather than treat the
  * transfer as complete.
  */
-{ downloading: { percent: number; downloadedBytes: number; totalBytes: number } } | "completed" | { failed: string }
+{ downloading: { percent: number; downloadedBytes: number; totalBytes: number } } | 
+/**
+ * Stopped on purpose, with the partial file left on disk. Distinct from
+ * `Failed` because the bytes already fetched are still good and resuming
+ * picks up from them.
+ */
+{ paused: { downloadedBytes: number; totalBytes: number } } | "completed" | { failed: string }
 export type GgufLlmModel = "qwen3.6-35b-a3b" | "qwen3.6-35b-a3b-q4km" | "gemma-4-26b-a4b" | "gemma-4-12b" | "qwen3-4b" | "llama-3.3-70b" | "Llama3p2_3bQ4" | "Gemma3_4bQ4" | "HyprLLM"
 export type ModelInfo = { key: GgufLlmModel; name: string; description: string; size_bytes: number; min_memory_bytes: number; warmup_seconds: number; parameters_billions: number }
 export type ModelRecommendation = { model: ModelInfo | null; total_memory_bytes: number }

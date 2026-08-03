@@ -9,6 +9,8 @@ Default permissions for the plugin
 - `allow-is-model-downloaded`
 - `allow-download-model`
 - `allow-cancel-download`
+- `allow-pause-download`
+- `allow-paused-bytes`
 - `allow-delete-model`
 - `allow-list-downloaded-model`
 - `allow-list-supported-model`
@@ -258,6 +260,58 @@ Enables the models_dir command without any pre-configured scope.
 <td>
 
 Denies the models_dir command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`local-llm:allow-pause-download`
+
+</td>
+<td>
+
+Enables the pause_download command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`local-llm:deny-pause-download`
+
+</td>
+<td>
+
+Denies the pause_download command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`local-llm:allow-paused-bytes`
+
+</td>
+<td>
+
+Enables the paused_bytes command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`local-llm:deny-paused-bytes`
+
+</td>
+<td>
+
+Denies the paused_bytes command without any pre-configured scope.
 
 </td>
 </tr>

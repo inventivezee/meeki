@@ -48,6 +48,7 @@ type DownloadSnapshot = {
   progress: number;
   downloadedBytes: number;
   totalBytes: number;
+  paused: boolean;
 };
 
 const MODEL_DISPLAY_NAMES: Partial<Record<TrackedModel, string>> = {
@@ -128,12 +129,24 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
           const next = new Map(prev);
           if (isFailed || status === "completed") {
             next.delete(eventModel);
+          } else if (typeof status === "object" && "paused" in status) {
+            const { downloadedBytes, totalBytes } = status.paused;
+            next.set(eventModel, {
+              progress:
+                totalBytes > 0
+                  ? Math.round((downloadedBytes / totalBytes) * 100)
+                  : 0,
+              downloadedBytes,
+              totalBytes,
+              paused: true,
+            });
           } else if (typeof status === "object" && "downloading" in status) {
             const { percent, downloadedBytes, totalBytes } = status.downloading;
             next.set(eventModel, {
               progress: Math.max(0, Math.min(100, percent)),
               downloadedBytes,
               totalBytes,
+              paused: false,
             });
           }
           return next;
