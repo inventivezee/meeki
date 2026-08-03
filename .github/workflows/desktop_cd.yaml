@@ -362,7 +362,7 @@ jobs:
             Meeki is a local-first meeting notetaker for macOS. Recording,
             transcription and the assistant all run on your own machine.
 
-            **Requirements** — Apple Silicon (M1 or newer), macOS 14 or later.
+            **Requirements** — Apple Silicon (M1 or newer), macOS 15 or later.
 
             **Install** — download the `.dmg` below, open it, and drag Meeki to
             Applications. The build is signed and notarized by Apple, so it
