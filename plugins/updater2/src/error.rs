@@ -18,6 +18,10 @@ pub enum Error {
     UpdateNotAvailable,
     #[error("version mismatch: expected {expected}, got {actual}")]
     VersionMismatch { expected: String, actual: String },
+    #[error(
+        "Meeki is running from a location it cannot update in place ({path}). Move Meeki to your Applications folder and try again."
+    )]
+    AppNotInWritableLocation { path: String },
     #[error("failed to determine current app path")]
     FailedToDetermineCurrentAppPath,
     #[error("failed to schedule installed app launch at {path}: {details}")]

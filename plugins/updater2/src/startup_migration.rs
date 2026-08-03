@@ -85,7 +85,7 @@ fn legacy_target_app_path(current_app_path: &Path) -> Option<PathBuf> {
         .map(|parent| parent.join(target_name))
 }
 
-fn current_app_bundle_path() -> Result<PathBuf, crate::Error> {
+pub(crate) fn current_app_bundle_path() -> Result<PathBuf, crate::Error> {
     let executable_path = tauri::utils::platform::current_exe()?;
     current_app_bundle_path_from_executable(&executable_path)
 }

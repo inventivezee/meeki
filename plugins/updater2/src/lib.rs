@@ -3,6 +3,8 @@ mod error;
 mod events;
 mod ext;
 #[cfg(target_os = "macos")]
+#[cfg(target_os = "macos")]
+mod install_macos;
 mod startup_migration;
 mod store;
 

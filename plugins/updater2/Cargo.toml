@@ -16,6 +16,10 @@ specta-typescript = { workspace = true }
 [dependencies]
 tauri-plugin-store2 = { workspace = true }
 tauri-plugin-updater = { workspace = true }
+
+flate2 = { workspace = true }
+tar = { workspace = true }
+tempfile = { workspace = true }
 tokio = { workspace = true, features = ["macros", "time", "sync"] }
 
 tauri = { workspace = true, features = ["test"] }

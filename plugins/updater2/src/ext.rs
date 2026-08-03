@@ -211,6 +211,15 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Updater2<'a, R, M> {
 
         let _ = self.manager.store2().save();
 
+        // Not update.install on macOS: upstream stages through $TMPDIR and
+        // renames across filesystems, which fails with EXDEV for any app that
+        // is not on the boot data volume. See install_macos.
+        #[cfg(target_os = "macos")]
+        {
+            let _ = &update;
+            crate::install_macos::install_bundle(&bytes)?;
+        }
+        #[cfg(not(target_os = "macos"))]
         update.install(&bytes)?;
         Ok(InstallResult::RelaunchCurrent)
     }

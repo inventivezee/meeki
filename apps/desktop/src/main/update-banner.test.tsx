@@ -343,6 +343,62 @@ describe("SidebarTimelineUpdateButton", () => {
     });
   });
 
+  it("retries the install, not the download, after an install fails", async () => {
+    // The reported symptom was an icon oscillating between download and
+    // restart with nothing happening: a failed install rendered the same icon
+    // as "available", so the retry click ran download(), which short-circuits
+    // on the cached bytes and re-emits ready. Two clicks, zero progress.
+    installMock.mockResolvedValue({
+      status: "error",
+      error: "Cross-device link (os error 18)",
+    });
+
+    renderSidebarUpdateButton();
+
+    await waitFor(() =>
+      expect(eventHandlers.updateReady).toBeTypeOf("function"),
+    );
+    act(() => {
+      eventHandlers.updateReady?.({ payload: { version: "1.0.34" } });
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Restart to update" }));
+    await waitFor(() => expect(installMock).toHaveBeenCalledTimes(1));
+
+    downloadMock.mockClear();
+    const retry = await screen.findByRole("button", { name: "Retry update" });
+    fireEvent.click(retry);
+
+    await waitFor(() => expect(installMock).toHaveBeenCalledTimes(2));
+    expect(downloadMock).not.toHaveBeenCalled();
+  });
+
+  it("keeps the failure visible when a background check re-emits ready", async () => {
+    installMock.mockResolvedValue({ status: "error", error: "boom" });
+
+    renderSidebarUpdateButton();
+
+    await waitFor(() =>
+      expect(eventHandlers.updateReady).toBeTypeOf("function"),
+    );
+    act(() => {
+      eventHandlers.updateReady?.({ payload: { version: "1.0.34" } });
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Restart to update" }));
+    expect(
+      await screen.findByRole("button", { name: "Retry update" }),
+    ).toBeTruthy();
+
+    // The periodic check emits this whenever the bytes are cached, which used
+    // to silently erase the failure and its message.
+    act(() => {
+      eventHandlers.updateReady?.({ payload: { version: "1.0.34" } });
+    });
+
+    expect(screen.getByRole("button", { name: "Retry update" })).toBeTruthy();
+  });
+
   it("clears the button after the app reports it has updated", async () => {
     checkMock.mockResolvedValue({ status: "ok", data: "1.0.34" });
 

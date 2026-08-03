@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { DownloadIcon, RotateCwIcon } from "lucide-react";
+import { AlertTriangleIcon, DownloadIcon, RotateCwIcon } from "lucide-react";
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 
 import {
@@ -7,6 +7,7 @@ import {
   events as updaterEvents,
   type Result,
 } from "@meeki/plugin-updater2";
+import { sonnerToast } from "@meeki/ui/components/ui/toast";
 import { cn } from "@meeki/utils";
 
 import { useMountEffect } from "~/shared/hooks/useMountEffect";
@@ -113,12 +114,20 @@ export function useDesktopUpdateControl(): DesktopUpdateControl {
           });
         }),
         updaterEvents.updateReadyEvent.listen(({ payload }) => {
-          setEventState({
-            status: "ready",
-            version: payload.version,
-            downloadedBytes: 0,
-            contentLength: null,
-            errorMessage: null,
+          setEventState((previous) => {
+            // The bytes being cached is not news after an install failed: a
+            // periodic check re-emits this, and clobbering "failed" is what
+            // made the icon oscillate between download and restart forever.
+            if (previous?.status === "failed") {
+              return previous;
+            }
+            return {
+              status: "ready",
+              version: payload.version,
+              downloadedBytes: 0,
+              contentLength: null,
+              errorMessage: null,
+            };
           });
         }),
         updaterEvents.updateDownloadFailedEvent.listen(({ payload }) => {
@@ -237,12 +246,19 @@ export function useDesktopUpdateControl(): DesktopUpdateControl {
       unwrapResult(await updaterCommands.postinstall(result));
     },
     onError: (error, version) => {
+      const message = readErrorMessage(error);
       setEventState({
         status: "failed",
         version,
         downloadedBytes: 0,
         contentLength: null,
-        errorMessage: readErrorMessage(error),
+        errorMessage: message,
+      });
+      // A 28px icon button has nowhere to put this, and it was going nowhere
+      // else — errorMessage was returned by the hook and read by no one.
+      sonnerToast.error("Couldn’t install the update", {
+        id: "update-install-failed",
+        description: message,
       });
     },
   });
@@ -356,7 +372,11 @@ export function SidebarTimelineUpdateButton({
         "focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden",
         "disabled:cursor-default disabled:bg-blue-500 disabled:text-white disabled:opacity-70 disabled:hover:bg-blue-500",
       ])}
-      onClick={isReady ? update.installUpdate : update.downloadUpdate}
+      onClick={
+        isReady || update.status === "failed"
+          ? update.installUpdate
+          : update.downloadUpdate
+      }
     >
       {isDownloading ? (
         <SidebarCircularProgress progress={update.progress} />
@@ -431,6 +451,12 @@ function sidebarUpdateLabel(
 function sidebarActionIcon(status: UpdateBannerStatus): ReactNode {
   if (status === "ready") {
     return <RotateCwIcon size={14} aria-hidden="true" />;
+  }
+
+  // Distinct from "available": they were pixel-identical, so a failed install
+  // was indistinguishable from an update waiting to be fetched.
+  if (status === "failed") {
+    return <AlertTriangleIcon size={14} aria-hidden="true" />;
   }
 
   return <DownloadIcon size={14} aria-hidden="true" />;
