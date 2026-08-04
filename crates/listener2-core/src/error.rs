@@ -37,6 +37,10 @@ pub enum BatchFailure {
     ProgressiveStreamError { provider: String, message: String },
     #[error("Timed out waiting for progressive batch stream response.")]
     ProgressiveStreamTimeout,
+    #[error(
+        "The {model} transcription model isn't downloaded yet. The recording was kept — this will finish once the download does."
+    )]
+    ModelNotDownloaded { model: String },
 }
 
 impl BatchFailure {
@@ -60,6 +64,7 @@ impl BatchFailure {
             Self::ProgressiveStartFailed { .. } => BatchErrorCode::ProgressiveStartFailed,
             Self::ProgressiveStreamError { .. } => BatchErrorCode::ProgressiveStreamError,
             Self::ProgressiveStreamTimeout => BatchErrorCode::ProgressiveStreamTimeout,
+            Self::ModelNotDownloaded { .. } => BatchErrorCode::ModelNotDownloaded,
         }
     }
 }

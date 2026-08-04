@@ -408,13 +408,46 @@ private actor SoniqoBridge {
     downloadStates[kind] = state
 
     let task = Task.detached(priority: .utility) {
-      try await kind.load { fraction, status in
-        Task {
-          await SoniqoBridge.shared.updateDownloadProgress(
+      // An outer retry on top of the Hub client's own ladder, because that one
+      // is exhausted in about ten minutes and is not tunable from here. A
+      // closed laptop lid kills the sockets and burned every attempt while the
+      // machine was asleep, so the model never arrived. These waits are long
+      // enough that the process is awake again when they fire, and each retry
+      // skips every file that already landed — the Hub writes a .metadata
+      // sidecar only after a file completes.
+      let waitsSeconds: [UInt64] = [30, 60, 120]
+      var attempt = 0
+
+      while true {
+        do {
+          return try await kind.load { fraction, status in
+            Task {
+              await SoniqoBridge.shared.updateDownloadProgress(
+                kind: kind,
+                fraction: fraction,
+                status: status
+              )
+            }
+          }
+        } catch {
+          // A deliberate cancel is not a failure to retry through.
+          if Task.isCancelled || error is CancellationError {
+            throw error
+          }
+          if attempt >= waitsSeconds.count {
+            throw error
+          }
+
+          let wait = waitsSeconds[attempt]
+          attempt += 1
+          await SoniqoBridge.shared.updateDownloadRetrying(
             kind: kind,
-            fraction: fraction,
-            status: status
+            attempt: attempt,
+            waitSeconds: wait
           )
+          // Throws CancellationError promptly if the task is cancelled while
+          // waiting, so a reset does not sit here for two minutes.
+          try await Task.sleep(nanoseconds: wait * 1_000_000_000)
         }
       }
     }
@@ -426,9 +459,33 @@ private actor SoniqoBridge {
         let model = try await task.value
         await SoniqoBridge.shared.finishModelLoad(kind: kind, model: model)
       } catch {
+        // A cancelled download is not an error state — reset and delete both
+        // cancel, and writing "error" there would surface a failure the user
+        // caused on purpose.
+        if error is CancellationError || (error as? URLError)?.code == .cancelled {
+          await SoniqoBridge.shared.clearModelTask(kind: kind)
+          return
+        }
         await SoniqoBridge.shared.finishModelLoad(kind: kind, error: error)
       }
     }
+  }
+
+  /// Keeps the transfer reported as in flight across a retry wait. The settings
+  /// card treats "not downloading" as a hard stop, so going idle here would
+  /// abort its own sequencer.
+  func updateDownloadRetrying(kind: SpeechModelKind, attempt: Int, waitSeconds: UInt64) {
+    var state = downloadState(for: kind)
+    state.status = "downloading"
+    state.currentFile =
+      "Connection lost — retrying in \(waitSeconds)s (attempt \(attempt + 1))"
+    state.error = nil
+    downloadStates[kind] = state
+  }
+
+  func clearModelTask(kind: SpeechModelKind) {
+    modelTasks[kind] = nil
+    refreshReadyState(for: kind)
   }
 
   func resetModel(modelId: String) {
@@ -437,6 +494,10 @@ private actor SoniqoBridge {
     }
 
     loadedModels[kind] = nil
+    // Cancelling matters: dropping the handle alone leaves the download running,
+    // which made reset_model a no-op against a live transfer and let
+    // delete_model remove_dir_all a directory Swift was still writing into.
+    modelTasks[kind]?.cancel()
     modelTasks[kind] = nil
     refreshReadyState(for: kind)
 
@@ -717,6 +778,16 @@ private actor SoniqoBridge {
       let loaded = try await task.value
       loadedModels[kind] = loaded
       return loaded
+    }
+
+    // Deliberately does not download. This runs inside transcription, where a
+    // silent multi-gigabyte fetch cost a user their transcript when it failed:
+    // it registers nothing in modelTasks, so is_model_downloading reported
+    // false throughout and the settings card would happily start a second
+    // concurrent transfer into the same cache directory. Downloads belong to
+    // startModelDownload, which reports progress and can be observed.
+    guard kind.filesReady() else {
+      throw SoniqoBridgeError.message("\(kind.label) is not downloaded.")
     }
 
     let loaded = try await kind.load(progressHandler: nil)

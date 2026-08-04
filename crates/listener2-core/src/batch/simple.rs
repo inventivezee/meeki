@@ -177,6 +177,39 @@ pub(super) async fn run_soniqo_batch(
             })?
             .batch_model();
 
+        // Checked before anything else: the Swift bridge downloads a missing
+        // model *inside* the transcription call, so without this a stopped
+        // recording silently starts a 1.7 GB fetch and loses the transcript if
+        // it fails. spawn_blocking because this crosses the FFI onto a
+        // dispatch semaphore.
+        let downloaded = tokio::task::spawn_blocking(move || {
+            meeki_transcribe_soniqo::is_model_downloaded(model)
+        })
+        .await;
+        match downloaded {
+            Ok(Ok(true)) => {}
+            Ok(Ok(false)) => {
+                return Err(crate::BatchFailure::ModelNotDownloaded {
+                    model: model.display_name().to_string(),
+                }
+                .into());
+            }
+            Ok(Err(error)) => {
+                return Err(crate::BatchFailure::DirectRequestFailed {
+                    provider: "soniqo".to_string(),
+                    message: error.to_string(),
+                }
+                .into());
+            }
+            Err(error) => {
+                return Err(crate::BatchFailure::DirectRequestFailed {
+                    provider: "soniqo".to_string(),
+                    message: error.to_string(),
+                }
+                .into());
+            }
+        }
+
         let file_path = params.file_path.clone();
         let file_extension = Path::new(&file_path)
             .extension()

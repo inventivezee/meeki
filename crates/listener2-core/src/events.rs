@@ -22,6 +22,9 @@ pub enum BatchErrorCode {
     ProgressiveStartFailed,
     ProgressiveStreamError,
     ProgressiveStreamTimeout,
+    /// The transcript could not be produced because its model is absent. The
+    /// audio is kept, so this is a "not yet", not a loss.
+    ModelNotDownloaded,
 }
 
 #[derive(serde::Serialize, Clone)]

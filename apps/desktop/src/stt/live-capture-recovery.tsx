@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
+import { commands as fsSyncCommands } from "@meeki/plugin-fs-sync";
+import { events as localSttEvents } from "@meeki/plugin-local-stt";
 import { commands as listenerCommands } from "@meeki/plugin-transcription";
 
 import {
@@ -8,6 +10,7 @@ import {
   loadCaptureLifecycleMarkers,
 } from "./capture-lifecycle-storage";
 import { listenCaptureRecoveryRequests } from "./capture-recovery-requests";
+import { useListener } from "./contexts";
 import {
   hasMicrophone,
   NO_MICROPHONE_MESSAGE,
@@ -109,9 +112,35 @@ export function LiveCaptureRecovery() {
         );
       });
 
+    // A batch pass that failed for a missing model is waiting on exactly one
+    // event, and it is not a timer. When the download finishes, replay the
+    // durable markers — the audio is still on disk, so the transcript can
+    // still be produced without the user relaunching or asking.
+    const downloadUnlisten = localSttEvents.downloadProgressPayload.listen(
+      (event) => {
+        if (event.payload.status !== "completed") {
+          return;
+        }
+        void loadCaptureLifecycleMarkers()
+          .then((markers) => {
+            addSessionIds(
+              markers.map((marker) => marker.sessionId),
+              true,
+            );
+          })
+          .catch((error) => {
+            console.error(
+              "[listener] failed to replay capture recovery after a model download",
+              error,
+            );
+          });
+      },
+    );
+
     return () => {
       active = false;
       unlisten?.();
+      void downloadUnlisten.then((stop) => stop());
     };
   }, []);
 
@@ -135,6 +164,9 @@ function LiveCaptureSessionRecovery({
   onComplete: (sessionId: string, recoveryToken: number) => void;
 }) {
   const resumeListeningLifecycle = useResumeListeningLifecycle(sessionId);
+  const finishFinalization = useListener(
+    (state) => state.finishCaptureRecoveryFinalization,
+  );
 
   useEffect(() => {
     let active = true;
@@ -176,7 +208,27 @@ function LiveCaptureSessionRecovery({
         try {
           const marker = await loadCaptureLifecycleMarker(sessionId);
           if (marker) {
-            await clearCaptureLifecycleMarker(sessionId, marker.transcriptId);
+            // The marker is the only durable record that this session still
+            // needs a transcript, and it is replayed at every launch. Three
+            // retries two seconds apart is an unwinnable budget against a
+            // multi-gigabyte model download, and clearing it here is what
+            // turned a temporary failure into a permanently lost transcript.
+            // Keep it whenever the audio survives; there is still something to
+            // recover from.
+            const audio = await fsSyncCommands.audioPath(sessionId);
+            const audioSurvives = audio.status === "ok" && !!audio.data;
+
+            if (audioSurvives) {
+              console.warn(
+                "[listener] keeping capture recovery marker; audio is still on disk",
+                { sessionId },
+              );
+              // Released so a later attempt in this same run is not rejected
+              // before it starts.
+              finishFinalization(sessionId);
+            } else {
+              await clearCaptureLifecycleMarker(sessionId, marker.transcriptId);
+            }
           }
         } catch (error) {
           console.error(

@@ -11,6 +11,7 @@ import {
 
 import { withCloudsyncActivity } from "~/db/cloudsync-activity";
 import { getEnhancerService } from "~/services/enhancer";
+import { useTabs } from "~/store/zustand/tabs";
 import {
   getLocalFinalBatchModel,
   isLocalSoniqoSttModel,
@@ -69,7 +70,8 @@ export function useRegenerateTranscript(sessionId: string): {
   confirmDialog: ReactNode;
 } {
   const runBatch = useRunBatch(sessionId);
-  const { conn } = useSTTConnection();
+  const { conn, local } = useSTTConnection();
+  const openNew = useTabs((state) => state.openNew);
   const handleBatchFailed = useListener((state) => state.handleBatchFailed);
   const [pending, setPending] = useState<PendingConfirm | null>(null);
 
@@ -121,6 +123,27 @@ export function useRegenerateTranscript(sessionId: string): {
     }
 
     if (!conn) {
+      // The connection is null *because* the model is absent, so the old
+      // "configure a model in Settings" message fired at exactly the moment the
+      // user needed a download, not a settings change. Offer the download.
+      if (local.data?.status === "not_downloaded") {
+        sonnerToast.error("The transcription model isn’t downloaded yet.", {
+          id: `transcript-regenerate-not-downloaded-${sessionId}`,
+          description:
+            "Your recording is safe. Download the model and this will finish.",
+          action: {
+            label: "Download",
+            onClick: () => {
+              openNew({
+                type: "settings",
+                state: { tab: "transcription" },
+              });
+            },
+          },
+        });
+        return;
+      }
+
       sonnerToast.error("Configure a speech-to-text model in Settings first.", {
         id: `transcript-regenerate-no-stt-${sessionId}`,
       });

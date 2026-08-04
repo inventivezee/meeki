@@ -12,6 +12,8 @@ const mocks = vi.hoisted(() => ({
   resumeBySession: new Map<string, ReturnType<typeof vi.fn>>(),
 }));
 
+const finishFinalizationMock = vi.hoisted(() => vi.fn());
+
 vi.mock("@meeki/plugin-transcription", () => ({
   commands: {
     getCaptureSnapshot: mocks.getCaptureSnapshot,
@@ -28,6 +30,14 @@ vi.mock("./useStartListening", () => ({
     }
     return resume;
   },
+}));
+
+// The component releases the finalization claim on give-up so a retry in the
+// same run is not rejected before it starts; these tests render without a
+// ListenerProvider.
+vi.mock("./contexts", () => ({
+  useListener: (selector: (state: unknown) => unknown) =>
+    selector({ finishCaptureRecoveryFinalization: finishFinalizationMock }),
 }));
 
 vi.mock("./capture-recovery-requests", () => ({

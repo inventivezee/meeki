@@ -58,8 +58,12 @@ export function useTranscriptScreen({
     sessionMode === "active" || sessionMode === "finalizing";
   const captureMode = getLiveCaptureUiMode(live);
   const isRecordOnlyMode = sessionMode === "active" && captureMode !== "live";
-  const hasVisibleTranscriptState =
-    hasTranscriptWords || liveSegments.length > 0 || !!batchError;
+  const hasTranscriptContent = hasTranscriptWords || liveSegments.length > 0;
+  // batchError still counts as "visible" so an active session with an error is
+  // not shown as merely listening — but it must not, on its own, route to the
+  // ready branch. Zero words plus an error used to render an empty pane, which
+  // hid the one screen that offers Re-transcribe.
+  const hasVisibleTranscriptState = hasTranscriptContent || !!batchError;
 
   if (sessionMode === "running_batch") {
     return {
@@ -84,7 +88,7 @@ export function useTranscriptScreen({
     };
   }
 
-  if (!hasVisibleTranscriptState) {
+  if (!hasTranscriptContent) {
     return {
       kind: "empty",
       hasAudio: audioExists,
