@@ -24,7 +24,41 @@ use {
 static CLIENT: OnceLock<reqwest::Client> = OnceLock::new();
 
 fn get_client() -> &'static reqwest::Client {
-    CLIENT.get_or_init(reqwest::Client::new)
+    CLIENT.get_or_init(|| {
+        // A bare Client has no timeouts at all, so a socket that goes quiet
+        // mid-download leaves the progress bar frozen with the transfer still
+        // considered active — forever. No total timeout on purpose: a
+        // multi-gigabyte model legitimately takes hours on a slow link.
+        reqwest::Client::builder()
+            .connect_timeout(std::time::Duration::from_secs(30))
+            .read_timeout(std::time::Duration::from_secs(60))
+            .tcp_keepalive(std::time::Duration::from_secs(30))
+            .build()
+            .unwrap_or_else(|_| reqwest::Client::new())
+    })
+}
+
+impl crate::Error {
+    /// Whether retrying could reasonably succeed with the bytes already on disk.
+    ///
+    /// A dropped connection is the normal cost of downloading gigabytes over
+    /// real networks — and of closing a laptop lid. Treating it like a corrupt
+    /// archive and deleting the partial is what turned a Wi-Fi blip at 90% of a
+    /// 13.6 GB model into starting over.
+    pub fn is_transient(&self) -> bool {
+        match self {
+            Self::ReqwestError(error) => {
+                error.is_timeout()
+                    || error.is_connect()
+                    || error.is_request()
+                    || error.is_body()
+                    || error.is_decode()
+            }
+            // A checksum mismatch, a failed rename, or a bad HTTP status will
+            // not fix itself, and the bytes on disk cannot be trusted.
+            Self::FileIOError(_) | Self::Cancelled | Self::OtherError(_) => false,
+        }
+    }
 }
 
 /// Makes a request with optional range header and returns the response.

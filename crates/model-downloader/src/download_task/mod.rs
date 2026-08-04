@@ -45,6 +45,16 @@ pub(crate) fn spawn_download_task<M: DownloadableModel>(
                 forget_without_cleanup(&params).await;
                 return;
             }
+
+            // A dropped connection is not a corrupt download. Keeping the bytes
+            // and reporting Paused turns a Wi-Fi blip — or a closed lid — into
+            // a Resume rather than starting a 13.6 GB transfer over.
+            if error.is_transient() {
+                tracing::info!(error = %error, "model_download_interrupted");
+                pause_task(&params).await;
+                return;
+            }
+
             let reason = log_download_error(&error);
             fail_task(&params, reason).await;
             return;
@@ -88,6 +98,22 @@ pub(crate) fn spawn_download_task<M: DownloadableModel>(
             .remove_if_generation_matches(&params.key, params.generation)
             .await;
     })
+}
+
+/// Stops without discarding the partial, and reports it as resumable.
+async fn pause_task<M: DownloadableModel>(params: &DownloadTaskParams<M>) {
+    let downloaded_bytes = crate::download_paths::partial_bytes(&params.final_destination)
+        .await
+        .unwrap_or(0);
+
+    params.runtime.emit_progress(
+        &params.model,
+        crate::runtime::DownloadStatus::Paused {
+            downloaded_bytes,
+            total_bytes: params.model.download_size().unwrap_or(0),
+        },
+    );
+    forget_without_cleanup(params).await;
 }
 
 async fn fail_task<M: DownloadableModel>(params: &DownloadTaskParams<M>, reason: Option<String>) {

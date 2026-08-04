@@ -13,6 +13,7 @@ import { cn } from "@meeki/utils";
 
 import { OtherLocalModels } from "./other-models";
 
+import { useNotifications } from "~/contexts/notifications";
 import {
   formatGb,
   formatMemoryGb,
@@ -46,6 +47,7 @@ async function activateOnDeviceLlm(model: GgufLlmModel) {
 
 export function OnDeviceLlmCard() {
   const queryClient = useQueryClient();
+  const { downloadsFor } = useNotifications();
   const [phase, setPhase] = useState<DownloadPhase>("idle");
   // null means "in progress but this mount doesn't own the progress channel".
   const [progress, setProgress] = useState<number | null>(null);
@@ -71,6 +73,14 @@ export function OnDeviceLlmCard() {
   const defaultModel = recommended.data?.model ?? null;
   const totalMemoryBytes = recommended.data?.total_memory_bytes ?? 0;
   const modelKey = defaultModel?.key ?? "none";
+  // Falls back to the app-wide stream when this mount has no channel of its own
+  // — a download started from the setup card, or before this tab was opened.
+  // Without it `progress` stayed null and the bar rendered full-width and
+  // pulsing, which reads as "nearly done" at 6%.
+  const sharedProgress = downloadsFor(
+    defaultModel ? [defaultModel.key] : [],
+  ).current;
+  const shownProgress = progress ?? sharedProgress?.progress ?? null;
   const modelName = defaultModel?.name ?? "the on-device model";
 
   const downloaded = useQuery({
@@ -334,27 +344,27 @@ export function OnDeviceLlmCard() {
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={
-              showStarting || progress === null ? undefined : progress
+              showStarting || shownProgress === null ? undefined : shownProgress
             }
             aria-valuetext={
               showStarting
                 ? `Starting ${modelName}`
-                : progress === null
+                : shownProgress === null
                   ? `Downloading ${modelName}`
-                  : `${progress}%`
+                  : `${shownProgress}%`
             }
             aria-label={`${modelName} download progress`}
           >
             <div
               className={cn([
                 "bg-foreground/80 h-full rounded-full transition-[width] duration-300 ease-out",
-                (showStarting || progress === null) && "animate-pulse",
+                (showStarting || shownProgress === null) && "animate-pulse",
               ])}
               style={{
                 width:
-                  showStarting || progress === null
+                  showStarting || shownProgress === null
                     ? "100%"
-                    : `${Math.max(progress, 2)}%`,
+                    : `${Math.max(shownProgress, 2)}%`,
               }}
             />
           </div>

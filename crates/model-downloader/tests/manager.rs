@@ -624,3 +624,74 @@ async fn pause_keeps_the_partial_while_cancel_discards_it() {
         "pausing should report Paused, not Failed: {events:?}"
     );
 }
+
+#[tokio::test]
+async fn an_interrupted_download_keeps_its_bytes_for_a_resume() {
+    // The reported behaviour: a Wi-Fi blip at 90% of a 13.6 GB model discarded
+    // every byte, because any download error took the failure path and that
+    // deletes the partial. A dropped connection is not a corrupt archive.
+    let server = MockServer::start().await;
+    let body = vec![9u8; 2048];
+    let len = body.len().to_string();
+
+    Mock::given(method("HEAD"))
+        .and(path("/model.bin"))
+        .respond_with(ResponseTemplate::new(200).insert_header("content-length", len.as_str()))
+        .mount(&server)
+        .await;
+
+    // Answers the headers, then never sends the body — reqwest gives up on the
+    // read timeout, which is what a vanished network looks like.
+    Mock::given(method("GET"))
+        .and(path("/model.bin"))
+        .respond_with(
+            ResponseTemplate::new(200)
+                .insert_header("content-length", len.as_str())
+                .set_delay(Duration::from_secs(120)),
+        )
+        .mount(&server)
+        .await;
+
+    let runtime = TestRuntime::new();
+    let manager = ModelDownloadManager::new(runtime.clone());
+    let model = TestModel::with_url("interrupted", format!("{}/model.bin", server.uri()));
+
+    // Bytes from an earlier attempt of this same download. The sidecar has to
+    // match or the partial is correctly discarded before the transfer starts.
+    let base = runtime.temp_dir.path();
+    std::fs::write(base.join("interrupted.bin.part"), vec![9u8; 1024]).unwrap();
+    std::fs::write(
+        base.join("interrupted.bin.part.json"),
+        serde_json::json!({
+            "url": format!("{}/model.bin", server.uri()),
+            "expected_bytes": 0,
+        })
+        .to_string(),
+    )
+    .unwrap();
+
+    manager.download(&model).await.unwrap();
+    // Long enough for the read timeout to fire, not for the mock to answer.
+    tokio::time::timeout(Duration::from_secs(90), async {
+        loop {
+            if !manager.is_downloading(&model).await {
+                break;
+            }
+            tokio::time::sleep(Duration::from_millis(100)).await;
+        }
+    })
+    .await
+    .expect("the interrupted download should settle");
+
+    let events = runtime.progress_statuses();
+    assert!(
+        !events
+            .iter()
+            .any(|s| matches!(s, DownloadStatus::Failed(_))),
+        "a dropped connection must not be reported as a failure: {events:?}"
+    );
+    assert!(
+        base.join("interrupted.bin.part").exists(),
+        "the partial must survive so the transfer can resume"
+    );
+}

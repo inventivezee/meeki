@@ -33,7 +33,7 @@ const SETUP_TOAST_ID = "on-device-setup";
  */
 export function OnDeviceSetupCard() {
   const queryClient = useQueryClient();
-  const { activeDownloads } = useNotifications();
+  const { downloadsFor } = useNotifications();
   const sawInFlight = useRef(false);
 
   const recommended = useQuery({
@@ -176,9 +176,15 @@ export function OnDeviceSetupCard() {
     },
   });
 
-  const current = activeDownloads[0] ?? null;
+  // This card's own models, in the order it downloads them — not whatever
+  // happened to report progress first.
+  const mine = downloadsFor([
+    ...ON_DEVICE_STT_PACK,
+    ...(llmModel ? [llmModel.key] : []),
+  ]);
+  const current = mine.current;
   const percent = current?.progress ?? null;
-  const paused = current?.paused === true;
+  const paused = mine.paused;
   // Only the GGUF leg can be paused; the Soniqo transfer is owned by the Swift
   // bridge, which exposes start and poll but no stop.
   const pausable = Boolean(llmModel && current?.model === llmModel.key);
