@@ -13,6 +13,7 @@ import {
 } from "@meeki/plugin-local-stt";
 import { Button } from "@meeki/ui/components/ui/button";
 import { sonnerToast } from "@meeki/ui/components/ui/toast";
+import { cn } from "@meeki/utils";
 
 import { useNotifications } from "~/contexts/notifications";
 import {
@@ -164,7 +165,12 @@ export function OnDeviceSetupCard() {
     ...(llmModel ? [llmModel.key] : []),
   ]);
   const current = mine.current;
-  const percent = current?.progress ?? null;
+  // A percentage is only shown when byte counts back it up. The Soniqo bridge
+  // reports a fraction weighted per *file*, so a 2.4 GB shard is one sixth of
+  // the bar and the whole transfer crawls 0% -> 13%. A number that moves one
+  // point per 185 MB is worse than no number; an indeterminate bar is honest.
+  const hasByteCounts = (current?.totalBytes ?? 0) > 0;
+  const percent = hasByteCounts ? (current?.progress ?? null) : null;
   const paused = mine.paused;
   // Only the GGUF leg can be paused; the Soniqo transfer is owned by the Swift
   // bridge, which exposes start and poll but no stop.
@@ -278,8 +284,13 @@ export function OnDeviceSetupCard() {
             aria-label="On-device model download progress"
           >
             <div
-              className="bg-foreground/80 h-full rounded-full transition-[width] duration-300 ease-out"
-              style={{ width: `${Math.max(percent ?? 2, 2)}%` }}
+              className={cn([
+                "bg-foreground/80 h-full rounded-full transition-[width] duration-300 ease-out",
+                percent === null && "animate-pulse",
+              ])}
+              style={{
+                width: percent === null ? "100%" : `${Math.max(percent, 2)}%`,
+              }}
             />
           </div>
         </div>
