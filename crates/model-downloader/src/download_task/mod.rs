@@ -14,6 +14,10 @@ mod steps;
 
 pub(crate) use params::DownloadTaskParams;
 
+/// Long enough that a closed lid or a dropped link has plausibly recovered,
+/// short enough that a user watching the bar sees it move again.
+const RETRY_WAITS_SECONDS: [u64; 3] = [30, 60, 120];
+
 pub(crate) fn spawn_download_task<M: DownloadableModel>(
     params: DownloadTaskParams<M>,
     start_rx: oneshot::Receiver<()>,
@@ -35,10 +39,21 @@ pub(crate) fn spawn_download_task<M: DownloadableModel>(
             }
         };
 
-        let progress_callback =
-            make_progress_callback(params.runtime.clone(), params.model.clone());
+        // Retried here rather than driven by a sleep observer. The process is
+        // frozen while the Mac sleeps, so these waits elapse *after* wake, with
+        // the network back — which is exactly the moment to try again. The
+        // partial and its Range resume mean each attempt continues rather than
+        // restarts, and the registry entry stays put so the settings card's own
+        // sequencer does not read this as a stop.
+        let mut attempt = 0usize;
+        loop {
+            let progress_callback =
+                make_progress_callback(params.runtime.clone(), params.model.clone());
 
-        if let Err(error) = steps::download(&params, progress_callback).await {
+            let Err(error) = steps::download(&params, progress_callback).await else {
+                break;
+            };
+
             // A pause cancels the same token a cancel does, so the flag is the
             // only thing that says whether the partial should survive.
             if params.paused.load(Ordering::Relaxed) {
@@ -46,18 +61,43 @@ pub(crate) fn spawn_download_task<M: DownloadableModel>(
                 return;
             }
 
-            // A dropped connection is not a corrupt download. Keeping the bytes
-            // and reporting Paused turns a Wi-Fi blip — or a closed lid — into
-            // a Resume rather than starting a 13.6 GB transfer over.
-            if error.is_transient() {
-                tracing::info!(error = %error, "model_download_interrupted");
-                pause_task(&params).await;
+            // A checksum mismatch or a bad status will not fix itself.
+            if !error.is_transient() {
+                let reason = log_download_error(&error);
+                fail_task(&params, reason).await;
                 return;
             }
 
-            let reason = log_download_error(&error);
-            fail_task(&params, reason).await;
-            return;
+            let Some(wait) = RETRY_WAITS_SECONDS.get(attempt).copied() else {
+                // Out of attempts. The bytes are still good, so this is a
+                // resumable pause rather than a failure.
+                tracing::info!(error = %error, "model_download_gave_up_retrying");
+                pause_task(&params).await;
+                return;
+            };
+            attempt += 1;
+
+            tracing::info!(
+                error = %error,
+                attempt,
+                wait_seconds = wait,
+                "model_download_interrupted_retrying"
+            );
+            // Reported as paused for the wait: it is not transferring, and the
+            // UI already knows how to render a resumable pause.
+            emit_paused(&params).await;
+
+            tokio::select! {
+                _ = tokio::time::sleep(std::time::Duration::from_secs(wait)) => {}
+                _ = params.cancellation_token.cancelled() => {
+                    if params.paused.load(Ordering::Relaxed) {
+                        forget_without_cleanup(&params).await;
+                    } else {
+                        cleanup_for_failure(&params).await;
+                    }
+                    return;
+                }
+            }
         }
 
         if let Some(expected_checksum) = params.model.download_checksum()
@@ -100,8 +140,7 @@ pub(crate) fn spawn_download_task<M: DownloadableModel>(
     })
 }
 
-/// Stops without discarding the partial, and reports it as resumable.
-async fn pause_task<M: DownloadableModel>(params: &DownloadTaskParams<M>) {
+async fn emit_paused<M: DownloadableModel>(params: &DownloadTaskParams<M>) {
     let downloaded_bytes = crate::download_paths::partial_bytes(&params.final_destination)
         .await
         .unwrap_or(0);
@@ -113,6 +152,11 @@ async fn pause_task<M: DownloadableModel>(params: &DownloadTaskParams<M>) {
             total_bytes: params.model.download_size().unwrap_or(0),
         },
     );
+}
+
+/// Stops without discarding the partial, and reports it as resumable.
+async fn pause_task<M: DownloadableModel>(params: &DownloadTaskParams<M>) {
+    emit_paused(params).await;
     forget_without_cleanup(params).await;
 }
 

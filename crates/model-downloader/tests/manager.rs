@@ -671,19 +671,25 @@ async fn an_interrupted_download_keeps_its_bytes_for_a_resume() {
     .unwrap();
 
     manager.download(&model).await.unwrap();
-    // Long enough for the read timeout to fire, not for the mock to answer.
-    tokio::time::timeout(Duration::from_secs(90), async {
+
+    // Waits for the first Paused, not for the task to finish: an interruption
+    // now backs off and retries, so the transfer stays registered for minutes.
+    // The read timeout is what makes this take ~a minute.
+    let events = tokio::time::timeout(Duration::from_secs(120), async {
         loop {
-            if !manager.is_downloading(&model).await {
-                break;
+            let events = runtime.progress_statuses();
+            if events
+                .iter()
+                .any(|s| matches!(s, DownloadStatus::Paused { .. }))
+            {
+                return events;
             }
-            tokio::time::sleep(Duration::from_millis(100)).await;
+            tokio::time::sleep(Duration::from_millis(200)).await;
         }
     })
     .await
-    .expect("the interrupted download should settle");
+    .expect("an interrupted download should report Paused");
 
-    let events = runtime.progress_statuses();
     assert!(
         !events
             .iter()
