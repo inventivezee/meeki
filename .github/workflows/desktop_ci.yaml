@@ -52,6 +52,10 @@ jobs:
           platform: ${{ matrix.platform }}
       - if: matrix.platform == 'macos'
         run: echo "SDKROOT=$(xcrun --sdk macosx --show-sdk-path)" >> $GITHUB_ENV
+      # tauri.conf.json declares resources/llama-cpp, and the build script
+      # refuses to run without it. desktop_cd already does this; this job never
+      # did, because it had only ever queued on a runner nobody has.
+      - run: pnpm -F desktop llama:prepare
       - run: cargo check -p desktop
       - run: cargo test -p desktop
       - run: |
@@ -157,6 +161,12 @@ jobs:
       - uses: ./.github/actions/rust_install
         with:
           platform: windows
+      # prepare-llama-cpp.mjs only fetches macOS binaries, so this job cannot
+      # run it — but the build script still insists the declared resource path
+      # exists. This job type-checks and never bundles, so an empty directory
+      # is enough; desktop_cd exercises the real resource.
+      - run: mkdir -p apps/desktop/src-tauri/resources/llama-cpp
+        shell: bash
       - run: cargo check --locked -p desktop
       - run: cargo test --locked -p desktop --no-run
       - run: cargo test --locked -p cloudsync loads_bundled_cloudsync
