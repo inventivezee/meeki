@@ -5,8 +5,10 @@ import { useCallback } from "react";
 
 import { commands as localLlmCommands } from "@meeki/plugin-local-llm";
 import { Button } from "@meeki/ui/components/ui/button";
+import { sonnerToast } from "@meeki/ui/components/ui/toast";
 
 import { formatGb } from "~/settings/ai/shared/model-facts";
+import { downloadAndActivateOnDevice } from "~/settings/ai/shared/on-device-setup";
 import { useTabs } from "~/store/zustand/tabs";
 import { sttPackBytes } from "~/stt/on-device-pack";
 
@@ -39,6 +41,32 @@ export function ModelsSection({ onContinue }: { onContinue: () => void }) {
     onContinue();
   }, [onContinue, openCurrent]);
 
+  // Both of the choices below used to call onContinue() and nothing else, so a
+  // fresh install finished onboarding with no transcription model and no
+  // provider set — and met the consequences at its first recording.
+  const startLocalDownload = useCallback(() => {
+    // Not awaited: this is fifteen minutes of downloading. Progress is tracked
+    // app-wide, and the settings card finishes activation even if this screen
+    // is long gone.
+    void downloadAndActivateOnDevice(
+      recommended.data?.model?.key ?? null,
+    ).catch((error: unknown) => {
+      sonnerToast.error("Couldn’t finish the on-device download", {
+        id: "onboarding-on-device-download",
+        description: error instanceof Error ? error.message : String(error),
+      });
+    });
+    openCurrent({ type: "settings", state: { tab: "transcription" } });
+    onContinue();
+  }, [onContinue, openCurrent, recommended.data?.model?.key]);
+
+  // Cloud needs a key, so the honest action is to go and add one rather than
+  // silently record the choice and leave the user with nothing configured.
+  const chooseCloud = useCallback(() => {
+    openCurrent({ type: "settings", state: { tab: "intelligence" } });
+    onContinue();
+  }, [onContinue, openCurrent]);
+
   return (
     <div className="flex flex-col gap-3">
       <p className="text-muted-foreground text-sm leading-relaxed">
@@ -49,7 +77,10 @@ export function ModelsSection({ onContinue }: { onContinue: () => void }) {
       </p>
 
       <div className="flex flex-col gap-2">
-        <Button className="w-full justify-start gap-2" onClick={onContinue}>
+        <Button
+          className="w-full justify-start gap-2"
+          onClick={startLocalDownload}
+        >
           <DownloadIcon className="size-4 shrink-0" />
           <Trans>Download local & private models (about {totalGb} GB)</Trans>
         </Button>
@@ -63,10 +94,10 @@ export function ModelsSection({ onContinue }: { onContinue: () => void }) {
         <Button
           variant="outline"
           className="w-full justify-start gap-2"
-          onClick={onContinue}
+          onClick={chooseCloud}
         >
           <CloudIcon className="size-4 shrink-0" />
-          <Trans>Use cloud models instead (skip the download)</Trans>
+          <Trans>Use cloud models instead (add an API key)</Trans>
         </Button>
 
         <Button

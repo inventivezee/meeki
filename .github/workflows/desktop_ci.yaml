@@ -57,6 +57,12 @@ jobs:
       # did, because it had only ever queued on a runner nobody has.
       - run: pnpm -F desktop llama:prepare
       - run: cargo check -p desktop
+      # ort-sys downloads a prebuilt onnxruntime in its build script, and cargo
+      # check never links so a failed download goes unnoticed until cargo test
+      # does. A clean rebuild here is cheap and makes the download happen in a
+      # step that will actually report it. Verified locally that a fully clean
+      # ort-sys links fine, so the config itself is not the problem.
+      - run: cargo clean -p ort-sys
       - run: cargo test -p desktop
       - run: |
           cargo test --workspace \

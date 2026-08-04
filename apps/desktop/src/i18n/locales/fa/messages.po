@@ -2530,7 +2530,7 @@ msgid "Use an existing key"
 msgstr ""
 
 #: src/onboarding/models.tsx
-msgid "Use cloud models instead (skip the download)"
+msgid "Use cloud models instead (add an API key)"
 msgstr ""
 
 #: src/onboarding/permissions.tsx

@@ -19,7 +19,7 @@ This note is a quick way to see how Meeki works.
 Click **Record** in the top-right corner. Meeki will listen to your microphone and system audio, transcribe what it hears, and turn it into notes.
 
 
-Your first recording downloads Meeki's on-device transcription models (about 2 GB), so everything stays private on your Mac. To get them ready ahead of time, open **Settings → Transcription** and click **Download on-device models**.
+Recording needs Meeki's on-device models, so everything stays private on your Mac. Open **Settings → Transcription** and click **Download on-device models** — it's a few gigabytes and a one-time wait.
 
 
 When you stop recording, Meeki can start creating your summary.`;

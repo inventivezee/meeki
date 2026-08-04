@@ -2530,8 +2530,8 @@ msgid "Use an existing key"
 msgstr "Use an existing key"
 
 #: src/onboarding/models.tsx
-msgid "Use cloud models instead (skip the download)"
-msgstr "Use cloud models instead (skip the download)"
+msgid "Use cloud models instead (add an API key)"
+msgstr "Use cloud models instead (add an API key)"
 
 #: src/onboarding/permissions.tsx
 msgid "Use system audio to capture other speakers"

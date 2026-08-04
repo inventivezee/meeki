@@ -101,28 +101,9 @@ export function OnDeviceSetupCard() {
 
   const setup = useMutation({
     mutationFn: async () => {
-      if (!sttReady.data) {
-        for (const model of ON_DEVICE_STT_PACK) {
-          await downloadSttModel(model);
-        }
-      }
-
-      if (llmModel && !llmReady) {
-        // The channel only feeds this component; the durable progress the UI
-        // renders comes from the app-wide event. It stays because cancelling
-        // the download still relies on it.
-        const channel = new Channel<number>();
-        const result = await localLlmCommands.downloadModel(
-          llmModel.key,
-          channel,
-        );
-        if (result.status === "error") {
-          throw new Error(result.error);
-        }
-        await waitForLlmDownload(llmModel.key);
-      }
-
-      await activateOnDevice(llmModel?.key ?? null);
+      // downloadAndActivateOnDevice skips what is already on disk, so passing
+      // the recommended model is safe even when only one leg is missing.
+      await downloadAndActivateOnDevice(llmModel?.key ?? null);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
@@ -313,6 +294,36 @@ export function OnDeviceSetupCard() {
       )}
     </div>
   );
+}
+
+/**
+ * Downloads the on-device pack and selects it. Shared with onboarding, whose
+ * "Download local & private models" button used to call onContinue() and
+ * nothing else — a fresh install reached the record button with no model at all.
+ *
+ * Long-lived by design: callers that must not block should not await it. Every
+ * surface tracks the progress through the app-wide event, and the setup card
+ * finishes activation on its own if this caller goes away.
+ */
+export async function downloadAndActivateOnDevice(
+  llmModel: GgufLlmModel | null,
+) {
+  for (const model of ON_DEVICE_STT_PACK) {
+    await downloadSttModel(model);
+  }
+
+  if (llmModel) {
+    const result = await localLlmCommands.downloadModel(
+      llmModel,
+      new Channel<number>(),
+    );
+    if (result.status === "error") {
+      throw new Error(result.error);
+    }
+    await waitForLlmDownload(llmModel);
+  }
+
+  await activateOnDevice(llmModel);
 }
 
 async function downloadSttModel(model: LocalModel) {
