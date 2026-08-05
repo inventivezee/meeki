@@ -31,8 +31,18 @@ const SETUP_TOAST_ID = "on-device-setup";
 /**
  * Single entry point for on-device AI. Transcription always uses the fixed
  * Parakeet + Qwen3 pair; only the interpretation model varies with memory.
+ *
+ * `scope` exists because this card renders on two settings pages. Under
+ * Transcription it used to describe — and offer to download — the 13.6 GB
+ * summarisation model, which has nothing to do with transcription and read as a
+ * mistake.
  */
-export function OnDeviceSetupCard() {
+export function OnDeviceSetupCard({
+  scope = "all",
+}: {
+  scope?: "all" | "stt";
+} = {}) {
+  const includesLlm = scope === "all";
   const queryClient = useQueryClient();
   const { downloadsFor } = useNotifications();
   const sawInFlight = useRef(false);
@@ -72,10 +82,12 @@ export function OnDeviceSetupCard() {
     refetchInterval: 2_000,
   });
 
-  const llmModel = recommended.data?.model ?? null;
-  const llmReady = Boolean(
-    llmModel && llmDownloaded.data?.includes(llmModel.key),
-  );
+  const llmModel = includesLlm ? (recommended.data?.model ?? null) : null;
+  // Vacuously true when this card is not responsible for the LLM, so the
+  // transcription page still hides the card once transcription is set up.
+  const llmReady =
+    !includesLlm ||
+    Boolean(llmModel && llmDownloaded.data?.includes(llmModel.key));
 
   // Asked of the backend rather than tracked in component state: a download
   // outlives this card, so remounting it after a tab switch must not offer to
@@ -219,10 +231,15 @@ export function OnDeviceSetupCard() {
   return (
     <div className="border-border/60 bg-card/70 flex flex-col gap-3 rounded-2xl border px-4 py-3">
       <div className="flex flex-col gap-1">
-        <p className="text-sm font-medium">Set up on-device AI</p>
+        <p className="text-sm font-medium">
+          {includesLlm
+            ? "Set up on-device AI"
+            : "Set up on-device transcription"}
+        </p>
         <p className="text-muted-foreground text-xs leading-relaxed">
-          Downloads everything Meeki needs to work offline: Parakeet and Qwen3
-          for transcription
+          {includesLlm
+            ? "Downloads everything Meeki needs to work offline: Parakeet and Qwen3 for transcription"
+            : "Downloads Parakeet and Qwen3 so transcription runs on this Mac"}
           {llmModel ? `, and ${llmModel.name} for summaries` : ""}. About{" "}
           {formatGb(totalBytes)} GB from Hugging Face. The runtimes are already
           in the app.

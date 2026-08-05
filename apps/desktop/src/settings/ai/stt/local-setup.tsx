@@ -100,7 +100,7 @@ export function LocalTranscriptionSetup() {
         })}
       </div>
 
-      <OnDeviceSetupCard />
+      <OnDeviceSetupCard scope="stt" />
     </div>
   );
 }
