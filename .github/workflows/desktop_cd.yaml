@@ -81,6 +81,11 @@ jobs:
     # failing, which is a miserable way to discover you do not have an account.
     # macos-latest is Apple Silicon, matching the aarch64 target.
     runs-on: macos-latest
+    # A hung codesign — it blocks on Apple's timestamp service — used to burn
+    # the full six-hour default before GitHub killed the job. A signed,
+    # notarized build takes about 50 minutes, so this fails fast enough to
+    # retry the same day.
+    timeout-minutes: 100
     strategy:
       fail-fast: true
       matrix:
@@ -318,6 +323,7 @@ jobs:
     if: ${{ inputs.channel != 'staging' && inputs.publish && !cancelled() && needs.cn-publish.result == 'success' && needs.build-macos.result == 'success' }}
     needs: [compute-version, build-macos, cn-publish]
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: write
     steps:
