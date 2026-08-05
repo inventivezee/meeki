@@ -65,6 +65,13 @@ const UUID_TITLE_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const ISO_TITLE_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/;
 const PENDING_AUTO_ENHANCE_RECOVERY_INTERVAL_MS = 5_000;
+/**
+ * A pending job that cannot run — no model downloaded, no provider configured —
+ * used to be re-queued every five seconds for as long as the app stayed open,
+ * logging each time. Backing off turns a hot loop into a slow poll that still
+ * picks the job up once a model arrives.
+ */
+const PENDING_AUTO_ENHANCE_MAX_INTERVAL_MS = 5 * 60_000;
 const TEXT_CONTAINER_TYPES = new Set([
   "doc",
   "heading",
@@ -200,6 +207,8 @@ export class EnhancerService {
     PendingAutoEnhanceJob | undefined
   >();
   private pendingRetries = new Map<string, ReturnType<typeof setTimeout>>();
+  private pendingResumeDelayMs = PENDING_AUTO_ENHANCE_RECOVERY_INTERVAL_MS;
+  private readonly loggedPendingResume = new Set<string>();
   private pendingResumeTimer: ReturnType<typeof setTimeout> | null = null;
   private unsubscribe: (() => void) | null = null;
   private eventListeners = new Set<(event: EnhancerEvent) => void>();
@@ -307,6 +316,10 @@ export class EnhancerService {
       await this.resetEnhanceTasks(sessionId);
       this.activeAutoEnhance.delete(sessionId);
       this.clearRetry(sessionId);
+      // Something completed, so the backoff earned by a stuck job should not
+      // penalise the next one.
+      this.pendingResumeDelayMs = PENDING_AUTO_ENHANCE_RECOVERY_INTERVAL_MS;
+      this.loggedPendingResume.delete(sessionId);
       this.schedulePendingAutoEnhanceResume();
       this.queueAutoEnhance(sessionId, pendingAutoEnhance);
       return;
@@ -344,14 +357,31 @@ export class EnhancerService {
         if (live.status === "active" && live.sessionId === job.sessionId) {
           continue;
         }
-        console.info("[enhancer] resuming pending auto-enhance", {
-          sessionId: job.sessionId,
-        });
+        // Logged only on the first attempt for a session. The same job
+        // reappearing every poll is the normal shape of "waiting for a model",
+        // not news worth a line each time.
+        if (!this.loggedPendingResume.has(job.sessionId)) {
+          this.loggedPendingResume.add(job.sessionId);
+          console.info("[enhancer] resuming pending auto-enhance", {
+            sessionId: job.sessionId,
+          });
+        }
         this.queueAutoEnhance(job.sessionId, job);
       }
 
       if (jobs.length > 0) {
-        this.schedulePendingAutoEnhanceResume();
+        // Schedules at the current delay, then doubles for next time, so the
+        // first retry is still prompt and only a persistently stuck job — one
+        // waiting on a multi-gigabyte download — slows down.
+        const delayMs = this.pendingResumeDelayMs;
+        this.pendingResumeDelayMs = Math.min(
+          delayMs * 2,
+          PENDING_AUTO_ENHANCE_MAX_INTERVAL_MS,
+        );
+        this.schedulePendingAutoEnhanceResume(delayMs);
+      } else {
+        this.pendingResumeDelayMs = PENDING_AUTO_ENHANCE_RECOVERY_INTERVAL_MS;
+        this.loggedPendingResume.clear();
       }
     } catch (error) {
       console.error("[enhancer] failed to resume pending auto-enhance", error);
