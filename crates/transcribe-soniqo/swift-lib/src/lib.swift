@@ -103,6 +103,37 @@ private enum SpeechModelKind: String, CaseIterable {
     (try? cacheDirectoryURL().path) ?? ""
   }
 
+  /// The byte-weighted downloader rejects any name containing a path separator
+  /// (validatedRemoteFileName), so the CoreML kinds — whose weights live under
+  /// `encoder.mlmodelc/...` — cannot use it and keep the file-counted path.
+  var supportsByteWeightedDownload: Bool {
+    switch self {
+    case .qwen3Small, .qwen3Large:
+      return true
+    case .parakeetStreaming, .parakeetBatch, .omnilingual:
+      return false
+    }
+  }
+
+  /// The files downloadWeights resolves for these repos. Listed explicitly
+  /// because the Hub module is not a dependency of this target and the
+  /// downloader exposes no listing API — and because the byte-weighted
+  /// downloader takes names, not globs.
+  ///
+  /// Getting this wrong is safe: an unexpected name fails the prefetch, the
+  /// error is swallowed, and kind.load downloads whatever is missing the old
+  /// way. The cost is progress accuracy, never the model.
+  var weightFiles: [String] {
+    [
+      "config.json",
+      "model.safetensors",
+      "model.safetensors.index.json",
+      "vocab.json",
+      "merges.txt",
+      "tokenizer_config.json",
+    ]
+  }
+
   func filesReady() -> Bool {
     guard let directory = try? cacheDirectoryURL() else {
       return false
@@ -275,6 +306,11 @@ private struct ModelDownloadPayload: Codable {
   var status: String
   var currentFile: String?
   var progressPercent: Int?
+  /// Zero when unknown. The Hub's own fraction is weighted per file, so a 2.4 GB
+  /// shard counts the same as a 40 KB config and the bar barely moves; these
+  /// come from the byte-weighted downloader instead.
+  var downloadedBytes: Int64
+  var totalBytes: Int64
   var localPath: String
   var error: String?
 }
@@ -368,6 +404,8 @@ private actor SoniqoBridge {
           status: "error",
           currentFile: nil,
           progressPercent: nil,
+          downloadedBytes: 0,
+          totalBytes: 0,
           localPath: "",
           error: "Unsupported Soniqo model."
         )
@@ -420,6 +458,40 @@ private actor SoniqoBridge {
 
       while true {
         do {
+          // Prefetch with real byte accounting where the repo allows it. The
+          // Hub's snapshot weights each file equally, so a 2.4 GB shard is one
+          // of six units and the bar crawls 0% -> 13% before jumping. This
+          // fetches the same files with byte-level progress; kind.load then
+          // finds them present and does no network work.
+          //
+          // Best effort: if listing or fetching fails, fall through to load,
+          // which downloads whatever is missing the old way. A wrong glob costs
+          // accuracy, never the download.
+          if kind.supportsByteWeightedDownload {
+            do {
+              let directory = try kind.cacheDirectoryURL()
+              try await HuggingFaceDownloader.downloadFilesByteWeighted(
+                modelId: kind.repo,
+                to: directory,
+                files: kind.weightFiles
+              ) { _, completed, total, name in
+                Task {
+                  await SoniqoBridge.shared.updateDownloadBytes(
+                    kind: kind,
+                    completedBytes: completed,
+                    totalBytes: total,
+                    fileName: name
+                  )
+                }
+              }
+            } catch {
+              if Task.isCancelled || error is CancellationError {
+                throw error
+              }
+              // Falls through to kind.load, which will fetch what is missing.
+            }
+          }
+
           return try await kind.load { fraction, status in
             Task {
               await SoniqoBridge.shared.updateDownloadProgress(
@@ -469,6 +541,27 @@ private actor SoniqoBridge {
         await SoniqoBridge.shared.finishModelLoad(kind: kind, error: error)
       }
     }
+  }
+
+  /// Real byte counts, from the byte-weighted downloader. Unlike
+  /// updateDownloadProgress, the percentage here means what it says.
+  func updateDownloadBytes(
+    kind: SpeechModelKind,
+    completedBytes: Int64,
+    totalBytes: Int64,
+    fileName: String
+  ) {
+    var state = downloadState(for: kind)
+    state.status = "downloading"
+    state.currentFile = fileName.isEmpty ? state.currentFile : fileName
+    state.downloadedBytes = completedBytes
+    state.totalBytes = totalBytes
+    state.progressPercent =
+      totalBytes > 0
+      ? Int((Double(completedBytes) / Double(totalBytes) * 100.0).rounded(.down))
+      : nil
+    state.error = nil
+    downloadStates[kind] = state
   }
 
   /// Keeps the transfer reported as in flight across a retry wait. The settings
@@ -870,6 +963,8 @@ private actor SoniqoBridge {
       status: "idle",
       currentFile: nil,
       progressPercent: nil,
+      downloadedBytes: 0,
+      totalBytes: 0,
       localPath: kind.cacheDirectoryPath(),
       error: nil
     )

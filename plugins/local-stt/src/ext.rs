@@ -425,15 +425,13 @@ fn spawn_soniqo_progress_poller<R: Runtime>(
                             .error
                             .unwrap_or_else(|| "Soniqo model download failed".to_string()),
                     ),
+                    // Passed through, never derived. These are real counts from
+                    // the byte-weighted downloader where the repo supports it,
+                    // and zero — meaning unknown — where it does not.
                     _ => DownloadStatus::Downloading {
                         percent: state.progress_percent.unwrap_or(0).min(100),
-                        // Zero means unknown, and the UI hides the byte line.
-                        // These used to be derived from the percent, which made
-                        // "0 MB of 1.8 GB" the same number printed twice — and
-                        // the declared total is ~40% under the real payload.
-                        // Swift owns this transfer and reports no byte counts.
-                        downloaded_bytes: 0,
-                        total_bytes: 0,
+                        downloaded_bytes: state.downloaded_bytes,
+                        total_bytes: state.total_bytes,
                     },
                 },
                 Ok(Err(error)) => DownloadStatus::Failed(error.to_string()),

@@ -216,6 +216,12 @@ pub struct ModelDownloadState {
     pub status: String,
     pub current_file: Option<String>,
     pub progress_percent: Option<u8>,
+    /// Real byte counts where the transfer can report them. Zero means unknown,
+    /// which the UI renders as an indeterminate bar rather than a percentage.
+    #[serde(default)]
+    pub downloaded_bytes: u64,
+    #[serde(default)]
+    pub total_bytes: u64,
     pub local_path: String,
     pub error: Option<String>,
 }
