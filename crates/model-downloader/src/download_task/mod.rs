@@ -192,6 +192,10 @@ fn log_download_error(error: &meeki_file::Error) -> Option<String> {
         meeki_file::Error::FileIOError(e) => {
             format!("File system error: {}", e)
         }
+        meeki_file::Error::HttpStatus { status, .. } => match status {
+            404 | 410 => "That model is no longer available for download.".to_string(),
+            _ => format!("The download server returned {status}. Please try again."),
+        },
         meeki_file::Error::Cancelled => unreachable!(),
         meeki_file::Error::OtherError(msg) => msg.clone(),
     };

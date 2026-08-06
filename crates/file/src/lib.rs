@@ -54,8 +54,13 @@ impl crate::Error {
                     || error.is_body()
                     || error.is_decode()
             }
-            // A checksum mismatch, a failed rename, or a bad HTTP status will
-            // not fix itself, and the bytes on disk cannot be trusted.
+            // 403 is the one that cost a user 6.8 GB: Hugging Face's signed CDN
+            // URLs expire, and a 13.6 GB download can outlive its signature.
+            // Retrying re-resolves the redirect and gets a fresh one. 408, 429
+            // and 5xx are plainly retryable. A 404 or 410 will not fix itself.
+            Self::HttpStatus { status, .. } => {
+                matches!(status, 403 | 408 | 429) || (500..600).contains(status)
+            }
             Self::FileIOError(_) | Self::Cancelled | Self::OtherError(_) => false,
         }
     }
@@ -156,11 +161,10 @@ pub async fn download_file_with_callback_cancellable<F: Fn(DownloadProgress)>(
     .await?;
 
     if !res.status().is_success() && res.status() != StatusCode::PARTIAL_CONTENT {
-        return Err(crate::Error::OtherError(format!(
-            "Download failed with status {}: {}",
-            res.status(),
-            url
-        )));
+        return Err(crate::Error::HttpStatus {
+            status: res.status().as_u16(),
+            url: url.to_string(),
+        });
     }
 
     // If we tried to resume but server doesn't support it, start fresh
@@ -171,11 +175,10 @@ pub async fn download_file_with_callback_cancellable<F: Fn(DownloadProgress)>(
         res = request_with_range(url.clone(), None).await?;
 
         if !res.status().is_success() {
-            return Err(crate::Error::OtherError(format!(
-                "Download failed with status {}: {}",
-                res.status(),
-                url
-            )));
+            return Err(crate::Error::HttpStatus {
+                status: res.status().as_u16(),
+                url: url.to_string(),
+            });
         }
     }
 
@@ -335,11 +338,10 @@ pub async fn download_file_parallel_cancellable<F: Fn(DownloadProgress) + Send +
 
     // Check if the resource exists before attempting download
     if !head_response.status().is_success() {
-        return Err(crate::Error::OtherError(format!(
-            "Resource not found or inaccessible (status {}): {}",
-            head_response.status(),
-            url
-        )));
+        return Err(crate::Error::HttpStatus {
+            status: head_response.status().as_u16(),
+            url: url.to_string(),
+        });
     }
 
     let total_size = get_content_length_from_headers(&head_response);
@@ -469,16 +471,16 @@ pub async fn download_file_parallel_cancellable<F: Fn(DownloadProgress) + Send +
             let range_header = format!("bytes={}-{}", start, end);
 
             let response = client
-                .get(url_clone)
+                .get(url_clone.clone())
                 .header("Range", range_header)
                 .send()
                 .await?;
 
             if response.status() != StatusCode::PARTIAL_CONTENT {
-                return Err(crate::Error::OtherError(format!(
-                    "Server didn't return partial content (status: {})",
-                    response.status()
-                )));
+                return Err(crate::Error::HttpStatus {
+                    status: response.status().as_u16(),
+                    url: url_clone.to_string(),
+                });
             }
 
             let mut bytes = Vec::new();

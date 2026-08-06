@@ -346,17 +346,20 @@ async fn cancel_download_returns_true_and_cleans_up() {
 
 #[tokio::test]
 async fn download_failure_cleans_up_part_file() {
+    // 404, not 500. A 5xx is the server having a bad day and is retried with the
+    // partial kept; only a status that says the file is gone for good justifies
+    // throwing away what was already fetched.
     let server = MockServer::start().await;
 
     Mock::given(method("HEAD"))
         .and(path("/fail.bin"))
-        .respond_with(ResponseTemplate::new(200).insert_header("content-length", "1024"))
+        .respond_with(ResponseTemplate::new(404))
         .mount(&server)
         .await;
 
     Mock::given(method("GET"))
         .and(path("/fail.bin"))
-        .respond_with(ResponseTemplate::new(500))
+        .respond_with(ResponseTemplate::new(404))
         .mount(&server)
         .await;
 
@@ -699,5 +702,76 @@ async fn an_interrupted_download_keeps_its_bytes_for_a_resume() {
     assert!(
         base.join("interrupted.bin.part").exists(),
         "the partial must survive so the transfer can resume"
+    );
+}
+
+#[tokio::test]
+async fn an_expired_signed_url_does_not_discard_the_partial() {
+    // What actually happened to a user: Hugging Face redirects to a CDN URL
+    // carrying an Expires parameter, a 13.6 GB download outlived its signature,
+    // the CDN answered 403, and the partial — 6.8 GB of it — was deleted as a
+    // permanent failure. Retrying re-resolves the redirect and gets a fresh
+    // signature, so the bytes must survive.
+    let server = MockServer::start().await;
+    let len = "2048";
+
+    Mock::given(method("HEAD"))
+        .and(path("/model.bin"))
+        .respond_with(
+            ResponseTemplate::new(200)
+                .insert_header("content-length", len)
+                .insert_header("accept-ranges", "bytes"),
+        )
+        .mount(&server)
+        .await;
+
+    Mock::given(method("GET"))
+        .and(path("/model.bin"))
+        .respond_with(ResponseTemplate::new(403))
+        .mount(&server)
+        .await;
+
+    let runtime = TestRuntime::new();
+    let manager = ModelDownloadManager::new(runtime.clone());
+    let model = TestModel::with_url("expired", format!("{}/model.bin", server.uri()));
+
+    let base = runtime.temp_dir.path();
+    std::fs::write(base.join("expired.bin.part"), vec![7u8; 1024]).unwrap();
+    std::fs::write(
+        base.join("expired.bin.part.json"),
+        serde_json::json!({
+            "url": format!("{}/model.bin", server.uri()),
+            "expected_bytes": 0,
+        })
+        .to_string(),
+    )
+    .unwrap();
+
+    manager.download(&model).await.unwrap();
+
+    let events = tokio::time::timeout(Duration::from_secs(30), async {
+        loop {
+            let events = runtime.progress_statuses();
+            if events
+                .iter()
+                .any(|s| matches!(s, DownloadStatus::Paused { .. }))
+            {
+                return events;
+            }
+            tokio::time::sleep(Duration::from_millis(100)).await;
+        }
+    })
+    .await
+    .expect("a 403 should be retried, reporting Paused between attempts");
+
+    assert!(
+        !events
+            .iter()
+            .any(|s| matches!(s, DownloadStatus::Failed(_))),
+        "an expired signature is not a permanent failure: {events:?}"
+    );
+    assert!(
+        base.join("expired.bin.part").exists(),
+        "the partial must survive a 403 — this is the 6.8 GB that was lost"
     );
 }
