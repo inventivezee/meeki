@@ -411,6 +411,8 @@ fn spawn_soniqo_progress_poller<R: Runtime>(
             })
             .ok();
 
+        let mut last_logged = std::time::Instant::now() - std::time::Duration::from_secs(60);
+
         for _ in 0..7200 {
             let status = tokio::task::spawn_blocking(move || {
                 meeki_transcribe_soniqo::model_download_state(soniqo_model)
@@ -437,6 +439,18 @@ fn spawn_soniqo_progress_poller<R: Runtime>(
                 Ok(Err(error)) => DownloadStatus::Failed(error.to_string()),
                 Err(error) => DownloadStatus::Failed(error.to_string()),
             };
+
+            // Logged periodically, not just on failure. Without this a download
+            // in flight produces no record at all, so "stuck at 0%" and
+            // "working slowly" look identical in a user's log.
+            if last_logged.elapsed() >= std::time::Duration::from_secs(5) {
+                last_logged = std::time::Instant::now();
+                tracing::info!(
+                    model = soniqo_model.as_str(),
+                    status = ?download_status,
+                    "soniqo_model_download_progress"
+                );
+            }
 
             let should_stop = matches!(
                 download_status,

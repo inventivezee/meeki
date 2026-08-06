@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Channel } from "@tauri-apps/api/core";
-import { Loader2, X } from "lucide-react";
+import { Loader2, PauseIcon, PlayIcon, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
@@ -81,6 +81,7 @@ export function OnDeviceLlmCard() {
     defaultModel ? [defaultModel.key] : [],
   ).current;
   const shownProgress = progress ?? sharedProgress?.progress ?? null;
+  const isPaused = sharedProgress?.paused === true;
   const modelName = defaultModel?.name ?? "the on-device model";
 
   const downloaded = useQuery({
@@ -229,6 +230,20 @@ export function OnDeviceLlmCard() {
     },
   });
 
+  const pauseDownload = useMutation({
+    mutationFn: async (model: GgufLlmModel) => {
+      const result = await localLlmCommands.pauseDownload(model);
+      if (result.status === "error") {
+        throw new Error(result.error);
+      }
+    },
+    onError: (error) => {
+      sonnerToast.error("Couldn’t pause the download", {
+        description: error instanceof Error ? error.message : String(error),
+      });
+    },
+  });
+
   const cancelDownload = useMutation({
     mutationFn: async (model: GgufLlmModel) => {
       if (activatingRef.current) {
@@ -326,16 +341,46 @@ export function OnDeviceLlmCard() {
               </span>
             </div>
             {showDownloading ? (
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-7 shrink-0 gap-1 px-2 text-xs"
-                disabled={cancelDownload.isPending}
-                onClick={() => cancelDownload.mutate(defaultModel.key)}
-              >
-                <X className="size-3.5" />
-                Cancel
-              </Button>
+              <div className="flex shrink-0 items-center gap-1">
+                {/*
+                  Pausing keeps the bytes for a Range resume; cancelling throws
+                  them away. On a 13.6 GB model that is a big enough difference
+                  to be worth offering both.
+                */}
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 gap-1 px-2 text-xs"
+                  disabled={pauseDownload.isPending || isPaused}
+                  onClick={() =>
+                    isPaused
+                      ? downloadAndUse.mutate(defaultModel.key)
+                      : pauseDownload.mutate(defaultModel.key)
+                  }
+                >
+                  {isPaused ? (
+                    <>
+                      <PlayIcon className="size-3.5" />
+                      Resume
+                    </>
+                  ) : (
+                    <>
+                      <PauseIcon className="size-3.5" />
+                      Pause
+                    </>
+                  )}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 gap-1 px-2 text-xs"
+                  disabled={cancelDownload.isPending}
+                  onClick={() => cancelDownload.mutate(defaultModel.key)}
+                >
+                  <X className="size-3.5" />
+                  Cancel
+                </Button>
+              </div>
             ) : null}
           </div>
           <div

@@ -484,11 +484,21 @@ private actor SoniqoBridge {
                   )
                 }
               }
+              FileHandle.standardError.write(
+                Data("[soniqo] byte-weighted prefetch finished for \(kind.repo)\n".utf8)
+              )
             } catch {
               if Task.isCancelled || error is CancellationError {
                 throw error
               }
-              // Falls through to kind.load, which will fetch what is missing.
+              // Falls through to kind.load, which fetches what is missing. Logged
+              // because a silent fallback is indistinguishable from the feature
+              // not existing — which is exactly how this was reported.
+              FileHandle.standardError.write(
+                Data(
+                  "[soniqo] byte-weighted prefetch failed for \(kind.repo), falling back: \(error)\n"
+                    .utf8)
+              )
             }
           }
 
