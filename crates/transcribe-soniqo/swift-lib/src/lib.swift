@@ -515,14 +515,22 @@ private actor SoniqoBridge {
           if kind.supportsByteWeightedDownload {
             do {
               let directory = try kind.cacheDirectoryURL()
+              await SoniqoBridge.shared.updateDownloadStage(
+                kind: kind, stage: "Checking files for \(kind.label)...")
               try await HuggingFaceDownloader.downloadFilesByteWeighted(
                 modelId: kind.repo,
                 to: directory,
                 files: kind.weightFiles,
-                // The default ladder is 5/15/30/60. On a link that stalls
-                // repeatedly that is spent in under two minutes; these buy real
-                // time, and each attempt resumes at whole-file granularity.
-                retryDelaysSeconds: [15, 30, 60, 120, 300]
+                // One attempt, no ladder. This call only exists to make the
+                // progress bar accurate; the download itself is kind.load
+                // below. A previous version passed [15, 30, 60, 120, 300] here,
+                // which meant six attempts and about nine minutes of total
+                // silence — resolveRemoteFiles runs before the first progress
+                // callback, so a user whose metadata lookup failed watched a
+                // frozen 0% while the real download had not been allowed to
+                // start. Failing fast and falling through costs a nice bar and
+                // saves the transfer.
+                retryDelaysSeconds: []
               ) { _, completed, total, name in
                 Task {
                   await SoniqoBridge.shared.updateDownloadBytes(
@@ -642,6 +650,20 @@ private actor SoniqoBridge {
       totalBytes > 0
       ? Int((Double(completedBytes) / Double(totalBytes) * 100.0).rounded(.down))
       : nil
+    state.error = nil
+    downloadStates[kind] = state
+  }
+
+  /// What the transfer is doing before any bytes can be attributed to it.
+  ///
+  /// The metadata lookup that precedes the first progress callback reported
+  /// nothing at all while it ran, so the card sat at a frozen 0% and the log
+  /// line showed percent, downloaded and total all zero — indistinguishable
+  /// from a wedged download, and the state a user watched for minutes.
+  func updateDownloadStage(kind: SpeechModelKind, stage: String) {
+    var state = downloadState(for: kind)
+    state.status = "downloading"
+    state.currentFile = stage
     state.error = nil
     downloadStates[kind] = state
   }

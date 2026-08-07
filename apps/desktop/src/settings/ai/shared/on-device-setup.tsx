@@ -232,12 +232,18 @@ export function OnDeviceSetupCard({
   // happened to report progress first.
   const mine = downloadsFor([...sttPack, ...(llmModel ? [llmModel.key] : [])]);
   const current = mine.current;
-  // A percentage is only shown when byte counts back it up. The Soniqo bridge
-  // reports a fraction weighted per *file*, so a 2.4 GB shard is one sixth of
-  // the bar and the whole transfer crawls 0% -> 13%. A number that moves one
-  // point per 185 MB is worse than no number; an indeterminate bar is honest.
+  // Byte counts are the good case: the byte-weighted downloader reports real
+  // totals and the bar is honest. When it falls back, the Soniqo bridge only
+  // offers a fraction weighted per *file*, so the number is lumpy — but it does
+  // move, and requiring bytes meant showing nothing at all for the whole
+  // transfer, which is what users kept reporting as "stuck at 0%".
+  //
+  // Zero is not treated as a reading. Rust sends progress_percent as 0 when it
+  // is unknown, so an unmoved 0 and a genuine 0 are the same value; showing it
+  // would claim a measurement that does not exist.
   const hasByteCounts = (current?.totalBytes ?? 0) > 0;
-  const percent = hasByteCounts ? (current?.progress ?? null) : null;
+  const reported = current?.progress ?? 0;
+  const percent = hasByteCounts || reported > 0 ? reported : null;
   const paused = mine.paused;
   // Every leg can be stopped now. Soniqo used to be excluded because the bridge
   // was thought to have no stop, which left a transcription download with no
