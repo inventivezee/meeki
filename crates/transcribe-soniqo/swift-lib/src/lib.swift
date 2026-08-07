@@ -35,15 +35,15 @@ private enum SpeechModelKind: String, CaseIterable {
   var label: String {
     switch self {
     case .parakeetStreaming:
-      return "Soniqo Parakeet Streaming"
+      return "Parakeet Streaming"
     case .parakeetBatch:
-      return "Soniqo Parakeet Batch"
+      return "Parakeet Batch"
     case .omnilingual:
-      return "Soniqo Omnilingual"
+      return "Omnilingual ASR"
     case .qwen3Small:
-      return "Soniqo Qwen3 0.6B"
+      return "Qwen3 ASR 0.6B"
     case .qwen3Large:
-      return "Soniqo Qwen3 1.7B"
+      return "Qwen3 ASR 1.7B"
     }
   }
 

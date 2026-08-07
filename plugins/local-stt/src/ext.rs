@@ -322,8 +322,25 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
     pub async fn cancel_download(&self, model: LocalModel) -> Result<bool, crate::Error> {
         Self::ensure_stt_model(&model)?;
 
-        if matches!(model, LocalModel::Soniqo(_)) {
-            return Ok(false);
+        // Soniqo used to answer "cannot cancel", on the belief that the Swift
+        // bridge exposes no stop. reset_model has cancelled the task since it
+        // was added for the stall path, and the Hub writes a .metadata sidecar
+        // per completed file — so stopping keeps every file that landed and a
+        // later download resumes from there. That is a pause in everything but
+        // name, and the settings card had no button at all without it.
+        if let LocalModel::Soniqo(soniqo) = model {
+            let was_running = soniqo_download_state(soniqo).await?.status == "downloading";
+            if !was_running {
+                return Ok(false);
+            }
+
+            let soniqo = soniqo;
+            run_soniqo_blocking(
+                move || meeki_transcribe_soniqo::reset_model(soniqo),
+                crate::Error::ServerStopFailed,
+            )
+            .await?;
+            return Ok(true);
         }
 
         let downloader = {
@@ -440,6 +457,7 @@ fn spawn_soniqo_progress_poller<R: Runtime>(
         let mut last_change = std::time::Instant::now();
         let mut last_seen: Option<(String, Option<String>, u8, u64)> = None;
         let mut last_logged = std::time::Instant::now() - std::time::Duration::from_secs(60);
+        let mut seen_downloading = false;
 
         loop {
             let status = tokio::task::spawn_blocking(move || {
@@ -458,6 +476,12 @@ fn spawn_soniqo_progress_poller<R: Runtime>(
                 )),
                 _ => None,
             };
+            if let Ok(Ok(state)) = &status
+                && state.status == "downloading"
+            {
+                seen_downloading = true;
+            }
+
             if fingerprint.is_some() && fingerprint != last_seen {
                 last_change = std::time::Instant::now();
                 last_seen = fingerprint;
@@ -471,6 +495,16 @@ fn spawn_soniqo_progress_poller<R: Runtime>(
                             .error
                             .unwrap_or_else(|| "Soniqo model download failed".to_string()),
                     ),
+                    // Back to idle after it was running means something stopped
+                    // it — a Stop from the settings card, or a reset. Not a
+                    // failure, and not still downloading: the files that landed
+                    // are kept and a later download continues from them. The
+                    // catch-all below would have reported this as an eternal
+                    // 0% download, since nothing would ever move it again.
+                    "idle" if seen_downloading => DownloadStatus::Paused {
+                        downloaded_bytes: state.downloaded_bytes,
+                        total_bytes: state.total_bytes,
+                    },
                     // Passed through, never derived. These are real counts from
                     // the byte-weighted downloader where the repo supports it,
                     // and zero — meaning unknown — where it does not.
@@ -498,7 +532,9 @@ fn spawn_soniqo_progress_poller<R: Runtime>(
 
             let should_stop = matches!(
                 download_status,
-                DownloadStatus::Completed | DownloadStatus::Failed(_)
+                DownloadStatus::Completed
+                    | DownloadStatus::Failed(_)
+                    | DownloadStatus::Paused { .. }
             );
             if let DownloadStatus::Failed(error) = &download_status {
                 tracing::error!(

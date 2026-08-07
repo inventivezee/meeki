@@ -24,6 +24,7 @@ import {
 import { setAiProvider } from "~/settings/providers";
 import { setSettingValues } from "~/settings/queries";
 import {
+  BATCH_MODEL_CHOICES,
   DEFAULT_BATCH_MODEL,
   sttPackBytes,
   sttPackFor,
@@ -65,6 +66,25 @@ export function OnDeviceSetupCard({
       return result.data;
     },
     staleTime: Infinity,
+  });
+
+  // Any batch model on disk means transcription works, which is all this card
+  // was ever offering. It used to insist on its own exact pack, so a user who
+  // had already downloaded a different model — or picked one and fetched it
+  // from the list below — kept a "download models" panel above a page whose
+  // rows all say Downloaded.
+  const anyBatchReady = useQuery({
+    queryKey: ["on-device-any-batch-model-ready"],
+    queryFn: async () => {
+      for (const choice of BATCH_MODEL_CHOICES) {
+        const result = await localSttCommands.isModelDownloaded(choice.model);
+        if (result.status === "ok" && result.data) {
+          return true;
+        }
+      }
+      return false;
+    },
+    refetchInterval: 2_000,
   });
 
   const sttReady = useQuery({
@@ -148,10 +168,23 @@ export function OnDeviceSetupCard({
     },
   });
 
+  // Whichever leg is actually transferring. The two stop by different means —
+  // the GGUF keeps a byte-range partial, Soniqo keeps whole completed files —
+  // but both resume rather than restart, so one button covers them.
   const pause = useMutation({
     mutationFn: async () => {
-      if (!llmModel) return;
-      const result = await localLlmCommands.pauseDownload(llmModel.key);
+      const model = current?.model;
+      if (!model) return;
+
+      if (llmModel && model === llmModel.key) {
+        const result = await localLlmCommands.pauseDownload(llmModel.key);
+        if (result.status === "error") {
+          throw new Error(result.error);
+        }
+        return;
+      }
+
+      const result = await localSttCommands.cancelDownload(model as LocalModel);
       if (result.status === "error") {
         throw new Error(result.error);
       }
@@ -165,13 +198,25 @@ export function OnDeviceSetupCard({
 
   const resume = useMutation({
     mutationFn: async () => {
-      if (!llmModel) return;
-      // Resuming is just downloading again: the partial on disk is picked up
-      // by a Range request rather than refetched.
-      const result = await localLlmCommands.downloadModel(
-        llmModel.key,
-        new Channel<number>(),
-      );
+      const model = current?.model;
+      if (!model) return;
+
+      if (llmModel && model === llmModel.key) {
+        // Resuming is just downloading again: the partial on disk is picked up
+        // by a Range request rather than refetched.
+        const result = await localLlmCommands.downloadModel(
+          llmModel.key,
+          new Channel<number>(),
+        );
+        if (result.status === "error") {
+          throw new Error(result.error);
+        }
+        return;
+      }
+
+      // Same for Soniqo, at whole-file granularity: the Hub writes a .metadata
+      // sidecar only after a file completes, so a restart skips what landed.
+      const result = await localSttCommands.downloadModel(model as LocalModel);
       if (result.status === "error") {
         throw new Error(result.error);
       }
@@ -194,9 +239,11 @@ export function OnDeviceSetupCard({
   const hasByteCounts = (current?.totalBytes ?? 0) > 0;
   const percent = hasByteCounts ? (current?.progress ?? null) : null;
   const paused = mine.paused;
-  // Only the GGUF leg can be paused; the Soniqo transfer is owned by the Swift
-  // bridge, which exposes start and poll but no stop.
-  const pausable = Boolean(llmModel && current?.model === llmModel.key);
+  // Every leg can be stopped now. Soniqo used to be excluded because the bridge
+  // was thought to have no stop, which left a transcription download with no
+  // button at all — no pause, and no Download either, since the progress row
+  // replaces it.
+  const pausable = Boolean(current);
   const running = setup.isPending || inFlight.data === true || paused;
 
   // A download outlives this card, so the mutation that would have selected the
@@ -232,7 +279,7 @@ export function OnDeviceSetupCard({
     batchModel,
   ]);
 
-  if (sttReady.data && llmReady) {
+  if ((sttReady.data || anyBatchReady.data) && llmReady) {
     return null;
   }
 

@@ -79,7 +79,7 @@ const LOCAL_SONIQO_BATCH_TARGET = {
   model: "soniqo-qwen3-large",
   baseUrl: "soniqo://local",
   apiKey: "",
-  label: "Soniqo Qwen3 1.7B batch transcription",
+  label: "Qwen3 ASR 1.7B batch transcription",
 } satisfies BatchTarget;
 
 export function getBatchProvider(

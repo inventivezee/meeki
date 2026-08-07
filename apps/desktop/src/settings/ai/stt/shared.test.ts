@@ -18,16 +18,10 @@ describe("STT model display labels", () => {
 
   test("collapses local model names to on-device labels", () => {
     expect(
-      displayModelLabel(
-        "soniqo-parakeet-streaming",
-        "Soniqo Parakeet Streaming",
-      ),
+      displayModelLabel("soniqo-parakeet-streaming", "Parakeet Streaming"),
     ).toBe("On device");
     expect(
-      displayModelTitle(
-        "soniqo-parakeet-streaming",
-        "Soniqo Parakeet Streaming",
-      ),
-    ).toBe("Soniqo Parakeet Streaming");
+      displayModelTitle("soniqo-parakeet-streaming", "Parakeet Streaming"),
+    ).toBe("Parakeet Streaming");
   });
 });

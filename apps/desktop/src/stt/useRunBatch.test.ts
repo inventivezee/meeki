@@ -192,7 +192,7 @@ describe("getBatchFallbackTarget", () => {
       model: "soniqo-qwen3-large",
       baseUrl: "soniqo://local",
       apiKey: "",
-      label: "Soniqo Qwen3 1.7B batch transcription",
+      label: "Qwen3 ASR 1.7B batch transcription",
     });
   });
 
@@ -208,7 +208,7 @@ describe("getBatchFallbackTarget", () => {
       model: "soniqo-qwen3-large",
       baseUrl: "soniqo://local",
       apiKey: "",
-      label: "Soniqo Qwen3 1.7B batch transcription",
+      label: "Qwen3 ASR 1.7B batch transcription",
     });
   });
 });
