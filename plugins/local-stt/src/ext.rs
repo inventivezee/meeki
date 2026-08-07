@@ -411,13 +411,42 @@ fn spawn_soniqo_progress_poller<R: Runtime>(
             })
             .ok();
 
+        // Failure is judged on a lack of progress, not on elapsed time. The old
+        // cap was 7200 polls at 250ms — a flat 30 minutes — which declared a
+        // download dead on any link slower than about 1.4 MB/s while the Swift
+        // task carried on downloading behind it. A user's log showed exactly
+        // that, twice.
+        const STALL_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(15 * 60);
+        // A backstop against a genuinely wedged bridge, generous enough that a
+        // slow link finishes well inside it.
+        const ABSOLUTE_CAP: std::time::Duration = std::time::Duration::from_secs(6 * 60 * 60);
+
+        let started = std::time::Instant::now();
+        let mut last_change = std::time::Instant::now();
+        let mut last_seen: Option<(String, Option<String>, u8, u64)> = None;
         let mut last_logged = std::time::Instant::now() - std::time::Duration::from_secs(60);
 
-        for _ in 0..7200 {
+        loop {
             let status = tokio::task::spawn_blocking(move || {
                 meeki_transcribe_soniqo::model_download_state(soniqo_model)
             })
             .await;
+
+            // Includes current_file so a retry wait — which changes only the
+            // message — counts as the download being alive rather than stalled.
+            let fingerprint = match &status {
+                Ok(Ok(state)) => Some((
+                    state.status.clone(),
+                    state.current_file.clone(),
+                    state.progress_percent.unwrap_or(0),
+                    state.downloaded_bytes,
+                )),
+                _ => None,
+            };
+            if fingerprint.is_some() && fingerprint != last_seen {
+                last_change = std::time::Instant::now();
+                last_seen = fingerprint;
+            }
 
             let download_status = match status {
                 Ok(Ok(state)) => match state.status.as_str() {
@@ -473,18 +502,40 @@ fn spawn_soniqo_progress_poller<R: Runtime>(
                 return;
             }
 
+            if last_change.elapsed() >= STALL_TIMEOUT {
+                tracing::error!(
+                    model = soniqo_model.as_str(),
+                    stalled_for_seconds = last_change.elapsed().as_secs(),
+                    "soniqo_model_download_stalled"
+                );
+                let _ = DownloadProgressPayload {
+                    model,
+                    status: DownloadStatus::Failed(
+                        "The download stopped making progress. Check your connection and try again."
+                            .to_string(),
+                    ),
+                }
+                .emit(&app_handle);
+                return;
+            }
+
+            if started.elapsed() >= ABSOLUTE_CAP {
+                tracing::error!(
+                    model = soniqo_model.as_str(),
+                    "soniqo_model_download_exceeded_cap"
+                );
+                let _ = DownloadProgressPayload {
+                    model,
+                    status: DownloadStatus::Failed(
+                        "The download did not finish. Please try again.".to_string(),
+                    ),
+                }
+                .emit(&app_handle);
+                return;
+            }
+
             tokio::time::sleep(std::time::Duration::from_millis(250)).await;
         }
-
-        tracing::error!(
-            model = soniqo_model.as_str(),
-            "soniqo_model_download_timed_out"
-        );
-        let _ = DownloadProgressPayload {
-            model,
-            status: DownloadStatus::Failed("Soniqo model download timed out".to_string()),
-        }
-        .emit(&app_handle);
     });
 }
 

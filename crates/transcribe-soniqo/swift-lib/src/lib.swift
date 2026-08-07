@@ -453,7 +453,11 @@ private actor SoniqoBridge {
       // enough that the process is awake again when they fire, and each retry
       // skips every file that already landed — the Hub writes a .metadata
       // sidecar only after a file completes.
-      let waitsSeconds: [UInt64] = [30, 60, 120]
+      // Extended after a user's log showed both this ladder and the Hub's own
+      // 300-second stall guard exhausting repeatedly on a flaky link. The
+      // transfer stays reported as downloading throughout, so a long wait costs
+      // patience rather than the download.
+      let waitsSeconds: [UInt64] = [30, 60, 120, 300, 600]
       var attempt = 0
 
       while true {
@@ -473,7 +477,11 @@ private actor SoniqoBridge {
               try await HuggingFaceDownloader.downloadFilesByteWeighted(
                 modelId: kind.repo,
                 to: directory,
-                files: kind.weightFiles
+                files: kind.weightFiles,
+                // The default ladder is 5/15/30/60. On a link that stalls
+                // repeatedly that is spent in under two minutes; these buy real
+                // time, and each attempt resumes at whole-file granularity.
+                retryDelaysSeconds: [15, 30, 60, 120, 300]
               ) { _, completed, total, name in
                 Task {
                   await SoniqoBridge.shared.updateDownloadBytes(
