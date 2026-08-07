@@ -88,6 +88,11 @@ export function OnDeviceSetupCard({
   const llmReady =
     !includesLlm ||
     Boolean(llmModel && llmDownloaded.data?.includes(llmModel.key));
+  // What this card would actually fetch. The card described — and showed the
+  // full spec block for — a summarisation model that had already finished,
+  // while quoting a size that correctly excluded it.
+  const llmPending = llmReady ? null : llmModel;
+  const sttPending = !sttReady.data;
 
   // Asked of the backend rather than tracked in component state: a download
   // outlives this card, so remounting it after a tab switch must not offer to
@@ -232,23 +237,29 @@ export function OnDeviceSetupCard({
     <div className="border-border/60 bg-card/70 flex flex-col gap-3 rounded-2xl border px-4 py-3">
       <div className="flex flex-col gap-1">
         <p className="text-sm font-medium">
-          {includesLlm
+          {sttPending && llmPending
             ? "Set up on-device AI"
-            : "Set up on-device transcription"}
+            : sttPending
+              ? "Set up on-device transcription"
+              : "Set up on-device summaries"}
         </p>
         <p className="text-muted-foreground text-xs leading-relaxed">
-          {includesLlm
-            ? "Downloads everything Meeki needs to work offline: Parakeet and Qwen3 for transcription"
-            : "Downloads Parakeet and Qwen3 so transcription runs on this Mac"}
-          {llmModel ? `, and ${llmModel.name} for summaries` : ""}. About{" "}
-          {formatGb(totalBytes)} GB from Hugging Face. The runtimes are already
-          in the app.
+          {/* Names only what is still missing. Listing a model that has already
+              downloaded reads as though the work has to be redone. */}
+          {sttPending
+            ? "Downloads Parakeet and Qwen3 so transcription runs on this Mac"
+            : `Downloads ${llmPending?.name ?? "a language model"} so summaries run on this Mac`}
+          {sttPending && llmPending
+            ? `, and ${llmPending.name} for summaries`
+            : ""}
+          . About {formatGb(totalBytes)} GB from Hugging Face. The runtimes are
+          already in the app.
         </p>
-        {llmModel ? (
+        {llmPending ? (
           <div className="border-border/60 mt-1 flex flex-col gap-0.5 border-l-2 pl-2.5">
-            <p className="text-xs font-medium">{llmModel.name}</p>
+            <p className="text-xs font-medium">{llmPending.name}</p>
             <ModelFacts
-              model={llmModel}
+              model={llmPending}
               totalMemoryBytes={recommended.data?.total_memory_bytes ?? 0}
             />
           </div>
