@@ -217,7 +217,12 @@ export function LocalModels() {
       <div className="border-border/60 bg-card/70 divide-border/60 flex flex-col divide-y rounded-2xl border">
         {models.map((model) => {
           const isDownloaded = downloaded.data?.includes(model.key) ?? false;
+          // Selected is not the same as present. Config keeps pointing at a
+          // model whose weights are missing — never fetched, or deleted — and
+          // the row answered "In use" while the setup card above it was still
+          // downloading that very model.
           const isActive =
+            isDownloaded &&
             current_llm_provider === "on_device" &&
             current_llm_model === model.key;
           const fits = fitsInMemory(model, totalMemoryBytes);

@@ -352,17 +352,30 @@ export async function downloadAndActivateOnDevice(
   }
 
   if (llmModel) {
-    const result = await localLlmCommands.downloadModel(
-      llmModel,
-      new Channel<number>(),
-    );
-    if (result.status === "error") {
-      throw new Error(result.error);
-    }
-    await waitForLlmDownload(llmModel);
+    await downloadLlmModel(llmModel);
   }
 
   await activateOnDevice(llmModel);
+}
+
+async function downloadLlmModel(model: GgufLlmModel) {
+  // The same check the STT leg has always done. Without it, clicking setup
+  // with only transcription missing refetched a summarisation model that was
+  // already on disk — 13.6 GB from byte zero, invisibly, because the transfer
+  // lands in a .part while the complete file next to it keeps serving answers.
+  const already = await localLlmCommands.isModelDownloaded(model);
+  if (already.status === "ok" && already.data) {
+    return;
+  }
+
+  const result = await localLlmCommands.downloadModel(
+    model,
+    new Channel<number>(),
+  );
+  if (result.status === "error") {
+    throw new Error(result.error);
+  }
+  await waitForLlmDownload(model);
 }
 
 async function downloadSttModel(model: LocalModel) {
