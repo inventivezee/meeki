@@ -72,11 +72,15 @@ type DownloadSnapshot = {
 /// used to cover only the STT models, and the `?? model` fallback printed a raw
 /// id — which is how "soniqo-qwen3-large" reached a user-facing card.
 const MODEL_DISPLAY_NAMES: Partial<Record<TrackedModel, string>> = {
-  "soniqo-parakeet-streaming": "Soniqo Parakeet Streaming",
-  "soniqo-parakeet-batch": "Soniqo Parakeet Batch",
-  "soniqo-omnilingual": "Soniqo Omnilingual",
-  "soniqo-qwen3-small": "Soniqo Qwen3 0.6B",
-  "soniqo-qwen3-large": "Soniqo Qwen3 1.7B",
+  // No "Soniqo" prefix. That is the speech engine that hosts these models, not
+  // the models themselves, and the transcription settings already call them
+  // "Qwen3 ASR 1.7B" and "Parakeet Batch". Two names for one model in one app
+  // is worse than a slightly less precise one.
+  "soniqo-parakeet-streaming": "Parakeet Streaming",
+  "soniqo-parakeet-batch": "Parakeet Batch",
+  "soniqo-omnilingual": "Omnilingual ASR",
+  "soniqo-qwen3-small": "Qwen3 ASR 0.6B",
+  "soniqo-qwen3-large": "Qwen3 ASR 1.7B",
   "am-parakeet-v2": "Parakeet v2",
   "am-parakeet-v3": "Parakeet v3",
   "am-whisper-large-v3": "Whisper Large v3",

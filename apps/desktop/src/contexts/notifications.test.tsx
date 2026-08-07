@@ -85,7 +85,7 @@ describe("NotificationProvider", () => {
     });
 
     expect(mocks.toastError).toHaveBeenCalledWith(
-      "Couldn’t download Soniqo Parakeet Batch",
+      "Couldn’t download Parakeet Batch",
       { description: "download server rejected the model" },
     );
   });
