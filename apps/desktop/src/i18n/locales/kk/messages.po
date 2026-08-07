@@ -714,6 +714,10 @@ msgstr ""
 msgid "Download recovery key (.txt)"
 msgstr ""
 
+#: src/main/update-prompt.tsx
+msgid "Downloading update…"
+msgstr ""
+
 #. placeholder {0}: downloading.progress
 #: src/session/components/note-input/enhanced/config-error.tsx
 msgid "Downloading… {0}%"
@@ -1335,6 +1339,14 @@ msgstr ""
 
 #: src/main/empty.tsx
 msgid "New Note"
+msgstr ""
+
+#: src/main/update-prompt.tsx
+msgid "New update available, click to download"
+msgstr ""
+
+#: src/main/update-prompt.tsx
+msgid "New update released, click to update"
 msgstr ""
 
 #: src/contacts/shared.tsx
@@ -2474,6 +2486,10 @@ msgstr ""
 
 #: src/contacts/details.tsx
 msgid "Untitled Note"
+msgstr ""
+
+#: src/main/update-prompt.tsx
+msgid "Update failed — click to retry"
 msgstr ""
 
 #: src/settings/todo/github.tsx

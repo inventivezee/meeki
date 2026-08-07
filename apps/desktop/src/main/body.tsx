@@ -39,6 +39,7 @@ import {
   SidebarTimelineUpdateButton,
   useDesktopUpdateControl,
 } from "./update-banner";
+import { UpdatePrompt } from "./update-prompt";
 import { useClassicMainShortcuts } from "./useShortcuts";
 
 import { useShell } from "~/contexts/shell";
@@ -497,6 +498,7 @@ export function ClassicMainBody() {
       style={leftSidebarSizeStyle}
       className="relative flex h-full min-w-0 flex-1 flex-col"
     >
+      {isOnboarding ? null : <UpdatePrompt update={update} />}
       {isOnboarding ||
       showSidebarTimeline ? null : showCollapsedSidebarTimelineChrome ? (
         <div

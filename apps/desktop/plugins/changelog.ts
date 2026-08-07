@@ -9,32 +9,52 @@ const changelogDir = resolve(__dirname, "../../../packages/changelog/content");
 const VIRTUAL_ID = "virtual:changelog";
 const RESOLVED_ID = "\0" + VIRTUAL_ID;
 
-function getLatestVersion(): string | null {
+function readAll(): Record<string, string> {
   try {
     const files = readdirSync(changelogDir).filter(
       (f) => f.endsWith(".md") && /^\d/.test(f),
     );
-    const versions = files.map((f) => f.replace(".md", ""));
-    versions.sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
-    return versions[0] || null;
+    const entries: Record<string, string> = {};
+    for (const file of files) {
+      try {
+        entries[file.replace(".md", "")] = readFileSync(
+          resolve(changelogDir, file),
+          "utf-8",
+        );
+      } catch {}
+    }
+    return entries;
   } catch {
-    return null;
+    return {};
   }
 }
 
-function buildModule(): string {
-  const latest = getLatestVersion();
-  let content: string | null = null;
+function sortVersionsDescending(versions: string[]): string[] {
+  return [...versions].sort((a, b) =>
+    b.localeCompare(a, undefined, { numeric: true }),
+  );
+}
 
-  if (latest) {
-    try {
-      content = readFileSync(resolve(changelogDir, `${latest}.md`), "utf-8");
-    } catch {}
-  }
+/**
+ * Every entry, keyed by version — not just the newest one.
+ *
+ * Only the highest-numbered file used to be bundled, and the panel showed it
+ * only when it matched the running version. This fork restarted the desktop at
+ * 0.0.x while the content directory kept the 1.x lineage, so "latest" resolved
+ * to 1.3.11 and no Meeki release could ever match it. Every version shipped
+ * with "No changelog available for this version", and adding a 0.0.x file would
+ * not have helped, because 1.3.11 still sorts higher.
+ */
+function buildModule(): string {
+  const entries = readAll();
+  const versions = sortVersionsDescending(Object.keys(entries));
+  const latest = versions[0] ?? null;
 
   return [
+    `export const changelogs = ${JSON.stringify(entries)};`,
+    `export const versions = ${JSON.stringify(versions)};`,
     `export const latestVersion = ${JSON.stringify(latest)};`,
-    `export const latestContent = ${JSON.stringify(content)};`,
+    `export const latestContent = ${JSON.stringify(latest ? entries[latest] : null)};`,
   ].join("\n");
 }
 

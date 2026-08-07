@@ -714,6 +714,10 @@ msgstr "Download local & private models (about {totalGb} GB)"
 msgid "Download recovery key (.txt)"
 msgstr "Download recovery key (.txt)"
 
+#: src/main/update-prompt.tsx
+msgid "Downloading update…"
+msgstr "Downloading update…"
+
 #. placeholder {0}: downloading.progress
 #: src/session/components/note-input/enhanced/config-error.tsx
 msgid "Downloading… {0}%"
@@ -1336,6 +1340,14 @@ msgstr "New chat"
 #: src/main/empty.tsx
 msgid "New Note"
 msgstr "New Note"
+
+#: src/main/update-prompt.tsx
+msgid "New update available, click to download"
+msgstr "New update available, click to download"
+
+#: src/main/update-prompt.tsx
+msgid "New update released, click to update"
+msgstr "New update released, click to update"
 
 #: src/contacts/shared.tsx
 msgid "Newest"
@@ -2475,6 +2487,10 @@ msgstr "Untitled"
 #: src/contacts/details.tsx
 msgid "Untitled Note"
 msgstr "Untitled Note"
+
+#: src/main/update-prompt.tsx
+msgid "Update failed — click to retry"
+msgstr "Update failed — click to retry"
 
 #: src/settings/todo/github.tsx
 msgid "Upgrade for private repos."

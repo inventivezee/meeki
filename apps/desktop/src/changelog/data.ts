@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
-// @ts-ignore virtual module provided by ./vite.ts
-import { latestContent, latestVersion } from "virtual:changelog";
+// @ts-ignore virtual module provided by ../../plugins/changelog.ts
+import { changelogs, versions } from "virtual:changelog";
 
 import { processContent } from "@meeki/changelog";
 
+const entries = changelogs as Record<string, string>;
+const knownVersions = versions as string[];
+
 export function getLatestVersion(): string | null {
-  return latestVersion;
+  return knownVersions[0] ?? null;
 }
 
 export function useChangelogContent(version: string) {
@@ -14,31 +17,21 @@ export function useChangelogContent(version: string) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function loadChangelog() {
-      if (version === latestVersion && latestContent) {
-        const { content: parsed, date: parsedDate } =
-          processContent(latestContent);
-        setContent(parsed);
-        setDate(parsedDate);
-        setLoading(false);
-        return;
-      }
-
-      // Only the bundled changelog is available; older entries are not fetched
-      // from a remote repository.
-      if (cancelled) return;
+    // Keyed by the version being asked about. This used to render only when the
+    // requested version happened to be the highest-numbered file on disk, which
+    // no Meeki release has ever been.
+    const raw = entries[version];
+    if (!raw) {
       setContent(null);
       setDate(null);
       setLoading(false);
+      return;
     }
 
-    loadChangelog();
-
-    return () => {
-      cancelled = true;
-    };
+    const { content: parsed, date: parsedDate } = processContent(raw);
+    setContent(parsed);
+    setDate(parsedDate);
+    setLoading(false);
   }, [version]);
 
   return { content, date, loading };
