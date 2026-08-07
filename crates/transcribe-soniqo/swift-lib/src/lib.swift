@@ -315,6 +315,39 @@ private struct ModelDownloadPayload: Codable {
   var error: String?
 }
 
+/// URLError codes that mean "this machine cannot currently reach the network",
+/// as opposed to "the server said no" or "the bytes were wrong".
+private let connectivityErrorCodes: Set<URLError.Code> = [
+  .notConnectedToInternet,
+  .networkConnectionLost,
+  .cannotConnectToHost,
+  .cannotFindHost,
+  .dnsLookupFailed,
+  .timedOut,
+  .internationalRoamingOff,
+  .dataNotAllowed,
+]
+
+/// The same conditions as text, because that is all that survives the trip.
+///
+/// speech-swift's `DownloadError.failedToDownload` is built from
+/// `lastError?.localizedDescription`, so by the time a failure reaches us the
+/// URLError has been flattened into a sentence and there is no underlying error
+/// left to inspect. Foundation generates these strings, so generating the
+/// needles the same way keeps them correct in every locale and stops them
+/// drifting from whatever URLError actually produces.
+private let connectivityErrorDescriptions: Set<String> = Set(
+  connectivityErrorCodes.map { URLError($0).localizedDescription }
+)
+
+private func isConnectivityFailure(_ error: Error) -> Bool {
+  if let urlError = error as? URLError {
+    return connectivityErrorCodes.contains(urlError.code)
+  }
+  let description = error.localizedDescription
+  return connectivityErrorDescriptions.contains { description.contains($0) }
+}
+
 private struct FileTranscriptionPayload: Codable {
   var text: String
   var durationSeconds: Double
@@ -460,6 +493,14 @@ private actor SoniqoBridge {
       let waitsSeconds: [UInt64] = [30, 60, 120, 300, 600]
       var attempt = 0
 
+      // Time spent unreachable is not counted against the ladder above, so it
+      // needs its own bound: six hours of a closed lid before the download is
+      // called dead. Long enough to survive a night, short enough that a task
+      // cannot outlive the reason it exists.
+      let offlineWaitSeconds: UInt64 = 60
+      let maxOfflineWaits = 360
+      var offlineWaits = 0
+
       while true {
         do {
           // Prefetch with real byte accounting where the repo allows it. The
@@ -524,6 +565,29 @@ private actor SoniqoBridge {
           if Task.isCancelled || error is CancellationError {
             throw error
           }
+
+          // An unreachable network is not a failed download, and must not spend
+          // the budget below. A shut lid, a sleeping machine or a dropped link
+          // fixes itself; no number of attempts fixes it sooner, and every one
+          // spent brings the transfer closer to dying of something temporary.
+          //
+          // This is how a 1.7 GB model ended at 4.4 MB on a link that carried a
+          // 13.6 GB one to completion the same night: the Rust downloader
+          // classifies these as transient (is_transient, crates/file), this
+          // ladder counted them like a corrupt response.
+          if isConnectivityFailure(error) {
+            offlineWaits += 1
+            if offlineWaits > maxOfflineWaits {
+              throw error
+            }
+            await SoniqoBridge.shared.updateDownloadOffline(
+              kind: kind,
+              waitSeconds: offlineWaitSeconds
+            )
+            try await Task.sleep(nanoseconds: offlineWaitSeconds * 1_000_000_000)
+            continue
+          }
+
           if attempt >= waitsSeconds.count {
             throw error
           }
@@ -590,6 +654,18 @@ private actor SoniqoBridge {
     state.status = "downloading"
     state.currentFile =
       "Connection lost — retrying in \(waitSeconds)s (attempt \(attempt + 1))"
+    state.error = nil
+    downloadStates[kind] = state
+  }
+
+  /// Same contract as updateDownloadRetrying, different cause: the machine is
+  /// unreachable rather than the transfer unlucky. Worth saying plainly, since
+  /// "retrying (attempt 5)" reads like the download is running out of chances
+  /// when nothing is being spent.
+  func updateDownloadOffline(kind: SpeechModelKind, waitSeconds: UInt64) {
+    var state = downloadState(for: kind)
+    state.status = "downloading"
+    state.currentFile = "Waiting for a network connection — retrying in \(waitSeconds)s"
     state.error = nil
     downloadStates[kind] = state
   }

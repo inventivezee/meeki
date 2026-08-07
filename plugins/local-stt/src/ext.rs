@@ -396,6 +396,21 @@ async fn soniqo_download_state(
     .await
 }
 
+/// Tell the bridge to stop before declaring a download dead.
+///
+/// is_model_downloading reads Swift's own state, not this poller's. Emitting
+/// Failed and returning left that state saying "downloading" forever, so the
+/// settings card stayed in its running branch: no progress to show, no Pause
+/// (that is LLM-only), and the Download button hidden because a transfer was
+/// supposedly in flight. The only way out was quitting the app.
+async fn abandon_soniqo_download(model: meeki_transcribe_soniqo::SoniqoModel) {
+    match tokio::task::spawn_blocking(move || meeki_transcribe_soniqo::reset_model(model)).await {
+        Ok(Ok(())) => {}
+        Ok(Err(error)) => tracing::warn!(error = %error, "soniqo_abandon_failed"),
+        Err(error) => tracing::warn!(error = %error, "soniqo_abandon_join_failed"),
+    }
+}
+
 fn spawn_soniqo_progress_poller<R: Runtime>(
     app_handle: tauri::AppHandle<R>,
     model: LocalModel,
@@ -508,6 +523,7 @@ fn spawn_soniqo_progress_poller<R: Runtime>(
                     stalled_for_seconds = last_change.elapsed().as_secs(),
                     "soniqo_model_download_stalled"
                 );
+                abandon_soniqo_download(soniqo_model).await;
                 let _ = DownloadProgressPayload {
                     model,
                     status: DownloadStatus::Failed(
@@ -524,6 +540,7 @@ fn spawn_soniqo_progress_poller<R: Runtime>(
                     model = soniqo_model.as_str(),
                     "soniqo_model_download_exceeded_cap"
                 );
+                abandon_soniqo_download(soniqo_model).await;
                 let _ = DownloadProgressPayload {
                     model,
                     status: DownloadStatus::Failed(
