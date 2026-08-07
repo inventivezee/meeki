@@ -41,6 +41,31 @@ import { useConfigValues } from "~/shared/config";
 
 const DOWNLOADED_QUERY_KEY = ["local-llm-downloaded"] as const;
 
+/**
+ * Blocks until the weights are on disk, the transfer stops, or an hour passes.
+ *
+ * A paused transfer resolves rather than throwing: the bytes are kept for a
+ * Range resume, so it is not a failure to report. Shared by both settings rows.
+ */
+export async function waitUntilDownloaded(model: GgufLlmModel) {
+  for (let attempt = 0; attempt < 60 * 60; attempt += 1) {
+    const done = await localLlmCommands.isModelDownloaded(model);
+    if (done.status === "ok" && done.data) {
+      return;
+    }
+    const running = await localLlmCommands.isModelDownloading(model);
+    if (running.status === "ok" && !running.data) {
+      const paused = await localLlmCommands.pausedBytes(model);
+      if (paused.status === "ok" && paused.data > 0) {
+        return;
+      }
+      throw new Error("The download stopped before the model finished.");
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1_000));
+  }
+  throw new Error("Timed out waiting for the download to finish.");
+}
+
 async function activate(model: GgufLlmModel) {
   const started = await localLlmCommands.startServer(model);
   if (started.status === "error") {
@@ -166,6 +191,12 @@ export function LocalModels() {
       if (result.status === "error") {
         throw new Error(result.error);
       }
+
+      // downloadModel resolves once the transfer is queued, not when it lands.
+      // Returning here claimed success at 0% — a green "downloaded" toast that
+      // the next progress tick overwrote with "Downloading… 0%", and a row that
+      // went back to offering Download for the whole multi-gigabyte transfer.
+      await waitUntilDownloaded(model.key);
     },
     onSuccess: async (_data, model) => {
       await queryClient.invalidateQueries({ queryKey: DOWNLOADED_QUERY_KEY });

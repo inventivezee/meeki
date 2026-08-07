@@ -188,10 +188,18 @@ export function OnDeviceLlmCard() {
         if (cancelledRef.current) {
           return;
         }
-        if (value < 0) {
+        // -1 is failure, -2 is paused. Treating every negative as a failure
+        // meant pausing raised "Download failed. Check your connection", reset
+        // the phase and made this card vanish — for a transfer that was fine
+        // and resumable. The plugin sends -2 for exactly this reason, and the
+        // two sibling consumers already gate on `value >= 0`.
+        if (value === -1) {
           reportDownloadFailure(
             "Download failed. Check your connection and try again.",
           );
+          return;
+        }
+        if (value < 0) {
           return;
         }
 
@@ -351,7 +359,11 @@ export function OnDeviceLlmCard() {
                   size="sm"
                   variant="ghost"
                   className="h-7 gap-1 px-2 text-xs"
-                  disabled={pauseDownload.isPending || isPaused}
+                  // Not `|| isPaused`: that disabled the button in the one state
+                  // where it says "Resume", so the resume branch below was
+                  // unreachable. During a retry backoff — which renders exactly
+                  // this state — the only ways out were waiting or cancelling.
+                  disabled={pauseDownload.isPending || downloadAndUse.isPending}
                   onClick={() =>
                     isPaused
                       ? downloadAndUse.mutate(defaultModel.key)

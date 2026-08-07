@@ -4,7 +4,7 @@ use tokio::task::JoinHandle;
 use std::sync::atomic::Ordering;
 
 use crate::download_task::failure::{cleanup_for_failure, forget_without_cleanup};
-use crate::download_task::steps::{ChecksumError, FinalizeError};
+use crate::download_task::steps::{ChecksumError, FinalizeError, SizeMismatch};
 use crate::download_task_progress::make_progress_callback;
 use crate::model::DownloadableModel;
 
@@ -98,6 +98,18 @@ pub(crate) fn spawn_download_task<M: DownloadableModel>(
                     return;
                 }
             }
+        }
+
+        // Checked before the checksum because most models have no checksum to
+        // check. The large GGUF quants all return None from download_checksum,
+        // so until now nothing at all stood between a short .part and promote
+        // renaming it over a working model.
+        if let Some(expected_bytes) = params.model.download_size()
+            && let Err(error) = steps::verify_size(&params, expected_bytes).await
+        {
+            let reason = log_size_error(&error);
+            fail_task(&params, Some(reason)).await;
+            return;
         }
 
         if let Some(expected_checksum) = params.model.download_checksum()
@@ -224,6 +236,15 @@ fn log_checksum_error(error: &ChecksumError) -> String {
             format!("Verification interrupted: {}", error)
         }
     }
+}
+
+fn log_size_error(error: &SizeMismatch) -> String {
+    tracing::error!(
+        actual_bytes = error.actual,
+        expected_bytes = error.expected,
+        "model_download_size_mismatch"
+    );
+    "The download finished with the wrong number of bytes. Please try again.".to_string()
 }
 
 fn log_finalize_error(error: &FinalizeError) -> String {

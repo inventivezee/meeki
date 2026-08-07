@@ -15,6 +15,33 @@ pub(super) enum FinalizeError {
     Join(tokio::task::JoinError),
 }
 
+pub(super) struct SizeMismatch {
+    pub(super) actual: u64,
+    pub(super) expected: u64,
+}
+
+/// Refuses to promote a file that is not the size it should be.
+///
+/// Exact, not tolerant: gguf_size_matches allows drift because it is judging a
+/// file that is already in place, where refusing would strand a working model.
+/// Here the alternative is keeping the model the user already has, so anything
+/// short of the declared size is worth rejecting.
+pub(super) async fn verify_size<M: DownloadableModel>(
+    params: &DownloadTaskParams<M>,
+    expected: u64,
+) -> Result<(), SizeMismatch> {
+    let actual = fs::metadata(&params.destination)
+        .await
+        .map(|meta| meta.len())
+        .unwrap_or(0);
+
+    if actual == expected {
+        Ok(())
+    } else {
+        Err(SizeMismatch { actual, expected })
+    }
+}
+
 pub(super) async fn download<M: DownloadableModel>(
     params: &DownloadTaskParams<M>,
     progress_callback: impl Fn(meeki_download_interface::DownloadProgress) + Send + Sync,

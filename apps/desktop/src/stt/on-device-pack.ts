@@ -79,6 +79,23 @@ export const ON_DEVICE_STT_PACK = [
   LOCAL_FINAL_BATCH_MODEL,
 ] as const satisfies readonly LocalModel[];
 
+/**
+ * The pack for a given batch choice. Live captions are always Parakeet; only
+ * the saved transcript's model is up to the user.
+ *
+ * The setup card used to download ON_DEVICE_STT_PACK unconditionally, so
+ * picking "Qwen3 ASR 0.6B" to save disk fetched the 1.7B one instead and
+ * selected that — leaving the panel that gates on the choice waiting forever
+ * for a model nothing had been asked to fetch.
+ */
+export function sttPackFor(
+  batchModel: LocalModel = DEFAULT_BATCH_MODEL,
+): readonly LocalModel[] {
+  return batchModel === LOCAL_LIVE_PREVIEW_MODEL
+    ? [LOCAL_LIVE_PREVIEW_MODEL]
+    : [LOCAL_LIVE_PREVIEW_MODEL, batchModel];
+}
+
 /** Mirrors `SoniqoModel::ParakeetStreaming` in crates/transcribe-soniqo. */
 const LIVE_PREVIEW_BYTES = 120 * 1024 * 1024;
 

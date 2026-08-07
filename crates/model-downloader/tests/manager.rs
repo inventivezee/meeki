@@ -52,6 +52,10 @@ struct TestModel {
     key: String,
     url: Option<String>,
     checksum: Option<u32>,
+    /// Left None by every constructor but with_url_and_size, mirroring the real
+    /// implementors. That this field did not exist is why download_size going
+    /// unimplemented for so long was invisible to the suite.
+    size: Option<u64>,
 }
 
 impl TestModel {
@@ -60,6 +64,16 @@ impl TestModel {
             key: key.to_string(),
             url: Some(url),
             checksum: None,
+            size: None,
+        }
+    }
+
+    fn with_url_and_size(key: &str, url: String, size: u64) -> Self {
+        Self {
+            key: key.to_string(),
+            url: Some(url),
+            checksum: None,
+            size: Some(size),
         }
     }
 
@@ -68,6 +82,7 @@ impl TestModel {
             key: key.to_string(),
             url: Some(url),
             checksum: Some(checksum),
+            size: None,
         }
     }
 
@@ -76,6 +91,7 @@ impl TestModel {
             key: key.to_string(),
             url: None,
             checksum: None,
+            size: None,
         }
     }
 }
@@ -91,6 +107,10 @@ impl DownloadableModel for TestModel {
 
     fn download_checksum(&self) -> Option<u32> {
         self.checksum
+    }
+
+    fn download_size(&self) -> Option<u64> {
+        self.size
     }
 
     fn download_destination(&self, models_base: &Path) -> PathBuf {
@@ -774,4 +794,97 @@ async fn an_expired_signed_url_does_not_discard_the_partial() {
         base.join("expired.bin.part").exists(),
         "the partial must survive a 403 — this is the 6.8 GB that was lost"
     );
+}
+
+#[tokio::test]
+async fn download_skips_a_model_already_on_disk() {
+    // The mock counts requests, so "did not refetch" is asserted against the
+    // server rather than inferred from timing.
+    let server = start_mock_server("/model.bin", b"fake weights".to_vec()).await;
+    let url = format!("{}/model.bin", server.uri());
+
+    let runtime = TestRuntime::new();
+    let manager = ModelDownloadManager::new(runtime.clone());
+    let model = TestModel::with_url("already-here", url);
+
+    std::fs::write(manager.model_path(&model).unwrap(), b"fake weights").unwrap();
+
+    manager.download(&model).await.unwrap();
+    wait_until_done(&manager, &model).await;
+
+    let requests = server.received_requests().await.unwrap_or_default();
+    assert!(
+        requests.is_empty(),
+        "refetched a model that was already on disk: {} request(s)",
+        requests.len()
+    );
+    assert!(
+        runtime
+            .progress_statuses()
+            .contains(&DownloadStatus::Completed),
+        "a skipped download must still report Completed, or the caller's \
+         channel never reaches a terminal value: {:?}",
+        runtime.progress_statuses()
+    );
+}
+
+#[tokio::test]
+async fn a_short_download_is_not_promoted_over_the_existing_model() {
+    // Content-Length says 64, the body is 64, but the model declares 4096. The
+    // large GGUF quants carry no checksum, so before this check the short file
+    // was renamed straight over the real weights.
+    let server = start_mock_server("/model.bin", vec![9u8; 64]).await;
+    let url = format!("{}/model.bin", server.uri());
+
+    let runtime = TestRuntime::new();
+    let manager = ModelDownloadManager::new(runtime.clone());
+    let model = TestModel::with_url_and_size("short", url, 4096);
+
+    manager.download(&model).await.unwrap();
+    wait_until_done(&manager, &model).await;
+
+    assert!(
+        !manager.model_path(&model).unwrap().exists(),
+        "promoted a file that was 64 bytes of a declared 4096"
+    );
+    assert!(
+        runtime
+            .progress_statuses()
+            .iter()
+            .any(|s| matches!(s, DownloadStatus::Failed(_))),
+        "a size mismatch must be reported: {:?}",
+        runtime.progress_statuses()
+    );
+}
+
+#[tokio::test]
+async fn a_sidecar_written_before_sizes_existed_still_resumes() {
+    // download_size() returned None for the whole life of the sidecar format,
+    // so every partial on disk today records expected_bytes 0. Comparing the
+    // struct strictly would call those foreign and delete them — an upgrade
+    // that silently restarts a 13.6 GB download.
+    let server = start_mock_server("/model.bin", vec![3u8; 2048]).await;
+    let url = format!("{}/model.bin", server.uri());
+
+    let runtime = TestRuntime::new();
+    let manager = ModelDownloadManager::new(runtime.clone());
+    let model = TestModel::with_url_and_size("upgraded", url.clone(), 2048);
+
+    let part = runtime.temp_dir.path().join("upgraded.bin.part");
+    let sidecar = runtime.temp_dir.path().join("upgraded.bin.part.json");
+    std::fs::write(&part, vec![3u8; 1024]).unwrap();
+    std::fs::write(
+        &sidecar,
+        serde_json::json!({ "url": url, "expected_bytes": 0 }).to_string(),
+    )
+    .unwrap();
+
+    manager.download(&model).await.unwrap();
+
+    assert!(
+        part.exists(),
+        "discarded a pre-upgrade partial instead of resuming into it"
+    );
+
+    wait_until_done(&manager, &model).await;
 }

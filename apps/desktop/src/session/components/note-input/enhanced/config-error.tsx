@@ -9,6 +9,8 @@ import { sonnerToast } from "@meeki/ui/components/ui/toast";
 
 import { useNotifications } from "~/contexts/notifications";
 import { formatGb } from "~/settings/ai/shared/model-facts";
+import { setAiProvider } from "~/settings/providers";
+import { setSettingValues } from "~/settings/queries";
 import { useTabs } from "~/store/zustand/tabs";
 
 /**
@@ -42,11 +44,44 @@ export function ConfigError() {
     ? (activeDownloads.find((entry) => entry.model === model.key) ?? null)
     : null;
 
+  // Reaching this card says nothing about whether the weights are here. Every
+  // reason that renders it — no provider, no model, blank API key — is
+  // satisfied by a complete model that was simply never selected, which is the
+  // ordinary outcome of downloading one in Settings and not clicking Enable.
+  // Offering to fetch 13.6 GB in that state is the wrong thing to offer.
+  const alreadyOnDisk = useQuery({
+    enabled: !!model,
+    queryKey: ["local-llm-downloaded", model?.key ?? null],
+    refetchInterval: 2_000,
+    queryFn: async () => {
+      if (!model) return false;
+      const result = await localLlmCommands.isModelDownloaded(model.key);
+      return result.status === "ok" && result.data;
+    },
+  });
+
   const download = useMutation({
     mutationFn: async () => {
       if (!model) {
         throw new Error("No local model fits this Mac.");
       }
+
+      if (alreadyOnDisk.data) {
+        const started = await localLlmCommands.startServer(model.key);
+        if (started.status === "error") {
+          throw new Error(started.error);
+        }
+        await setAiProvider("llm", "on_device", {
+          base_url: started.data,
+          api_key: "local",
+        });
+        await setSettingValues({
+          current_llm_provider: "on_device",
+          current_llm_model: model.key,
+        });
+        return;
+      }
+
       const result = await localLlmCommands.downloadModel(
         model.key,
         new Channel<number>(),
@@ -92,6 +127,8 @@ export function ConfigError() {
               <Loader2 className="size-3.5 animate-spin" />
               <Trans>Downloading… {downloading.progress}%</Trans>
             </>
+          ) : model && alreadyOnDisk.data ? (
+            <Trans>Use {model.name}</Trans>
           ) : model ? (
             <Trans>
               Download {model.name} ({formatGb(model.size_bytes)} GB)

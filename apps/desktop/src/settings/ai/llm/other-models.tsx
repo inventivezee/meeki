@@ -12,6 +12,7 @@ import { Button } from "@meeki/ui/components/ui/button";
 import { sonnerToast } from "@meeki/ui/components/ui/toast";
 
 import { Disclosure } from "~/chat/components/message/shared";
+import { waitUntilDownloaded } from "~/settings/ai/llm/local-models";
 import { ModelFacts } from "~/settings/ai/shared/model-facts";
 
 /**
@@ -74,6 +75,11 @@ export function OtherLocalModels({
       if (result.status === "error") {
         throw new Error(result.error);
       }
+
+      // Same as the recommended row: the command resolves at queue time, so
+      // without this the success toast and the re-armed Download button both
+      // land at 0%.
+      await waitUntilDownloaded(model.key);
     },
     onSuccess: async (_data, model) => {
       await queryClient.invalidateQueries({

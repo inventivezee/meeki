@@ -2521,6 +2521,11 @@ msgstr ""
 msgid "Upload transcript"
 msgstr ""
 
+#. placeholder {0}: model.name
+#: src/session/components/note-input/enhanced/config-error.tsx
+msgid "Use {0}"
+msgstr ""
+
 #: src/session/components/note-input/enhanced/config-error.tsx
 msgid "Use an API key"
 msgstr ""

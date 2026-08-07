@@ -51,6 +51,23 @@ impl PartialMeta {
             .ok()?;
         serde_json::from_slice(&raw).ok()
     }
+
+    /// Whether a partial described by `self` can be resumed by a download
+    /// described by `other`.
+    ///
+    /// Not a derived equality: zero means "size unknown", not "zero bytes".
+    /// download_size() went unimplemented for a long time, so every sidecar
+    /// written before it landed records 0, and a strict comparison would treat
+    /// all of them as foreign and delete the partials they vouch for — turning
+    /// an upgrade into a fresh 13.6 GB download for anyone mid-transfer.
+    fn can_resume_into(&self, other: &Self) -> bool {
+        if self.url != other.url {
+            return false;
+        }
+        self.expected_bytes == 0
+            || other.expected_bytes == 0
+            || self.expected_bytes == other.expected_bytes
+    }
 }
 
 /// Drops a partial that does not belong to the download about to run. A missing
@@ -62,7 +79,10 @@ pub(crate) async fn discard_unusable_partial(destination: &Path, expected: &Part
         return;
     }
 
-    if PartialMeta::read(destination).await.as_ref() == Some(expected) {
+    if PartialMeta::read(destination)
+        .await
+        .is_some_and(|found| found.can_resume_into(expected))
+    {
         return;
     }
 

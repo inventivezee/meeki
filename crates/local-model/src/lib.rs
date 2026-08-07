@@ -424,6 +424,14 @@ impl DownloadableModel for GgufLlmModel {
         self.model_checksum()
     }
 
+    /// The trait default is None, and nothing overrode it — which left every
+    /// pause reporting "0 bytes of 0", the sidecar's size guard comparing 0 to
+    /// 0, and no size to check a finished file against. The number was here the
+    /// whole time: is_downloaded already validates against it.
+    fn download_size(&self) -> Option<u64> {
+        Some(self.model_size())
+    }
+
     fn download_destination(&self, models_base: &Path) -> PathBuf {
         models_base.join("llm").join(self.file_name())
     }
@@ -487,6 +495,15 @@ impl DownloadableModel for LocalModel {
             LocalModel::Whisper(model) => Some(model.checksum()),
             LocalModel::Am(model) => Some(model.tar_checksum()),
             LocalModel::GgufLlm(model) => model.download_checksum(),
+        }
+    }
+
+    fn download_size(&self) -> Option<u64> {
+        match self {
+            // Soniqo is fetched by the Swift bridge, and the Whisper/Am tables
+            // carry no declared size.
+            LocalModel::Soniqo(_) | LocalModel::Whisper(_) | LocalModel::Am(_) => None,
+            LocalModel::GgufLlm(model) => model.download_size(),
         }
     }
 

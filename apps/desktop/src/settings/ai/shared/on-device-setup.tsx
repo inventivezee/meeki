@@ -23,8 +23,12 @@ import {
 } from "~/settings/ai/shared/model-facts";
 import { setAiProvider } from "~/settings/providers";
 import { setSettingValues } from "~/settings/queries";
-import { LOCAL_FINAL_BATCH_MODEL } from "~/stt/capabilities";
-import { ON_DEVICE_STT_PACK, sttPackBytes } from "~/stt/on-device-pack";
+import {
+  DEFAULT_BATCH_MODEL,
+  sttPackBytes,
+  sttPackFor,
+  usePreferredBatchModel,
+} from "~/stt/on-device-pack";
 
 const SETUP_TOAST_ID = "on-device-setup";
 
@@ -43,6 +47,10 @@ export function OnDeviceSetupCard({
   scope?: "all" | "stt";
 } = {}) {
   const includesLlm = scope === "all";
+  // The transcription panel writes the user's batch choice here; reading it
+  // rather than a constant is what makes the pick actually govern the download.
+  const batchModel = usePreferredBatchModel();
+  const sttPack = sttPackFor(batchModel);
   const queryClient = useQueryClient();
   const { downloadsFor } = useNotifications();
   const sawInFlight = useRef(false);
@@ -60,9 +68,9 @@ export function OnDeviceSetupCard({
   });
 
   const sttReady = useQuery({
-    queryKey: ["on-device-stt-pack-ready"],
+    queryKey: ["on-device-stt-pack-ready", batchModel],
     queryFn: async () => {
-      for (const model of ON_DEVICE_STT_PACK) {
+      for (const model of sttPack) {
         const result = await localSttCommands.isModelDownloaded(model);
         if (result.status !== "ok" || !result.data) {
           return false;
@@ -98,10 +106,10 @@ export function OnDeviceSetupCard({
   // outlives this card, so remounting it after a tab switch must not offer to
   // start the same multi-gigabyte transfer a second time.
   const inFlight = useQuery({
-    queryKey: ["on-device-setup-in-flight", llmModel?.key ?? null],
+    queryKey: ["on-device-setup-in-flight", llmModel?.key ?? null, batchModel],
     refetchInterval: 1_000,
     queryFn: async () => {
-      for (const model of ON_DEVICE_STT_PACK) {
+      for (const model of sttPack) {
         const result = await localSttCommands.isModelDownloading(model);
         if (result.status === "ok" && result.data) {
           return true;
@@ -121,7 +129,7 @@ export function OnDeviceSetupCard({
     mutationFn: async () => {
       // downloadAndActivateOnDevice skips what is already on disk, so passing
       // the recommended model is safe even when only one leg is missing.
-      await downloadAndActivateOnDevice(llmModel?.key ?? null);
+      await downloadAndActivateOnDevice(llmModel?.key ?? null, batchModel);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
@@ -177,10 +185,7 @@ export function OnDeviceSetupCard({
 
   // This card's own models, in the order it downloads them — not whatever
   // happened to report progress first.
-  const mine = downloadsFor([
-    ...ON_DEVICE_STT_PACK,
-    ...(llmModel ? [llmModel.key] : []),
-  ]);
+  const mine = downloadsFor([...sttPack, ...(llmModel ? [llmModel.key] : [])]);
   const current = mine.current;
   // A percentage is only shown when byte counts back it up. The Soniqo bridge
   // reports a fraction weighted per *file*, so a 2.4 GB shard is one sixth of
@@ -209,12 +214,14 @@ export function OnDeviceSetupCard({
       return;
     }
     sawInFlight.current = false;
-    void activateOnDevice(llmModel?.key ?? null).catch((error: unknown) => {
-      sonnerToast.error("Downloaded, but couldn’t start the models", {
-        id: SETUP_TOAST_ID,
-        description: error instanceof Error ? error.message : String(error),
-      });
-    });
+    void activateOnDevice(llmModel?.key ?? null, batchModel).catch(
+      (error: unknown) => {
+        sonnerToast.error("Downloaded, but couldn’t start the models", {
+          id: SETUP_TOAST_ID,
+          description: error instanceof Error ? error.message : String(error),
+        });
+      },
+    );
   }, [
     inFlight.data,
     sttReady.data,
@@ -222,13 +229,14 @@ export function OnDeviceSetupCard({
     llmModel?.key,
     setup.isPending,
     paused,
+    batchModel,
   ]);
 
   if (sttReady.data && llmReady) {
     return null;
   }
 
-  const packBytes = sttPackBytes();
+  const packBytes = sttPackBytes(batchModel);
   const totalBytes =
     (sttReady.data ? 0 : packBytes) +
     (llmModel && !llmReady ? llmModel.size_bytes : 0);
@@ -346,26 +354,44 @@ export function OnDeviceSetupCard({
  */
 export async function downloadAndActivateOnDevice(
   llmModel: GgufLlmModel | null,
+  batchModel: LocalModel = DEFAULT_BATCH_MODEL,
 ) {
-  for (const model of ON_DEVICE_STT_PACK) {
+  for (const model of sttPackFor(batchModel)) {
     await downloadSttModel(model);
   }
 
   if (llmModel) {
-    await downloadLlmModel(llmModel);
+    // A paused model must not be selected — the weights are incomplete. The
+    // card's recovery effect re-activates once the resumed transfer lands, so
+    // stopping here quietly is the whole handling.
+    if ((await downloadLlmModel(llmModel)) === "paused") {
+      return;
+    }
   }
 
-  await activateOnDevice(llmModel);
+  await activateOnDevice(llmModel, batchModel);
 }
 
-async function downloadLlmModel(model: GgufLlmModel) {
+async function downloadLlmModel(
+  model: GgufLlmModel,
+): Promise<"done" | "paused"> {
   // The same check the STT leg has always done. Without it, clicking setup
   // with only transcription missing refetched a summarisation model that was
   // already on disk — 13.6 GB from byte zero, invisibly, because the transfer
   // lands in a .part while the complete file next to it keeps serving answers.
   const already = await localLlmCommands.isModelDownloaded(model);
   if (already.status === "ok" && already.data) {
-    return;
+    return "done";
+  }
+
+  // This leg runs only after the whole STT pack lands, so it can fire many
+  // minutes after the click that armed it — long enough for the user to have
+  // started this very model from the settings row below. Re-issuing the command
+  // would displace that transfer's channel with a -1 and restart its
+  // connection. Wait on it instead.
+  const inFlight = await localLlmCommands.isModelDownloading(model);
+  if (inFlight.status === "ok" && inFlight.data) {
+    return await waitForLlmDownload(model);
   }
 
   const result = await localLlmCommands.downloadModel(
@@ -375,7 +401,7 @@ async function downloadLlmModel(model: GgufLlmModel) {
   if (result.status === "error") {
     throw new Error(result.error);
   }
-  await waitForLlmDownload(model);
+  return await waitForLlmDownload(model);
 }
 
 async function downloadSttModel(model: LocalModel) {
@@ -405,14 +431,25 @@ async function downloadSttModel(model: LocalModel) {
   throw new Error(`Timed out downloading ${model}`);
 }
 
-async function waitForLlmDownload(model: GgufLlmModel) {
+async function waitForLlmDownload(
+  model: GgufLlmModel,
+): Promise<"done" | "paused"> {
   for (let attempt = 0; attempt < 60 * 60; attempt += 1) {
     const done = await localLlmCommands.isModelDownloaded(model);
     if (done.status === "ok" && done.data) {
-      return;
+      return "done";
     }
     const downloading = await localLlmCommands.isModelDownloading(model);
     if (downloading.status === "ok" && !downloading.data) {
+      // A pause looks exactly like a stop from here: pause_download removes the
+      // registry entry before it returns, so is_downloading reads false the
+      // instant the user clicks the card's own Pause button. Throwing turned a
+      // deliberate, resumable pause into "Couldn't finish on-device setup".
+      // Bytes on disk are what tells them apart — a pause keeps its partial.
+      const paused = await localLlmCommands.pausedBytes(model);
+      if (paused.status === "ok" && paused.data > 0) {
+        return "paused";
+      }
       throw new Error("Download stopped before the model finished.");
     }
     await new Promise((resolve) => setTimeout(resolve, 1_000));
@@ -420,10 +457,13 @@ async function waitForLlmDownload(model: GgufLlmModel) {
   throw new Error("Timed out downloading the interpretation model.");
 }
 
-async function activateOnDevice(llmModel: GgufLlmModel | null) {
+async function activateOnDevice(
+  llmModel: GgufLlmModel | null,
+  batchModel: LocalModel = DEFAULT_BATCH_MODEL,
+) {
   await setSettingValues({
     current_stt_provider: "hyprnote",
-    current_stt_model: LOCAL_FINAL_BATCH_MODEL,
+    current_stt_model: batchModel,
   });
 
   if (!llmModel) {
