@@ -9,6 +9,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   createNewNote: vi.fn(),
+  startRecording: vi.fn(),
   openNew: vi.fn(),
   openSearch: vi.fn(),
   goBack: vi.fn(),
@@ -148,6 +149,7 @@ vi.mock("~/shared/open-note-dialog", () => ({
 
 vi.mock("~/shared/useNewNote", () => ({
   useNewNote: () => mocks.createNewNote,
+  useNewNoteAndListen: () => mocks.startRecording,
 }));
 
 vi.mock("~/store/zustand/tabs", () => ({

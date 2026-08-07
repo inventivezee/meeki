@@ -5,6 +5,7 @@ import {
   PanelLeftCloseIcon,
   PanelLeftOpenIcon,
   SearchIcon,
+  MicIcon,
   SquarePenIcon,
   WrenchIcon,
 } from "lucide-react";
@@ -50,7 +51,7 @@ import {
   usesNoteSurfaceMinWidth,
 } from "~/shared/main/layout-widths";
 import { useOpenNoteDialog } from "~/shared/open-note-dialog";
-import { useNewNote } from "~/shared/useNewNote";
+import { useNewNote, useNewNoteAndListen } from "~/shared/useNewNote";
 import { useSidebarUpcomingMeetingStatus } from "~/sidebar/timeline/upcoming-meeting";
 import {
   hasCustomSidebarTab,
@@ -170,6 +171,7 @@ export function ClassicMainBody() {
   const currentSessionId =
     currentTab?.type === "sessions" ? currentTab.id : undefined;
   const createNewNote = useNewNote();
+  const startRecording = useNewNoteAndListen();
   const openNoteDialog = useOpenNoteDialog();
   const handleOpenNoteDialog = useCallback(() => {
     openNoteDialog.open();
@@ -483,6 +485,7 @@ export function ClassicMainBody() {
           showIgnoredTimelineEvents={showIgnoredTimelineEvents}
           devtoolsPanelOpen={devtoolsPanelOpen}
           onNewNote={createNewNote}
+          onStartRecording={startRecording}
           onSearch={handleOpenNoteDialog}
           onOpenDevtools={handleOpenDevtoolsPanel}
           onToggleSidebar={handleToggleLeftSidebar}
@@ -521,6 +524,7 @@ export function ClassicMainBody() {
               showIgnoredTimelineEvents={showIgnoredTimelineEvents}
               devtoolsPanelOpen={devtoolsPanelOpen}
               onNewNote={createNewNote}
+              onStartRecording={startRecording}
               onSearch={handleOpenNoteDialog}
               onOpenDevtools={handleOpenDevtoolsPanel}
               onToggleSidebar={handleToggleLeftSidebar}
@@ -874,6 +878,7 @@ const SidebarTimelineChromeWithUpcomingMeeting = memo(
     currentSessionId,
     devtoolsPanelOpen,
     onNewNote,
+    onStartRecording,
     onOpenDevtools,
     onSearch,
     onToggleSidebar,
@@ -885,6 +890,7 @@ const SidebarTimelineChromeWithUpcomingMeeting = memo(
     currentSessionId?: string;
     devtoolsPanelOpen: boolean;
     onNewNote: () => void;
+    onStartRecording: () => void;
     onOpenDevtools: () => void;
     onSearch: () => void;
     onToggleSidebar: () => void;
@@ -906,6 +912,7 @@ const SidebarTimelineChromeWithUpcomingMeeting = memo(
         devtoolsPanelOpen={devtoolsPanelOpen}
         hasUpcomingMeeting={hasUpcomingMeeting}
         onNewNote={onNewNote}
+        onStartRecording={onStartRecording}
         onOpenDevtools={onOpenDevtools}
         onSearch={onSearch}
         onToggleSidebar={onToggleSidebar}
@@ -921,6 +928,7 @@ function SidebarTimelineChrome({
   devtoolsPanelOpen,
   hasUpcomingMeeting,
   onNewNote,
+  onStartRecording,
   onOpenDevtools,
   onSearch,
   onToggleSidebar,
@@ -931,6 +939,7 @@ function SidebarTimelineChrome({
   devtoolsPanelOpen: boolean;
   hasUpcomingMeeting: boolean;
   onNewNote: () => void;
+  onStartRecording: () => void;
   onOpenDevtools: () => void;
   onSearch: () => void;
   onToggleSidebar: () => void;
@@ -969,6 +978,18 @@ function SidebarTimelineChrome({
             </LeftSurfaceChromeButton>
             <LeftSurfaceChromeButton ariaLabel="New note" onClick={onNewNote}>
               <SquarePenIcon size={15} />
+            </LeftSurfaceChromeButton>
+            {/*
+              Recording used to be reachable only from a session's own header,
+              so any other tab — settings, the changelog — had no way to start
+              one. This creates the session it records into, which is what makes
+              it safe to offer from anywhere.
+            */}
+            <LeftSurfaceChromeButton
+              ariaLabel="Start recording"
+              onClick={onStartRecording}
+            >
+              <MicIcon size={15} />
             </LeftSurfaceChromeButton>
             {showDevtoolsPanelButton && !devtoolsPanelOpen ? (
               <LeftSurfaceChromeButton

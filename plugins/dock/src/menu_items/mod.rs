@@ -1,7 +1,6 @@
 mod check_update;
 mod new_note;
 mod open;
-mod quit;
 mod restart;
 mod settings;
 mod start_recording;
@@ -9,7 +8,6 @@ mod start_recording;
 pub use check_update::DockCheckUpdate;
 pub use new_note::DockNewNote;
 pub use open::DockOpen;
-pub use quit::DockQuit;
 pub use restart::DockRestart;
 pub use settings::DockSettings;
 pub use start_recording::DockStartRecording;
@@ -102,5 +100,4 @@ dock_menu_items! {
     handleDockSettings => DockSettings,
     handleDockCheckUpdate => DockCheckUpdate,
     handleDockRestart => DockRestart,
-    handleDockQuit => DockQuit,
 }

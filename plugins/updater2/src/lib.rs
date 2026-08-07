@@ -3,7 +3,6 @@ mod error;
 mod events;
 mod ext;
 #[cfg(target_os = "macos")]
-#[cfg(target_os = "macos")]
 mod install_macos;
 mod startup_migration;
 mod store;
@@ -54,9 +53,21 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
 
             let handle = app.clone();
             tauri::async_runtime::spawn(async move {
+                // The launch check runs against a network that is often not up
+                // yet — a Mac waking to an app that opens on login reaches this
+                // before Wi-Fi associates. One attempt then meant the first real
+                // check was half an hour away, so a machine that had been off
+                // for a week still opened on a stale build.
+                for wait in STARTUP_RETRY_WAITS_SECONDS {
+                    if check_and_download(&handle).await {
+                        break;
+                    }
+                    tokio::time::sleep(std::time::Duration::from_secs(wait)).await;
+                }
+
                 loop {
-                    check_and_download(&handle).await;
                     tokio::time::sleep(std::time::Duration::from_secs(30 * 60)).await;
+                    check_and_download(&handle).await;
                 }
             });
 
@@ -65,25 +76,34 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
         .build()
 }
 
-async fn check_and_download<R: tauri::Runtime>(app: &tauri::AppHandle<R>) {
+/// Retries for the launch check only. Roughly six minutes of patience spread
+/// over five attempts, which covers a login-item start racing the network
+/// without hammering the endpoint.
+const STARTUP_RETRY_WAITS_SECONDS: [u64; 5] = [15, 30, 60, 120, 180];
+
+/// True when the check reached the server — whether or not an update existed.
+/// Only a failed check is worth retrying; "you are up to date" is an answer.
+async fn check_and_download<R: tauri::Runtime>(app: &tauri::AppHandle<R>) -> bool {
     if cfg!(debug_assertions) {
-        return;
+        return true;
     }
 
     let updater2 = app.updater2();
 
     let version = match updater2.check().await {
         Ok(Some(v)) => v,
-        Ok(None) => return,
+        Ok(None) => return true,
         Err(e) => {
             tracing::error!("update_check_failed: {}", e);
-            return;
+            return false;
         }
     };
 
     if let Err(e) = updater2.download(&version).await {
         tracing::error!("update_download_failed: {}", e);
     }
+
+    true
 }
 
 #[cfg(test)]
