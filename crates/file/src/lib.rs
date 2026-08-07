@@ -61,6 +61,9 @@ impl crate::Error {
             Self::HttpStatus { status, .. } => {
                 matches!(status, 403 | 408 | 429) || (500..600).contains(status)
             }
+            // A body that stopped early says nothing about the range being
+            // wrong, and the resume picks up from the last contiguous byte.
+            Self::IncompleteChunk { .. } => true,
             Self::FileIOError(_) | Self::Cancelled | Self::OtherError(_) => false,
         }
     }
@@ -483,6 +486,7 @@ pub async fn download_file_parallel_cancellable<F: Fn(DownloadProgress) + Send +
                 });
             }
 
+            let expected_len = (end - start + 1) as usize;
             let mut bytes = Vec::new();
             let mut stream = response.bytes_stream();
 
@@ -491,7 +495,13 @@ pub async fn download_file_parallel_cancellable<F: Fn(DownloadProgress) + Send +
                 if let Some(ref token) = cancellation_token_clone
                     && token.is_cancelled()
                 {
-                    return Ok((start, bytes)); // Return what we have so far
+                    // Not Ok(partial): downstream cannot tell a short chunk from
+                    // a whole one, and process_task_result would advance the
+                    // write offset past bytes that never arrived — stranding
+                    // every later chunk and leaving the file quietly truncated.
+                    // Dropping it costs nothing; the resume refetches this range
+                    // from the last contiguous offset.
+                    return Err(crate::Error::Cancelled);
                 }
 
                 bytes.extend_from_slice(&chunk);
@@ -502,6 +512,14 @@ pub async fn download_file_parallel_cancellable<F: Fn(DownloadProgress) + Send +
                 drop(downloaded_guard);
 
                 progress_callback_clone(DownloadProgress::Progress(current_downloaded, total_size));
+            }
+
+            if bytes.len() != expected_len {
+                return Err(crate::Error::IncompleteChunk {
+                    start,
+                    end,
+                    received: bytes.len(),
+                });
             }
 
             Ok((start, bytes))
@@ -516,22 +534,19 @@ pub async fn download_file_parallel_cancellable<F: Fn(DownloadProgress) + Send +
         }
     }
 
+    // Every result propagates. The previous version matched Err(Cancelled) and
+    // then tested that same Err for Ok(..) — an arm the compiler can never
+    // reach — so a cancelled chunk was neither salvaged nor reported, and this
+    // function returned Ok(()) for a file missing up to 64 MB. The caller reads
+    // Ok as "downloaded", skips the paused check, skips the checksum these
+    // models do not carry, and renames the short .part over a complete model.
+    //
+    // The loop above returns Err(Cancelled) on the same condition, but only
+    // between dispatches: chunk_size is remaining/MAX_CONCURRENT_CHUNKS, so
+    // once the final chunks are in flight there is no dispatch left to check
+    // and every cancellation lands here instead.
     while let Some(result) = tasks.next().await {
-        // If we get a cancellation error, still try to process the result
-        // as it might contain partial data
-        if let Err(Error::Cancelled) = &result {
-            // Process any data that was downloaded before cancellation
-            if let Ok((offset, data)) = result {
-                let _ = process_task_result(
-                    Ok((offset, data)),
-                    &file,
-                    &pending_writes,
-                    &next_write_offset,
-                );
-            }
-        } else {
-            process_task_result(result, &file, &pending_writes, &next_write_offset)?;
-        }
+        process_task_result(result, &file, &pending_writes, &next_write_offset)?;
     }
 
     // Final sync to ensure all data is on disk

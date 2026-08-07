@@ -197,6 +197,9 @@ fn log_download_error(error: &meeki_file::Error) -> Option<String> {
             _ => format!("The download server returned {status}. Please try again."),
         },
         meeki_file::Error::Cancelled => unreachable!(),
+        meeki_file::Error::IncompleteChunk { .. } => {
+            "The download server sent an incomplete response. Please try again.".to_string()
+        }
         meeki_file::Error::OtherError(msg) => msg.clone(),
     };
     Some(reason)
