@@ -144,6 +144,11 @@ msgstr "Advanced"
 msgid "After recording"
 msgstr "After recording"
 
+#: src/settings/ai/index.tsx
+#: src/sidebar/settings.tsx
+msgid "AI Models"
+msgstr "AI Models"
+
 #: src/contacts/details.tsx
 msgid "AI-generated summary of all interactions and notes with this contact will appear here. This will synthesize key discussion points, action items, and relationship context across all meetings and notes."
 msgstr "AI-generated summary of all interactions and notes with this contact will appear here. This will synthesize key discussion points, action items, and relationship context across all meetings and notes."
@@ -1002,7 +1007,6 @@ msgid "Insert below"
 msgstr "Insert below"
 
 #: src/settings/ai/llm/index.tsx
-#: src/sidebar/settings.tsx
 msgid "Intelligence"
 msgstr "Intelligence"
 
@@ -2355,6 +2359,10 @@ msgstr "Template content with Jinja2: {{ variable }}, {% if condition %}"
 msgid "Templates"
 msgstr "Templates"
 
+#: src/settings/ai/index.tsx
+msgid "Text summarisation & more"
+msgstr "Text summarisation & more"
+
 #: src/onboarding/folder-location.tsx
 msgid "The app will restart after onboarding to apply your storage changes"
 msgstr "The app will restart after onboarding to apply your storage changes"
@@ -2420,7 +2428,6 @@ msgid "Transcript"
 msgstr "Transcript"
 
 #: src/settings/ai/stt/index.tsx
-#: src/sidebar/settings.tsx
 msgid "Transcription"
 msgstr "Transcription"
 
@@ -2451,6 +2458,10 @@ msgstr "Try again"
 #: src/settings/sync/index.tsx
 msgid "Turn on sync to create or enter your recovery key."
 msgstr "Turn on sync to create or enter your recovery key."
+
+#: src/settings/ai/index.tsx
+msgid "Turns a transcript into a summary, and answers questions about it in chat. Also called intelligence."
+msgstr "Turns a transcript into a summary, and answers questions about it in chat. Also called intelligence."
 
 #: src/session/components/note-input/transcript/renderer/speaker-assign.tsx
 msgid "Unknown"
@@ -2579,6 +2590,10 @@ msgstr "View LinkedIn profile"
 msgid "View plans"
 msgstr "View plans"
 
+#: src/settings/ai/index.tsx
+msgid "Voice to Text"
+msgstr "Voice to Text"
+
 #: src/settings/general/week-start.tsx
 msgid "Week starts on"
 msgstr "Week starts on"
@@ -2602,6 +2617,10 @@ msgstr "While listening, use Accessibility access to copy visible chat from supp
 #: src/task/tab-content.tsx
 msgid "Work on this task"
 msgstr "Work on this task"
+
+#: src/settings/ai/index.tsx
+msgid "Writes down what was said in your meetings. Also called transcription."
+msgstr "Writes down what was said in your meetings. Also called transcription."
 
 #: src/session-sharing/comments.tsx
 msgid "You"

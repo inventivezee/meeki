@@ -220,7 +220,7 @@ describe("ToastNotifications", () => {
 
     expect(mocks.updateSettingsTabState).toHaveBeenCalledWith(
       mocks.currentTab,
-      { tab: "intelligence" },
+      { tab: "ai-models" },
     );
     expect(mocks.openNew).not.toHaveBeenCalled();
   });

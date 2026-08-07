@@ -8,8 +8,7 @@ import {
 } from "./general";
 import { SettingsTodo } from "./todo";
 
-import { LLM } from "~/settings/ai/llm";
-import { STT } from "~/settings/ai/stt";
+import { AiModels } from "~/settings/ai";
 import { SettingsDictionary } from "~/settings/dictionary";
 import { SettingsHydrationBoundary } from "~/settings/hydration-boundary";
 import { SettingsRecordings } from "~/settings/recordings";
@@ -56,10 +55,8 @@ function SettingsView({ tab }: { tab: Extract<Tab, { type: "settings" }> }) {
         return <SettingsDictionary />;
       case "recordings":
         return <SettingsRecordings />;
-      case "transcription":
-        return <STT />;
-      case "intelligence":
-        return <LLM />;
+      case "ai-models":
+        return <AiModels />;
       case "todo":
         return <SettingsTodo />;
       default:

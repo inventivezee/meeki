@@ -69,11 +69,12 @@ export function ToastNotifications() {
   const clearDevtoolsPreview = useDevtoolsToastPreview(
     (state) => state.clearPreview,
   );
-  const isAiTranscriptionTabActive =
-    currentTab?.type === "settings" &&
-    currentTab.state?.tab === "transcription";
-  const isAiIntelligenceTabActive =
-    currentTab?.type === "settings" && currentTab.state?.tab === "intelligence";
+  // One page owns both models now, so the two prompts share a destination and
+  // are both already-there when it is open.
+  const isAiModelsTabActive =
+    currentTab?.type === "settings" && currentTab.state?.tab === "ai-models";
+  const isAiTranscriptionTabActive = isAiModelsTabActive;
+  const isAiIntelligenceTabActive = isAiModelsTabActive;
   const activeTranscriptSessionId =
     currentTab?.type === "sessions" &&
     currentTab.state.view?.type === "transcript"
@@ -96,7 +97,7 @@ export function ToastNotifications() {
   }, [auth]);
 
   const openAiTab = useCallback(
-    (tab: "intelligence" | "transcription") => {
+    (tab: "ai-models") => {
       if (currentTab?.type === "settings") {
         updateSettingsTabState(currentTab, { tab });
       } else {
@@ -107,12 +108,12 @@ export function ToastNotifications() {
   );
 
   const handleOpenLLMSettings = useCallback(() => {
-    openAiTab("intelligence");
+    openAiTab("ai-models");
   }, [openAiTab]);
 
   const handleOpenSTTSettings = useCallback(() => {
     setToastActionTarget("stt");
-    openAiTab("transcription");
+    openAiTab("ai-models");
   }, [openAiTab, setToastActionTarget]);
 
   const registry = useMemo(

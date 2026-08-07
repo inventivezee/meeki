@@ -144,6 +144,11 @@ msgstr ""
 msgid "After recording"
 msgstr ""
 
+#: src/settings/ai/index.tsx
+#: src/sidebar/settings.tsx
+msgid "AI Models"
+msgstr ""
+
 #: src/contacts/details.tsx
 msgid "AI-generated summary of all interactions and notes with this contact will appear here. This will synthesize key discussion points, action items, and relationship context across all meetings and notes."
 msgstr ""
@@ -1002,7 +1007,6 @@ msgid "Insert below"
 msgstr ""
 
 #: src/settings/ai/llm/index.tsx
-#: src/sidebar/settings.tsx
 msgid "Intelligence"
 msgstr ""
 
@@ -2355,6 +2359,10 @@ msgstr ""
 msgid "Templates"
 msgstr ""
 
+#: src/settings/ai/index.tsx
+msgid "Text summarisation & more"
+msgstr ""
+
 #: src/onboarding/folder-location.tsx
 msgid "The app will restart after onboarding to apply your storage changes"
 msgstr ""
@@ -2420,7 +2428,6 @@ msgid "Transcript"
 msgstr ""
 
 #: src/settings/ai/stt/index.tsx
-#: src/sidebar/settings.tsx
 msgid "Transcription"
 msgstr ""
 
@@ -2450,6 +2457,10 @@ msgstr ""
 
 #: src/settings/sync/index.tsx
 msgid "Turn on sync to create or enter your recovery key."
+msgstr ""
+
+#: src/settings/ai/index.tsx
+msgid "Turns a transcript into a summary, and answers questions about it in chat. Also called intelligence."
 msgstr ""
 
 #: src/session/components/note-input/transcript/renderer/speaker-assign.tsx
@@ -2579,6 +2590,10 @@ msgstr ""
 msgid "View plans"
 msgstr ""
 
+#: src/settings/ai/index.tsx
+msgid "Voice to Text"
+msgstr ""
+
 #: src/settings/general/week-start.tsx
 msgid "Week starts on"
 msgstr ""
@@ -2601,6 +2616,10 @@ msgstr ""
 
 #: src/task/tab-content.tsx
 msgid "Work on this task"
+msgstr ""
+
+#: src/settings/ai/index.tsx
+msgid "Writes down what was said in your meetings. Also called transcription."
 msgstr ""
 
 #: src/session-sharing/comments.tsx

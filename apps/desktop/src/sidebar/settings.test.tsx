@@ -120,9 +120,9 @@ describe("SettingsNav", () => {
       "Context",
       "Calendar",
       "Contacts",
+      "Recordings",
       "AI",
-      "Transcription",
-      "Intelligence",
+      "AI Models",
       "Templates",
     ].forEach((label) => {
       expect(screen.getByText(label)).toBeTruthy();

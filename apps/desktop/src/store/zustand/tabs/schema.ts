@@ -45,8 +45,7 @@ export type SettingsTab =
   | "permissions"
   | "dictionary"
   | "recordings"
-  | "transcription"
-  | "intelligence"
+  | "ai-models"
   | "todo";
 
 export const normalizeSettingsTab = (
@@ -59,10 +58,14 @@ export const normalizeSettingsTab = (
     case "permissions":
     case "dictionary":
     case "recordings":
-    case "transcription":
-    case "intelligence":
+    case "ai-models":
     case "todo":
       return tab;
+    // Both AI pages became one. Old deep links and any persisted tab state
+    // still name them, so they redirect rather than silently landing on App.
+    case "transcription":
+    case "intelligence":
+      return "ai-models";
     case "personalization":
       return "dictionary";
     case "account":

@@ -22,7 +22,8 @@ import {
   ModelFacts,
 } from "~/settings/ai/shared/model-facts";
 import { setAiProvider } from "~/settings/providers";
-import { setSettingValues } from "~/settings/queries";
+import { getStoredSettingValues, setSettingValues } from "~/settings/queries";
+import { useConfigValues } from "~/shared/config";
 import {
   BATCH_MODEL_CHOICES,
   DEFAULT_BATCH_MODEL,
@@ -110,11 +111,28 @@ export function OnDeviceSetupCard({
     refetchInterval: 2_000,
   });
 
+  // A provider the user already picked counts as done, even when it is not the
+  // recommended one and even when nothing is on disk — a cloud key is a choice,
+  // and downloading gigabytes over the top of it would override that choice.
+  // "hyprnote" and "on_device" are the local providers; anything else is set up
+  // elsewhere and needs no model from here.
+  const { current_stt_provider, current_llm_provider } = useConfigValues([
+    "current_stt_provider",
+    "current_llm_provider",
+  ] as const);
+  const sttUsesAnotherProvider = Boolean(
+    current_stt_provider && current_stt_provider !== "hyprnote",
+  );
+  const llmUsesAnotherProvider = Boolean(
+    current_llm_provider && current_llm_provider !== "on_device",
+  );
+
   const llmModel = includesLlm ? (recommended.data?.model ?? null) : null;
   // Vacuously true when this card is not responsible for the LLM, so the
   // transcription page still hides the card once transcription is set up.
   const llmReady =
     !includesLlm ||
+    llmUsesAnotherProvider ||
     Boolean(llmModel && llmDownloaded.data?.includes(llmModel.key));
   // What this card would actually fetch. The card described — and showed the
   // full spec block for — a summarisation model that had already finished,
@@ -149,7 +167,11 @@ export function OnDeviceSetupCard({
     mutationFn: async () => {
       // downloadAndActivateOnDevice skips what is already on disk, so passing
       // the recommended model is safe even when only one leg is missing.
-      await downloadAndActivateOnDevice(llmModel?.key ?? null, batchModel);
+      await downloadAndActivateOnDevice(
+        llmUsesAnotherProvider ? null : (llmModel?.key ?? null),
+        batchModel,
+        { skipStt: sttUsesAnotherProvider },
+      );
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
@@ -285,7 +307,10 @@ export function OnDeviceSetupCard({
     batchModel,
   ]);
 
-  if ((sttReady.data || anyBatchReady.data) && llmReady) {
+  if (
+    (sttReady.data || anyBatchReady.data || sttUsesAnotherProvider) &&
+    llmReady
+  ) {
     return null;
   }
 
@@ -408,9 +433,12 @@ export function OnDeviceSetupCard({
 export async function downloadAndActivateOnDevice(
   llmModel: GgufLlmModel | null,
   batchModel: LocalModel = DEFAULT_BATCH_MODEL,
+  { skipStt = false }: { skipStt?: boolean } = {},
 ) {
-  for (const model of sttPackFor(batchModel)) {
-    await downloadSttModel(model);
+  if (!skipStt) {
+    for (const model of sttPackFor(batchModel)) {
+      await downloadSttModel(model);
+    }
   }
 
   if (llmModel) {
@@ -422,7 +450,38 @@ export async function downloadAndActivateOnDevice(
     }
   }
 
-  await activateOnDevice(llmModel, batchModel);
+  await activateOnDevice(llmModel, batchModel, { skipStt });
+}
+
+/**
+ * Languages worth having on by default once a model that can hear them is here.
+ *
+ * Qwen3 ASR reports support for every language the app knows
+ * (SoniqoModel::supports_language), so this is a starting point rather than a
+ * limit. Existing choices are kept — the user may have added others, and
+ * silently dropping one would change what their meetings transcribe as.
+ */
+const QWEN_DEFAULT_LANGUAGES = ["en", "zh", "es", "de", "fr"] as const;
+
+async function enableQwenLanguages(stored: string | undefined) {
+  // Persisted as a JSON string, not an array.
+  let current: string[] = [];
+  try {
+    const parsed: unknown = stored ? JSON.parse(stored) : [];
+    if (Array.isArray(parsed)) {
+      current = parsed.filter(
+        (entry): entry is string => typeof entry === "string",
+      );
+    }
+  } catch {
+    current = [];
+  }
+
+  const merged = Array.from(new Set([...current, ...QWEN_DEFAULT_LANGUAGES]));
+  if (merged.length === current.length) {
+    return;
+  }
+  await setSettingValues({ spoken_languages: JSON.stringify(merged) });
 }
 
 async function downloadLlmModel(
@@ -513,16 +572,38 @@ async function waitForLlmDownload(
 async function activateOnDevice(
   llmModel: GgufLlmModel | null,
   batchModel: LocalModel = DEFAULT_BATCH_MODEL,
+  { skipStt = false }: { skipStt?: boolean } = {},
 ) {
+  if (skipStt) {
+    // Transcription is already someone else's job; only the summariser below
+    // still needs selecting.
+    if (llmModel) {
+      await activateLlmOnly(llmModel);
+    }
+    return;
+  }
   await setSettingValues({
     current_stt_provider: "hyprnote",
     current_stt_model: batchModel,
   });
 
+  if (isQwenBatchModel(batchModel)) {
+    const stored = await getStoredSettingValues();
+    await enableQwenLanguages(stored.values.spoken_languages);
+  }
+
   if (!llmModel) {
     return;
   }
 
+  await activateLlmOnly(llmModel);
+}
+
+function isQwenBatchModel(model: LocalModel) {
+  return model === "soniqo-qwen3-large" || model === "soniqo-qwen3-small";
+}
+
+async function activateLlmOnly(llmModel: GgufLlmModel) {
   const started = await localLlmCommands.startServer(llmModel);
   if (started.status === "error") {
     throw new Error(started.error);

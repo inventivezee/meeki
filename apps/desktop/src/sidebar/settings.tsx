@@ -1,7 +1,6 @@
 import { Trans, useLingui } from "@lingui/react/macro";
 import { platform } from "@tauri-apps/plugin-os";
 import {
-  AudioLinesIcon,
   ArrowUpRightIcon,
   BellIcon,
   BookText,
@@ -80,6 +79,7 @@ export function SettingsNav() {
         // pages could only open dead URLs. Restore these two entries once the
         // API is deployed.
         { id: "notifications", label: t`Notifications`, icon: BellIcon },
+        { id: "recordings", label: t`Recordings`, icon: MicIcon },
       ],
     },
     {
@@ -100,9 +100,7 @@ export function SettingsNav() {
     {
       label: "AI",
       items: [
-        { id: "transcription", label: t`Transcription`, icon: AudioLinesIcon },
-        { id: "recordings", label: t`Recordings`, icon: MicIcon },
-        { id: "intelligence", label: t`Intelligence`, icon: SparklesIcon },
+        { id: "ai-models", label: t`AI Models`, icon: SparklesIcon },
         // Dictionary is hidden: the terms are stored and handed to Rust, then
         // dropped before they reach Soniqo, so it changes nothing for any
         // on-device model. It only ever biased third-party cloud STT.

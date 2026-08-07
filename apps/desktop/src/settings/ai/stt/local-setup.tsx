@@ -5,7 +5,6 @@ import { useState } from "react";
 import { commands as localSttCommands } from "@meeki/plugin-local-stt";
 import { cn } from "@meeki/utils";
 
-import { OnDeviceSetupCard } from "~/settings/ai/shared/on-device-setup";
 import { LOCAL_LIVE_PREVIEW_MODEL } from "~/stt/capabilities";
 import {
   BATCH_MODEL_CHOICES,
@@ -99,8 +98,6 @@ export function LocalTranscriptionSetup() {
           );
         })}
       </div>
-
-      <OnDeviceSetupCard scope="stt" />
     </div>
   );
 }

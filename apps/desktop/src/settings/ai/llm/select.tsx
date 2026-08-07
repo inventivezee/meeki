@@ -54,7 +54,6 @@ import {
 } from "~/settings/ai/shared/list-openai";
 import { listOpenRouterModels } from "~/settings/ai/shared/list-openrouter";
 import { ModelCombobox } from "~/settings/ai/shared/model-combobox";
-import { OnDeviceSetupCard } from "~/settings/ai/shared/on-device-setup";
 import { PersistAiSelection } from "~/settings/ai/shared/persist-selection";
 import {
   getConfiguredProviderIds,
@@ -351,7 +350,6 @@ export function SelectProviderAndModel() {
           model={defaultSelection.model}
         />
       ) : null}
-      <OnDeviceSetupCard />
       {localModelInUse ? null : <OnDeviceLlmCard />}
       <ThinkingToggle />
       <SettingsAlertToast
