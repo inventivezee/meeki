@@ -158,13 +158,8 @@ export default function NotekeeperLanding({
         </nav>
 
         <div className={styles.headerActions}>
-          <a
-            className={styles.navCta}
-            href={DOWNLOAD_URL}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Download <span aria-hidden="true">↗</span>
+          <a className={styles.navCta} href={DOWNLOAD_URL}>
+            Download <span aria-hidden="true">↓</span>
           </a>
         </div>
       </header>
@@ -191,12 +186,7 @@ export default function NotekeeperLanding({
             </p>
 
             <div className={styles.heroActions}>
-              <a
-                className={styles.primaryButton}
-                href={DOWNLOAD_URL}
-                target="_blank"
-                rel="noreferrer"
-              >
+              <a className={styles.primaryButton} href={DOWNLOAD_URL}>
                 {copy.primaryCta}
                 <span aria-hidden="true">↓</span>
               </a>
@@ -544,12 +534,7 @@ export default function NotekeeperLanding({
           <h2>{copy.finalTitle}</h2>
           <p>{copy.finalBody}</p>
           <div className={styles.heroActions}>
-            <a
-              className={styles.primaryButton}
-              href={DOWNLOAD_URL}
-              target="_blank"
-              rel="noreferrer"
-            >
+            <a className={styles.primaryButton} href={DOWNLOAD_URL}>
               Download Meeki <span aria-hidden="true">↓</span>
             </a>
             <a

@@ -1,9 +1,11 @@
-/**
- * Shared so every call to action points to the canonical project pages.
- *
- * /releases/latest rather than a pinned filename: the DMG name carries the
- * version, so a direct link would go stale on the next release.
- */
 export const GITHUB_URL = "https://github.com/inventivezee/meeki";
-export const DOWNLOAD_URL =
-  "https://github.com/inventivezee/meeki/releases/latest";
+
+/** Fallback when the DMG cannot be resolved — see app/download/route.ts. */
+export const RELEASES_URL = `${GITHUB_URL}/releases/latest`;
+
+/**
+ * Every download CTA points here, not at GitHub. /download redirects to the
+ * current DMG so the click downloads the app rather than opening a page the
+ * visitor has to read.
+ */
+export const DOWNLOAD_URL = "/download";
