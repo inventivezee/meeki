@@ -30,12 +30,19 @@ The zone is already on Cloudflare nameservers (`noel`/`saanvi.ns.cloudflare.com`
 
 Two live problems in that table:
 
-- **`www.meeki.ai` returns 200 instead of redirecting.** It serves the whole
-  site as a second origin. The app-side half of this is fixed — `SITE_ORIGIN` in
-  [apps/web/app/site.ts](apps/web/app/site.ts) pins every canonical and `og:url`
-  to the apex regardless of which hostname served the request — but the
-  duplicate origin still answers. Add a `www` → apex 301 (and `http` → `https`)
-  bulk redirect in the Cloudflare dashboard to close it properly.
+- **Duplicate origins — fixed in the Worker, 2026-08-08.** The site used to
+  answer 200 on all four of apex/www × http/https. `canonicalRedirect()` in
+  [apps/web/worker/index.ts](apps/web/worker/index.ts) now 301s www → apex and
+  http → https in a single hop, preserving path and query, and `SITE_ORIGIN` in
+  [apps/web/app/site.ts](apps/web/app/site.ts) keeps every canonical on the
+  apex. It is scoped to the meeki.ai zone so `localhost` and the `*.workers.dev`
+  preview still serve directly — do not widen that, or local testing breaks.
+
+  Still worth enabling in the dashboard, as belt and braces rather than a fix:
+  **SSL/TLS → Edge Certificates → Always Use HTTPS**, which handles the
+  http → https hop at the edge without invoking the Worker, and **HSTS**, which
+  stops the browser making the insecure request at all. Neither is required now
+  that the Worker handles it.
 - **`docs.meeki.ai` has no DNS record at all** — NXDOMAIN, not merely
   undeployed. Anything pointing at it is a dead link, which is why the nine
   `docs.meeki.ai` URLs were dropped from `llms.txt`. `AGENTS.md` still lists it
