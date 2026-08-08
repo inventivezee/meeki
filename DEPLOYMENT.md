@@ -58,36 +58,45 @@ with `git subtree` so all 8 of its commits are in this repository's history.
 That remote is recorded here only so it is not lost; treat this repo as the
 source of truth.
 
-### Who deploys it — UNCONFIRMED, resolve before using web_cd
+### Who deploys it — RESOLVED 2026-08-08
 
-There is no `wrangler.toml` in the tree: vinext generates
-`apps/web/dist/server/wrangler.json` during the build. Nothing in the repo names
-a Cloudflare account. `.openai/hosting.json`'s `project_id` is identical to the
-path segment of that sandbox git remote, which strongly suggests the ChatGPT
-sites control plane built and deployed the site — possibly into a Cloudflare
-account that is not yours.
+You own it. Confirmed with `wrangler whoami` and
+`wrangler deployments list --name meeki-website`:
 
-[.github/workflows/web_cd.yaml](.github/workflows/web_cd.yaml) exists but is
-`workflow_dispatch` only and its `dry_run` input **defaults to true**. Work
-through this before ever running it with `dry_run: false`:
+- Cloudflare account `zee@inventive.capital` (`1d66546466f21179ff41fd2ae5d40167`).
+- Worker **`meeki-website`** exists in that account, and every deployment in its
+  history is authored by `zee@inventive.capital`.
+- The most recent deployment, `2026-08-03T21:04:01Z`, matches the timestamp of
+  commit `1e8705d` exactly — so what is live is the head of the tree that became
+  `apps/web`, and the SEO work is purely additive on top of it.
 
-1. Log into the Cloudflare dashboard and find the Worker. The build calls it
-   `meeki-website`. Confirm it exists, and note which **account** owns it.
-2. Confirm what publishes it today. If **Workers Builds / a connected Git
-   repo** does, this workflow would become a second publisher racing it —
-   disconnect that build first. If the **ChatGPT sites control plane** does,
-   then moving the code here has already severed the trigger and CI is now the
-   only path, making this workflow mandatory rather than optional.
-3. Check where the `meeki.ai` custom domain is bound. If it is bound to a Worker
-   in an account you do not control, you need your own Worker plus a domain
-   re-point, and the cutover has a window where the site can go down.
-4. Create an API token scoped to *Edit Cloudflare Workers* for that account and
-   add repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
-5. Run web_cd with `dry_run: true`. It prints the resolved worker name, compat
-   date and assets directory — check them against the dashboard.
-6. Only then run with `dry_run: false`. The job curls `/`, `/personal`,
-   `/sitemap.xml`, `/llms.txt`, `/robots.txt` and `/favicon.ico` afterwards and
-   fails if any is not 200.
+There is still no `wrangler.toml` in the tree; vinext generates
+`apps/web/dist/server/wrangler.json` at build time.
+
+**The Worker name is pinned in [apps/web/vite.config.ts](apps/web/vite.config.ts)
+and must stay that way.** vinext derives the name from the package name, so
+renaming the package to `@meeki/web` silently retargeted the deploy at a Worker
+called `meeki-web`. That would have created a second Worker, left the one holding
+the `meeki.ai` custom domain untouched, and still reported a successful deploy.
+If a deploy ever appears to succeed while the live site does not change, check
+this first.
+
+To deploy manually:
+
+```bash
+pnpm -F web build && cd apps/web && pnpm exec wrangler deploy --config dist/server/wrangler.json
+```
+
+Via CI: [.github/workflows/web_cd.yaml](.github/workflows/web_cd.yaml) is
+`workflow_dispatch` only with `dry_run` defaulting to true. It needs repo secrets
+`CLOUDFLARE_API_TOKEN` (scoped *Edit Cloudflare Workers* on the account above)
+and `CLOUDFLARE_ACCOUNT_ID`. After a real run it curls `/`, `/personal`,
+`/sitemap.xml`, `/llms.txt`, `/robots.txt` and `/favicon.ico` and fails if any is
+not 200.
+
+One thing still unverified: whether anything else also publishes this Worker. If
+Workers Builds is connected to a Git repo in that account, CI would race it —
+check **Workers → meeki-website → Settings → Builds** once.
 
 ### Cloudflare may be shadowing robots.txt
 
