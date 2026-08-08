@@ -249,7 +249,7 @@ describe("OverflowButton", () => {
     },
   );
 
-  it("renders one separator when meeting actions are disabled", () => {
+  it("keeps settings and delete in their own groups when meeting actions are disabled", () => {
     useHasTranscriptMock.mockReturnValue(false);
     currentNoteContent.value = "Existing content";
 
@@ -261,7 +261,7 @@ describe("OverflowButton", () => {
       />,
     );
 
-    expect(container.querySelectorAll("hr")).toHaveLength(1);
+    expect(container.querySelectorAll("hr")).toHaveLength(3);
   });
 
   it("offers resume and re-transcribe when recorded audio exists", () => {
@@ -297,7 +297,7 @@ describe("OverflowButton", () => {
       />,
     );
 
-    expect(container.querySelectorAll("hr")).toHaveLength(2);
+    expect(container.querySelectorAll("hr")).toHaveLength(4);
   });
 
   it("keeps the overflow trigger out of the header drag region", () => {

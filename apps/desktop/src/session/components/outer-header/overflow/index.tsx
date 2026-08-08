@@ -6,9 +6,10 @@ import {
   MoreHorizontalIcon,
   PictureInPicture2Icon,
   RefreshCwIcon,
+  SettingsIcon,
   SquareArrowOutUpRightIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { Button } from "@meeki/ui/components/ui/button";
 import {
@@ -34,6 +35,7 @@ import {
 } from "~/session/components/shared";
 import { openStandaloneNoteWindow } from "~/session/window";
 import { useConfigValue } from "~/shared/config";
+import { useTabs } from "~/store/zustand/tabs";
 import type { EditorView } from "~/store/zustand/tabs/schema";
 import { useListener } from "~/stt/contexts";
 import { useUploadFile } from "~/stt/useUploadFile";
@@ -50,6 +52,12 @@ export function OverflowButton({
   currentView: EditorView;
 }) {
   const [open, setOpen] = useState(false);
+  const openNew = useTabs((state) => state.openNew);
+  // Reachable from the note itself, so changing a model does not mean hunting
+  // for the sidebar first.
+  const handleOpenSettings = useCallback(() => {
+    openNew({ type: "settings", state: { tab: "ai-models" } });
+  }, [openNew]);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [hasOpenedExportModal, setHasOpenedExportModal] = useState(false);
   const hasTranscript = useHasTranscript(sessionId);
@@ -196,6 +204,17 @@ export function OverflowButton({
               </DropdownMenuItem>
             )}
             <ShowInFinder sessionId={sessionId} />
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={handleOpenSettings}
+              className="cursor-pointer"
+            >
+              <SettingsIcon />
+              <span>
+                <Trans>Settings</Trans>
+              </span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DeleteNote sessionId={sessionId} />
           </AppFloatingPanel>
         </DropdownMenuContent>

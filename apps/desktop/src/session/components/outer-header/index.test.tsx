@@ -20,6 +20,8 @@ const mocks = vi.hoisted(() => ({
   goBack: vi.fn(),
   goNext: vi.fn(),
   sessionModes: {} as Record<string, string>,
+  liveStatus: "inactive" as string,
+  liveSessionId: null as string | null,
   sessionEvents: {} as Record<string, any>,
   nowMs: new Date("2026-06-05T09:50:00.000Z").getTime(),
   openUrl: vi.fn(),
@@ -143,6 +145,7 @@ vi.mock("~/stt/contexts", () => ({
         (mocks.sessionModes[sessionId] ?? "inactive") === "inactive",
       stop: mocks.stopListening,
       stopTranscription: mocks.stopTranscription,
+      live: { status: mocks.liveStatus, sessionId: mocks.liveSessionId },
     }),
   ),
 }));
@@ -167,6 +170,8 @@ describe("OuterHeader", () => {
     mocks.goBack.mockClear();
     mocks.goNext.mockClear();
     mocks.sessionModes = {};
+    mocks.liveStatus = "inactive";
+    mocks.liveSessionId = null;
     mocks.sessionEvents = {};
     mocks.nowMs = new Date("2026-06-05T09:50:00.000Z").getTime();
     mocks.openUrl.mockClear();

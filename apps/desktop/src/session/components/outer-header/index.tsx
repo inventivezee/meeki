@@ -1,7 +1,8 @@
-import { useLingui } from "@lingui/react/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import {
   ChevronDownIcon,
   HeadsetIcon,
+  PlusIcon,
   SquareIcon,
   VideoIcon,
 } from "lucide-react";
@@ -26,6 +27,7 @@ import {
 import { useSessionEvent } from "~/session/hooks/useSessionEvent";
 import { resolveMeetingLink } from "~/session/meeting-link";
 import { useConfigValue } from "~/shared/config";
+import { useNewNoteAndListen } from "~/shared/useNewNote";
 import type { EditorView } from "~/store/zustand/tabs/schema";
 import { useListener } from "~/stt/contexts";
 import { useStartListening } from "~/stt/useStartListening";
@@ -257,6 +259,7 @@ function HeaderMeetingActionPill({
         label: t`Resume`,
         title: t`Resume listening`,
         icon: <RecordingIcon />,
+        resumes: true,
         onClick: start,
       };
     }
@@ -265,10 +268,21 @@ function HeaderMeetingActionPill({
       label: canResume ? t`Resume` : t`Record`,
       title: canResume ? t`Resume listening` : t`Record`,
       icon: <RecordingIcon />,
+      resumes: canResume,
       onClick: start,
     };
   })();
+  const startNewRecording = useNewNoteAndListen();
   const disabled = sessionMode === "finalizing" || joiningMeeting;
+  // Resume appends to *this* note. Until now that was the only option from a
+  // finished note, so starting a fresh recording meant leaving the note first.
+  // Only offered where the two genuinely differ — never mid-recording.
+  const showNewRecording =
+    "resumes" in action &&
+    action.resumes &&
+    sessionMode !== "active" &&
+    sessionMode !== "running_batch" &&
+    !disabled;
   const showCountdown =
     Boolean(countdown.label) &&
     sessionMode !== "active" &&
@@ -310,6 +324,23 @@ function HeaderMeetingActionPill({
           {action.icon}
           <span className="truncate">{action.label}</span>
         </button>
+        {showNewRecording ? (
+          <button
+            type="button"
+            data-tauri-drag-region="false"
+            aria-label={t`New Recording`}
+            title={t`Record a new note instead of adding to this one`}
+            onClick={startNewRecording}
+            className={cn([
+              "border-border/60 flex h-full shrink-0 items-center gap-1 border-l px-1.5",
+              "text-xs font-medium whitespace-nowrap",
+              "hover:bg-accent transition-colors",
+            ])}
+          >
+            <PlusIcon className="size-3" />
+            <Trans>New</Trans>
+          </button>
+        ) : null}
         <MetadataButton
           sessionId={sessionId}
           renderTrigger={({ open, label: metadataLabel }) => (

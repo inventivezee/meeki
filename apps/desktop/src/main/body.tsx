@@ -987,9 +987,10 @@ function SidebarTimelineChrome({
             */}
             <LeftSurfaceChromeButton
               ariaLabel="Start recording"
+              emphasis
               onClick={onStartRecording}
             >
-              <MicIcon size={15} />
+              <MicIcon size={14} />
             </LeftSurfaceChromeButton>
             {showDevtoolsPanelButton && !devtoolsPanelOpen ? (
               <LeftSurfaceChromeButton
@@ -1016,12 +1017,15 @@ function LeftSurfaceChromeButton({
   badge = null,
   children,
   disabled = false,
+  emphasis = false,
   onClick,
 }: {
   ariaLabel: string;
   badge?: LeftSurfaceChromeBadge | null;
   children: React.ReactNode;
   disabled?: boolean;
+  /** Filled rather than ghosted. For record, which is an action, not chrome. */
+  emphasis?: boolean;
   onClick: () => void;
 }) {
   return (
@@ -1032,9 +1036,12 @@ function LeftSurfaceChromeButton({
       disabled={disabled}
       className={cn([
         "pointer-events-auto relative flex size-7 items-center justify-center rounded-full",
-        "text-muted-foreground hover:bg-accent hover:text-foreground transition-colors",
         "focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-hidden",
-        "disabled:text-muted-foreground/70 disabled:hover:text-muted-foreground/70 disabled:hover:bg-transparent",
+        emphasis
+          ? // A bare grey glyph among other grey glyphs read as decoration; the
+            // filled red circle is what says "this records".
+            "bg-red-500 text-white shadow-sm transition-colors hover:bg-red-600 disabled:opacity-70 disabled:hover:bg-red-500"
+          : "text-muted-foreground hover:bg-accent hover:text-foreground disabled:text-muted-foreground/70 disabled:hover:text-muted-foreground/70 transition-colors disabled:hover:bg-transparent",
       ])}
       onClick={onClick}
     >

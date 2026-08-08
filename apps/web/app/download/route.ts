@@ -1,23 +1,52 @@
-import { RELEASES_URL } from "../links";
-
-const LATEST_RELEASE_API =
-  "https://api.github.com/repos/inventivezee/meeki/releases/latest";
+import { GITHUB_URL, RELEASES_URL } from "../links";
 
 /**
  * meeki.ai/download — resolves to the current DMG so the CTA downloads the app
  * instead of opening a releases page to hunt through.
  *
- * It has to be resolved at request time rather than hardcoded: the asset name
- * carries the version (Meeki_0.0.11_apple-silicon.dmg), so any fixed URL breaks
- * on the next release. Matching on the .dmg suffix rather than the exact name
- * keeps this working if the filename changes shape.
+ * It cannot be hardcoded: the asset name carries the version
+ * (Meeki_0.0.11_apple-silicon.dmg), so any fixed URL breaks on the next release.
  *
- * The redirect is cached at the edge so a burst of downloads is one API call,
- * not one per visitor — GitHub rate-limits unauthenticated calls by IP and a
- * Worker shares its egress addresses. Any failure falls through to the releases
- * page, so the button is never a dead end.
+ * It also deliberately does NOT use api.github.com. Unauthenticated API calls
+ * are rate-limited to 60/hour per IP, and a Worker egresses from addresses
+ * shared with every other Cloudflare customer — in production that quota was
+ * already exhausted and every request fell through to the releases page, even
+ * though the same call from a laptop reported 59 of 60 remaining.
+ *
+ * github.com/releases/latest redirects to the tagged release instead, and plain
+ * github.com is not subject to that quota. The tag gives us the version, and the
+ * asset name is derived from it — a convention verified across releases
+ * 0.0.6 through 0.0.11. The derived URL is then confirmed with a HEAD before we
+ * hand it to anyone, so a naming change degrades to the releases page rather
+ * than to a broken download.
  */
 const CACHE_SECONDS = 900;
+
+async function resolveDmgUrl(): Promise<string | null> {
+  const latest = await fetch(RELEASES_URL, {
+    redirect: "manual",
+    headers: { "User-Agent": "meeki.ai" },
+  });
+
+  const location = latest.headers.get("location");
+  if (!location) return null;
+
+  const tag = location.split("/releases/tag/")[1];
+  if (!tag?.startsWith("desktop_v")) return null;
+
+  const version = tag.slice("desktop_v".length);
+  const candidate = `${GITHUB_URL}/releases/download/${tag}/Meeki_${version}_apple-silicon.dmg`;
+
+  // A missing asset answers 404; a real one redirects to signed storage.
+  const check = await fetch(candidate, {
+    method: "HEAD",
+    redirect: "manual",
+    headers: { "User-Agent": "meeki.ai" },
+  });
+  if (check.status >= 400) return null;
+
+  return candidate;
+}
 
 export async function GET(request: Request) {
   const cache = await caches.open("meeki-download");
@@ -26,47 +55,25 @@ export async function GET(request: Request) {
   const cached = await cache.match(cacheKey);
   if (cached) return cached;
 
-  let target = RELEASES_URL;
-
+  let dmg: string | null = null;
   try {
-    const response = await fetch(LATEST_RELEASE_API, {
-      headers: {
-        // GitHub rejects API requests without one.
-        "User-Agent": "meeki.ai",
-        Accept: "application/vnd.github+json",
-      },
-    });
-
-    if (response.ok) {
-      const release = (await response.json()) as {
-        assets?: { name: string; browser_download_url: string }[];
-      };
-      const dmg = release.assets?.find((asset) =>
-        asset.name.toLowerCase().endsWith(".dmg"),
-      );
-      if (dmg) target = dmg.browser_download_url;
-    }
+    dmg = await resolveDmgUrl();
   } catch {
-    // Keep the releases-page fallback.
+    // Fall through to the releases page.
   }
 
-  const redirect = new Response(null, {
+  const response = new Response(null, {
     status: 302,
     headers: {
-      Location: target,
+      Location: dmg ?? RELEASES_URL,
       // Only cache a resolved DMG. Caching the fallback would pin visitors to
-      // the releases page for the whole TTL after a transient GitHub failure.
-      "Cache-Control":
-        target === RELEASES_URL
-          ? "no-store"
-          : `public, max-age=${CACHE_SECONDS}`,
+      // the releases page for the whole TTL after one transient failure.
+      "Cache-Control": dmg ? `public, max-age=${CACHE_SECONDS}` : "no-store",
       "X-Robots-Tag": "noindex, nofollow",
     },
   });
 
-  if (target !== RELEASES_URL) {
-    await cache.put(cacheKey, redirect.clone());
-  }
+  if (dmg) await cache.put(cacheKey, response.clone());
 
-  return redirect;
+  return response;
 }

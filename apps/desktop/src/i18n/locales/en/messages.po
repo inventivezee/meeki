@@ -1337,6 +1337,10 @@ msgstr "Move up"
 msgid "Name"
 msgstr "Name"
 
+#: src/session/components/outer-header/index.tsx
+msgid "New"
+msgstr "New"
+
 #: src/chat/components/toolbar-controls.tsx
 msgid "New chat"
 msgstr "New chat"
@@ -1344,6 +1348,10 @@ msgstr "New chat"
 #: src/main/empty.tsx
 msgid "New Note"
 msgstr "New Note"
+
+#: src/session/components/outer-header/index.tsx
+msgid "New Recording"
+msgstr "New Recording"
 
 #: src/main/update-prompt.tsx
 msgid "New update available, click to download"
@@ -1671,6 +1679,10 @@ msgstr "Reconnect required"
 msgid "Record"
 msgstr "Record"
 
+#: src/session/components/outer-header/index.tsx
+msgid "Record a new note instead of adding to this one"
+msgstr "Record a new note instead of adding to this one"
+
 #: src/settings/recordings/index.tsx
 #: src/sidebar/settings.tsx
 msgid "Recordings"
@@ -1986,6 +1998,7 @@ msgid "Setting up encrypted cloud sync."
 msgstr "Setting up encrypted cloud sync."
 
 #: src/main/empty.tsx
+#: src/session/components/outer-header/overflow/index.tsx
 #: src/sidebar/settings.tsx
 msgid "Settings"
 msgstr "Settings"
