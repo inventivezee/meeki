@@ -13,6 +13,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: "/",
+    siteName: "Meeki",
     title,
     description,
     images: [

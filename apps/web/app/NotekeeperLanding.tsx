@@ -278,7 +278,7 @@ export default function NotekeeperLanding({
                   <div className={styles.meetingHeading}>
                     <div>
                       <span>Tuesday · 10:00 AM</span>
-                      <h2>Launch review</h2>
+                      <p className={styles.meetingTitle}>Launch review</p>
                     </div>
                     <div
                       className={styles.avatars}
@@ -379,7 +379,10 @@ export default function NotekeeperLanding({
           </div>
         </section>
 
-        <section className={styles.proofBand} aria-label="Meeki trust proof">
+        <section className={styles.proofBand} aria-labelledby="proof-heading">
+          <h2 id="proof-heading" className={styles.srOnly}>
+            Why people trust Meeki
+          </h2>
           <div>
             <strong>0</strong>
             <span>No meeting bots</span>

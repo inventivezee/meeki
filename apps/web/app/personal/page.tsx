@@ -13,6 +13,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: "/personal",
+    siteName: "Meeki",
     title,
     description,
     images: [
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
         url: "/og.png",
         width: 1536,
         height: 1024,
-        alt: "Meeki — Your private meeting notekeeper",
+        alt: title,
       },
     ],
   },

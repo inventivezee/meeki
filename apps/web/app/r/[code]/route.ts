@@ -29,5 +29,12 @@ export async function GET(
     store.set(referralCookie(code));
   }
 
-  return NextResponse.redirect(destination, 302);
+  const response = NextResponse.redirect(destination, 302);
+
+  // robots.txt asks crawlers not to fetch /r/, but a header is what a crawler
+  // that followed a shared link actually sees on the redirect itself. Stays a
+  // 302: a cached permanent redirect would skip the cookie on repeat visits.
+  response.headers.set("X-Robots-Tag", "noindex, nofollow");
+
+  return response;
 }
