@@ -47,8 +47,14 @@ function assertSharedProof(html) {
 
 test("server-renders the private notekeeper variation", async () => {
   const html = await htmlFor("/");
-  assert.match(html, /<title>Meeki — Your private meeting notekeeper<\/title>/i);
-  assert.match(html, /Meeki is your[\s\S]*<strong>private<\/strong>[\s\S]*meeting/i);
+  assert.match(
+    html,
+    /<title>Meeki — Your private meeting notekeeper<\/title>/i,
+  );
+  assert.match(
+    html,
+    /Meeki is your[\s\S]*<strong>private<\/strong>[\s\S]*meeting/i,
+  );
   assert.match(html, /<em>notekeeper\.<\/em>/i);
   assert.match(html, /A keeper, not a collector/i);
   assertSharedProof(html);
@@ -56,8 +62,14 @@ test("server-renders the private notekeeper variation", async () => {
 
 test("server-renders the personal notekeeper variation", async () => {
   const html = await htmlFor("/personal");
-  assert.match(html, /<title>Meeki — Your personal meeting notekeeper<\/title>/i);
-  assert.match(html, /Meeki is your[\s\S]*<strong>personal<\/strong>[\s\S]*meeting/i);
+  assert.match(
+    html,
+    /<title>Meeki — Your personal meeting notekeeper<\/title>/i,
+  );
+  assert.match(
+    html,
+    /Meeki is your[\s\S]*<strong>personal<\/strong>[\s\S]*meeting/i,
+  );
   assert.match(html, /<em>notekeeper\.<\/em>/i);
   assert.match(html, /Listens\. Tidies\. Remembers\./i);
   assertSharedProof(html);

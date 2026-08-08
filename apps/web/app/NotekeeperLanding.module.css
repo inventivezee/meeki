@@ -857,7 +857,8 @@
   gap: 2px 16px;
   min-height: 154px;
   padding: 30px clamp(26px, 4vw, 70px);
-  border-right: 1px solid color-mix(in srgb, var(--accent-ink) 18%, transparent);
+  border-right: 1px solid
+    color-mix(in srgb, var(--accent-ink) 18%, transparent);
 }
 
 .proofBand > div:last-child {
@@ -1462,7 +1463,8 @@
   .proofBand > div {
     min-height: 118px;
     border-right: 0;
-    border-bottom: 1px solid color-mix(in srgb, var(--accent-ink) 18%, transparent);
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--accent-ink) 18%, transparent);
   }
 
   .sectionIntro,

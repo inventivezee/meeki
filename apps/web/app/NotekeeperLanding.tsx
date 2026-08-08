@@ -62,18 +62,15 @@ const variantCopy = {
 const meetingNotes = {
   summary: {
     title: "The short version",
-    body:
-      "The team approved the private beta launch for Monday. Local mode stays the default, and eight design partners will receive onboarding details Thursday.",
+    body: "The team approved the private beta launch for Monday. Local mode stays the default, and eight design partners will receive onboarding details Thursday.",
   },
   actions: {
     title: "What happens next",
-    body:
-      "Maya sends onboarding details Thursday. Theo completes the deployment checklist. You confirm the Monday launch window.",
+    body: "Maya sends onboarding details Thursday. Theo completes the deployment checklist. You confirm the Monday launch window.",
   },
   transcript: {
     title: "What was said",
-    body:
-      "Maya · 10:08 — The security review is complete. We can open the pilot Monday while keeping local mode as the default.",
+    body: "Maya · 10:08 — The security review is complete. We can open the pilot Monday while keeping local mode as the default.",
   },
 } satisfies Record<NoteTab, { title: string; body: string }>;
 
@@ -214,7 +211,10 @@ export default function NotekeeperLanding({
               </a>
             </div>
 
-            <div className={styles.heroProof} aria-label="Meeki product principles">
+            <div
+              className={styles.heroProof}
+              aria-label="Meeki product principles"
+            >
               <span>Local by default</span>
               <span>Bring your own AI</span>
               <span>Self-hostable</span>
@@ -231,7 +231,10 @@ export default function NotekeeperLanding({
                   unoptimized
                   sizes="(max-width: 680px) 150px, 240px"
                   priority
-                  style={{ objectFit: "contain", objectPosition: "center bottom" }}
+                  style={{
+                    objectFit: "contain",
+                    objectPosition: "center bottom",
+                  }}
                 />
               </div>
             </div>
@@ -250,7 +253,10 @@ export default function NotekeeperLanding({
               </div>
 
               <div className={styles.previewLayout}>
-                <aside className={styles.previewSidebar} aria-label="Meeting list">
+                <aside
+                  className={styles.previewSidebar}
+                  aria-label="Meeting list"
+                >
                   <span className={styles.sidebarTitle}>Today</span>
                   <button type="button" className={styles.activeMeeting}>
                     <span>10:00</span>
@@ -274,7 +280,10 @@ export default function NotekeeperLanding({
                       <span>Tuesday · 10:00 AM</span>
                       <h2>Launch review</h2>
                     </div>
-                    <div className={styles.avatars} aria-label="Three participants">
+                    <div
+                      className={styles.avatars}
+                      aria-label="Three participants"
+                    >
                       <span>M</span>
                       <span>T</span>
                       <span>Y</span>
@@ -288,13 +297,21 @@ export default function NotekeeperLanding({
                         recording ? styles.recording : ""
                       }`}
                       aria-pressed={recording}
-                      aria-label={recording ? "Stop sample recording" : "Start sample recording"}
+                      aria-label={
+                        recording
+                          ? "Stop sample recording"
+                          : "Start sample recording"
+                      }
                       onClick={() => setRecording((value) => !value)}
                     >
                       <span aria-hidden="true" />
                     </button>
                     <div>
-                      <strong>{recording ? "Recording locally" : "Ready on this device"}</strong>
+                      <strong>
+                        {recording
+                          ? "Recording locally"
+                          : "Ready on this device"}
+                      </strong>
                       <span>{formatTime(elapsed)}</span>
                     </div>
                     <div
@@ -307,7 +324,11 @@ export default function NotekeeperLanding({
                     </div>
                   </div>
 
-                  <div className={styles.tabs} role="tablist" aria-label="Meeting note views">
+                  <div
+                    className={styles.tabs}
+                    role="tablist"
+                    aria-label="Meeting note views"
+                  >
                     {tabs.map((tab) => (
                       <button
                         key={tab.id}
@@ -351,7 +372,9 @@ export default function NotekeeperLanding({
             </div>
 
             <div className={styles.visualNote} aria-hidden="true">
-              {variant === "private" ? "Your boundary stays visible." : "Your meeting, neatly kept."}
+              {variant === "private"
+                ? "Your boundary stays visible."
+                : "Your meeting, neatly kept."}
             </div>
           </div>
         </section>
@@ -402,7 +425,10 @@ export default function NotekeeperLanding({
                 <i />
               </div>
               <h3>Turns talk into signal</h3>
-              <p>Find decisions, context, and next steps with the model you choose.</p>
+              <p>
+                Find decisions, context, and next steps with the model you
+                choose.
+              </p>
             </article>
             <article>
               <span className={styles.cardNumber}>03</span>
@@ -410,7 +436,10 @@ export default function NotekeeperLanding({
                 <span>✓</span>
               </div>
               <h3>Keeps it under your control</h3>
-              <p>Search a private notebook whose storage and retention you decide.</p>
+              <p>
+                Search a private notebook whose storage and retention you
+                decide.
+              </p>
             </article>
           </div>
         </section>
@@ -424,7 +453,10 @@ export default function NotekeeperLanding({
 
           <div className={styles.boundaryGrid}>
             {boundaryModes.map((mode, index) => (
-              <article key={mode.name} className={index === 0 ? styles.featuredMode : ""}>
+              <article
+                key={mode.name}
+                className={index === 0 ? styles.featuredMode : ""}
+              >
                 <div className={styles.modeTopline}>
                   <span>{mode.number}</span>
                   <small>{mode.label}</small>
@@ -464,7 +496,10 @@ export default function NotekeeperLanding({
             </a>
           </div>
 
-          <div className={styles.codeWindow} aria-label="Illustrative local-mode configuration">
+          <div
+            className={styles.codeWindow}
+            aria-label="Illustrative local-mode configuration"
+          >
             <div className={styles.codeTopbar}>
               <div className={styles.windowDots} aria-hidden="true">
                 <span />
@@ -476,15 +511,26 @@ export default function NotekeeperLanding({
             </div>
             <pre>
               <code>
-                <span>{"const"}</span>{" boundary = {\n"}
-                {"  capture: "}<strong>{'"on-device"'}</strong>{",\n"}
-                {"  model: "}<strong>{'"local"'}</strong>{",\n"}
-                {"  storage: "}<strong>{'"yours"'}</strong>{",\n"}
-                {"  cloud: "}<strong>{'"opt-in"'}</strong>{"\n};"}
+                <span>{"const"}</span>
+                {" boundary = {\n"}
+                {"  capture: "}
+                <strong>{'"on-device"'}</strong>
+                {",\n"}
+                {"  model: "}
+                <strong>{'"local"'}</strong>
+                {",\n"}
+                {"  storage: "}
+                <strong>{'"yours"'}</strong>
+                {",\n"}
+                {"  cloud: "}
+                <strong>{'"opt-in"'}</strong>
+                {"\n};"}
               </code>
             </pre>
             <div className={styles.codeStatus}>
-              <span><i /> Fully private local mode</span>
+              <span>
+                <i /> Fully private local mode
+              </span>
               <span>MIT licensed</span>
             </div>
           </div>

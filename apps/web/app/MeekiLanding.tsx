@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import styles from "./MeekiLanding.module.css";
 
 import { DOWNLOAD_URL, GITHUB_URL } from "./links";
+import styles from "./MeekiLanding.module.css";
 
 type DemoTab = "notes" | "enhanced" | "transcript";
 
@@ -125,7 +125,10 @@ export default function MeekiLanding() {
 
           <div className={styles.demoWrap}>
             <div className={styles.paperCorner} aria-hidden="true" />
-            <div className={styles.demo} aria-label="Interactive Meeki product preview">
+            <div
+              className={styles.demo}
+              aria-label="Interactive Meeki product preview"
+            >
               <div className={styles.demoTopbar}>
                 <div className={styles.windowDots} aria-hidden="true">
                   <span />
@@ -168,7 +171,10 @@ export default function MeekiLanding() {
                       <span className={styles.dateLine}>Tuesday, 26 July</span>
                       <h2>Launch review</h2>
                     </div>
-                    <div className={styles.avatars} aria-label="Meeting participants">
+                    <div
+                      className={styles.avatars}
+                      aria-label="Meeting participants"
+                    >
                       <span title="Maya">M</span>
                       <span title="Theo">T</span>
                       <span title="You">Y</span>
@@ -183,15 +189,23 @@ export default function MeekiLanding() {
                       type="button"
                       onClick={toggleRecording}
                       aria-pressed={isRecording}
-                      aria-label={isRecording ? "Stop sample recording" : "Start sample recording"}
+                      aria-label={
+                        isRecording
+                          ? "Stop sample recording"
+                          : "Start sample recording"
+                      }
                     >
                       <span aria-hidden="true" />
                     </button>
                     <div className={styles.recorderInfo}>
                       <span className={styles.recorderStatus} role="status">
-                        {isRecording ? "Recording on this device" : "Ready to record"}
+                        {isRecording
+                          ? "Recording on this device"
+                          : "Ready to record"}
                       </span>
-                      <span className={styles.timer}>{formatTime(elapsed)}</span>
+                      <span className={styles.timer}>
+                        {formatTime(elapsed)}
+                      </span>
                     </div>
                     <div
                       className={`${styles.waveform} ${
@@ -212,7 +226,11 @@ export default function MeekiLanding() {
                     </button>
                   </div>
 
-                  <div className={styles.tabs} role="tablist" aria-label="Meeting note views">
+                  <div
+                    className={styles.tabs}
+                    role="tablist"
+                    aria-label="Meeting note views"
+                  >
                     {tabs.map((tab) => (
                       <button
                         key={tab.id}
@@ -260,9 +278,9 @@ export default function MeekiLanding() {
                         <div className={styles.summaryBlock}>
                           <span>Summary</span>
                           <p>
-                            The Northstar review is complete. The team will
-                            open the managed pilot to eight design partners on
-                            Monday while keeping local mode as the default.
+                            The Northstar review is complete. The team will open
+                            the managed pilot to eight design partners on Monday
+                            while keeping local mode as the default.
                           </p>
                         </div>
                         <div className={styles.noteColumns}>
@@ -327,7 +345,9 @@ export default function MeekiLanding() {
                       type="button"
                       aria-expanded={showPrivacyDetails}
                       aria-controls="local-processing-details"
-                      onClick={() => setShowPrivacyDetails((current) => !current)}
+                      onClick={() =>
+                        setShowPrivacyDetails((current) => !current)
+                      }
                     >
                       {showPrivacyDetails ? "Hide" : "Details"}
                     </button>
@@ -351,7 +371,11 @@ export default function MeekiLanding() {
           </div>
         </section>
 
-        <section className={styles.proofStrip} id="privacy" aria-labelledby="proof-heading">
+        <section
+          className={styles.proofStrip}
+          id="privacy"
+          aria-labelledby="proof-heading"
+        >
           <h2 id="proof-heading" className={styles.visuallyHidden}>
             Meeki privacy principles
           </h2>
@@ -381,10 +405,13 @@ export default function MeekiLanding() {
         <section className={styles.flowSection} id="how-it-works">
           <div className={styles.sectionIntro}>
             <span className={styles.sectionNumber}>01 / HOW IT WORKS</span>
-            <h2>Your conversation.<br />A clear path to notes.</h2>
+            <h2>
+              Your conversation.
+              <br />A clear path to notes.
+            </h2>
             <p>
-              No mystery pipeline. Meeki makes every boundary visible and
-              leaves the important choices in your hands.
+              No mystery pipeline. Meeki makes every boundary visible and leaves
+              the important choices in your hands.
             </p>
           </div>
 
@@ -428,7 +455,11 @@ export default function MeekiLanding() {
         <section className={styles.boundarySection}>
           <div className={styles.boundaryHeading}>
             <span className={styles.sectionNumber}>02 / YOUR BOUNDARY</span>
-            <h2>Private isn&apos;t<br />one-size-fits-all.</h2>
+            <h2>
+              Private isn&apos;t
+              <br />
+              one-size-fits-all.
+            </h2>
           </div>
 
           <div className={styles.boundaryOptions}>
@@ -490,8 +521,8 @@ export default function MeekiLanding() {
               </div>
               <h3>Convenience when you want it.</h3>
               <p>
-                Opt into Meeki-managed transcription and AI when your team
-                wants a ready-to-use service instead of running the stack.
+                Opt into Meeki-managed transcription and AI when your team wants
+                a ready-to-use service instead of running the stack.
               </p>
               <div className={styles.optionDiagram} aria-hidden="true">
                 <span>Your device</span>
@@ -505,7 +536,11 @@ export default function MeekiLanding() {
         <section className={styles.openSourceSection} id="open-source">
           <div className={styles.openSourceCopy}>
             <span className={styles.sectionNumber}>03 / OPEN SOURCE</span>
-            <h2>Trust is better<br />when it&apos;s verifiable.</h2>
+            <h2>
+              Trust is better
+              <br />
+              when it&apos;s verifiable.
+            </h2>
             <p>
               Meeki&apos;s codebase is open source under the MIT license. Read
               it, run it yourself, improve it, or build something entirely new.
@@ -557,7 +592,9 @@ export default function MeekiLanding() {
                 <span className={styles.codeGreen}>&quot;local&quot;</span>
                 {",\n"}
                 {"  storage: "}
-                <span className={styles.codeGreen}>&quot;your-device&quot;</span>
+                <span className={styles.codeGreen}>
+                  &quot;your-device&quot;
+                </span>
                 {"\n};"}
               </code>
             </pre>
@@ -573,7 +610,11 @@ export default function MeekiLanding() {
             yours, truly.
           </div>
           <span className={styles.sectionNumber}>THE PRIVATE NOTEBOOK</span>
-          <h2>Remember more.<br />Reveal less.</h2>
+          <h2>
+            Remember more.
+            <br />
+            Reveal less.
+          </h2>
           <p>
             Download Meeki and keep your next conversation where it belongs.
           </p>
@@ -617,7 +658,9 @@ export default function MeekiLanding() {
             GitHub ↗
           </a>
         </div>
-        <span className={styles.copyright}>© {new Date().getFullYear()} Meeki</span>
+        <span className={styles.copyright}>
+          © {new Date().getFullYear()} Meeki
+        </span>
       </footer>
     </div>
   );

@@ -15,7 +15,11 @@
   overflow: hidden;
   color: var(--ink);
   background:
-    radial-gradient(circle at 12% 7%, rgba(255, 255, 255, 0.9), transparent 28%),
+    radial-gradient(
+      circle at 12% 7%,
+      rgba(255, 255, 255, 0.9),
+      transparent 28%
+    ),
     var(--paper);
   font-family: var(--sans);
 }
@@ -139,10 +143,7 @@
   border-radius: 999px;
   font-size: 13px;
   font-weight: 700;
-  transition:
-    color 160ms ease,
-    background 160ms ease,
-    transform 160ms ease;
+  transition: color 160ms ease, background 160ms ease, transform 160ms ease;
 }
 
 .navCta:hover {
@@ -495,12 +496,12 @@
   background:
     linear-gradient(rgba(253, 252, 249, 0.95), rgba(253, 252, 249, 0.95)),
     repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 20px,
-      rgba(55, 107, 80, 0.08) 20px,
-      rgba(55, 107, 80, 0.08) 21px
-    );
+    0deg,
+    transparent,
+    transparent 20px,
+    rgba(55, 107, 80, 0.08) 20px,
+    rgba(55, 107, 80, 0.08) 21px
+  );
 }
 
 .meetingHeading {
@@ -625,15 +626,15 @@
   background: #aeb7af;
 }
 
-.waveform span:nth-child(3n + 1) {
+.waveform span:nth-child(3n+1) {
   height: 11px;
 }
 
-.waveform span:nth-child(4n + 2) {
+.waveform span:nth-child(4n+2) {
   height: 17px;
 }
 
-.waveform span:nth-child(7n + 3) {
+.waveform span:nth-child(7n+3) {
   height: 21px;
 }
 
@@ -1211,7 +1212,7 @@
   border-left: 1px solid var(--line);
 }
 
-.boundaryOptions article:nth-child(n + 3) {
+.boundaryOptions article:nth-child(n+3) {
   border-top: 1px solid var(--line);
 }
 
@@ -1622,7 +1623,7 @@
     grid-template-columns: auto auto 1fr auto;
   }
 
-  .waveform span:nth-child(n + 24) {
+  .waveform span:nth-child(n+24) {
     display: none;
   }
 
@@ -1701,7 +1702,7 @@
     border-left: 0;
   }
 
-  .boundaryOptions article:nth-child(n + 3) {
+  .boundaryOptions article:nth-child(n+3) {
     border-top: 1px solid var(--line);
   }
 
