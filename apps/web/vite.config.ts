@@ -13,6 +13,11 @@ const { d1, r2 } = hostingConfig;
 const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
 
 const localBindingConfig = {
+  // Pinned, not derived from the package name. This is the Worker that already
+  // owns the meeki.ai custom domain. Renaming the package to @meeki/web made
+  // the generated name "meeki-web", which would deploy a brand-new Worker and
+  // leave the live site untouched while still reporting success.
+  name: "meeki-website",
   main: "./worker/index.ts",
   compatibility_flags: ["nodejs_compat"],
   d1_databases: d1
