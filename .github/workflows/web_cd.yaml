@@ -1,5 +1,29 @@
+name: web_cd
+
+# Deliberately workflow_dispatch only, and dry_run defaults to true.
+#
+# meeki.ai is live and it is not yet confirmed who publishes it today: there is
+# no wrangler config in the tree (vinext generates dist/server/wrangler.json at
+# build time), no Cloudflare account id anywhere, and .openai/hosting.json's
+# project_id matches the git remote of the ChatGPT sites control plane that the
+# site was developed on. If that control plane still deploys on push, this
+# workflow becomes a second publisher racing it.
+#
+# Run it once with dry_run: true and compare the reported worker name and
+# routes against the Cloudflare dashboard before ever running it for real.
+# See DEPLOYMENT.md for the full pre-flight checklist.
+
 on:
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Build and validate without publishing. Leave enabled until the Cloudflare target is confirmed."
+        type: boolean
+        default: true
+
+concurrency:
+  group: web-cloudflare-deploy
+  cancel-in-progress: false
 
 jobs:
   compute-version:
@@ -22,36 +46,67 @@ jobs:
   deploy:
     needs: compute-version
     runs-on: ubuntu-latest
-    timeout-minutes: 60
-    concurrency: web-netlify-deploy
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/pnpm_install
-      - uses: denoland/setup-deno@v2
-      - name: Check Netlify deployment credentials
+
+      - name: Check Cloudflare deployment credentials
+        if: ${{ !inputs.dry_run }}
         env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          : "${NETLIFY_AUTH_TOKEN:?Missing NETLIFY_AUTH_TOKEN repository secret}"
-          : "${NETLIFY_SITE_ID:?Missing NETLIFY_SITE_ID repository secret}"
-      - run: pnpm -F ui build
-      - run: npm install -g netlify-cli@26.2.0
-      - name: Build and deploy web to Netlify
+          : "${CLOUDFLARE_API_TOKEN:?Missing CLOUDFLARE_API_TOKEN repository secret}"
+          : "${CLOUDFLARE_ACCOUNT_ID:?Missing CLOUDFLARE_ACCOUNT_ID repository secret}"
+
+      - run: pnpm -F web typecheck
+      - run: pnpm -F web build
+
+      # vinext writes the wrangler config as a build artifact rather than the
+      # repo holding one, so it only exists after the build above.
+      - name: Show resolved deploy target
+        working-directory: apps/web
         run: |
-          netlify deploy \
-            --prod \
-            --context production \
-            --site "$NETLIFY_SITE_ID" \
-            --filter @meeki/web \
-            --message "web v${{ needs.compute-version.outputs.version }} ($GITHUB_SHA)"
+          echo "Worker name : $(jq -r .name dist/server/wrangler.json)"
+          echo "Compat date : $(jq -r .compatibility_date dist/server/wrangler.json)"
+          echo "Assets dir  : $(jq -r .assets.directory dist/server/wrangler.json)"
+
+      - name: Deploy to Cloudflare Workers
+        working-directory: apps/web
         env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-          VITE_APP_VERSION: ${{ needs.compute-version.outputs.version }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            echo "::notice::Dry run — nothing is published."
+            pnpm exec wrangler deploy --config dist/server/wrangler.json --dry-run
+          else
+            pnpm exec wrangler deploy --config dist/server/wrangler.json \
+              --message "web v${{ needs.compute-version.outputs.version }} ($GITHUB_SHA)"
+          fi
+
+      - name: Verify the SEO endpoints are live
+        if: ${{ !inputs.dry_run }}
+        run: |
+          fail=0
+          for path in / /personal /sitemap.xml /llms.txt /robots.txt /favicon.ico; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" -L --max-time 30 "https://meeki.ai$path")
+            echo "$code  $path"
+            [[ "$code" == "200" ]] || fail=1
+          done
+          # robots.txt is served by Cloudflare's managed content-signals file on
+          # some zones, which would shadow app/robots.ts and drop the Sitemap
+          # directive. A 200 alone does not prove ours is the one being served.
+          if ! curl -s --max-time 30 https://meeki.ai/robots.txt | grep -q "Sitemap:"; then
+            echo "::error::robots.txt has no Sitemap directive — Cloudflare's managed robots.txt is probably shadowing app/robots.ts"
+            fail=1
+          fi
+          exit $fail
 
   tag:
     needs: [compute-version, deploy]
+    if: ${{ !inputs.dry_run }}
     runs-on: ubuntu-latest
     permissions:
       contents: write

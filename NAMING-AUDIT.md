@@ -9,6 +9,50 @@ Every naming site assessed under three stated assumptions: **zero users**, **all
 | SELF-CONSISTENT-CONTRACT | 17 | verified consistent, keep in sync |
 | INERT | 12 | no action ever |
 
+> ## Addendum — `apps/web` was replaced on 2026-08-07
+>
+> This audit is a snapshot taken against the TanStack Start web app. That entire
+> tree was removed in `852ee6c` and `apps/web` is now the Next.js/vinext site
+> that actually serves meeki.ai. The findings below are left unedited so the
+> snapshot stays intact, but **52 lines cite `apps/web` paths and all but three
+> of those files no longer exist**: 39 cite `apps/web/src/…`, 13 cite
+> `apps/web/netlify.toml`, 5 cite `apps/web/content/…`.
+>
+> How to read the affected findings now:
+>
+> - **`apps/web/src/…` — moot as written.** The whole directory is gone. Every
+>   finding about `functions/github*.ts`, `lib/download.ts`, `lib/team.ts`,
+>   `telemetry.ts`, `routes/index.tsx` testimonials, `routes/discord.tsx`,
+>   `env.ts`, `functions/app-origin.ts`, deep-link scheme lists and the
+>   `api/assets.$.ts` proxy no longer has code to change. If any of that
+>   behaviour is wanted again it has to be rewritten, not renamed. The Next app
+>   has exactly one URL constant file: `apps/web/app/links.ts`, already on
+>   `inventivezee/meeki`.
+> - **`apps/web/netlify.toml` — moot.** The site is on Cloudflare Workers; there
+>   is no Netlify config and no Netlify site. The hyprnote.com→char.com→meeki.org
+>   redirect blocks, the `remote_images` allowlist and the docs proxies all went
+>   with it. The legacy-domain redirects were **never live** and any equivalent
+>   would now be Cloudflare bulk redirects.
+> - **`apps/web/public/llms.txt` — resolved and improved.** Now served at
+>   `/llms.txt`. Every URL was re-verified; the nine `docs.meeki.ai` links were
+>   dropped because that host is NXDOMAIN, and the GitHub link moved off
+>   `inventivezee/Meety`, which 404s.
+> - **`apps/web/content/legal/{privacy,terms}.mdx` — STILL LIVE AND STILL VALID.**
+>   These two files survived into `apps/web/content/` and the
+>   `Fastrepl, Inc.` finding is unchanged and unfixed. Five occurrences, one of
+>   them all-caps (`FASTREPL, INC.` in the limitation-of-liability clause), so
+>   search case-insensitively. Nothing serves them today, which is the only
+>   reason this is not user-facing.
+> - **`apps/web/README.md` and `apps/web/vite.config.ts` exist but are different
+>   files.** They belong to the Next app; findings about the old ones do not
+>   apply.
+> - **`meeki.org` findings — the domain has no DNS record at all.** The live site
+>   is `meeki.ai`. Anything describing `meeki.org` as the web origin, or a
+>   Netlify site behind it, describes something that was never built.
+> - **`packages/changelog` findings still stand** — that package is unchanged and
+>   still consumed by `apps/desktop`, including the `auth.hyprnote.com` image
+>   rewrite at `src/process.ts:40`.
+
 
 ## Upstream dependencies — must be severed for independence
 

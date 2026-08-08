@@ -1,7 +1,14 @@
 # Overview
 
-Tauri desktop note-taking app (`apps/desktop/`) with a web app (`apps/web/`).
-Uses pnpm workspaces.
+Tauri desktop note-taking app (`apps/desktop/`) with a marketing site
+(`apps/web/`). Uses pnpm workspaces.
+
+`apps/web` is the site that serves meeki.ai: Next.js 16 App Router built by
+`vinext` and deployed to a Cloudflare Worker. It is a marketing site only — `/`,
+`/personal` and a `/r/[code]` referral redirect. It is **not** the TanStack Start
+app that used to live at this path; that tree was never deployed and was removed
+in `852ee6c`. Do not reach for TanStack Router, Netlify or `src/routes/`
+conventions here.
 SQLite is the primary data store (schema and migrations in `crates/db-app/`, desktop transport in `plugins/db/`), Zustand is used for UI state, and TipTap powers the editor. Sessions are the core entity — all notes are backed by sessions.
 
 ## Commands
@@ -10,8 +17,9 @@ SQLite is the primary data store (schema and migrations in `crates/db-app/`, des
 - Typecheck (TS): `pnpm -r typecheck`
 - Typecheck (Rust): `cargo check`
 - Desktop dev: `pnpm -F @meeki/desktop tauri:dev`
-- Web dev: `pnpm -F @meeki/web dev`
-- Dev docs: https://docs.meeki.ai
+- Web dev: `pnpm -F web dev`
+- Web verify: `pnpm -F web typecheck && pnpm -F web test`
+- Dev docs: `docs/` in this repo (the `docs.meeki.ai` host has no DNS record)
 
 ## Guidelines
 
@@ -21,7 +29,10 @@ SQLite is the primary data store (schema and migrations in `crates/db-app/`, des
 - After editing files, run the relevant verification commands before finishing.
 - For `apps/desktop/` TypeScript changes, prefer `pnpm -F desktop typecheck` to match CI.
 - After edits, run `pnpm exec dprint fmt`.
-- Use `useForm` (tanstack-form) and `useQuery`/`useMutation` (tanstack-query) for form/mutation state. Avoid manual state management (e.g. `setError`).
+- Use `useForm` (tanstack-form) and `useQuery`/`useMutation` (tanstack-query) for form/mutation state. Avoid manual state management (e.g. `setError`). This applies to `apps/desktop`; `apps/web` has neither dependency and should stay dependency-light.
+- In `apps/web`, keep absolute URLs derived from `SITE_ORIGIN` in `app/site.ts`. Never rebuild an origin from request headers — `www` and the apex both answer, so that produced two competing canonicals.
+- `apps/web` runs on Cloudflare Workers: no filesystem and no `new Function()`/`eval` at runtime. Content must be inlined at build time (`import.meta.glob`, `?raw`).
+- Verify `apps/web` against the Workers runtime, not `vinext start`. The Node server rewrites `Content-Type` from the URL extension and reports `.txt` as `application/octet-stream`. Use `pnpm exec wrangler dev --config dist/server/wrangler.json` after a build.
 - For `plugins/db` live queries, keep schema creation, migrations, and DB initialization on the Rust side; TypeScript should only consume `execute`/`subscribe` APIs.
 - Branch naming: `fix/`, `chore/`, `refactor/` prefixes.
 

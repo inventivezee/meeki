@@ -585,26 +585,46 @@ Capabilities: `apps/desktop/src-tauri/capabilities/default.json` (broad plugin d
 
 ## 7. Web app structure
 
-**Stack:** TanStack Start / Vite (`apps/web`).
+**Stack:** Next.js 16 App Router, built by `vinext`, deployed to a Cloudflare
+Worker (`apps/web`). This is what serves meeki.ai.
+
+> The table below previously described a TanStack Start app with auth, billing,
+> share-viewer and admin-CMS routes. That tree was **never deployed** — every
+> route in it returned 404 on meeki.ai and `meeki.org` has no DNS record — and it
+> was removed in `852ee6c`. It is recoverable from history if any of it is worth
+> porting. See DEPLOYMENT.md § 2 for the routes the Rust backend still generates
+> links into but which no longer exist.
 
 ### 7.1 User-facing routes
 
 | Route | Feature |
 |-------|---------|
-| `/` | Marketing / manifesto / pricing |
-| `/auth`, `/confirm-auth`, `/reset-password`, `/update-password` | Auth |
-| `/_view/app/*` | Account, checkout, portal, switch-plan, integrations |
-| `/_view/callback/*` | Auth / billing / integration / signout callbacks |
-| `/_view/download/*` | Platform downloads |
-| `/share/$shareId` | Authenticated share viewer |
-| `/share/link/$shareId` | Capability-token share |
-| `/share/invite/$invitationId` | Invitation accept |
-| `/share/public/$publicSlug` | Public share |
-| `/blog`, `/changelog`, `/privacy`, `/terms`, `/discord` | Content / legal |
+| `/` | Marketing landing page (private-notekeeper framing) |
+| `/personal` | Same landing page, personal framing |
+| `/r/[code]` | Referral redirect — sets a cookie, 302s to `/`, `noindex` |
 
-### 7.2 Web API routes (`apps/web/src/routes/api/`)
+### 7.2 Crawler and metadata routes
 
-Mostly marketing/ops: admin CMS/kanban/media/stars, OG images, templates, Slack interactive webhooks, assets — not the core meeting editor.
+| Route | Source |
+|-------|--------|
+| `/sitemap.xml` | `app/sitemap.ts` |
+| `/robots.txt` | `app/robots.ts` — names GPTBot, ClaudeBot, OAI-SearchBot, PerplexityBot, Google-Extended and others explicitly as allowed |
+| `/llms.txt` | `app/llms.txt/route.ts`, content in `content.txt` |
+| `/manifest.json`, `/favicon.ico`, icons | `public/` |
+
+JSON-LD (`SoftwareApplication`, `Organization`, `WebSite`) is emitted from
+`app/site.ts` via the root layout. `SITE_ORIGIN` there is the single source for
+every absolute URL.
+
+There are **no** web API routes. The app has no database, no auth and no
+workspace dependencies.
+
+### 7.3 Unpublished content
+
+`apps/web/content/` holds 62 salvaged articles and two legal documents that
+**no route serves**. Read `apps/web/content/README.md` before publishing any of
+them — 61 of the 62 are still live on char.com under a different author, and all
+273 of their images are gone.
 
 ---
 
@@ -749,7 +769,7 @@ Runtime env read by the Rust side (not Vite):
 ```bash
 pnpm install
 pnpm -F @meeki/desktop tauri:dev
-pnpm -F @meeki/web dev
+pnpm -F web dev
 cargo run -p api          # needs full env
 task supabase-start       # optional local Supabase
 pnpm exec dprint fmt
