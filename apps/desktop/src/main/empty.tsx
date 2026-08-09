@@ -1,5 +1,5 @@
 import { Trans } from "@lingui/react/macro";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Kbd } from "@meeki/ui/components/ui/kbd";
 import { cn } from "@meeki/utils";
@@ -13,6 +13,10 @@ import {
   useNewNoteFromDroppedAudio,
 } from "~/shared/useNewNote";
 import { type Tab, useTabs } from "~/store/zustand/tabs";
+import {
+  listUntranscribedSessions,
+  useAudioBacklog,
+} from "~/stt/audio-backlog";
 
 export function TabContentEmpty({
   tab: _tab,
@@ -85,6 +89,7 @@ function EmptyView() {
           label={<Trans>Upload a Recording</Trans>}
           onClick={uploadRecording}
         />
+        <ResumeBacklogItem />
         <div className="bg-accent my-1 h-px" />
         <ActionItem
           label={<Trans>Settings</Trans>}
@@ -93,6 +98,49 @@ function EmptyView() {
         />
       </div>
     </div>
+  );
+}
+
+/**
+ * How an interrupted backlog run is picked up again. The queue is a query, so
+ * "resume" is just starting over — anything already transcribed no longer
+ * matches. Hidden when there is nothing waiting, which is the normal case.
+ */
+function ResumeBacklogItem() {
+  const running = useAudioBacklog((state) => state.running);
+  const start = useAudioBacklog((state) => state.start);
+  const [count, setCount] = useState(0);
+
+  // Counted on mount and whenever a run ends, rather than polled: the empty tab
+  // is a menu, not a dashboard, and this is the only place its contents depend
+  // on the database.
+  useEffect(() => {
+    if (running) {
+      return;
+    }
+
+    let current = true;
+    void listUntranscribedSessions()
+      .then((pending) => {
+        if (current) {
+          setCount(pending.length);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      current = false;
+    };
+  }, [running]);
+
+  if (running || count === 0) {
+    return null;
+  }
+
+  return (
+    <ActionItem
+      label={<Trans>Transcribe {count} imported recordings</Trans>}
+      onClick={() => start(count)}
+    />
   );
 }
 

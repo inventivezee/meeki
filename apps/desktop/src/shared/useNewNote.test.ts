@@ -10,6 +10,8 @@ const mocks = vi.hoisted(() => ({
   selectFile: vi.fn(),
   toastMessage: vi.fn(),
   toastSuccess: vi.fn(),
+  catalogLocalSessionAudio: vi.fn(),
+  listUntranscribedSessions: vi.fn(),
 }));
 
 vi.mock("@meeki/plugin-fs-sync", () => ({
@@ -31,8 +33,17 @@ vi.mock("@tauri-apps/plugin-dialog", () => ({
   open: mocks.selectFile,
 }));
 
+vi.mock("~/session/attachments", () => ({
+  catalogLocalSessionAudio: mocks.catalogLocalSessionAudio,
+}));
+
 vi.mock("~/session/queries", () => ({
   createSession: mocks.createSession,
+}));
+
+vi.mock("~/stt/audio-backlog", () => ({
+  listUntranscribedSessions: mocks.listUntranscribedSessions,
+  useAudioBacklog: { getState: () => ({ start: vi.fn() }) },
 }));
 
 vi.mock("~/store/zustand/tabs", () => ({
@@ -73,6 +84,8 @@ describe("importing several recordings at once", () => {
     );
     mocks.audioImport.mockResolvedValue({ status: "ok" });
     mocks.audioImportData.mockResolvedValue({ status: "ok" });
+    mocks.catalogLocalSessionAudio.mockResolvedValue(undefined);
+    mocks.listUntranscribedSessions.mockResolvedValue([]);
   });
 
   it("gives every dropped recording its own note", async () => {
@@ -125,6 +138,9 @@ describe("importing several recordings at once", () => {
     );
     expect(mocks.createSession).toHaveBeenCalledTimes(2);
     expect(mocks.audioImport).toHaveBeenCalledWith("session-2", "/tmp/b.mp3");
+    // Without the attachment row the audio is on disk but invisible to the
+    // player, to sync, and to the backlog that transcribes it later.
+    expect(mocks.catalogLocalSessionAudio).toHaveBeenCalledWith("session-2");
   });
 
   it("keeps transcript upload to one file, since a note has one transcript", async () => {

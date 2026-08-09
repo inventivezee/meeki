@@ -29,6 +29,7 @@ import { configureVeniceLlmFromEnv } from "~/shared/config/configure-venice";
 import { useDesktopTabLifecycle } from "~/shared/desktop-tab-lifecycle";
 import { useMountEffect } from "~/shared/hooks/useMountEffect";
 import { useTabs } from "~/store/zustand/tabs";
+import { AudioBacklogWorker } from "~/stt/audio-backlog-worker";
 import { LiveCaptureRecovery } from "~/stt/live-capture-recovery";
 import { MainListenerControlBridge } from "~/stt/window-control";
 
@@ -65,6 +66,7 @@ export function ClassicMainServices() {
       <MainListenerControlBridge />
       <ToolRegistration />
       <LocalLlmEnsure />
+      <AudioBacklogWorker />
       <EnhancerInit />
       <LegacyWelcomeDemoCleanup />
     </>

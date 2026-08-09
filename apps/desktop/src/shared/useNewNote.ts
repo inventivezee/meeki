@@ -6,8 +6,13 @@ import { useShallow } from "zustand/shallow";
 import { commands as fsSyncCommands } from "@meeki/plugin-fs-sync";
 import { sonnerToast } from "@meeki/ui/components/ui/toast";
 
+import { catalogLocalSessionAudio } from "~/session/attachments";
 import { createSession } from "~/session/queries";
 import { useTabs } from "~/store/zustand/tabs";
+import {
+  listUntranscribedSessions,
+  useAudioBacklog,
+} from "~/stt/audio-backlog";
 import { useListener } from "~/stt/contexts";
 import { setPendingUpload } from "~/stt/pending-upload";
 import { AUDIO_EXTENSIONS, isAudioUploadFile } from "~/stt/useUploadFile";
@@ -148,7 +153,12 @@ async function importIntoNewNote(
     const result = await run(sessionId);
     if (result.status === "error") {
       console.error("[session] failed to import audio", result.error);
+      return;
     }
+    // The single-file path catalogs through useUploadFile. Without the
+    // attachment row the audio exists on disk but nothing else can see it —
+    // not the player, not sync, not the backlog this note now belongs to.
+    await catalogLocalSessionAudio(sessionId);
   } catch (error) {
     console.error("[session] failed to import audio", error);
   }
@@ -209,11 +219,25 @@ async function importBatch<T>(
     report(done);
   }
 
+  // Importing only copies the audio. Offer the hours of transcription that
+  // follow rather than starting them unasked.
+  const pending = await listUntranscribedSessions().catch(() => []);
+
   sonnerToast.success(
     stopped
       ? `Stopped after importing ${done} of ${total} recordings`
       : `Imported ${done} recordings`,
-    { id: IMPORT_TOAST_ID, duration: 5_000, action: undefined },
+    {
+      id: IMPORT_TOAST_ID,
+      duration: pending.length > 0 ? 30_000 : 5_000,
+      action:
+        pending.length > 0
+          ? {
+              label: `Transcribe ${pending.length}`,
+              onClick: () => useAudioBacklog.getState().start(pending.length),
+            }
+          : undefined,
+    },
   );
 }
 

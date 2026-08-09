@@ -2438,6 +2438,10 @@ msgstr "Timezone"
 msgid "Tip: The Meeki team loves our users!"
 msgstr "Tip: The Meeki team loves our users!"
 
+#: src/main/empty.tsx
+msgid "Transcribe {count} imported recordings"
+msgstr "Transcribe {count} imported recordings"
+
 #: src/session/components/note-input/header.tsx
 #: src/session/components/outer-header/overflow/export-modal.tsx
 #: src/templates/auto-form.tsx
