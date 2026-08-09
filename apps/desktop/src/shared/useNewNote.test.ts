@@ -12,7 +12,8 @@ const mocks = vi.hoisted(() => ({
   toastSuccess: vi.fn(),
   toastError: vi.fn(),
   catalogLocalSessionAudio: vi.fn(),
-  listUntranscribedSessions: vi.fn(),
+  askBulkImportChoice: vi.fn(),
+  startBacklogRun: vi.fn(),
 }));
 
 vi.mock("@meeki/plugin-fs-sync", () => ({
@@ -47,8 +48,11 @@ vi.mock("~/session/queries", () => ({
 }));
 
 vi.mock("~/stt/audio-backlog", () => ({
-  listUntranscribedSessions: mocks.listUntranscribedSessions,
-  useAudioBacklog: { getState: () => ({ start: vi.fn() }) },
+  startBacklogRun: mocks.startBacklogRun,
+}));
+
+vi.mock("~/shared/bulk-import-prompt", () => ({
+  askBulkImportChoice: mocks.askBulkImportChoice,
 }));
 
 vi.mock("~/store/zustand/tabs", () => ({
@@ -91,7 +95,10 @@ describe("importing several recordings at once", () => {
     mocks.audioImport.mockResolvedValue({ status: "ok" });
     mocks.audioImportData.mockResolvedValue({ status: "ok" });
     mocks.catalogLocalSessionAudio.mockResolvedValue(undefined);
-    mocks.listUntranscribedSessions.mockResolvedValue([]);
+    mocks.askBulkImportChoice.mockResolvedValue({
+      transcribe: true,
+      summarize: true,
+    });
   });
 
   it("gives every dropped recording its own note", async () => {
@@ -104,11 +111,10 @@ describe("importing several recordings at once", () => {
     ]);
 
     expect(mocks.createSession).toHaveBeenCalledTimes(3);
-    // The first rides the existing pending-upload path so it still transcribes
-    // on open; the rest are imported now, because a queued upload only runs in
-    // the tab that is on screen.
-    expect(mocks.setPendingUpload).toHaveBeenCalledTimes(1);
-    expect(mocks.audioImportData).toHaveBeenCalledTimes(2);
+    // None are queued for the session view. That view transcribes from inside
+    // the open tab, which would race the backlog worker for the same note.
+    expect(mocks.setPendingUpload).not.toHaveBeenCalled();
+    expect(mocks.audioImportData).toHaveBeenCalledTimes(3);
     expect(mocks.openNew).toHaveBeenCalledTimes(1);
   });
 
@@ -162,7 +168,7 @@ describe("importing several recordings at once", () => {
     expect(mocks.audioImport).not.toHaveBeenCalled();
   });
 
-  it("counts the whole selection, including the file the session view takes", async () => {
+  it("reports progress from the first file to the last", async () => {
     mocks.selectFile.mockResolvedValue([
       "/tmp/a.mp3",
       "/tmp/b.mp3",
@@ -172,9 +178,14 @@ describe("importing several recordings at once", () => {
 
     await result.current("audio");
 
-    expect(mocks.toastMessage).toHaveBeenCalledWith(
+    expect(mocks.toastMessage).toHaveBeenNthCalledWith(
+      1,
       "Importing 3 recordings",
-      expect.objectContaining({ description: "1 of 3" }),
+      expect.objectContaining({ description: "0 of 3" }),
+    );
+    expect(mocks.toastMessage).toHaveBeenLastCalledWith(
+      "Importing 3 recordings",
+      expect.objectContaining({ description: "3 of 3" }),
     );
     expect(mocks.toastSuccess).toHaveBeenCalledWith(
       "Imported 3 recordings",
@@ -201,7 +212,7 @@ describe("importing several recordings at once", () => {
 
     expect(mocks.audioImport).not.toHaveBeenCalled();
     expect(mocks.toastSuccess).toHaveBeenCalledWith(
-      "Stopped after importing 1 of 4 recordings",
+      "Stopped after importing 0 of 4 recordings",
       expect.anything(),
     );
   });
@@ -271,7 +282,7 @@ describe("importing several recordings at once", () => {
     await result.current([audioFile("a.mp3"), audioFile("b.mp3")]);
 
     expect(mocks.toastError).not.toHaveBeenCalled();
-    expect(mocks.audioImportData).toHaveBeenCalledTimes(1);
+    expect(mocks.audioImportData).toHaveBeenCalledTimes(2);
   });
 
   it("keeps importing the rest when one file fails", async () => {
@@ -286,7 +297,57 @@ describe("importing several recordings at once", () => {
       audioFile("c.mp3"),
     ]);
 
-    expect(mocks.audioImportData).toHaveBeenCalledTimes(2);
+    expect(mocks.audioImportData).toHaveBeenCalledTimes(3);
     expect(mocks.openNew).toHaveBeenCalledTimes(1);
+  });
+
+  it("abandons the import when the prompt is cancelled", async () => {
+    mocks.askBulkImportChoice.mockResolvedValue(null);
+    mocks.selectFile.mockResolvedValue(["/tmp/a.mp3", "/tmp/b.mp3"]);
+    const { result } = renderHook(() => useNewNoteAndUpload());
+
+    await result.current("audio");
+
+    // Asked before anything is copied, so cancelling leaves no notes behind.
+    expect(mocks.createSession).not.toHaveBeenCalled();
+    expect(mocks.audioImport).not.toHaveBeenCalled();
+    expect(mocks.startBacklogRun).not.toHaveBeenCalled();
+  });
+
+  it("starts processing only when the user asked for it", async () => {
+    mocks.askBulkImportChoice.mockResolvedValue({
+      transcribe: true,
+      summarize: false,
+    });
+    mocks.selectFile.mockResolvedValue(["/tmp/a.mp3", "/tmp/b.mp3"]);
+    const { result } = renderHook(() => useNewNoteAndUpload());
+
+    await result.current("audio");
+
+    expect(mocks.startBacklogRun).toHaveBeenCalledWith({ summarize: false });
+  });
+
+  it("imports without processing when the user declines both", async () => {
+    mocks.askBulkImportChoice.mockResolvedValue({
+      transcribe: false,
+      summarize: false,
+    });
+    mocks.selectFile.mockResolvedValue(["/tmp/a.mp3", "/tmp/b.mp3"]);
+    const { result } = renderHook(() => useNewNoteAndUpload());
+
+    await result.current("audio");
+
+    expect(mocks.audioImport).toHaveBeenCalledTimes(2);
+    expect(mocks.startBacklogRun).not.toHaveBeenCalled();
+  });
+
+  it("does not ask about a single file, which just opens and transcribes", async () => {
+    mocks.selectFile.mockResolvedValue(["/tmp/only.mp3"]);
+    const { result } = renderHook(() => useNewNoteAndUpload());
+
+    await result.current("audio");
+
+    expect(mocks.askBulkImportChoice).not.toHaveBeenCalled();
+    expect(mocks.setPendingUpload).toHaveBeenCalledTimes(1);
   });
 });

@@ -270,8 +270,12 @@ msgid "Browser handoff not working? Paste the callback link instead"
 msgstr ""
 
 #: src/session/components/outer-header/overflow/index.tsx
-msgid "Bulk upload recordings"
+msgid "Bulk import recordings"
 msgstr ""
+
+#: src/session/components/outer-header/overflow/index.tsx
+#~ msgid "Bulk upload recordings"
+#~ msgstr ""
 
 #: src/calendar/components/sidebar.tsx
 #: src/settings/general/permissions.tsx
@@ -293,6 +297,7 @@ msgstr ""
 #: src/settings/general/e2ee-setup.tsx
 #: src/settings/general/storage/legacy-cleanup.tsx
 #: src/settings/todo/github.tsx
+#: src/shared/bulk-import-prompt.tsx
 msgid "Cancel"
 msgstr ""
 
@@ -753,6 +758,10 @@ msgstr ""
 msgid "Duration"
 msgstr ""
 
+#: src/shared/bulk-import-prompt.tsx
+msgid "Each recording becomes its own note. Processing them runs one at a time and can take many hours; you can stop it at any point and pick up where it left off."
+msgstr ""
+
 #: src/session/components/outer-header/metadata/date.tsx
 msgid "Edit date"
 msgstr ""
@@ -992,6 +1001,15 @@ msgstr ""
 
 #: src/settings/general/account.tsx
 msgid "If the browser does not reopen Meeki, use the paste-link fallback in the sign-in instruction window."
+msgstr ""
+
+#: src/shared/bulk-import-prompt.tsx
+msgid "Import"
+msgstr ""
+
+#. placeholder {0}: request.count
+#: src/shared/bulk-import-prompt.tsx
+msgid "Import {0} recordings"
 msgstr ""
 
 #: src/sidebar/timeline/upcoming-meeting.ts
@@ -1343,6 +1361,10 @@ msgstr ""
 #: src/contacts/details.tsx
 #: src/contacts/organization-details.tsx
 msgid "Name"
+msgstr ""
+
+#: src/shared/bulk-import-prompt.tsx
+msgid "Needs transcripts."
 msgstr ""
 
 #: src/session/components/outer-header/index.tsx
@@ -2287,6 +2309,10 @@ msgstr ""
 msgid "Summaries need a language model. Download one that runs on this Mac, or connect a provider you already use."
 msgstr ""
 
+#: src/shared/bulk-import-prompt.tsx
+msgid "Summarize all"
+msgstr ""
+
 #: src/contacts/details.tsx
 #: src/session/components/outer-header/overflow/export-modal.tsx
 msgid "Summary"
@@ -2446,6 +2472,10 @@ msgstr ""
 msgid "Transcribe {count} imported recordings"
 msgstr ""
 
+#: src/shared/bulk-import-prompt.tsx
+msgid "Transcribe all"
+msgstr ""
+
 #: src/session/components/note-input/header.tsx
 #: src/session/components/outer-header/overflow/export-modal.tsx
 #: src/templates/auto-form.tsx
@@ -2478,6 +2508,10 @@ msgstr ""
 
 #: src/session-sharing/index.tsx
 msgid "Try again"
+msgstr ""
+
+#: src/shared/bulk-import-prompt.tsx
+msgid "Turn every recording into a transcript."
 msgstr ""
 
 #: src/settings/sync/index.tsx
@@ -2641,6 +2675,10 @@ msgstr ""
 
 #: src/task/tab-content.tsx
 msgid "Work on this task"
+msgstr ""
+
+#: src/shared/bulk-import-prompt.tsx
+msgid "Write a summary note from each transcript."
 msgstr ""
 
 #: src/settings/ai/index.tsx

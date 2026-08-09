@@ -14,6 +14,7 @@ import {
 import { type Tab, useTabs } from "~/store/zustand/tabs";
 import {
   listUntranscribedSessions,
+  startBacklogRun,
   useAudioBacklog,
 } from "~/stt/audio-backlog";
 
@@ -97,7 +98,6 @@ function EmptyView() {
  */
 function ResumeBacklogItem() {
   const running = useAudioBacklog((state) => state.running);
-  const start = useAudioBacklog((state) => state.start);
   const [count, setCount] = useState(0);
 
   // Counted on mount and whenever a run ends, rather than polled: the empty tab
@@ -128,7 +128,7 @@ function ResumeBacklogItem() {
   return (
     <ActionItem
       label={<Trans>Transcribe {count} imported recordings</Trans>}
-      onClick={() => start(count)}
+      onClick={() => void startBacklogRun()}
     />
   );
 }

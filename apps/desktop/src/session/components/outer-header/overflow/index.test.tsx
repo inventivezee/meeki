@@ -196,7 +196,7 @@ describe("OverflowButton", () => {
 
     expect(screen.queryByRole("button", { name: "Upload audio" })).toBeNull();
     fireEvent.click(
-      screen.getByRole("button", { name: "Bulk upload recordings" }),
+      screen.getByRole("button", { name: "Bulk import recordings" }),
     );
 
     expect(bulkUploadMock).toHaveBeenCalledWith("audio");

@@ -221,7 +221,7 @@ export function OverflowButton({
             >
               <FolderUpIcon />
               <span>
-                <Trans>Bulk upload recordings</Trans>
+                <Trans>Bulk import recordings</Trans>
               </span>
             </DropdownMenuItem>
             <DropdownMenuItem

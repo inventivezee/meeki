@@ -23,6 +23,7 @@ import { OwnedSharedNotePublisher } from "~/session-sharing/sync";
 import { SharedAttachmentCacheLifecycle } from "~/shared-notes/attachment-cache-lifecycle";
 import { SharedNotePreviewAuthLifecycle } from "~/shared-notes/preview";
 import { DurableSharedNoteCacheSync } from "~/shared-notes/sync";
+import { BulkImportPrompt } from "~/shared/bulk-import-prompt";
 import { useConfigValue } from "~/shared/config";
 import { configureAssemblyAiSttFromEnv } from "~/shared/config/configure-assemblyai";
 import { configureVeniceLlmFromEnv } from "~/shared/config/configure-venice";
@@ -67,6 +68,7 @@ export function ClassicMainServices() {
       <ToolRegistration />
       <LocalLlmEnsure />
       <AudioBacklogWorker />
+      <BulkImportPrompt />
       <EnhancerInit />
       <LegacyWelcomeDemoCleanup />
     </>

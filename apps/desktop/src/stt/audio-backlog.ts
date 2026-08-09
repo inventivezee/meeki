@@ -46,13 +46,15 @@ type BacklogState = {
   /** How many were pending when the user started, so progress reads as N of M. */
   total: number;
   done: number;
+  /** Whether to write a summary after each transcript, as the user chose. */
+  summarize: boolean;
   /**
    * Sessions this run could not transcribe. Held in memory only: a file that
    * fails today may well succeed after the user fixes the model or the disk,
    * and a persisted skip list would quietly hide it forever.
    */
   failed: Set<string>;
-  start: (total: number) => void;
+  start: (total: number, options?: { summarize?: boolean }) => void;
   stop: () => void;
   recordDone: () => void;
   recordFailure: (sessionId: string) => void;
@@ -62,8 +64,16 @@ export const useAudioBacklog = create<BacklogState>((set) => ({
   running: false,
   total: 0,
   done: 0,
+  summarize: true,
   failed: new Set(),
-  start: (total) => set({ running: true, total, done: 0, failed: new Set() }),
+  start: (total, options) =>
+    set({
+      running: true,
+      total,
+      done: 0,
+      summarize: options?.summarize ?? true,
+      failed: new Set(),
+    }),
   stop: () => set({ running: false }),
   recordDone: () => set((state) => ({ done: state.done + 1 })),
   recordFailure: (sessionId) =>
@@ -72,3 +82,20 @@ export const useAudioBacklog = create<BacklogState>((set) => ({
       failed: new Set(state.failed).add(sessionId),
     })),
 }));
+
+/**
+ * Starts a run over whatever is pending right now.
+ *
+ * The count is read at the moment of starting rather than passed in, because
+ * the caller's idea of "how many" comes from a selection, and some of those
+ * files may have failed to import.
+ */
+export async function startBacklogRun(options?: {
+  summarize?: boolean;
+}): Promise<void> {
+  const pending = await listUntranscribedSessions().catch(() => []);
+  if (pending.length === 0) {
+    return;
+  }
+  useAudioBacklog.getState().start(pending.length, options);
+}

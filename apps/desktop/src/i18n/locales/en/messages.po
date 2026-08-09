@@ -270,8 +270,12 @@ msgid "Browser handoff not working? Paste the callback link instead"
 msgstr "Browser handoff not working? Paste the callback link instead"
 
 #: src/session/components/outer-header/overflow/index.tsx
-msgid "Bulk upload recordings"
-msgstr "Bulk upload recordings"
+msgid "Bulk import recordings"
+msgstr "Bulk import recordings"
+
+#: src/session/components/outer-header/overflow/index.tsx
+#~ msgid "Bulk upload recordings"
+#~ msgstr "Bulk upload recordings"
 
 #: src/calendar/components/sidebar.tsx
 #: src/settings/general/permissions.tsx
@@ -293,6 +297,7 @@ msgstr "Can transcribe while the meeting is happening."
 #: src/settings/general/e2ee-setup.tsx
 #: src/settings/general/storage/legacy-cleanup.tsx
 #: src/settings/todo/github.tsx
+#: src/shared/bulk-import-prompt.tsx
 msgid "Cancel"
 msgstr "Cancel"
 
@@ -753,6 +758,10 @@ msgstr "Duplicate"
 msgid "Duration"
 msgstr "Duration"
 
+#: src/shared/bulk-import-prompt.tsx
+msgid "Each recording becomes its own note. Processing them runs one at a time and can take many hours; you can stop it at any point and pick up where it left off."
+msgstr "Each recording becomes its own note. Processing them runs one at a time and can take many hours; you can stop it at any point and pick up where it left off."
+
 #: src/session/components/outer-header/metadata/date.tsx
 msgid "Edit date"
 msgstr "Edit date"
@@ -993,6 +1002,15 @@ msgstr "Icons"
 #: src/settings/general/account.tsx
 msgid "If the browser does not reopen Meeki, use the paste-link fallback in the sign-in instruction window."
 msgstr "If the browser does not reopen Meeki, use the paste-link fallback in the sign-in instruction window."
+
+#: src/shared/bulk-import-prompt.tsx
+msgid "Import"
+msgstr "Import"
+
+#. placeholder {0}: request.count
+#: src/shared/bulk-import-prompt.tsx
+msgid "Import {0} recordings"
+msgstr "Import {0} recordings"
 
 #: src/sidebar/timeline/upcoming-meeting.ts
 msgid "In {minutes}m {seconds}s"
@@ -1344,6 +1362,10 @@ msgstr "Move up"
 #: src/contacts/organization-details.tsx
 msgid "Name"
 msgstr "Name"
+
+#: src/shared/bulk-import-prompt.tsx
+msgid "Needs transcripts."
+msgstr "Needs transcripts."
 
 #: src/session/components/outer-header/index.tsx
 msgid "New"
@@ -2287,6 +2309,10 @@ msgstr "Submit callback URL"
 msgid "Summaries need a language model. Download one that runs on this Mac, or connect a provider you already use."
 msgstr "Summaries need a language model. Download one that runs on this Mac, or connect a provider you already use."
 
+#: src/shared/bulk-import-prompt.tsx
+msgid "Summarize all"
+msgstr "Summarize all"
+
 #: src/contacts/details.tsx
 #: src/session/components/outer-header/overflow/export-modal.tsx
 msgid "Summary"
@@ -2446,6 +2472,10 @@ msgstr "Tip: The Meeki team loves our users!"
 msgid "Transcribe {count} imported recordings"
 msgstr "Transcribe {count} imported recordings"
 
+#: src/shared/bulk-import-prompt.tsx
+msgid "Transcribe all"
+msgstr "Transcribe all"
+
 #: src/session/components/note-input/header.tsx
 #: src/session/components/outer-header/overflow/export-modal.tsx
 #: src/templates/auto-form.tsx
@@ -2479,6 +2509,10 @@ msgstr "Trial activated - {trialDays} days of Pro"
 #: src/session-sharing/index.tsx
 msgid "Try again"
 msgstr "Try again"
+
+#: src/shared/bulk-import-prompt.tsx
+msgid "Turn every recording into a transcript."
+msgstr "Turn every recording into a transcript."
 
 #: src/settings/sync/index.tsx
 msgid "Turn on sync to create or enter your recovery key."
@@ -2642,6 +2676,10 @@ msgstr "While listening, use Accessibility access to copy visible chat from supp
 #: src/task/tab-content.tsx
 msgid "Work on this task"
 msgstr "Work on this task"
+
+#: src/shared/bulk-import-prompt.tsx
+msgid "Write a summary note from each transcript."
+msgstr "Write a summary note from each transcript."
 
 #: src/settings/ai/index.tsx
 msgid "Writes down what was said in your meetings. Also called transcription."

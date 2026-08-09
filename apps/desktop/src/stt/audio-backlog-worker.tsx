@@ -125,13 +125,17 @@ function TranscribeOne({ sessionId }: { sessionId: string }) {
           promotion: { scope: "whole_session" },
         });
 
-        const started = await getEnhancerService()?.enhance(sessionId);
-        // `enhance` resolves once the task is queued, not once the summary
-        // exists. Waiting for it matters here: two summaries in flight can want
-        // different context windows, and growing the window restarts
-        // llama-server underneath whichever one is still streaming.
-        if (started && "noteId" in started && aiTaskStore) {
-          await waitForEnhance(aiTaskStore, started.noteId, () => cancelled);
+        // Read at use rather than subscribed to, so flipping the choice
+        // mid-run cannot re-render this component and restart its work.
+        if (useAudioBacklog.getState().summarize) {
+          const started = await getEnhancerService()?.enhance(sessionId);
+          // `enhance` resolves once the task is queued, not once the summary
+          // exists. Waiting for it matters here: two summaries in flight can
+          // want different context windows, and growing the window restarts
+          // llama-server underneath whichever one is still streaming.
+          if (started && "noteId" in started && aiTaskStore) {
+            await waitForEnhance(aiTaskStore, started.noteId, () => cancelled);
+          }
         }
 
         if (!cancelled) {
