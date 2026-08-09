@@ -12,6 +12,7 @@ import type { TaskArgsMapTransformed, TaskConfig } from ".";
 import type { EnhanceImageContext } from "./enhance-images";
 import { createEnhanceValidator } from "./enhance-validator";
 
+import { ensureContextForTranscript } from "~/ai/local-llm-context";
 import {
   groundedGenerationSettings,
   thinkingProviderOptions,
@@ -19,7 +20,7 @@ import {
 import {
   formatSummaryLengthGuidance,
   getSummaryLengthPolicy,
-  type SummaryLength,
+  type SummaryLengthPolicy,
 } from "~/services/enhancer/summary-length";
 import { getStoredSettingValues } from "~/settings/queries";
 import { normalizeBulletPoints } from "~/store/zustand/ai-task/shared/transform_impl";
@@ -52,11 +53,18 @@ async function* executeWorkflow(params: {
 }) {
   const { model, args, onProgress, signal } = params;
 
+  const policy = getSummaryLengthPolicy(args.transcripts, args.summaryLength);
+
+  // A long meeting needs a bigger context window than the one the local server
+  // starts with, and llama.cpp fixes that window when the process starts. Grow
+  // it here, before the request, rather than letting the whole summary come
+  // back as a 400 with nothing salvaged. No-op for cloud providers.
+  await ensureContextForTranscript(policy?.transcriptCharacters ?? 0);
+
   const system = await getSystemPrompt(args);
   const prompt = withLengthGuidance(
     withImageContextNote(await getUserPrompt(args), args.imageContext.length),
-    args.transcripts,
-    args.summaryLength,
+    policy,
   );
 
   yield* generateSummary({
@@ -214,12 +222,9 @@ ${IMAGE_CONTEXT_NOTE}`;
 
 function withLengthGuidance(
   prompt: string,
-  transcripts: TaskArgsMapTransformed["enhance"]["transcripts"],
-  summaryLength: SummaryLength,
+  policy: SummaryLengthPolicy | null,
 ): string {
-  const guidance = formatSummaryLengthGuidance(
-    getSummaryLengthPolicy(transcripts, summaryLength),
-  );
+  const guidance = formatSummaryLengthGuidance(policy);
   if (!guidance) {
     return prompt;
   }

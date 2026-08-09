@@ -243,19 +243,49 @@ impl<'a, R: Runtime, M: Manager<R>> LocalLlmExt<'a, R, M> {
     /// Idempotent: reuses a live server already serving `model`, otherwise
     /// replaces whatever is running. Starting happens outside the state lock so
     /// slow model loads don't block downloads or status polls.
+    ///
+    /// `ctx_size` is what the work in hand needs, or `None` for the default
+    /// this Mac can comfortably hold. It only ever grows the window — a running
+    /// server that is already large enough is reused — because `--ctx-size` is
+    /// fixed for the life of the process, so shrinking would cost a full weight
+    /// reload and buy nothing.
     #[tracing::instrument(skip_all)]
-    pub async fn start_server(&self, model: crate::SupportedModel) -> Result<String, crate::Error> {
+    pub async fn start_server(
+        &self,
+        model: crate::SupportedModel,
+        ctx_size: Option<u32>,
+    ) -> Result<String, crate::Error> {
         let state = self.manager.state::<crate::SharedState>();
         let model_id = model.openai_model_id();
+        let ctx_size = meeki_local_llm_core::resolved_ctx_size(Some(&model), ctx_size);
 
-        {
+        let replaced = {
             let mut guard = state.lock().await;
-            if let Some(existing) = guard.server.as_mut()
-                && existing.model_id() == model_id
-                && existing.is_running()
+            // `is_running` needs the mutable borrow, so this cannot be a match
+            // guard: pattern bindings stay immutable until the guard finishes.
+            let reusable = match guard.server.as_mut() {
+                Some(existing) => {
+                    existing.model_id() == model_id
+                        && existing.ctx_size() >= ctx_size
+                        && existing.is_running()
+                }
+                None => false,
+            };
+            if let Some(existing) = guard.server.as_ref()
+                && reusable
             {
                 return Ok(existing.url().to_string());
             }
+            guard.server.take()
+        };
+
+        // The old process has to go before the new one can claim its port, so
+        // this is not the usual "keep the old one alive while the new one
+        // loads". Reusing the port is what lets a growing window leave the base
+        // URL the app already handed to the AI SDK still pointing somewhere.
+        let reuse_port = replaced.as_ref().map(|server| server.port());
+        if let Some(replaced) = replaced {
+            replaced.stop().await;
         }
 
         let model_path = self.models_dir().join(model.file_name());
@@ -265,7 +295,8 @@ impl<'a, R: Runtime, M: Manager<R>> LocalLlmExt<'a, R, M> {
             model_id.to_string(),
             model_path,
             server_bin,
-            Some(&model),
+            ctx_size,
+            reuse_port,
         )
         .await?;
         let url = server.url().to_string();

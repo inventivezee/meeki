@@ -7,6 +7,7 @@ import { commands as localLlmCommands } from "@meeki/plugin-local-llm";
 import { Button } from "@meeki/ui/components/ui/button";
 import { sonnerToast } from "@meeki/ui/components/ui/toast";
 
+import { startLocalLlmServer } from "~/ai/local-llm-context";
 import { useNotifications } from "~/contexts/notifications";
 import { formatGb } from "~/settings/ai/shared/model-facts";
 import { setAiProvider } from "~/settings/providers";
@@ -67,7 +68,7 @@ export function ConfigError() {
       }
 
       if (alreadyOnDisk.data) {
-        const started = await localLlmCommands.startServer(model.key);
+        const started = await startLocalLlmServer(model.key);
         if (started.status === "error") {
           throw new Error(started.error);
         }

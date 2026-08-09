@@ -153,9 +153,10 @@ pub async fn sleep_idle_seconds() -> Result<i64, String> {
 pub async fn start_server<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     model: crate::SupportedModel,
+    ctx_size: Option<u32>,
 ) -> Result<String, String> {
     app.local_llm()
-        .start_server(model)
+        .start_server(model, ctx_size)
         .await
         .map_err(|e| e.to_string())
 }

@@ -51,6 +51,15 @@ fn server_memory_budget(total_memory_bytes: u64) -> u64 {
 /// catalog: Qwen 3 4B costs 144 KiB/token, so 64k reserves 9 GiB of KV on the
 /// 8 GiB Macs it is recommended to.
 fn adaptive_ctx_size(model: &SupportedModel, total_memory_bytes: u64) -> u32 {
+    round_to_cache_padding(
+        max_affordable_ctx_size(model, total_memory_bytes).min(DEFAULT_CTX_CEILING),
+    )
+}
+
+/// The largest window this Mac could hold if something actually needed it. The
+/// default deliberately sits below this — see `DEFAULT_CTX_CEILING` — but a
+/// long meeting is the one case where paying the memory beats failing.
+fn max_affordable_ctx_size(model: &SupportedModel, total_memory_bytes: u64) -> u32 {
     let per_token = model.kv_bytes_per_token().max(1);
 
     let affordable = server_memory_budget(total_memory_bytes)
@@ -59,9 +68,12 @@ fn adaptive_ctx_size(model: &SupportedModel, total_memory_bytes: u64) -> u32 {
         .saturating_sub(COMPUTE_OVERHEAD_BYTES)
         / per_token;
 
-    let ctx = affordable.min(DEFAULT_CTX_CEILING as u64) as u32;
-    // llama.cpp pads the cache to 256 tokens; round down so the padding cannot
-    // push the allocation back over the budget we just computed.
+    round_to_cache_padding(affordable.min(MAX_CTX_SIZE as u64) as u32)
+}
+
+/// llama.cpp pads the cache to 256 tokens; round down so the padding cannot
+/// push the allocation back over the budget we just computed.
+fn round_to_cache_padding(ctx: u32) -> u32 {
     (ctx / 256 * 256).max(MIN_CTX_SIZE)
 }
 
@@ -94,10 +106,29 @@ fn parse_ctx_size(raw: Option<&str>, fallback: u32) -> u32 {
         .unwrap_or(fallback)
 }
 
-fn resolve_ctx_size(model: Option<&SupportedModel>) -> u32 {
-    let fallback = model
-        .map(|model| adaptive_ctx_size(model, total_memory_bytes()))
-        .unwrap_or(MIN_CTX_SIZE);
+/// The window to start llama-server with.
+///
+/// `needed` is what the work in hand actually requires — a long transcript
+/// plus the summary it has to produce. It only ever raises the window above
+/// the default, and never past what this Mac can hold, so a caller can ask for
+/// what it wants without knowing anything about the hardware. The env var
+/// still wins over both, so a support session can pin a window outright.
+pub fn resolved_ctx_size(model: Option<&SupportedModel>, needed: Option<u32>) -> u32 {
+    let fallback = match model {
+        Some(model) => {
+            let total = total_memory_bytes();
+            let default = adaptive_ctx_size(model, total);
+            match needed {
+                // Written as max-then-min rather than `clamp` so it stays
+                // panic-free if a future default ever exceeds what fits.
+                Some(needed) => needed
+                    .max(default)
+                    .min(max_affordable_ctx_size(model, total).max(default)),
+                None => default,
+            }
+        }
+        None => MIN_CTX_SIZE,
+    };
     parse_ctx_size(std::env::var(CTX_SIZE_ENV).ok().as_deref(), fallback)
 }
 
@@ -140,17 +171,29 @@ fn resolve_sleep_idle_seconds() -> i64 {
 pub struct LlmServer {
     url: String,
     model_id: String,
+    ctx_size: u32,
+    port: u16,
     child: Child,
     exit_tx: watch::Sender<bool>,
     exit_rx: watch::Receiver<bool>,
 }
 
 impl LlmServer {
+    /// `ctx_size` is already resolved by the caller — see `resolved_ctx_size` —
+    /// because the caller also has to compare it against a running server to
+    /// decide whether that server can be reused.
+    ///
+    /// `preferred_port` is the port of the server being replaced. Growing the
+    /// context window means replacing the process, and the app has already
+    /// handed the old base URL to the AI SDK; keeping the port means an
+    /// in-flight model keeps working instead of talking to a dead socket. Falls
+    /// back to a fresh port if that one is no longer bindable.
     pub async fn start_with_model_path(
         name: String,
         file_path: impl AsRef<Path>,
         server_bin: impl AsRef<Path>,
-        model: Option<&SupportedModel>,
+        ctx_size: u32,
+        preferred_port: Option<u16>,
     ) -> Result<Self, Error> {
         let model_path = file_path.as_ref();
         if !model_path.exists() {
@@ -168,7 +211,10 @@ impl LlmServer {
             )));
         }
 
-        let port = free_port()?;
+        let port = match preferred_port {
+            Some(port) if port_is_bindable(port) => port,
+            _ => free_port()?,
+        };
         let host = "127.0.0.1";
         let url = format!("http://{host}:{port}/v1");
         let work_dir = server_bin
@@ -185,7 +231,7 @@ impl LlmServer {
             .arg("--port")
             .arg(port.to_string())
             .arg("--ctx-size")
-            .arg(resolve_ctx_size(model).to_string())
+            .arg(ctx_size.to_string())
             .arg("--parallel")
             .arg(SERVER_SLOTS.to_string())
             // Prefill dominates the wait — measured 153 tok/s, so a note plus
@@ -227,6 +273,8 @@ impl LlmServer {
         Ok(Self {
             url,
             model_id: name,
+            ctx_size,
+            port,
             child,
             exit_tx,
             exit_rx,
@@ -239,6 +287,16 @@ impl LlmServer {
 
     pub fn model_id(&self) -> &str {
         &self.model_id
+    }
+
+    /// The window this process was started with. `--ctx-size` is fixed for the
+    /// life of the process, so changing it means replacing the server.
+    pub fn ctx_size(&self) -> u32 {
+        self.ctx_size
+    }
+
+    pub fn port(&self) -> u16 {
+        self.port
     }
 
     pub fn is_running(&mut self) -> bool {
@@ -254,6 +312,13 @@ impl LlmServer {
         let _ = self.child.kill().await;
         let _ = self.child.wait().await;
     }
+}
+
+/// Whether the replaced server has actually let go of its port. Binding and
+/// dropping is the only honest test; the gap before llama-server binds it again
+/// is microseconds on loopback, and `wait_for_health` catches a loss anyway.
+fn port_is_bindable(port: u16) -> bool {
+    TcpListener::bind(("127.0.0.1", port)).is_ok()
 }
 
 fn free_port() -> Result<u16, Error> {
@@ -343,6 +408,51 @@ mod tests {
         assert!(adaptive_ctx_size(&model, 16 * GIB) <= DEFAULT_CTX_CEILING);
         assert!(adaptive_ctx_size(&model, 8 * GIB) <= adaptive_ctx_size(&model, 16 * GIB));
         assert_eq!(adaptive_ctx_size(&model, 64 * GIB), DEFAULT_CTX_CEILING);
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    #[test]
+    fn a_long_transcript_can_raise_the_window_but_never_lower_it() {
+        let model = SupportedModel::Gemma4_12bQ4Km;
+        let default = resolved_ctx_size(Some(&model), None);
+
+        // Asking for less keeps the default: shrinking buys nothing and costs a
+        // full weight reload.
+        assert_eq!(resolved_ctx_size(Some(&model), Some(1_024)), default);
+        assert_eq!(resolved_ctx_size(Some(&model), Some(default)), default);
+        assert!(resolved_ctx_size(Some(&model), Some(default + 8_192)) > default);
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    #[test]
+    fn growth_stops_at_what_the_machine_can_hold() {
+        // A demand no Mac can satisfy must still resolve to something that
+        // starts, rather than to the number that was asked for.
+        for total in [8, 16, 24, 32, 64] {
+            let model = crate::recommended_model_for_memory(total * GIB).unwrap();
+            let ceiling = max_affordable_ctx_size(&model, total * GIB);
+            let resident = model.model_size()
+                + model.kv_window_bytes(SERVER_SLOTS)
+                + COMPUTE_OVERHEAD_BYTES
+                + ceiling as u64 * model.kv_bytes_per_token();
+
+            assert!(
+                resident <= server_memory_budget(total * GIB) || ceiling == MIN_CTX_SIZE,
+                "{model:?} on {total} GiB would grow to {ceiling} tokens, needing {} MiB of {} MiB",
+                resident / MIB,
+                server_memory_budget(total * GIB) / MIB
+            );
+            assert!(ceiling >= adaptive_ctx_size(&model, total * GIB));
+        }
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    #[test]
+    fn the_default_leaves_headroom_to_grow_into() {
+        // Otherwise the whole mechanism is a no-op on the roomy Macs that can
+        // actually afford a long meeting.
+        let model = SupportedModel::Gemma4_26bA4bIq4Xs;
+        assert!(max_affordable_ctx_size(&model, 64 * GIB) > adaptive_ctx_size(&model, 64 * GIB));
     }
 
     #[test]

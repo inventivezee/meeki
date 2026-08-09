@@ -30,6 +30,7 @@ import {
 } from "@meeki/ui/components/ui/tooltip";
 import { cn } from "@meeki/utils";
 
+import { startLocalLlmServer } from "~/ai/local-llm-context";
 import {
   fitsInMemory,
   formatGb,
@@ -67,7 +68,7 @@ export async function waitUntilDownloaded(model: GgufLlmModel) {
 }
 
 async function activate(model: GgufLlmModel) {
-  const started = await localLlmCommands.startServer(model);
+  const started = await startLocalLlmServer(model);
   if (started.status === "error") {
     throw new Error(started.error);
   }

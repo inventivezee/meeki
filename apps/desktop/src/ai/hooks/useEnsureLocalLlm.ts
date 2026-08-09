@@ -6,6 +6,7 @@ import {
   type GgufLlmModel,
 } from "@meeki/plugin-local-llm";
 
+import { startLocalLlmServer } from "~/ai/local-llm-context";
 import {
   getLocalLlmGraceMs,
   resetLocalLlmEngagement,
@@ -70,7 +71,7 @@ export function useEnsureLocalLlm() {
       // soon as the process was up while prefill was still running. The fetch
       // path owns the indicator instead, because it knows when the server is
       // actually answering.
-      const started = await localLlmCommands.startServer(model);
+      const started = await startLocalLlmServer(model);
       if (started.status === "error") {
         throw new Error(started.error);
       }

@@ -122,9 +122,9 @@ async sleepIdleSeconds() : Promise<Result<number, string>> {
     else return { status: "error", error: e  as any };
 }
 },
-async startServer(model: GgufLlmModel) : Promise<Result<string, string>> {
+async startServer(model: GgufLlmModel, ctxSize: number | null) : Promise<Result<string, string>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|start_server", { model }) };
+    return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|start_server", { model, ctxSize }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };

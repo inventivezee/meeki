@@ -13,6 +13,7 @@ import { cn } from "@meeki/utils";
 
 import { OtherLocalModels } from "./other-models";
 
+import { startLocalLlmServer } from "~/ai/local-llm-context";
 import { useNotifications } from "~/contexts/notifications";
 import {
   formatGb,
@@ -30,7 +31,7 @@ const DOWNLOADED_QUERY_KEY = ["local-llm-downloaded"] as const;
 type DownloadPhase = "idle" | "downloading" | "starting";
 
 async function activateOnDeviceLlm(model: GgufLlmModel) {
-  const started = await localLlmCommands.startServer(model);
+  const started = await startLocalLlmServer(model);
   if (started.status === "error") {
     throw new Error(started.error);
   }

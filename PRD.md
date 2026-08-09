@@ -298,7 +298,7 @@ keeps `min_memory_bytes()` and `recommended_model_for_memory()` from drifting ap
 
 ```
 --model <path> --host 127.0.0.1 --port <free>
---ctx-size <adaptive>       # MEEKI_LLM_CTX_SIZE overrides, clamped 8192–262144
+--ctx-size <adaptive>       # grows to fit a long transcript; MEEKI_LLM_CTX_SIZE overrides, clamped 8192–262144
 --parallel 1                # one slot; each slot gets its own sliding-window KV cache
 --reasoning-format deepseek # thoughts land in reasoning_content, never in the note
 --reasoning-budget -1       # MEEKI_LLM_THINK_BUDGET
@@ -754,7 +754,7 @@ Runtime env read by the Rust side (not Vite):
 
 | Variable | Purpose |
 |----------|---------|
-| `MEEKI_LLM_CTX_SIZE` | Local LLM context window; default derived from total RAM and the model's KV cost (capped at 32768), clamped 8192–262144 |
+| `MEEKI_LLM_CTX_SIZE` | Local LLM context window; default derived from total RAM and the model's KV cost (capped at 20480), grown before a summary to fit the transcript up to what the Mac can hold, clamped 8192–262144 |
 | `MEEKI_LLM_THINK_BUDGET` | Reasoning token budget; default `-1` (unrestricted) |
 | `MEEKI_LLM_SLEEP_IDLE_SECONDS` | Idle seconds before llama-server unloads its weights; default 300, floored at 30, any value ≤ 0 disables sleeping |
 | `MEEKI_LLAMA_CPP_RELEASE` | llama.cpp release tag fetched by `llama:prepare` |

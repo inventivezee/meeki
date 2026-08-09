@@ -15,6 +15,7 @@ import { Button } from "@meeki/ui/components/ui/button";
 import { sonnerToast } from "@meeki/ui/components/ui/toast";
 import { cn } from "@meeki/utils";
 
+import { startLocalLlmServer } from "~/ai/local-llm-context";
 import { useNotifications } from "~/contexts/notifications";
 import {
   formatBytesProgress,
@@ -604,7 +605,7 @@ function isQwenBatchModel(model: LocalModel) {
 }
 
 async function activateLlmOnly(llmModel: GgufLlmModel) {
-  const started = await localLlmCommands.startServer(llmModel);
+  const started = await startLocalLlmServer(llmModel);
   if (started.status === "error") {
     throw new Error(started.error);
   }
