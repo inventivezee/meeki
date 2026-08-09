@@ -42,7 +42,9 @@ export function AudioBacklogWorker() {
 
   const next = pending.data?.find((sessionId) => !failed.has(sessionId));
 
-  useBacklogProgressToast(running, Boolean(next));
+  // The queue is not known until the first fetch lands. Reporting "finished"
+  // off an undefined list would end every run the instant it started.
+  useBacklogProgressToast(running && pending.isSuccess, Boolean(next));
 
   if (!running || !next) {
     return null;
@@ -51,11 +53,11 @@ export function AudioBacklogWorker() {
   return <TranscribeOne key={next} sessionId={next} />;
 }
 
-function useBacklogProgressToast(running: boolean, hasWork: boolean) {
+function useBacklogProgressToast(active: boolean, hasWork: boolean) {
   const { total, done, failed, stop } = useAudioBacklog();
 
   useEffect(() => {
-    if (!running) {
+    if (!active) {
       return;
     }
 
@@ -74,15 +76,22 @@ function useBacklogProgressToast(running: boolean, hasWork: boolean) {
       id: BACKLOG_TOAST_ID,
       description: `${done} of ${total} · this runs for hours`,
       duration: Infinity,
-      action: { label: "Stop", onClick: stop },
+      action: {
+        label: "Stop",
+        onClick: () => {
+          stop();
+          // The recording in flight is left to finish rather than abandoned
+          // half-transcribed; Stop means no more after this one. Replacing the
+          // toast here is what clears it — the effect above has already
+          // returned by the time `running` is false.
+          sonnerToast.message(`Stopped after ${done} of ${total}`, {
+            id: BACKLOG_TOAST_ID,
+            duration: 5_000,
+          });
+        },
+      },
     });
-  }, [running, hasWork, done, total, failed, stop]);
-
-  useEffect(() => {
-    if (!running) {
-      sonnerToast.dismiss(BACKLOG_TOAST_ID);
-    }
-  }, [running]);
+  }, [active, hasWork, done, total, failed, stop]);
 }
 
 /**
