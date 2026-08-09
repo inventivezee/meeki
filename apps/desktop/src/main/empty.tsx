@@ -55,9 +55,9 @@ function EmptyView() {
       onDrop={(event) => {
         event.preventDefault();
         setIsAudioDragActive(false);
-        const file = Array.from(event.dataTransfer.files ?? [])[0];
-        if (file) {
-          void newNoteFromDroppedAudio(file);
+        const files = Array.from(event.dataTransfer.files ?? []);
+        if (files.length > 0) {
+          void newNoteFromDroppedAudio(files);
         }
       }}
       className={cn([
@@ -67,7 +67,7 @@ function EmptyView() {
     >
       {isAudioDragActive ? (
         <div className="border-border/70 text-muted-foreground pointer-events-none absolute inset-6 flex items-center justify-center rounded-xl border border-dashed text-sm">
-          <Trans>Drop an audio file to transcribe it</Trans>
+          <Trans>Drop audio files to transcribe them</Trans>
         </div>
       ) : null}
       <div className="flex min-w-[280px] flex-col gap-1 text-center">

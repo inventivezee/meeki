@@ -733,8 +733,12 @@ msgid "Drag and drop to upload a recording"
 msgstr "Drag and drop to upload a recording"
 
 #: src/main/empty.tsx
-msgid "Drop an audio file to transcribe it"
-msgstr "Drop an audio file to transcribe it"
+#~ msgid "Drop an audio file to transcribe it"
+#~ msgstr "Drop an audio file to transcribe it"
+
+#: src/main/empty.tsx
+msgid "Drop audio files to transcribe them"
+msgstr "Drop audio files to transcribe them"
 
 #: src/templates/details.tsx
 #: src/templates/template-form.tsx
