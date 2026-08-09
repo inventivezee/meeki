@@ -26,6 +26,10 @@ msgstr "(Unavailable — using current default)"
 msgid "{0} opened on"
 msgstr "{0} opened on"
 
+#: src/settings/recordings/index.tsx
+msgid "{count} recordings have no transcript"
+msgstr "{count} recordings have no transcript"
+
 #. placeholder {0}: formatLanguageList(unsupportedLanguages)
 #: src/settings/ai/stt/select.tsx
 msgid "{model} can't transcribe {0}. Try another model or change your spoken languages."
@@ -1850,6 +1854,10 @@ msgstr "Retry"
 msgid "Runs after the recording finishes, not during the meeting."
 msgstr "Runs after the recording finishes, not during the meeting."
 
+#: src/settings/recordings/index.tsx
+msgid "Runs one at a time and can take hours. Stopping keeps everything finished so far."
+msgstr "Runs one at a time and can take hours. Stopping keeps everything finished so far."
+
 #: src/templates/auto-form.tsx
 msgid "Save"
 msgstr "Save"
@@ -2253,6 +2261,7 @@ msgid "Starting..."
 msgstr "Starting..."
 
 #: src/session/components/outer-header/index.tsx
+#: src/settings/recordings/index.tsx
 msgid "Stop"
 msgstr "Stop"
 
@@ -2462,12 +2471,17 @@ msgid "Tip: The Meeki team loves our users!"
 msgstr "Tip: The Meeki team loves our users!"
 
 #: src/main/empty.tsx
-msgid "Transcribe {count} imported recordings"
-msgstr "Transcribe {count} imported recordings"
+#~ msgid "Transcribe {count} imported recordings"
+#~ msgstr "Transcribe {count} imported recordings"
 
+#: src/settings/recordings/index.tsx
 #: src/shared/bulk-import-prompt.tsx
 msgid "Transcribe all"
 msgstr "Transcribe all"
+
+#: src/settings/recordings/index.tsx
+msgid "Transcribing {done} of {total}"
+msgstr "Transcribing {done} of {total}"
 
 #: src/session/components/note-input/header.tsx
 #: src/session/components/outer-header/overflow/export-modal.tsx
@@ -2585,6 +2599,10 @@ msgstr "Upgrade to Pro to use this provider."
 #: src/settings/ai/stt/select.tsx
 msgid "Upgrade to use"
 msgstr "Upgrade to use"
+
+#: src/main/empty.tsx
+msgid "Upload a Recording"
+msgstr "Upload a Recording"
 
 #: src/session/components/floating/options-menu.tsx
 #: src/session/components/outer-header/overflow/index.tsx

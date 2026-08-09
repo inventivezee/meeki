@@ -1,5 +1,5 @@
 import { Trans } from "@lingui/react/macro";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { Kbd } from "@meeki/ui/components/ui/kbd";
 import { cn } from "@meeki/utils";
@@ -9,14 +9,10 @@ import { StandardContentWrapper } from "~/shared/main";
 import {
   useNewNote,
   useNewNoteAndListen,
+  useNewNoteAndUpload,
   useNewNoteFromDroppedAudio,
 } from "~/shared/useNewNote";
 import { type Tab, useTabs } from "~/store/zustand/tabs";
-import {
-  listUntranscribedSessions,
-  startBacklogRun,
-  useAudioBacklog,
-} from "~/stt/audio-backlog";
 
 export function TabContentEmpty({
   tab: _tab,
@@ -33,9 +29,15 @@ export function TabContentEmpty({
 function EmptyView() {
   const newNote = useNewNote({ behavior: "current" });
   const newNoteAndListen = useNewNoteAndListen({ behavior: "current" });
+  const newNoteAndUpload = useNewNoteAndUpload();
   const newNoteFromDroppedAudio = useNewNoteFromDroppedAudio();
   const [isAudioDragActive, setIsAudioDragActive] = useState(false);
   const openCurrent = useTabs((state) => state.openCurrent);
+
+  const uploadRecording = useCallback(
+    () => void newNoteAndUpload("audio"),
+    [newNoteAndUpload],
+  );
 
   const openSettings = useCallback(
     () => openCurrent({ type: "settings" }),
@@ -79,7 +81,10 @@ function EmptyView() {
           shortcut={["⌘", "⇧", "N"]}
           onClick={newNoteAndListen}
         />
-        <ResumeBacklogItem />
+        <ActionItem
+          label={<Trans>Upload a Recording</Trans>}
+          onClick={uploadRecording}
+        />
         <div className="bg-accent my-1 h-px" />
         <ActionItem
           label={<Trans>Settings</Trans>}
@@ -88,48 +93,6 @@ function EmptyView() {
         />
       </div>
     </div>
-  );
-}
-
-/**
- * How an interrupted backlog run is picked up again. The queue is a query, so
- * "resume" is just starting over — anything already transcribed no longer
- * matches. Hidden when there is nothing waiting, which is the normal case.
- */
-function ResumeBacklogItem() {
-  const running = useAudioBacklog((state) => state.running);
-  const [count, setCount] = useState(0);
-
-  // Counted on mount and whenever a run ends, rather than polled: the empty tab
-  // is a menu, not a dashboard, and this is the only place its contents depend
-  // on the database.
-  useEffect(() => {
-    if (running) {
-      return;
-    }
-
-    let current = true;
-    void listUntranscribedSessions()
-      .then((pending) => {
-        if (current) {
-          setCount(pending.length);
-        }
-      })
-      .catch(() => {});
-    return () => {
-      current = false;
-    };
-  }, [running]);
-
-  if (running || count === 0) {
-    return null;
-  }
-
-  return (
-    <ActionItem
-      label={<Trans>Transcribe {count} imported recordings</Trans>}
-      onClick={() => void startBacklogRun()}
-    />
   );
 }
 

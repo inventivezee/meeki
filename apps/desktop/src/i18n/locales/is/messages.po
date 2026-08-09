@@ -26,6 +26,10 @@ msgstr ""
 msgid "{0} opened on"
 msgstr ""
 
+#: src/settings/recordings/index.tsx
+msgid "{count} recordings have no transcript"
+msgstr ""
+
 #. placeholder {0}: formatLanguageList(unsupportedLanguages)
 #: src/settings/ai/stt/select.tsx
 msgid "{model} can't transcribe {0}. Try another model or change your spoken languages."
@@ -1850,6 +1854,10 @@ msgstr ""
 msgid "Runs after the recording finishes, not during the meeting."
 msgstr ""
 
+#: src/settings/recordings/index.tsx
+msgid "Runs one at a time and can take hours. Stopping keeps everything finished so far."
+msgstr ""
+
 #: src/templates/auto-form.tsx
 msgid "Save"
 msgstr ""
@@ -2253,6 +2261,7 @@ msgid "Starting..."
 msgstr ""
 
 #: src/session/components/outer-header/index.tsx
+#: src/settings/recordings/index.tsx
 msgid "Stop"
 msgstr ""
 
@@ -2462,11 +2471,16 @@ msgid "Tip: The Meeki team loves our users!"
 msgstr ""
 
 #: src/main/empty.tsx
-msgid "Transcribe {count} imported recordings"
-msgstr ""
+#~ msgid "Transcribe {count} imported recordings"
+#~ msgstr ""
 
+#: src/settings/recordings/index.tsx
 #: src/shared/bulk-import-prompt.tsx
 msgid "Transcribe all"
+msgstr ""
+
+#: src/settings/recordings/index.tsx
+msgid "Transcribing {done} of {total}"
 msgstr ""
 
 #: src/session/components/note-input/header.tsx
@@ -2584,6 +2598,10 @@ msgstr ""
 
 #: src/settings/ai/stt/select.tsx
 msgid "Upgrade to use"
+msgstr ""
+
+#: src/main/empty.tsx
+msgid "Upload a Recording"
 msgstr ""
 
 #: src/session/components/floating/options-menu.tsx

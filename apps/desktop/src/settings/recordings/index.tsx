@@ -1,7 +1,7 @@
 import { Trans } from "@lingui/react/macro";
 import { useQuery } from "@tanstack/react-query";
 import { FolderOpenIcon, FolderUpIcon, MicIcon } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Button } from "@meeki/ui/components/ui/button";
 import { cn } from "@meeki/utils";
@@ -12,6 +12,11 @@ import { buildExportName } from "~/session/recordings/export-name";
 import { loadExportableRecordings } from "~/session/recordings/queries";
 import { useNewNoteAndUpload } from "~/shared/useNewNote";
 import type { EditorView } from "~/store/zustand/tabs/schema";
+import {
+  listUntranscribedSessions,
+  startBacklogRun,
+  useAudioBacklog,
+} from "~/stt/audio-backlog";
 
 function useRecordings() {
   // Re-runs when sessions change so a new recording appears without a reopen.
@@ -26,6 +31,80 @@ function useRecordings() {
     queryKey: ["exportable-recordings", sessions.length],
     queryFn: loadExportableRecordings,
   });
+}
+
+/**
+ * Imported audio that has never been transcribed, and the button that works
+ * through it.
+ *
+ * Lives here rather than on the home screen: it is a property of the recordings
+ * you have, not one of the things you might do next. Hidden when there is
+ * nothing waiting, which is the normal case.
+ */
+function PendingTranscriptions() {
+  const running = useAudioBacklog((state) => state.running);
+  const done = useAudioBacklog((state) => state.done);
+  const total = useAudioBacklog((state) => state.total);
+  const [count, setCount] = useState(0);
+
+  // Counted on mount and whenever a run ends. The queue is a query, so
+  // "resume" after a quit or a crash is just asking again.
+  useEffect(() => {
+    if (running) {
+      return;
+    }
+
+    let current = true;
+    void listUntranscribedSessions()
+      .then((pending) => current && setCount(pending.length))
+      .catch(() => {});
+    return () => {
+      current = false;
+    };
+  }, [running]);
+
+  if (!running && count === 0) {
+    return null;
+  }
+
+  return (
+    <div className="border-border/60 bg-card/70 flex items-center justify-between gap-4 rounded-lg border px-4 py-3">
+      <div className="flex flex-col gap-0.5">
+        <p className="text-sm font-medium">
+          {running ? (
+            <Trans>
+              Transcribing {done} of {total}
+            </Trans>
+          ) : (
+            <Trans>{count} recordings have no transcript</Trans>
+          )}
+        </p>
+        <p className="text-muted-foreground text-xs">
+          <Trans>
+            Runs one at a time and can take hours. Stopping keeps everything
+            finished so far.
+          </Trans>
+        </p>
+      </div>
+      {running ? (
+        <Button
+          variant="outline"
+          className="shrink-0"
+          onClick={() => useAudioBacklog.getState().stop()}
+        >
+          <Trans>Stop</Trans>
+        </Button>
+      ) : (
+        <Button
+          variant="outline"
+          className="shrink-0"
+          onClick={() => void startBacklogRun()}
+        >
+          <Trans>Transcribe all</Trans>
+        </Button>
+      )}
+    </div>
+  );
 }
 
 export function SettingsRecordings() {
@@ -70,6 +149,8 @@ export function SettingsRecordings() {
           </Button>
         </div>
       </div>
+
+      <PendingTranscriptions />
 
       <div className="flex flex-col divide-y rounded-lg border">
         {recordings.isLoading && (
