@@ -695,7 +695,10 @@ describe("OuterHeader", () => {
 
     expect(resumeButton.title).toBe("Resume listening");
     expect(screen.queryByRole("button", { name: "Record" })).toBeNull();
-    expect(screen.getByTestId("recording-icon")).not.toBeNull();
+    // Resuming is a play action, so it shows a triangle rather than the red
+    // dot that means "start capturing".
+    expect(resumeButton.querySelector("svg.lucide-play")).not.toBeNull();
+    expect(screen.queryByTestId("recording-icon")).toBeNull();
     expect(mocks.startListening).toHaveBeenCalledTimes(1);
   });
 
@@ -778,9 +781,11 @@ describe("OuterHeader", () => {
       name: "Open event metadata",
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Resume" }));
+    const resumeButton = screen.getByRole("button", { name: "Resume" });
 
-    expect(screen.getByTestId("recording-icon")).not.toBeNull();
+    fireEvent.click(resumeButton);
+
+    expect(resumeButton.querySelector("svg.lucide-play")).not.toBeNull();
     expect(screen.queryByRole("button", { name: "Join & record" })).toBeNull();
     expect(metadataButton.getAttribute("data-tauri-drag-region")).toBe("false");
     expect(mocks.startListening).toHaveBeenCalledTimes(1);

@@ -2,7 +2,7 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import {
   ChevronDownIcon,
   HeadsetIcon,
-  PlusIcon,
+  PlayIcon,
   SquareIcon,
   VideoIcon,
 } from "lucide-react";
@@ -258,7 +258,7 @@ function HeaderMeetingActionPill({
       return {
         label: t`Resume`,
         title: t`Resume listening`,
-        icon: <RecordingIcon />,
+        icon: <PlayIcon className="size-3 fill-current" />,
         resumes: true,
         onClick: start,
       };
@@ -267,7 +267,13 @@ function HeaderMeetingActionPill({
     return {
       label: canResume ? t`Resume` : t`Record`,
       title: canResume ? t`Resume listening` : t`Record`,
-      icon: <RecordingIcon />,
+      // Picking up an existing recording is a play action; starting one from
+      // nothing is not.
+      icon: canResume ? (
+        <PlayIcon className="size-3 fill-current" />
+      ) : (
+        <RecordingIcon />
+      ),
       resumes: canResume,
       onClick: start,
     };
@@ -337,7 +343,7 @@ function HeaderMeetingActionPill({
               "hover:bg-accent transition-colors",
             ])}
           >
-            <PlusIcon className="size-3" />
+            <SquareIcon className="size-3 fill-red-500 text-red-500" />
             <Trans>New</Trans>
           </button>
         ) : null}
