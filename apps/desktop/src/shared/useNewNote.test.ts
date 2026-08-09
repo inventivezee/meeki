@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   selectFile: vi.fn(),
   toastMessage: vi.fn(),
   toastSuccess: vi.fn(),
+  toastError: vi.fn(),
   catalogLocalSessionAudio: vi.fn(),
   listUntranscribedSessions: vi.fn(),
 }));
@@ -22,7 +23,11 @@ vi.mock("@meeki/plugin-fs-sync", () => ({
 }));
 
 vi.mock("@meeki/ui/components/ui/toast", () => ({
-  sonnerToast: { message: mocks.toastMessage, success: mocks.toastSuccess },
+  sonnerToast: {
+    message: mocks.toastMessage,
+    success: mocks.toastSuccess,
+    error: mocks.toastError,
+  },
 }));
 
 vi.mock("@tauri-apps/api/path", () => ({
@@ -67,11 +72,12 @@ vi.mock("~/stt/useUploadFile", () => ({
 
 import { useNewNoteAndUpload, useNewNoteFromDroppedAudio } from "./useNewNote";
 
-function audioFile(name: string): File {
+function audioFile(name: string, sizeBytes = 4): File {
   const file = new File(["audio"], name, { type: "audio/mpeg" });
   Object.defineProperty(file, "arrayBuffer", {
     value: () => Promise.resolve(new Uint8Array([1, 2]).buffer),
   });
+  Object.defineProperty(file, "size", { value: sizeBytes });
   return file;
 }
 
@@ -208,6 +214,64 @@ describe("importing several recordings at once", () => {
 
     expect(mocks.toastMessage).not.toHaveBeenCalled();
     expect(mocks.toastSuccess).not.toHaveBeenCalled();
+  });
+
+  it("refuses a drop of too many files and offers the picker instead", async () => {
+    const { result } = renderHook(() => useNewNoteFromDroppedAudio());
+
+    await result.current(
+      Array.from({ length: 40 }, (_, index) => audioFile(`${index}.mp3`)),
+    );
+
+    // Nothing imported: dropped bytes cross IPC as a JSON number array, which
+    // is what makes this path unusable at scale in the first place.
+    expect(mocks.createSession).not.toHaveBeenCalled();
+    expect(mocks.audioImportData).not.toHaveBeenCalled();
+    expect(mocks.toastError).toHaveBeenCalledWith(
+      "40 recordings is too many to drop",
+      expect.objectContaining({
+        action: expect.objectContaining({ label: "Choose files instead" }),
+      }),
+    );
+  });
+
+  it("refuses a drop that is too large even when the file count is small", async () => {
+    const { result } = renderHook(() => useNewNoteFromDroppedAudio());
+
+    await result.current([
+      audioFile("huge.mp3", 900_000_000),
+      audioFile("also-huge.mp3", 900_000_000),
+    ]);
+
+    expect(mocks.createSession).not.toHaveBeenCalled();
+    expect(mocks.toastError).toHaveBeenCalledWith(
+      "1.8 GB is too much audio to drop",
+      expect.anything(),
+    );
+  });
+
+  it("takes the user straight to the picker from the refusal", async () => {
+    mocks.selectFile.mockResolvedValue(["/tmp/a.mp3"]);
+    const { result } = renderHook(() => useNewNoteFromDroppedAudio());
+
+    await result.current(
+      Array.from({ length: 40 }, (_, index) => audioFile(`${index}.mp3`)),
+    );
+    const [, options] = mocks.toastError.mock.calls[0] as [
+      string,
+      { action: { onClick: () => void } },
+    ];
+    options.action.onClick();
+    await vi.waitFor(() => expect(mocks.selectFile).toHaveBeenCalled());
+  });
+
+  it("still accepts an ordinary handful of dropped files", async () => {
+    const { result } = renderHook(() => useNewNoteFromDroppedAudio());
+
+    await result.current([audioFile("a.mp3"), audioFile("b.mp3")]);
+
+    expect(mocks.toastError).not.toHaveBeenCalled();
+    expect(mocks.audioImportData).toHaveBeenCalledTimes(1);
   });
 
   it("keeps importing the rest when one file fails", async () => {

@@ -13,6 +13,7 @@ import { openFloatingMeetingPanel } from "~/meeting-float/host";
 import type { EditorView } from "~/store/zustand/tabs/schema";
 
 const {
+  bulkUploadMock,
   uploadAudioMock,
   uploadTranscriptMock,
   regenerateTranscriptMock,
@@ -25,6 +26,7 @@ const {
   useConfigValueMock,
   windowShowMock,
 } = vi.hoisted(() => ({
+  bulkUploadMock: vi.fn(),
   uploadAudioMock: vi.fn(),
   uploadTranscriptMock: vi.fn(),
   regenerateTranscriptMock: vi.fn(),
@@ -137,6 +139,10 @@ vi.mock("~/stt/useUploadFile", () => ({
   })),
 }));
 
+vi.mock("~/shared/useNewNote", () => ({
+  useNewNoteAndUpload: () => bulkUploadMock,
+}));
+
 describe("OverflowButton", () => {
   afterEach(() => {
     cleanup();
@@ -172,6 +178,28 @@ describe("OverflowButton", () => {
 
     expect(uploadAudioMock).toHaveBeenCalledTimes(1);
     expect(uploadTranscriptMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("offers bulk upload whatever state the open note is in", () => {
+    // It makes a note per file rather than filling this one, so unlike the
+    // Upload audio item above it must not be gated on the note being empty.
+    audioExists.value = true;
+    useHasTranscriptMock.mockReturnValue(true);
+    currentNoteContent.value = "already written";
+
+    render(
+      <OverflowButton
+        sessionId="session-1"
+        currentView={{ type: "enhanced", id: "note-1" } as EditorView}
+      />,
+    );
+
+    expect(screen.queryByRole("button", { name: "Upload audio" })).toBeNull();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Bulk upload recordings" }),
+    );
+
+    expect(bulkUploadMock).toHaveBeenCalledWith("audio");
   });
 
   it("does not offer re-transcription when recording is missing", () => {

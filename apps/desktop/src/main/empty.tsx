@@ -9,7 +9,6 @@ import { StandardContentWrapper } from "~/shared/main";
 import {
   useNewNote,
   useNewNoteAndListen,
-  useNewNoteAndUpload,
   useNewNoteFromDroppedAudio,
 } from "~/shared/useNewNote";
 import { type Tab, useTabs } from "~/store/zustand/tabs";
@@ -33,15 +32,9 @@ export function TabContentEmpty({
 function EmptyView() {
   const newNote = useNewNote({ behavior: "current" });
   const newNoteAndListen = useNewNoteAndListen({ behavior: "current" });
-  const newNoteAndUpload = useNewNoteAndUpload();
   const newNoteFromDroppedAudio = useNewNoteFromDroppedAudio();
   const [isAudioDragActive, setIsAudioDragActive] = useState(false);
   const openCurrent = useTabs((state) => state.openCurrent);
-
-  const uploadRecording = useCallback(
-    () => void newNoteAndUpload("audio"),
-    [newNoteAndUpload],
-  );
 
   const openSettings = useCallback(
     () => openCurrent({ type: "settings" }),
@@ -84,10 +77,6 @@ function EmptyView() {
           label={<Trans>Start Recording</Trans>}
           shortcut={["⌘", "⇧", "N"]}
           onClick={newNoteAndListen}
-        />
-        <ActionItem
-          label={<Trans>Upload a Recording</Trans>}
-          onClick={uploadRecording}
         />
         <ResumeBacklogItem />
         <div className="bg-accent my-1 h-px" />

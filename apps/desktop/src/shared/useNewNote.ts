@@ -241,9 +241,48 @@ async function importBatch<T>(
   );
 }
 
+const DROP_LIMIT_TOAST_ID = "audio-drop-too-large";
+
+/**
+ * Past either of these a drop is refused and the user is sent to the file
+ * dialog instead.
+ *
+ * A dropped file has no path, so its bytes cross to Rust as a JSON number
+ * array — 3.57x the audio size on the wire, and roughly 22x in heap while the
+ * array is built. The dialog hands over paths and Rust copies the files
+ * itself. At this size that is not merely faster: it is the difference between
+ * importing and running the app out of memory.
+ */
+const MAX_DROPPED_FILES = 25;
+const MAX_DROPPED_BYTES = 1_000_000_000;
+
+function describeOversizedDrop(
+  files: readonly File[],
+): { title: string; description: string } | null {
+  if (files.length > MAX_DROPPED_FILES) {
+    return {
+      title: `${files.length} recordings is too many to drop`,
+      description:
+        "Dropping copies every file through the app itself, which stops working well past a couple of dozen. Choosing them from the picker imports them by path instead — you can select a whole folder there.",
+    };
+  }
+
+  const bytes = files.reduce((total, file) => total + file.size, 0);
+  if (bytes > MAX_DROPPED_BYTES) {
+    return {
+      title: `${(bytes / 1e9).toFixed(1)} GB is too much audio to drop`,
+      description:
+        "Dropped files are copied through the app itself, and this much would exhaust its memory. Choosing them from the picker imports them by path instead.",
+    };
+  }
+
+  return null;
+}
+
 /** Drop audio files anywhere on the empty tab: a note each, then import them. */
 export function useNewNoteFromDroppedAudio() {
   const openNew = useTabs((state) => state.openNew);
+  const uploadFromDialog = useNewNoteAndUpload();
 
   return useCallback(
     async (dropped: File | File[]) => {
@@ -251,6 +290,20 @@ export function useNewNoteFromDroppedAudio() {
         isAudioUploadFile,
       );
       if (files.length === 0) {
+        return;
+      }
+
+      const oversized = describeOversizedDrop(files);
+      if (oversized) {
+        sonnerToast.error(oversized.title, {
+          id: DROP_LIMIT_TOAST_ID,
+          description: oversized.description,
+          duration: 20_000,
+          action: {
+            label: "Choose files instead",
+            onClick: () => void uploadFromDialog("audio"),
+          },
+        });
         return;
       }
 

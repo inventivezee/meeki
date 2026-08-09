@@ -269,6 +269,10 @@ msgstr ""
 msgid "Browser handoff not working? Paste the callback link instead"
 msgstr ""
 
+#: src/session/components/outer-header/overflow/index.tsx
+msgid "Bulk upload recordings"
+msgstr ""
+
 #: src/calendar/components/sidebar.tsx
 #: src/settings/general/permissions.tsx
 #: src/sidebar/calendar.tsx
@@ -2556,8 +2560,8 @@ msgid "Upgrade to use"
 msgstr ""
 
 #: src/main/empty.tsx
-msgid "Upload a Recording"
-msgstr ""
+#~ msgid "Upload a Recording"
+#~ msgstr ""
 
 #: src/session/components/floating/options-menu.tsx
 #: src/session/components/outer-header/overflow/index.tsx

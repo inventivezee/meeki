@@ -3,6 +3,7 @@ import {
   AudioLinesIcon,
   FileDownIcon,
   FileTextIcon,
+  FolderUpIcon,
   MoreHorizontalIcon,
   PictureInPicture2Icon,
   RefreshCwIcon,
@@ -35,6 +36,7 @@ import {
 } from "~/session/components/shared";
 import { openStandaloneNoteWindow } from "~/session/window";
 import { useConfigValue } from "~/shared/config";
+import { useNewNoteAndUpload } from "~/shared/useNewNote";
 import { useTabs } from "~/store/zustand/tabs";
 import type { EditorView } from "~/store/zustand/tabs/schema";
 import { useListener } from "~/stt/contexts";
@@ -67,6 +69,7 @@ export function OverflowButton({
   );
   const { audioExists, audioExistsResolved } = useAudioPlayer();
   const { uploadAudio, uploadTranscript } = useUploadFile(sessionId);
+  const bulkUpload = useNewNoteAndUpload();
   const { regenerateTranscript, confirmDialog: retranscribeConfirmDialog } =
     useRegenerateTranscript(sessionId);
   const sessionMode = useListener((state) => state.getSessionMode(sessionId));
@@ -97,6 +100,13 @@ export function OverflowButton({
   const handleUploadAudio = () => {
     setOpen(false);
     uploadAudio();
+  };
+  // Unlike Upload audio above, this does not touch the open note: it makes one
+  // note per file chosen. Kept out of the group above for that reason, and
+  // always available, since it says nothing about the note you are in.
+  const handleBulkUpload = () => {
+    setOpen(false);
+    void bulkUpload("audio");
   };
   const handleUploadTranscript = () => {
     setOpen(false);
@@ -205,6 +215,15 @@ export function OverflowButton({
             )}
             <ShowInFinder sessionId={sessionId} />
             <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={handleBulkUpload}
+              className="cursor-pointer"
+            >
+              <FolderUpIcon />
+              <span>
+                <Trans>Bulk upload recordings</Trans>
+              </span>
+            </DropdownMenuItem>
             <DropdownMenuItem
               onClick={handleOpenSettings}
               className="cursor-pointer"
