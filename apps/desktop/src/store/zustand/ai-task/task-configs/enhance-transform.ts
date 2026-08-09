@@ -11,6 +11,11 @@ import { collectEnhanceImageContext } from "./enhance-images";
 
 import { loadHumansByIds } from "~/contacts/queries";
 import {
+  DEFAULT_SUMMARY_LENGTH,
+  isSummaryLength,
+  type SummaryLength,
+} from "~/services/enhancer/summary-length";
+import {
   loadSessionContentSnapshot,
   type SessionContentSnapshot,
 } from "~/session/content-queries";
@@ -71,6 +76,7 @@ async function transformArgs(
     : null;
   const language = getLanguage(settingsValues);
   const promptOverride = getPromptOverride(settingsValues, templateId);
+  const summaryLength = getSummaryLength(settingsValues);
   const segments = await getTranscriptSegments(snapshot);
   const imageContext = modelSupportsImageInput(
     getOptionalSettingsValue(settingsValues, "current_llm_provider"),
@@ -92,7 +98,17 @@ async function transformArgs(
     postMeetingMemo: sessionContext.postMeetingMemo,
     transcripts: formatTranscripts(segments, sessionContext.transcriptsMeta),
     imageContext,
+    summaryLength,
   };
+}
+
+/**
+ * Stored values arrive raw, without schema defaults applied, so an unset or
+ * stale value has to fall back here rather than upstream.
+ */
+function getSummaryLength(settingsValues: SettingValues): SummaryLength {
+  const value = settingsValues.summary_length;
+  return isSummaryLength(value) ? value : DEFAULT_SUMMARY_LENGTH;
 }
 
 async function loadTemplate(templateId: string | undefined) {

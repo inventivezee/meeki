@@ -169,6 +169,11 @@ export const SETTING_DEFINITIONS = {
     path: ["ai", "llm_thinking"],
     default: false as boolean,
   },
+  summary_length: {
+    type: "string",
+    path: ["ai", "summary_length"],
+    default: "balanced" as string,
+  },
   save_memory: {
     type: "boolean",
     path: ["ai", "save_memory"],

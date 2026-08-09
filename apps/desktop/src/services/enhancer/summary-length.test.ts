@@ -27,6 +27,7 @@ describe("summary length policy", () => {
     ]);
 
     expect(policy).toEqual({
+      length: "balanced",
       transcriptCharacters: 200,
       maxCharacters: 320,
       maxSections: 2,
@@ -36,6 +37,96 @@ describe("summary length policy", () => {
         maxSections: 2,
       },
     });
+  });
+
+  it("defaults to the pre-existing balanced budget when no preference is given", () => {
+    const transcripts = [
+      {
+        startedAt: null,
+        endedAt: null,
+        segments: [{ speaker: "John", text: "a".repeat(8_000) }],
+      },
+    ];
+
+    expect(getSummaryLengthPolicy(transcripts)).toEqual(
+      getSummaryLengthPolicy(transcripts, "balanced"),
+    );
+  });
+
+  it("moves the budget in both directions without collapsing the meeting-size scaling", () => {
+    const policyFor = (length: "brief" | "balanced" | "detailed") =>
+      getSummaryLengthPolicy(
+        [
+          {
+            startedAt: null,
+            endedAt: null,
+            segments: [{ speaker: "John", text: "a".repeat(8_000) }],
+          },
+        ],
+        length,
+      );
+
+    const brief = policyFor("brief");
+    const balanced = policyFor("balanced");
+    const detailed = policyFor("detailed");
+
+    expect(brief!.maxCharacters).toBeLessThan(balanced!.maxCharacters);
+    expect(detailed!.maxCharacters).toBeGreaterThan(balanced!.maxCharacters);
+    // A longer meeting must still beat a shorter one at the same setting,
+    // otherwise the preference has replaced the scaling rather than shifted it.
+    const shorterDetailed = getSummaryLengthPolicy(
+      [
+        {
+          startedAt: null,
+          endedAt: null,
+          segments: [{ speaker: "John", text: "a".repeat(4_000) }],
+        },
+      ],
+      "detailed",
+    );
+    expect(detailed!.maxCharacters).toBeGreaterThan(
+      shorterDetailed!.maxCharacters,
+    );
+  });
+
+  it("raises the truncation ceiling with the guidance, so a detailed summary is not cut back down", () => {
+    const transcripts = [
+      {
+        startedAt: null,
+        endedAt: null,
+        segments: [{ speaker: "John", text: "a".repeat(6_000) }],
+      },
+    ];
+    const detailed = getSummaryLengthPolicy(transcripts, "detailed")!;
+    const balanced = getSummaryLengthPolicy(transcripts, "balanced")!;
+
+    // A summary sized to what "detailed" asked for must survive the
+    // post-generation constraint that "balanced" would have chopped.
+    const summary = `# Topic\n\n- ${"word ".repeat(1_800).trim()}`;
+
+    expect(countNormalizedCharacters(summary)).toBeGreaterThan(
+      balanced.maxCharacters,
+    );
+    expect(constrainSummaryLength(summary, detailed)).toBe(summary);
+  });
+
+  it("tells the model what to do with the extra room, not just that it exists", () => {
+    const transcripts = [
+      {
+        startedAt: null,
+        endedAt: null,
+        segments: [{ speaker: "John", text: "a".repeat(5_000) }],
+      },
+    ];
+
+    expect(
+      formatSummaryLengthGuidance(
+        getSummaryLengthPolicy(transcripts, "detailed"),
+      ),
+    ).toContain("depth");
+    expect(
+      formatSummaryLengthGuidance(getSummaryLengthPolicy(transcripts, "brief")),
+    ).toContain("short version");
   });
 
   it("scales the guided section range with the transcript size", () => {
@@ -111,6 +202,7 @@ describe("summary length policy", () => {
 
 - ${"c".repeat(100)}`;
     const result = constrainSummaryLength(markdown, {
+      length: "balanced",
       transcriptCharacters: 160,
       maxCharacters: 160,
       maxSections: 2,

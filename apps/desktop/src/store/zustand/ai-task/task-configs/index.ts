@@ -15,6 +15,7 @@ import { titleSuccess } from "./title-success";
 import { titleTransform } from "./title-transform";
 import { titleWorkflow } from "./title-workflow";
 
+import type { SummaryLength } from "~/services/enhancer/summary-length";
 import type { SettingValues } from "~/settings/schema";
 import { StreamTransform } from "~/store/zustand/ai-task/shared/transform_infra";
 import type { TaskState, TaskStepInfo } from "~/store/zustand/ai-task/tasks";
@@ -43,6 +44,7 @@ export interface TaskArgsMapTransformed {
   enhance: EnhanceSystem &
     EnhanceUser & {
       imageContext: EnhanceImageContext[];
+      summaryLength: SummaryLength;
     };
   title: TitleSystem & TitleUser;
 }

@@ -7,7 +7,59 @@ export const MAX_SUMMARY_GUIDANCE_CHARACTERS = 16_000;
 const SECTION_GUIDANCE_CHARACTER_STEP = 2_000;
 const MAX_GUIDANCE_SECTIONS = 12;
 
+/** How much detail the user wants, independent of how long the meeting was. */
+export type SummaryLength = "brief" | "balanced" | "detailed";
+
+export const DEFAULT_SUMMARY_LENGTH: SummaryLength = "balanced";
+
+const DETAILED_GUIDANCE_CHARACTER_LIMIT = 32_000;
+
+/**
+ * Multipliers on the transcript-derived budget. `balanced` reproduces the
+ * behaviour from before this was adjustable, so an unset preference changes
+ * nothing.
+ *
+ * `characters` scales the post-generation truncation ceiling as well as the
+ * guidance. Scaling only the guidance would let the model write the longer
+ * summary the user asked for and then have it cut off mid-sentence.
+ */
+const LENGTH_SCALES: Record<
+  SummaryLength,
+  {
+    characters: number;
+    sections: number;
+    guidanceCeiling: number;
+    shortMeetingSections: number;
+  }
+> = {
+  brief: {
+    characters: 0.5,
+    sections: 0.6,
+    guidanceCeiling: MAX_SUMMARY_GUIDANCE_CHARACTERS,
+    shortMeetingSections: 1,
+  },
+  balanced: {
+    characters: 1,
+    sections: 1,
+    guidanceCeiling: MAX_SUMMARY_GUIDANCE_CHARACTERS,
+    shortMeetingSections: 2,
+  },
+  detailed: {
+    characters: 2,
+    sections: 1.5,
+    guidanceCeiling: DETAILED_GUIDANCE_CHARACTER_LIMIT,
+    shortMeetingSections: 4,
+  },
+};
+
+export function isSummaryLength(value: unknown): value is SummaryLength {
+  return (
+    typeof value === "string" && Object.keys(LENGTH_SCALES).includes(value)
+  );
+}
+
 export type SummaryLengthPolicy = {
+  length: SummaryLength;
   maxCharacters: number;
   maxSections: number | null;
   transcriptCharacters: number;
@@ -42,6 +94,7 @@ export function countTranscriptWordCharacters(
 
 export function getSummaryLengthPolicy(
   transcripts: readonly Transcript[],
+  length: SummaryLength = DEFAULT_SUMMARY_LENGTH,
 ): SummaryLengthPolicy | null {
   const transcriptCharacters = countNormalizedCharacters(
     transcripts
@@ -55,30 +108,55 @@ export function getSummaryLengthPolicy(
     return null;
   }
 
+  const scale = LENGTH_SCALES[length] ?? LENGTH_SCALES[DEFAULT_SUMMARY_LENGTH];
+  const budget = Math.round(transcriptCharacters * scale.characters);
+
   return {
+    length,
     transcriptCharacters,
-    maxCharacters: Math.max(transcriptCharacters, MIN_SUMMARY_CHARACTERS),
+    maxCharacters: Math.max(budget, MIN_SUMMARY_CHARACTERS),
     maxSections:
-      transcriptCharacters < SHORT_TRANSCRIPT_CHARACTER_LIMIT ? 2 : null,
+      transcriptCharacters < SHORT_TRANSCRIPT_CHARACTER_LIMIT
+        ? scale.shortMeetingSections
+        : null,
     guidance: {
       maxCharacters: clamp(
-        transcriptCharacters,
+        budget,
         MIN_SUMMARY_CHARACTERS,
-        MAX_SUMMARY_GUIDANCE_CHARACTERS,
+        scale.guidanceCeiling,
       ),
       minSections: clamp(
-        Math.ceil(transcriptCharacters / (SECTION_GUIDANCE_CHARACTER_STEP * 2)),
+        Math.ceil(
+          (transcriptCharacters * scale.sections) /
+            (SECTION_GUIDANCE_CHARACTER_STEP * 2),
+        ),
         1,
         5,
       ),
       maxSections: clamp(
-        1 + Math.ceil(transcriptCharacters / SECTION_GUIDANCE_CHARACTER_STEP),
+        1 +
+          Math.ceil(
+            (transcriptCharacters * scale.sections) /
+              SECTION_GUIDANCE_CHARACTER_STEP,
+          ),
         2,
         MAX_GUIDANCE_SECTIONS,
       ),
     },
   };
 }
+
+/**
+ * The budget above is a ceiling, and a ceiling alone does not make a model
+ * write more. These say what to do with the room.
+ */
+const LENGTH_INSTRUCTIONS: Record<SummaryLength, string> = {
+  brief:
+    "The reader wants the short version: keep only what they would need to act on, and prefer one tight bullet over three loose ones.",
+  balanced: "Cover what was discussed without dwelling on any one point.",
+  detailed:
+    "The reader wants depth: keep supporting detail, concrete examples, numbers and named specifics rather than compressing them away, and give a distinct section to each topic that got real discussion.",
+};
 
 export function formatSummaryLengthGuidance(
   policy: SummaryLengthPolicy | null,
@@ -97,6 +175,7 @@ export function formatSummaryLengthGuidance(
     `Summary length: the transcript contains about ${policy.transcriptCharacters} characters.`,
     `Keep the summary proportional to it: use ${sections} and stay under ${guidance.maxCharacters} characters overall.`,
     "A short meeting must produce a short summary; never pad with filler.",
+    LENGTH_INSTRUCTIONS[policy.length],
   ].join(" ");
 }
 

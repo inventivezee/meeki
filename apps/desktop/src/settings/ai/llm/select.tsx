@@ -26,6 +26,7 @@ import {
   shouldShowMissingModelWarning,
 } from "./selection";
 import { type Provider, PROVIDERS } from "./shared";
+import { SummaryLengthSelect } from "./summary-length";
 import { ThinkingToggle } from "./thinking-toggle";
 
 import { useAuth } from "~/auth";
@@ -351,6 +352,7 @@ export function SelectProviderAndModel() {
         />
       ) : null}
       {localModelInUse ? null : <OnDeviceLlmCard />}
+      <SummaryLengthSelect />
       <ThinkingToggle />
       <SettingsAlertToast
         id="llm-settings-alert"

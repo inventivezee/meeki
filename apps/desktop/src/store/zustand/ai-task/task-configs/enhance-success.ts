@@ -34,7 +34,10 @@ const onSuccess: NonNullable<TaskConfig<"enhance">["onSuccess"]> = async ({
   getTaskState,
   signal,
 }) => {
-  const lengthPolicy = getSummaryLengthPolicy(transformedArgs.transcripts);
+  const lengthPolicy = getSummaryLengthPolicy(
+    transformedArgs.transcripts,
+    transformedArgs.summaryLength,
+  );
   const constrainedText = constrainSummaryLength(text, lengthPolicy);
   if (!constrainedText) {
     return;

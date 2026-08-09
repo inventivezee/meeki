@@ -19,6 +19,7 @@ import {
 import {
   formatSummaryLengthGuidance,
   getSummaryLengthPolicy,
+  type SummaryLength,
 } from "~/services/enhancer/summary-length";
 import { getStoredSettingValues } from "~/settings/queries";
 import { normalizeBulletPoints } from "~/store/zustand/ai-task/shared/transform_impl";
@@ -55,6 +56,7 @@ async function* executeWorkflow(params: {
   const prompt = withLengthGuidance(
     withImageContextNote(await getUserPrompt(args), args.imageContext.length),
     args.transcripts,
+    args.summaryLength,
   );
 
   yield* generateSummary({
@@ -213,9 +215,10 @@ ${IMAGE_CONTEXT_NOTE}`;
 function withLengthGuidance(
   prompt: string,
   transcripts: TaskArgsMapTransformed["enhance"]["transcripts"],
+  summaryLength: SummaryLength,
 ): string {
   const guidance = formatSummaryLengthGuidance(
-    getSummaryLengthPolicy(transcripts),
+    getSummaryLengthPolicy(transcripts, summaryLength),
   );
   if (!guidance) {
     return prompt;
