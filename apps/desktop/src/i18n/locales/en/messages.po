@@ -995,6 +995,7 @@ msgstr "Icons"
 msgid "If the browser does not reopen Meeki, use the paste-link fallback in the sign-in instruction window."
 msgstr "If the browser does not reopen Meeki, use the paste-link fallback in the sign-in instruction window."
 
+#: src/settings/recordings/index.tsx
 #: src/shared/bulk-import-prompt.tsx
 msgid "Import"
 msgstr "Import"
@@ -1208,8 +1209,8 @@ msgid "Meeki is repairing cloud sync in the background. Your notes remain availa
 msgstr "Meeki is repairing cloud sync in the background. Your notes remain available locally."
 
 #: src/settings/recordings/index.tsx
-msgid "Meeki keeps each recording beside its note. Export copies them into one folder, named by date and note title, leaving the originals untouched."
-msgstr "Meeki keeps each recording beside its note. Export copies them into one folder, named by date and note title, leaving the originals untouched."
+msgid "Meeki keeps each recording beside its note. Import brings in existing audio, a note per file. Export copies them into one folder, named by date and note title, leaving the originals untouched."
+msgstr "Meeki keeps each recording beside its note. Import brings in existing audio, a note per file. Export copies them into one folder, named by date and note title, leaving the originals untouched."
 
 #: src/onboarding/index.tsx
 msgid "Meeki needs access to your microphone and system audio to record and transcribe your meetings"

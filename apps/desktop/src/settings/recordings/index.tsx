@@ -1,7 +1,7 @@
 import { Trans } from "@lingui/react/macro";
 import { useQuery } from "@tanstack/react-query";
-import { FolderOpenIcon, MicIcon } from "lucide-react";
-import { useState } from "react";
+import { FolderOpenIcon, FolderUpIcon, MicIcon } from "lucide-react";
+import { useCallback, useState } from "react";
 
 import { Button } from "@meeki/ui/components/ui/button";
 import { cn } from "@meeki/utils";
@@ -10,6 +10,7 @@ import { useLiveQuery } from "~/db";
 import { ExportModal } from "~/session/components/outer-header/overflow/export-modal";
 import { buildExportName } from "~/session/recordings/export-name";
 import { loadExportableRecordings } from "~/session/recordings/queries";
+import { useNewNoteAndUpload } from "~/shared/useNewNote";
 import type { EditorView } from "~/store/zustand/tabs/schema";
 
 function useRecordings() {
@@ -30,6 +31,14 @@ function useRecordings() {
 export function SettingsRecordings() {
   const recordings = useRecordings();
   const [isExportOpen, setIsExportOpen] = useState(false);
+  const uploadRecordings = useNewNoteAndUpload();
+
+  // Picking several files opens the transcribe/summarize prompt, so this is
+  // the same bulk path as the note's overflow menu, not a second one.
+  const importRecordings = useCallback(
+    () => void uploadRecordings("audio"),
+    [uploadRecordings],
+  );
 
   const items = recordings.data ?? [];
 
@@ -42,17 +51,24 @@ export function SettingsRecordings() {
           </h2>
           <p className="text-muted-foreground max-w-prose text-sm">
             <Trans>
-              Meeki keeps each recording beside its note. Export copies them
-              into one folder, named by date and note title, leaving the
-              originals untouched.
+              Meeki keeps each recording beside its note. Import brings in
+              existing audio, a note per file. Export copies them into one
+              folder, named by date and note title, leaving the originals
+              untouched.
             </Trans>
           </p>
         </div>
 
-        <Button onClick={() => setIsExportOpen(true)}>
-          <FolderOpenIcon className="size-4" />
-          <Trans>Export all</Trans>
-        </Button>
+        <div className="flex shrink-0 items-center gap-2">
+          <Button variant="outline" onClick={importRecordings}>
+            <FolderUpIcon className="size-4" />
+            <Trans>Import</Trans>
+          </Button>
+          <Button onClick={() => setIsExportOpen(true)}>
+            <FolderOpenIcon className="size-4" />
+            <Trans>Export all</Trans>
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col divide-y rounded-lg border">
