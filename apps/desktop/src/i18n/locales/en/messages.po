@@ -273,10 +273,6 @@ msgstr "Browser handoff not working? Paste the callback link instead"
 msgid "Bulk import recordings"
 msgstr "Bulk import recordings"
 
-#: src/session/components/outer-header/overflow/index.tsx
-#~ msgid "Bulk upload recordings"
-#~ msgstr "Bulk upload recordings"
-
 #: src/calendar/components/sidebar.tsx
 #: src/settings/general/permissions.tsx
 #: src/sidebar/calendar.tsx
@@ -740,10 +736,6 @@ msgstr "Downloading… {0}%"
 #: src/session/components/note-input/raw.tsx
 msgid "Drag and drop to upload a recording"
 msgstr "Drag and drop to upload a recording"
-
-#: src/main/empty.tsx
-#~ msgid "Drop an audio file to transcribe it"
-#~ msgstr "Drop an audio file to transcribe it"
 
 #: src/main/empty.tsx
 msgid "Drop audio files to transcribe them"
@@ -2592,10 +2584,6 @@ msgstr "Upgrade to Pro to use this provider."
 #: src/settings/ai/stt/select.tsx
 msgid "Upgrade to use"
 msgstr "Upgrade to use"
-
-#: src/main/empty.tsx
-#~ msgid "Upload a Recording"
-#~ msgstr "Upload a Recording"
 
 #: src/session/components/floating/options-menu.tsx
 #: src/session/components/outer-header/overflow/index.tsx
