@@ -194,6 +194,15 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Updater2<'a, R, M> {
     }
 
     pub async fn install(&self, version: &str) -> Result<InstallResult, crate::Error> {
+        // Install can be asked for a version that was never cached: the cache
+        // holds whatever was downloaded at the time, and releases since then
+        // have moved the target. Retrying then failed forever with "cached
+        // update not found", because nothing in this path ever fetched the
+        // bytes it was missing. Download is a no-op when the file is present.
+        if !self.has_cached_update(version) {
+            self.download(version).await?;
+        }
+
         let bytes = self.get_cached_update_bytes(version)?;
 
         let updater = self.manager.updater()?;

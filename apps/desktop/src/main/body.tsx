@@ -37,7 +37,6 @@ import { ClassicMainSidebar } from "./shell-sidebar";
 import { ClassicMainTabContent } from "./tab-content";
 import {
   type DesktopUpdateControl,
-  SidebarTimelineUpdateButton,
   useDesktopUpdateControl,
 } from "./update-banner";
 import { UpdatePrompt } from "./update-prompt";
@@ -948,7 +947,6 @@ function SidebarTimelineChrome({
   update: DesktopUpdateControl;
 }) {
   const updateVisible = Boolean(update.status && update.version);
-  const showUpdateButton = sidebarExpanded && updateVisible;
   const collapsedBadge = !sidebarExpanded
     ? hasUpcomingMeeting
       ? "upcomingMeeting"
@@ -999,9 +997,6 @@ function SidebarTimelineChrome({
               >
                 <WrenchIcon size={15} />
               </LeftSurfaceChromeButton>
-            ) : null}
-            {showUpdateButton ? (
-              <SidebarTimelineUpdateButton update={update} />
             ) : null}
           </>
         ) : null}

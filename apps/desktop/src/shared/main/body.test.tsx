@@ -304,54 +304,6 @@ describe("ClassicMainBody", () => {
     expect(mocks.toggleLeftSidebar).toHaveBeenCalledTimes(1);
   });
 
-  it("shows the update button in the expanded sidebar control group", () => {
-    mocks.sidebarUpdateControl.status = "available";
-    mocks.sidebarUpdateControl.version = "1.0.34";
-
-    render(<ClassicMainBody />);
-
-    const sidebarToggle = screen.getByRole("button", { name: "Hide sidebar" });
-    const searchButton = screen.getByRole("button", { name: "Search" });
-    const newNoteButton = screen.getByRole("button", { name: "New note" });
-    const updateButton = screen.getByTestId("sidebar-update-button");
-    const chrome = sidebarToggle.parentElement?.parentElement;
-    const chromeFrame = chrome?.parentElement;
-    const timelineHeader = document.querySelector<HTMLElement>(
-      "[data-sidebar-timeline-header]",
-    );
-
-    expect(updateButton).toBeTruthy();
-    expect(updateButton.parentElement).toBe(sidebarToggle.parentElement);
-    expect(searchButton.compareDocumentPosition(newNoteButton)).toBe(
-      Node.DOCUMENT_POSITION_FOLLOWING,
-    );
-    expect(newNoteButton.compareDocumentPosition(updateButton)).toBe(
-      Node.DOCUMENT_POSITION_FOLLOWING,
-    );
-    expect(searchButton.parentElement).toBe(sidebarToggle.parentElement);
-    expect(newNoteButton.parentElement).toBe(sidebarToggle.parentElement);
-    expect(chrome?.className).toContain("items-center");
-    expect(chromeFrame).toBe(timelineHeader);
-    expect(chromeFrame?.className).toContain("pr-1");
-    expect(chromeFrame?.className).not.toContain("pr-3");
-    expect(
-      within(sidebarToggle).queryByTestId("collapsed-sidebar-update-badge"),
-    ).toBeNull();
-  });
-
-  it("shows ready updates in the expanded sidebar control group", () => {
-    mocks.sidebarUpdateControl.status = "ready";
-    mocks.sidebarUpdateControl.version = "1.0.34";
-
-    render(<ClassicMainBody />);
-
-    const sidebarToggle = screen.getByRole("button", { name: "Hide sidebar" });
-    const updateButton = screen.getByTestId("sidebar-update-button");
-
-    expect(updateButton).toBeTruthy();
-    expect(updateButton.parentElement).toBe(sidebarToggle.parentElement);
-  });
-
   it("shows an update badge on the collapsed sidebar toggle", () => {
     mocks.leftSidebarExpanded = false;
     mocks.sidebarUpdateControl.status = "available";
