@@ -8,6 +8,8 @@ const mocks = vi.hoisted(() => ({
   audioImport: vi.fn(),
   audioImportData: vi.fn(),
   selectFile: vi.fn(),
+  toastMessage: vi.fn(),
+  toastSuccess: vi.fn(),
 }));
 
 vi.mock("@meeki/plugin-fs-sync", () => ({
@@ -15,6 +17,10 @@ vi.mock("@meeki/plugin-fs-sync", () => ({
     audioImport: mocks.audioImport,
     audioImportData: mocks.audioImportData,
   },
+}));
+
+vi.mock("@meeki/ui/components/ui/toast", () => ({
+  sonnerToast: { message: mocks.toastMessage, success: mocks.toastSuccess },
 }));
 
 vi.mock("@tauri-apps/api/path", () => ({
@@ -132,6 +138,60 @@ describe("importing several recordings at once", () => {
     );
     expect(mocks.createSession).toHaveBeenCalledTimes(1);
     expect(mocks.audioImport).not.toHaveBeenCalled();
+  });
+
+  it("counts the whole selection, including the file the session view takes", async () => {
+    mocks.selectFile.mockResolvedValue([
+      "/tmp/a.mp3",
+      "/tmp/b.mp3",
+      "/tmp/c.mp3",
+    ]);
+    const { result } = renderHook(() => useNewNoteAndUpload());
+
+    await result.current("audio");
+
+    expect(mocks.toastMessage).toHaveBeenCalledWith(
+      "Importing 3 recordings",
+      expect.objectContaining({ description: "1 of 3" }),
+    );
+    expect(mocks.toastSuccess).toHaveBeenCalledWith(
+      "Imported 3 recordings",
+      expect.anything(),
+    );
+  });
+
+  it("stops at the next file boundary and keeps what it already imported", async () => {
+    mocks.selectFile.mockResolvedValue([
+      "/tmp/a.mp3",
+      "/tmp/b.mp3",
+      "/tmp/c.mp3",
+      "/tmp/d.mp3",
+    ]);
+    // Press Stop as soon as the first progress update offers the action.
+    mocks.toastMessage.mockImplementationOnce(
+      (_message: string, options: { action: { onClick: () => void } }) => {
+        options.action.onClick();
+      },
+    );
+    const { result } = renderHook(() => useNewNoteAndUpload());
+
+    await result.current("audio");
+
+    expect(mocks.audioImport).not.toHaveBeenCalled();
+    expect(mocks.toastSuccess).toHaveBeenCalledWith(
+      "Stopped after importing 1 of 4 recordings",
+      expect.anything(),
+    );
+  });
+
+  it("says nothing about a batch when only one file was chosen", async () => {
+    mocks.selectFile.mockResolvedValue(["/tmp/only.mp3"]);
+    const { result } = renderHook(() => useNewNoteAndUpload());
+
+    await result.current("audio");
+
+    expect(mocks.toastMessage).not.toHaveBeenCalled();
+    expect(mocks.toastSuccess).not.toHaveBeenCalled();
   });
 
   it("keeps importing the rest when one file fails", async () => {

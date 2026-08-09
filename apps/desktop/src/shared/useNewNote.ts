@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import { useShallow } from "zustand/shallow";
 
 import { commands as fsSyncCommands } from "@meeki/plugin-fs-sync";
+import { sonnerToast } from "@meeki/ui/components/ui/toast";
 
 import { createSession } from "~/session/queries";
 import { useTabs } from "~/store/zustand/tabs";
@@ -106,17 +107,17 @@ export function useNewNoteAndUpload() {
       const firstSessionId = await createSession();
       setPendingUpload(firstSessionId, { kind, filePath: first! });
 
-      for (const filePath of rest) {
-        await importIntoNewNote((sessionId) =>
-          fsSyncCommands.audioImport(sessionId, filePath),
-        );
-      }
-
       openNew({
         type: "sessions",
         id: firstSessionId,
         state: { view: null, autoStart: null },
       });
+
+      await importBatch(
+        rest,
+        (filePath) => (sessionId) =>
+          fsSyncCommands.audioImport(sessionId, filePath),
+      );
     },
     [openNew],
   );
@@ -153,6 +154,69 @@ async function importIntoNewNote(
   }
 }
 
+const IMPORT_TOAST_ID = "bulk-audio-import";
+
+/**
+ * Imports the rest of a multi-file selection one at a time, reporting as it
+ * goes.
+ *
+ * A folder of a few hundred recordings is minutes of copying with the window
+ * unresponsive, which is indistinguishable from a hang. The count says
+ * otherwise, and Stop ends the run at a file boundary rather than leaving a
+ * half-written copy behind. Files already imported keep their notes — stopping
+ * is "no more", not "undo".
+ */
+async function importBatch<T>(
+  items: T[],
+  toImport: (
+    item: T,
+  ) => (
+    sessionId: string,
+  ) => Promise<{ status: "ok" | "error"; error?: unknown }>,
+): Promise<void> {
+  if (items.length === 0) {
+    return;
+  }
+
+  // The first file was handed to the session view, so it counts toward the
+  // total the user selected even though it is not imported here.
+  const total = items.length + 1;
+  let stopped = false;
+
+  const report = (done: number) => {
+    sonnerToast.message(`Importing ${total} recordings`, {
+      id: IMPORT_TOAST_ID,
+      description: `${done} of ${total}`,
+      duration: Infinity,
+      action: {
+        label: "Stop",
+        onClick: () => {
+          stopped = true;
+        },
+      },
+    });
+  };
+
+  report(1);
+
+  let done = 1;
+  for (const item of items) {
+    if (stopped) {
+      break;
+    }
+    await importIntoNewNote(toImport(item));
+    done += 1;
+    report(done);
+  }
+
+  sonnerToast.success(
+    stopped
+      ? `Stopped after importing ${done} of ${total} recordings`
+      : `Imported ${done} recordings`,
+    { id: IMPORT_TOAST_ID, duration: 5_000, action: undefined },
+  );
+}
+
 /** Drop audio files anywhere on the empty tab: a note each, then import them. */
 export function useNewNoteFromDroppedAudio() {
   const openNew = useTabs((state) => state.openNew);
@@ -170,22 +234,23 @@ export function useNewNoteFromDroppedAudio() {
       const firstSessionId = await createSession();
       setPendingUpload(firstSessionId, { kind: "audio", file: first! });
 
-      for (const file of rest) {
-        const data = Array.from(new Uint8Array(await file.arrayBuffer()));
-        await importIntoNewNote((sessionId) =>
-          fsSyncCommands.audioImportData(
-            sessionId,
-            data,
-            file.name,
-            file.type || null,
-          ),
-        );
-      }
-
       openNew({
         type: "sessions",
         id: firstSessionId,
         state: { view: null, autoStart: null },
+      });
+
+      // A dropped file has no path, so its bytes cross IPC as a JSON number
+      // array — measured at 3.57x the audio size on the wire and ~22x in heap.
+      // Fine for a handful; use Upload a Recording for a folder.
+      await importBatch(rest, (file) => async (sessionId) => {
+        const data = Array.from(new Uint8Array(await file.arrayBuffer()));
+        return fsSyncCommands.audioImportData(
+          sessionId,
+          data,
+          file.name,
+          file.type || null,
+        );
       });
     },
     [openNew],
