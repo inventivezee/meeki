@@ -44,6 +44,7 @@ import {
   captureTranscriptIncompleteErrorId,
   reportCaptureErrorOnce,
 } from "~/store/zustand/capture-errors";
+import { isEmptyBatchTranscriptError } from "~/store/zustand/listener/batch";
 import type {
   LiveTranscriptPersistCallback,
   OnStoppedCallback,
@@ -607,6 +608,29 @@ function useCaptureLifecycle(sessionId: string) {
               await requestRecovery();
               return;
             }
+            // Silence is a settled result, so this must not go down the retry
+            // path. Marking the audio processed is what stops recovery on the
+            // next launch, and the backlog worker, from transcribing it again
+            // to reach the same empty answer — which is how one quiet recording
+            // produced an error on every restart.
+            if (isEmptyBatchTranscriptError(error)) {
+              await markSessionAudioTranscriptionComplete(sessionId).catch(
+                (markError: unknown) => {
+                  console.error(
+                    "[listener] failed to settle a silent recording",
+                    { sessionId, error: markError },
+                  );
+                },
+              );
+              reportCaptureErrorOnce({
+                id: captureBatchFailedErrorId(sessionId),
+                message:
+                  "No speech was found in this recording, so there is no transcript. The audio is saved on the note.",
+                variant: "warning",
+              });
+              return;
+            }
+
             console.error("[listener] post-stop transcript repair failed", {
               sessionId,
               reasons: repairReasons,

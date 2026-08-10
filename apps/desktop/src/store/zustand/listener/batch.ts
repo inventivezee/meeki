@@ -64,6 +64,19 @@ export type BatchActions = {
 
 export const EMPTY_BATCH_TRANSCRIPT_ERROR =
   "No speech was detected in the audio.";
+
+/**
+ * Silence is a final answer, not a failure. It travels as an Error because that
+ * is how the batch path reports "nothing to persist", but the same audio will
+ * always transcribe to the same nothing — so callers need to tell it apart from
+ * a write that genuinely could be retried.
+ */
+export function isEmptyBatchTranscriptError(error: unknown): boolean {
+  return (
+    (error instanceof Error ? error.message : String(error)) ===
+    EMPTY_BATCH_TRANSCRIPT_ERROR
+  );
+}
 const SYNTHETIC_TEXT_WORD_SECONDS = 0.4;
 const MIN_SYNTHETIC_TEXT_WORD_SECONDS = 0.05;
 

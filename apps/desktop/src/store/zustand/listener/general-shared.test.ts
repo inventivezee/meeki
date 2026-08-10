@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  EMPTY_BATCH_TRANSCRIPT_ERROR,
+  isEmptyBatchTranscriptError,
+} from "./batch";
+import {
   type GeneralState,
   initialGeneralState,
   markLiveCaptureStarted,
@@ -195,5 +199,22 @@ describe("tickTranscriptionStallWatchdog", () => {
     noteLiveTranscriptActivity(live, { hasFinalWords: true });
     expect(live.transcriptionStalled).toBe(false);
     expect(live.needsBatchRepair).toBe(true);
+  });
+});
+
+describe("telling silence apart from a failed write", () => {
+  it("recognises the empty-transcript error and nothing else", () => {
+    expect(
+      isEmptyBatchTranscriptError(new Error(EMPTY_BATCH_TRANSCRIPT_ERROR)),
+    ).toBe(true);
+    expect(isEmptyBatchTranscriptError(EMPTY_BATCH_TRANSCRIPT_ERROR)).toBe(
+      true,
+    );
+
+    // A write that could genuinely be retried must not be swallowed as silence.
+    expect(isEmptyBatchTranscriptError(new Error("database is locked"))).toBe(
+      false,
+    );
+    expect(isEmptyBatchTranscriptError(undefined)).toBe(false);
   });
 });
