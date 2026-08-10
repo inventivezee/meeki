@@ -60,9 +60,14 @@ vi.mock("~/store/zustand/tabs", () => ({
     selector({ openNew: mocks.openNew, openCurrent: vi.fn() }),
 }));
 
+const liveStatus = { value: "inactive" };
+const liveSessionId = { value: null as string | null };
+
 vi.mock("~/stt/contexts", () => ({
   useListener: (selector: (state: unknown) => unknown) =>
-    selector({ live: { status: "inactive", sessionId: null } }),
+    selector({
+      live: { status: liveStatus.value, sessionId: liveSessionId.value },
+    }),
 }));
 
 vi.mock("~/stt/pending-upload", () => ({
@@ -74,7 +79,12 @@ vi.mock("~/stt/useUploadFile", () => ({
   isAudioUploadFile: (file: File) => /\.(mp3|wav|m4a)$/u.test(file.name),
 }));
 
-import { useNewNoteAndUpload, useNewNoteFromDroppedAudio } from "./useNewNote";
+import {
+  resetPendingRecording,
+  useNewNoteAndListen,
+  useNewNoteAndUpload,
+  useNewNoteFromDroppedAudio,
+} from "./useNewNote";
 
 function audioFile(name: string, sizeBytes = 4): File {
   const file = new File(["audio"], name, { type: "audio/mpeg" });
@@ -349,5 +359,60 @@ describe("importing several recordings at once", () => {
 
     expect(mocks.askBulkImportChoice).not.toHaveBeenCalled();
     expect(mocks.setPendingUpload).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("starting a recording", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    resetPendingRecording();
+    liveStatus.value = "inactive";
+    liveSessionId.value = null;
+  });
+
+  it("starts only one recording when the button is clicked twice", async () => {
+    let resolveCreate: (id: string) => void = () => {};
+    mocks.createSession.mockImplementationOnce(
+      () => new Promise<string>((resolve) => (resolveCreate = resolve)),
+    );
+    const { result } = renderHook(() => useNewNoteAndListen());
+
+    // Both clicks land before the first createSession resolves, which is the
+    // whole window the live status cannot describe.
+    result.current();
+    result.current();
+    resolveCreate("session-1");
+    await Promise.resolve();
+
+    expect(mocks.createSession).toHaveBeenCalledTimes(1);
+    expect(mocks.openNew).toHaveBeenCalledTimes(1);
+  });
+
+  it("focuses the recording already starting rather than opening nothing", async () => {
+    mocks.createSession.mockResolvedValue("session-1");
+    const { result } = renderHook(() => useNewNoteAndListen());
+
+    result.current();
+    await vi.waitFor(() => expect(mocks.openNew).toHaveBeenCalledTimes(1));
+    result.current();
+
+    expect(mocks.createSession).toHaveBeenCalledTimes(1);
+    expect(mocks.openNew).toHaveBeenLastCalledWith(
+      expect.objectContaining({ id: "session-1" }),
+    );
+  });
+
+  it("focuses the live recording once one is active", () => {
+    liveStatus.value = "active";
+    liveSessionId.value = "live-session";
+    const { result } = renderHook(() => useNewNoteAndListen());
+
+    result.current();
+
+    expect(mocks.createSession).not.toHaveBeenCalled();
+    expect(mocks.openNew).toHaveBeenCalledWith({
+      type: "sessions",
+      id: "live-session",
+    });
   });
 });

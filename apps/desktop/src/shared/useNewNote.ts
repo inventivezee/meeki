@@ -1,6 +1,6 @@
 import { downloadDir } from "@tauri-apps/api/path";
 import { open as selectFile } from "@tauri-apps/plugin-dialog";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useShallow } from "zustand/shallow";
 
 import { commands as fsSyncCommands } from "@meeki/plugin-fs-sync";
@@ -41,6 +41,47 @@ export function useNewNote({
   return handler;
 }
 
+/**
+ * A recording start that has been asked for but has not reached "active" yet.
+ *
+ * Module-level on purpose: Start Recording exists in the sidebar, on the home
+ * screen, in the note header and on a keyboard shortcut, so a per-hook guard
+ * would not stop two of them racing — nor two clicks on one of them.
+ *
+ * `LiveSessionStatus` is only inactive | active | finalizing; there is nothing
+ * between asking and being active to check. Without this claim a second click
+ * inside that window creates a second session that also auto-starts, and the
+ * UI can only offer a stop control for one of them — leaving a recording
+ * running with no visible way to end it.
+ */
+const PENDING_RECORDING_TIMEOUT_MS = 20_000;
+let pendingRecording: {
+  sessionId: string | null;
+  timer: ReturnType<typeof setTimeout>;
+} | null = null;
+
+function claimPendingRecording() {
+  releasePendingRecording();
+  pendingRecording = {
+    sessionId: null,
+    // A start that never reports active must not wedge the button for the rest
+    // of the session. Allowing a second attempt is the lesser failure.
+    timer: setTimeout(releasePendingRecording, PENDING_RECORDING_TIMEOUT_MS),
+  };
+}
+
+function releasePendingRecording() {
+  if (pendingRecording) {
+    clearTimeout(pendingRecording.timer);
+    pendingRecording = null;
+  }
+}
+
+/** Exposed so tests do not leak a claim from one case into the next. */
+export function resetPendingRecording() {
+  releasePendingRecording();
+}
+
 export function useNewNoteAndListen({
   behavior = "new",
 }: {
@@ -57,16 +98,37 @@ export function useNewNoteAndListen({
     sessionId: state.live.sessionId,
   }));
 
+  // Clearing on "finalizing" too: a recording that has already been stopped is
+  // not one this guard should keep blocking.
+  useEffect(() => {
+    if (status === "active" || status === "finalizing") {
+      releasePendingRecording();
+    }
+  }, [status]);
+
   const handler = useCallback(() => {
+    const ff = behavior === "new" ? openNew : openCurrent;
+
     if (status === "active" && liveSessionId) {
-      const ff = behavior === "new" ? openNew : openCurrent;
       ff({ type: "sessions", id: liveSessionId });
       return;
     }
 
-    const ff = behavior === "new" ? openNew : openCurrent;
+    // Claimed synchronously, before the await below, so a second click in the
+    // same tick sees it.
+    if (pendingRecording) {
+      if (pendingRecording.sessionId) {
+        ff({ type: "sessions", id: pendingRecording.sessionId });
+      }
+      return;
+    }
+    claimPendingRecording();
+
     void createSession()
       .then((sessionId) => {
+        if (pendingRecording) {
+          pendingRecording.sessionId = sessionId;
+        }
         ff({
           type: "sessions",
           id: sessionId,
@@ -74,6 +136,7 @@ export function useNewNoteAndListen({
         });
       })
       .catch((error) => {
+        releasePendingRecording();
         console.error("[session] failed to create listening note", error);
       });
   }, [status, liveSessionId, openNew, openCurrent, behavior]);

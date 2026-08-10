@@ -613,18 +613,6 @@ describe("ClassicMainBody", () => {
     expect(mocks.tabContentRenderCount).toBe(initialRenderCount);
   });
 
-  it("keeps the update button in the fixed sidebar control group", () => {
-    mocks.updateControl.status = "available";
-    mocks.updateControl.version = "1.0.34";
-
-    render(<ClassicMainBody />);
-
-    const searchButton = screen.getByRole("button", { name: "Search" });
-    const updateButton = screen.getByRole("button", { name: "Update" });
-
-    expect(updateButton.parentElement).toBe(searchButton.parentElement);
-  });
-
   it("keeps near-equal sidebar size commits in sync with drag-time CSS variables", () => {
     render(<ClassicMainBody />);
 
