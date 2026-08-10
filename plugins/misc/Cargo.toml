@@ -17,6 +17,7 @@ specta-typescript = { workspace = true }
 [dependencies]
 meeki-buffer = { workspace = true }
 meeki-host = { workspace = true }
+meeki-power = { workspace = true }
 meeki-template-support = { workspace = true }
 
 tauri = { workspace = true, features = ["test"] }

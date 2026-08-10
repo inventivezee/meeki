@@ -8,6 +8,8 @@ Default permissions for the plugin
 - `allow-get-fingerprint`
 - `allow-get-device-info`
 - `allow-opinionated-md-to-html`
+- `allow-keep-awake-acquire`
+- `allow-keep-awake-release`
 
 ## Permission Table
 
@@ -248,6 +250,58 @@ Enables the get_git_hash command without any pre-configured scope.
 <td>
 
 Denies the get_git_hash command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`misc:allow-keep-awake-acquire`
+
+</td>
+<td>
+
+Enables the keep_awake_acquire command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`misc:deny-keep-awake-acquire`
+
+</td>
+<td>
+
+Denies the keep_awake_acquire command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`misc:allow-keep-awake-release`
+
+</td>
+<td>
+
+Enables the keep_awake_release command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`misc:deny-keep-awake-release`
+
+</td>
+<td>
+
+Denies the keep_awake_release command without any pre-configured scope.
 
 </td>
 </tr>

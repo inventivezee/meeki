@@ -403,6 +403,30 @@
           "markdownDescription": "Denies the get_git_hash command without any pre-configured scope."
         },
         {
+          "description": "Enables the keep_awake_acquire command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-keep-awake-acquire",
+          "markdownDescription": "Enables the keep_awake_acquire command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the keep_awake_acquire command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-keep-awake-acquire",
+          "markdownDescription": "Denies the keep_awake_acquire command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the keep_awake_release command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-keep-awake-release",
+          "markdownDescription": "Enables the keep_awake_release command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the keep_awake_release command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-keep-awake-release",
+          "markdownDescription": "Denies the keep_awake_release command without any pre-configured scope."
+        },
+        {
           "description": "Enables the opinionated_md_to_html command without any pre-configured scope.",
           "type": "string",
           "const": "allow-opinionated-md-to-html",
@@ -427,10 +451,10 @@
           "markdownDescription": "Denies the reveal_session_in_finder command without any pre-configured scope."
         },
         {
-          "description": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-get-git-hash`\n- `allow-get-fingerprint`\n- `allow-get-device-info`\n- `allow-opinionated-md-to-html`",
+          "description": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-get-git-hash`\n- `allow-get-fingerprint`\n- `allow-get-device-info`\n- `allow-opinionated-md-to-html`\n- `allow-keep-awake-acquire`\n- `allow-keep-awake-release`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-get-git-hash`\n- `allow-get-fingerprint`\n- `allow-get-device-info`\n- `allow-opinionated-md-to-html`"
+          "markdownDescription": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-get-git-hash`\n- `allow-get-fingerprint`\n- `allow-get-device-info`\n- `allow-opinionated-md-to-html`\n- `allow-keep-awake-acquire`\n- `allow-keep-awake-release`"
         }
       ]
     }

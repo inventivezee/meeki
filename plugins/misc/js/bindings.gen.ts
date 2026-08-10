@@ -37,6 +37,31 @@ async opinionatedMdToHtml(text: string) : Promise<Result<string, string>> {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+/**
+ * Holds off system sleep for as long as `reason` is held.
+ * 
+ * A backlog of recordings takes hours to transcribe and summarize, and a Mac
+ * that sleeps partway through does not simply resume: tokio's timers do not
+ * advance while the machine is asleep, so work in flight stalls rather than
+ * continuing. Keyed by reason and idempotent, so a re-entrant caller does not
+ * stack assertions it will forget to drop.
+ */
+async keepAwakeAcquire(reason: string) : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:misc|keep_awake_acquire", { reason }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async keepAwakeRelease(reason: string) : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:misc|keep_awake_release", { reason }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 

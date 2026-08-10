@@ -3,6 +3,7 @@ import { useRouteContext } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 
 import { commands as fsSyncCommands } from "@meeki/plugin-fs-sync";
+import { commands as miscCommands } from "@meeki/plugin-misc";
 import { sonnerToast } from "@meeki/ui/components/ui/toast";
 
 import { listUntranscribedSessions, useAudioBacklog } from "./audio-backlog";
@@ -31,6 +32,8 @@ export function AudioBacklogWorker() {
   const running = useAudioBacklog((state) => state.running);
   const failed = useAudioBacklog((state) => state.failed);
 
+  useKeepAwakeWhileRunning(running);
+
   const pending = useQuery({
     enabled: running,
     queryKey: ["audio-backlog"],
@@ -51,6 +54,33 @@ export function AudioBacklogWorker() {
   }
 
   return <TranscribeOne key={next} sessionId={next} />;
+}
+
+const KEEP_AWAKE_REASON = "Meeki is transcribing imported recordings";
+
+/**
+ * Holds off system sleep for the whole run, not per recording.
+ *
+ * A few hundred recordings is hours of work, and the gaps between them — a
+ * summary streaming, the next file being read — are exactly when an idle Mac
+ * would decide to sleep. Held across the run so those gaps are covered too.
+ *
+ * Sleep does not merely pause this: tokio's timers do not advance while the
+ * machine is asleep, so work in flight stalls rather than resuming.
+ */
+function useKeepAwakeWhileRunning(running: boolean) {
+  useEffect(() => {
+    if (!running) {
+      return;
+    }
+
+    void miscCommands.keepAwakeAcquire(KEEP_AWAKE_REASON);
+    return () => {
+      // Released on stop, on finish, and on unmount — the assertion must never
+      // outlive the work that asked for it.
+      void miscCommands.keepAwakeRelease(KEEP_AWAKE_REASON);
+    };
+  }, [running]);
 }
 
 function useBacklogProgressToast(active: boolean, hasWork: boolean) {

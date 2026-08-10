@@ -18802,6 +18802,7 @@ version = "0.1.0"
 dependencies = [
  "buffer",
  "host",
+ "power",
  "specta",
  "specta-typescript",
  "sysinfo",

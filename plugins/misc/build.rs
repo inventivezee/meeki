@@ -10,6 +10,8 @@ const COMMANDS: &[&str] = &[
     "audio_path",
     "audio_import",
     "reveal_session_in_finder",
+    "keep_awake_acquire",
+    "keep_awake_release",
 ];
 
 fn main() {

@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-keep-awake-acquire"
+description = "Enables the keep_awake_acquire command without any pre-configured scope."
+commands.allow = ["keep_awake_acquire"]
+
+[[permission]]
+identifier = "deny-keep-awake-acquire"
+description = "Denies the keep_awake_acquire command without any pre-configured scope."
+commands.deny = ["keep_awake_acquire"]
