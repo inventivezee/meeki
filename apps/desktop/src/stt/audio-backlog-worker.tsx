@@ -3,6 +3,7 @@ import { useRouteContext } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 
 import { commands as fsSyncCommands } from "@meeki/plugin-fs-sync";
+import { commands as localLlmCommands } from "@meeki/plugin-local-llm";
 import { commands as miscCommands } from "@meeki/plugin-misc";
 import { sonnerToast } from "@meeki/ui/components/ui/toast";
 
@@ -150,6 +151,20 @@ function TranscribeOne({ sessionId }: { sessionId: string }) {
         if (path.status === "error") {
           throw new Error(path.error);
         }
+
+        // Transcription is MLX on the GPU; the language model is llama.cpp on
+        // the same GPU. Metal will only wire ~75% of unified memory — measured
+        // at 11.84 GiB on a 16 GB M1 — and Gemma 4 12B's weights plus its
+        // caches are most of that on their own. Leaving the model resident
+        // through transcription exhausted the wired-memory budget on exactly
+        // that machine: the command buffer came back
+        // kIOGPUCommandBufferCallbackErrorOutOfMemory, MLX threw from Metal's
+        // completion handler where nothing can catch it, and the app aborted.
+        // WindowServer went down with the same error a second earlier.
+        //
+        // The summary step below starts it again. That costs a weight reload
+        // per recording, which is worth it to not crash.
+        await localLlmCommands.stopServer();
 
         await runBatchRef.current(path.data, {
           promotion: { scope: "whole_session" },
