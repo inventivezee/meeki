@@ -58,6 +58,39 @@ pub fn path(session_dir: &Path) -> Option<PathBuf> {
         .find(|path| path.exists())
 }
 
+fn hex_digest(hasher: Sha256) -> String {
+    hasher
+        .finalize()
+        .iter()
+        .fold(String::with_capacity(64), |mut output, byte| {
+            write!(&mut output, "{byte:02x}").unwrap();
+            output
+        })
+}
+
+/// Streaming sha256 of a file anywhere on disk.
+///
+/// Exists so an import can ask "is this recording already in the library?"
+/// before paying to copy it in. `metadata` can only answer that for a file
+/// already inside a session folder, which is too late to skip the copy — and
+/// across a folder of several hundred recordings the copies are the expensive
+/// part. Chunked, so a large file costs 64 KiB of memory rather than its size.
+pub fn file_sha256(path: &Path) -> std::io::Result<String> {
+    let mut file = std::fs::File::open(path)?;
+    let mut hasher = Sha256::new();
+    let mut buffer = [0_u8; 64 * 1024];
+
+    loop {
+        let bytes_read = file.read(&mut buffer)?;
+        if bytes_read == 0 {
+            break;
+        }
+        hasher.update(&buffer[..bytes_read]);
+    }
+
+    Ok(hex_digest(hasher))
+}
+
 pub fn metadata(session_dir: &Path) -> std::io::Result<Option<AudioFileMetadata>> {
     let Some(path) = path(session_dir) else {
         return Ok(None);
@@ -89,13 +122,7 @@ pub fn metadata(session_dir: &Path) -> std::io::Result<Option<AudioFileMetadata>
             .ok_or_else(|| std::io::Error::other("audio_file_too_large"))?;
     }
 
-    let sha256 = hasher
-        .finalize()
-        .iter()
-        .fold(String::with_capacity(64), |mut output, byte| {
-            write!(&mut output, "{byte:02x}").unwrap();
-            output
-        });
+    let sha256 = hex_digest(hasher);
 
     Ok(Some(AudioFileMetadata {
         filename: filename.to_string(),

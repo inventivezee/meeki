@@ -9,6 +9,10 @@ import { sonnerToast } from "@meeki/ui/components/ui/toast";
 import { catalogLocalSessionAudio } from "~/session/attachments";
 import { createSession } from "~/session/queries";
 import { askBulkImportChoice } from "~/shared/bulk-import-prompt";
+import {
+  createDuplicateFilter,
+  loadImportedAudioHashes,
+} from "~/shared/import-duplicates";
 import { useTabs } from "~/store/zustand/tabs";
 import { startBacklogRun } from "~/stt/audio-backlog";
 import { useListener } from "~/stt/contexts";
@@ -193,6 +197,7 @@ export function useNewNoteAndUpload() {
         filePaths,
         (filePath) => (sessionId) =>
           fsSyncCommands.audioImport(sessionId, filePath),
+        (filePath) => filePath,
       );
 
       if (sessionIds[0]) {
@@ -272,15 +277,31 @@ async function importBatch<T>(
   ) => (
     sessionId: string,
   ) => Promise<{ status: "ok" | "error"; error?: unknown }>,
+  /**
+   * Where the file currently lives, when that is knowable. Only the picker can
+   * say — a dropped file has no path — so drops import without the duplicate
+   * check rather than pretending to have one.
+   */
+  sourcePathOf?: (item: T) => string,
 ): Promise<string[]> {
   const total = items.length;
   const sessionIds: string[] = [];
+  let skipped = 0;
   let stopped = false;
+
+  const duplicates = sourcePathOf
+    ? createDuplicateFilter(
+        await loadImportedAudioHashes().catch(() => new Set<string>()),
+      )
+    : null;
 
   const report = (done: number) => {
     sonnerToast.message(`Importing ${total} recordings`, {
       id: IMPORT_TOAST_ID,
-      description: `${done} of ${total}`,
+      description:
+        skipped > 0
+          ? `${done} of ${total} · ${skipped} already imported`
+          : `${done} of ${total}`,
       duration: Infinity,
       action: {
         label: "Stop",
@@ -297,6 +318,17 @@ async function importBatch<T>(
     if (stopped) {
       break;
     }
+
+    // Checked before the copy, so a duplicate costs a read rather than a read,
+    // a write and a delete.
+    if (duplicates && sourcePathOf) {
+      if (await duplicates.isDuplicate(sourcePathOf(item))) {
+        skipped += 1;
+        report(sessionIds.length);
+        continue;
+      }
+    }
+
     const sessionId = await importIntoNewNote(toImport(item));
     if (sessionId) {
       sessionIds.push(sessionId);
@@ -304,11 +336,15 @@ async function importBatch<T>(
     report(sessionIds.length);
   }
 
+  // Counted rather than prompted: a run this long is unattended, and asking
+  // about each duplicate would defeat that.
+  const skippedNote =
+    skipped > 0 ? `, skipped ${skipped} already in your library` : "";
   sonnerToast.success(
     stopped
-      ? `Stopped after importing ${sessionIds.length} of ${total} recordings`
-      : `Imported ${sessionIds.length} recordings`,
-    { id: IMPORT_TOAST_ID, duration: 5_000, action: undefined },
+      ? `Stopped after importing ${sessionIds.length} of ${total} recordings${skippedNote}`
+      : `Imported ${sessionIds.length} recordings${skippedNote}`,
+    { id: IMPORT_TOAST_ID, duration: 6_000, action: undefined },
   );
 
   return sessionIds;

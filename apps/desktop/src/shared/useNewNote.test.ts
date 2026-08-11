@@ -14,12 +14,15 @@ const mocks = vi.hoisted(() => ({
   catalogLocalSessionAudio: vi.fn(),
   askBulkImportChoice: vi.fn(),
   startBacklogRun: vi.fn(),
+  audioSourceSha256: vi.fn(),
+  loadImportedAudioHashes: vi.fn(),
 }));
 
 vi.mock("@meeki/plugin-fs-sync", () => ({
   commands: {
     audioImport: mocks.audioImport,
     audioImportData: mocks.audioImportData,
+    audioSourceSha256: mocks.audioSourceSha256,
   },
 }));
 
@@ -49,6 +52,11 @@ vi.mock("~/session/queries", () => ({
 
 vi.mock("~/stt/audio-backlog", () => ({
   startBacklogRun: mocks.startBacklogRun,
+}));
+
+vi.mock("~/shared/import-duplicates", async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  loadImportedAudioHashes: mocks.loadImportedAudioHashes,
 }));
 
 vi.mock("~/shared/bulk-import-prompt", () => ({
@@ -109,6 +117,12 @@ describe("importing several recordings at once", () => {
       transcribe: true,
       summarize: true,
     });
+    mocks.loadImportedAudioHashes.mockResolvedValue(new Set<string>());
+    // A distinct hash per path, so the duplicate check never fires for cases
+    // that predate it.
+    mocks.audioSourceSha256.mockImplementation((path: string) =>
+      Promise.resolve({ status: "ok", data: `hash:${path}` }),
+    );
   });
 
   it("gives every dropped recording its own note", async () => {
@@ -414,5 +428,72 @@ describe("starting a recording", () => {
       type: "sessions",
       id: "live-session",
     });
+  });
+});
+
+describe("skipping recordings already in the library", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    resetPendingRecording();
+    let counter = 0;
+    mocks.createSession.mockImplementation(() =>
+      Promise.resolve(`session-${++counter}`),
+    );
+    mocks.audioImport.mockResolvedValue({ status: "ok" });
+    mocks.askBulkImportChoice.mockResolvedValue({
+      transcribe: false,
+      summarize: false,
+    });
+    mocks.loadImportedAudioHashes.mockResolvedValue(new Set(["hash-known"]));
+  });
+
+  it("does not copy a file whose contents are already imported", async () => {
+    mocks.audioSourceSha256.mockImplementation((path: string) =>
+      Promise.resolve({
+        status: "ok",
+        data: path === "/tmp/dupe.mp3" ? "hash-known" : "hash-new",
+      }),
+    );
+    mocks.selectFile.mockResolvedValue(["/tmp/dupe.mp3", "/tmp/fresh.mp3"]);
+    const { result } = renderHook(() => useNewNoteAndUpload());
+
+    await result.current("audio");
+
+    // Hashed before the copy, so the duplicate never reaches audioImport.
+    expect(mocks.audioImport).toHaveBeenCalledTimes(1);
+    expect(mocks.audioImport).toHaveBeenCalledWith(
+      "session-1",
+      "/tmp/fresh.mp3",
+    );
+    expect(mocks.toastSuccess).toHaveBeenCalledWith(
+      "Imported 1 recordings, skipped 1 already in your library",
+      expect.anything(),
+    );
+  });
+
+  it("collapses two copies of the same file inside one selection", async () => {
+    mocks.audioSourceSha256.mockResolvedValue({
+      status: "ok",
+      data: "hash-same",
+    });
+    mocks.selectFile.mockResolvedValue(["/tmp/a.mp3", "/tmp/b.mp3"]);
+    const { result } = renderHook(() => useNewNoteAndUpload());
+
+    await result.current("audio");
+
+    expect(mocks.audioImport).toHaveBeenCalledTimes(1);
+  });
+
+  it("imports a file it cannot hash rather than dropping it", async () => {
+    mocks.audioSourceSha256.mockResolvedValue({
+      status: "error",
+      error: "permission denied",
+    });
+    mocks.selectFile.mockResolvedValue(["/tmp/unreadable.mp3", "/tmp/b.mp3"]);
+    const { result } = renderHook(() => useNewNoteAndUpload());
+
+    await result.current("audio");
+
+    expect(mocks.audioImport).toHaveBeenCalledTimes(2);
   });
 });

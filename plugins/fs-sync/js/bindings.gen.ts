@@ -149,6 +149,18 @@ async audioSourceMetadata(sourcePath: string) : Promise<Result<AudioSourceMetada
     else return { status: "error", error: e  as any };
 }
 },
+/**
+ * Content hash of a recording still sitting outside the vault, so an import
+ * can skip a file it already has instead of copying it in to find out.
+ */
+async audioSourceSha256(sourcePath: string) : Promise<Result<string, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:fs-sync|audio_source_sha256", { sourcePath }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async audioPath(sessionId: string) : Promise<Result<string, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:fs-sync|audio_path", { sessionId }) };
