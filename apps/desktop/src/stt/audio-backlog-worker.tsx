@@ -211,12 +211,22 @@ function TranscribeOne({ sessionId }: { sessionId: string }) {
 }
 
 /**
- * Blocks until a queued summary reaches a terminal state.
+ * Blocks until a queued summary has actually finished.
  *
- * Polled rather than subscribed because the task store keys on a note id the
- * caller only learns after queueing, and a summary takes minutes — a second of
- * latency at the end of one is not worth a subscription to notice.
+ * `enhance` resolves once the task is queued, and the task store only flips to
+ * "generating" after its own awaits — so for a moment the status is idle or
+ * absent. Reading that as "finished" is what let the worker move on and stop
+ * llama-server while the summary was still streaming, which surfaced as
+ * "error sending request" against a port that no longer existed.
+ *
+ * So there are two waits: one for it to start, one for it to end. A summary
+ * that never starts is not worth blocking a several-hundred-file run over, and
+ * one that never ends must not block it forever either.
  */
+const ENHANCE_START_TIMEOUT_MS = 60_000;
+const ENHANCE_SETTLE_TIMEOUT_MS = 30 * 60_000;
+const ENHANCE_POLL_MS = 500;
+
 async function waitForEnhance(
   aiTaskStore: {
     getState: () => {
@@ -227,12 +237,31 @@ async function waitForEnhance(
   isCancelled: () => boolean,
 ): Promise<void> {
   const taskId = createTaskId(noteId, "enhance");
+  const statusNow = () => aiTaskStore.getState().getState(taskId)?.status;
+  const settled = (status: string | undefined) =>
+    status === "success" || status === "error";
 
-  while (!isCancelled()) {
-    const task = aiTaskStore.getState().getState(taskId);
-    if (task?.status !== "generating") {
-      return;
+  const waitUntil = async (
+    done: (status: string | undefined) => boolean,
+    timeoutMs: number,
+  ): Promise<boolean> => {
+    const deadline = Date.now() + timeoutMs;
+    while (!isCancelled() && Date.now() < deadline) {
+      if (done(statusNow())) {
+        return true;
+      }
+      await new Promise((resolve) => setTimeout(resolve, ENHANCE_POLL_MS));
     }
-    await new Promise((resolve) => setTimeout(resolve, 1_000));
+    return false;
+  };
+
+  const started = await waitUntil(
+    (status) => status === "generating" || settled(status),
+    ENHANCE_START_TIMEOUT_MS,
+  );
+  if (!started) {
+    return;
   }
+
+  await waitUntil(settled, ENHANCE_SETTLE_TIMEOUT_MS);
 }

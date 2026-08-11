@@ -19,6 +19,8 @@ const mocks = vi.hoisted(() => ({
   loadImportedAudioFingerprints: vi.fn(),
   softDeleteSession: vi.fn(),
   finalizeSessionDeletion: vi.fn(),
+  keepAwakeAcquire: vi.fn(),
+  keepAwakeRelease: vi.fn(),
 }));
 
 vi.mock("@meeki/plugin-fs-sync", () => ({
@@ -27,6 +29,13 @@ vi.mock("@meeki/plugin-fs-sync", () => ({
     audioImportData: mocks.audioImportData,
     audioSourceFingerprint: mocks.audioSourceFingerprint,
     audioMetadata: mocks.audioMetadata,
+  },
+}));
+
+vi.mock("@meeki/plugin-misc", () => ({
+  commands: {
+    keepAwakeAcquire: mocks.keepAwakeAcquire,
+    keepAwakeRelease: mocks.keepAwakeRelease,
   },
 }));
 
@@ -141,6 +150,8 @@ describe("importing several recordings at once", () => {
     );
     mocks.softDeleteSession.mockResolvedValue({ session: { id: "x" } });
     mocks.finalizeSessionDeletion.mockResolvedValue(undefined);
+    mocks.keepAwakeAcquire.mockResolvedValue(undefined);
+    mocks.keepAwakeRelease.mockResolvedValue(undefined);
   });
 
   it("gives every dropped recording its own note", async () => {
@@ -467,6 +478,8 @@ describe("skipping recordings already in the library", () => {
     );
     mocks.softDeleteSession.mockResolvedValue({ session: { id: "x" } });
     mocks.finalizeSessionDeletion.mockResolvedValue(undefined);
+    mocks.keepAwakeAcquire.mockResolvedValue(undefined);
+    mocks.keepAwakeRelease.mockResolvedValue(undefined);
   });
 
   it("does not copy a file whose contents are already imported", async () => {
@@ -546,5 +559,28 @@ describe("skipping recordings already in the library", () => {
 
     // Deleting on a failed read would destroy a recording to save disk space.
     expect(mocks.softDeleteSession).not.toHaveBeenCalled();
+  });
+
+  it("holds off sleep for the whole import and releases it after", async () => {
+    mocks.selectFile.mockResolvedValue(["/tmp/a.mp3", "/tmp/b.mp3"]);
+    const { result } = renderHook(() => useNewNoteAndUpload());
+
+    await result.current("audio");
+
+    // Copying hundreds of files runs for a long time and a sleeping Mac does
+    // not resume it, so the assertion spans the run rather than each file.
+    expect(mocks.keepAwakeAcquire).toHaveBeenCalledTimes(1);
+    expect(mocks.keepAwakeRelease).toHaveBeenCalledTimes(1);
+  });
+
+  it("releases the sleep assertion even when the import throws", async () => {
+    mocks.selectFile.mockResolvedValue(["/tmp/a.mp3", "/tmp/b.mp3"]);
+    mocks.createSession.mockRejectedValue(new Error("db gone"));
+    const { result } = renderHook(() => useNewNoteAndUpload());
+
+    await result.current("audio").catch(() => {});
+
+    // Leaking it would keep the Mac awake for the rest of the session.
+    expect(mocks.keepAwakeRelease).toHaveBeenCalledTimes(1);
   });
 });

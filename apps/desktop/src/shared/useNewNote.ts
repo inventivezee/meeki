@@ -4,6 +4,7 @@ import { useCallback, useEffect } from "react";
 import { useShallow } from "zustand/shallow";
 
 import { commands as fsSyncCommands } from "@meeki/plugin-fs-sync";
+import { commands as miscCommands } from "@meeki/plugin-misc";
 import { sonnerToast } from "@meeki/ui/components/ui/toast";
 
 import { catalogLocalSessionAudio } from "~/session/attachments";
@@ -260,6 +261,7 @@ async function importIntoNewNote(
 }
 
 const IMPORT_TOAST_ID = "bulk-audio-import";
+const IMPORT_KEEP_AWAKE_REASON = "Meeki is importing recordings";
 
 /**
  * Imports a multi-file selection one at a time, reporting as it goes, and
@@ -294,73 +296,85 @@ async function importBatch<T>(
     await loadImportedAudioFingerprints().catch(() => new Set<string>()),
   );
 
-  const report = (done: number) => {
-    sonnerToast.message(`Importing ${total} recordings`, {
-      id: IMPORT_TOAST_ID,
-      description:
-        skipped > 0
-          ? `${done} of ${total} · ${skipped} already imported`
-          : `${done} of ${total}`,
-      duration: Infinity,
-      action: {
-        label: "Stop",
-        onClick: () => {
-          stopped = true;
+  // Copying several hundred recordings runs for a long time, and a Mac that
+  // sleeps partway through does not resume it — tokio's timers do not advance
+  // while asleep. The transcription run holds its own assertion; this covers
+  // the copying, which until now had none.
+  await miscCommands.keepAwakeAcquire(IMPORT_KEEP_AWAKE_REASON).catch(() => {});
+
+  try {
+    const report = (done: number) => {
+      sonnerToast.message(`Importing ${total} recordings`, {
+        id: IMPORT_TOAST_ID,
+        description:
+          skipped > 0
+            ? `${done} of ${total} · ${skipped} already imported`
+            : `${done} of ${total}`,
+        duration: Infinity,
+        action: {
+          label: "Stop",
+          onClick: () => {
+            stopped = true;
+          },
         },
-      },
-    });
-  };
+      });
+    };
 
-  report(0);
+    report(0);
 
-  for (const item of items) {
-    if (stopped) {
-      break;
-    }
+    for (const item of items) {
+      if (stopped) {
+        break;
+      }
 
-    // Cheapest when we have a path: a duplicate costs one read rather than a
-    // read, a write and a delete.
-    if (
-      sourcePathOf &&
-      (await duplicates.isDuplicateSource(sourcePathOf(item)))
-    ) {
-      skipped += 1;
+      // Cheapest when we have a path: a duplicate costs one read rather than a
+      // read, a write and a delete.
+      if (
+        sourcePathOf &&
+        (await duplicates.isDuplicateSource(sourcePathOf(item)))
+      ) {
+        skipped += 1;
+        report(sessionIds.length);
+        continue;
+      }
+
+      const sessionId = await importIntoNewNote(toImport(item));
+      if (!sessionId) {
+        report(sessionIds.length);
+        continue;
+      }
+
+      // Dropped files only become checkable once they are on disk, so the copy
+      // is made and then reclaimed. Only ever the session created a line above —
+      // it has no title, notes or transcript, so there is nothing else to lose.
+      if (!sourcePathOf && (await duplicates.isDuplicateImport(sessionId))) {
+        await discardDuplicateImport(sessionId);
+        skipped += 1;
+        report(sessionIds.length);
+        continue;
+      }
+
+      sessionIds.push(sessionId);
       report(sessionIds.length);
-      continue;
     }
 
-    const sessionId = await importIntoNewNote(toImport(item));
-    if (!sessionId) {
-      report(sessionIds.length);
-      continue;
-    }
+    // Counted rather than prompted: a run this long is unattended, and asking
+    // about each duplicate would defeat that.
+    const skippedNote =
+      skipped > 0 ? `, skipped ${skipped} already in your library` : "";
+    sonnerToast.success(
+      stopped
+        ? `Stopped after importing ${sessionIds.length} of ${total} recordings${skippedNote}`
+        : `Imported ${sessionIds.length} recordings${skippedNote}`,
+      { id: IMPORT_TOAST_ID, duration: 6_000, action: undefined },
+    );
 
-    // Dropped files only become checkable once they are on disk, so the copy
-    // is made and then reclaimed. Only ever the session created a line above —
-    // it has no title, notes or transcript, so there is nothing else to lose.
-    if (!sourcePathOf && (await duplicates.isDuplicateImport(sessionId))) {
-      await discardDuplicateImport(sessionId);
-      skipped += 1;
-      report(sessionIds.length);
-      continue;
-    }
-
-    sessionIds.push(sessionId);
-    report(sessionIds.length);
+    return sessionIds;
+  } finally {
+    await miscCommands
+      .keepAwakeRelease(IMPORT_KEEP_AWAKE_REASON)
+      .catch(() => {});
   }
-
-  // Counted rather than prompted: a run this long is unattended, and asking
-  // about each duplicate would defeat that.
-  const skippedNote =
-    skipped > 0 ? `, skipped ${skipped} already in your library` : "";
-  sonnerToast.success(
-    stopped
-      ? `Stopped after importing ${sessionIds.length} of ${total} recordings${skippedNote}`
-      : `Imported ${sessionIds.length} recordings${skippedNote}`,
-    { id: IMPORT_TOAST_ID, duration: 6_000, action: undefined },
-  );
-
-  return sessionIds;
 }
 
 const DROP_LIMIT_TOAST_ID = "audio-drop-too-large";
