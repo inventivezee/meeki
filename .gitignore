@@ -31,3 +31,6 @@ internal
 .codex-security-artifacts-*/
 .codex-security-work-ledger-*.jsonl
 .claude/launch.json
+
+# Swift Package Manager build output
+crates/transcribe-soniqo/swift-lib/.build/

@@ -7,7 +7,11 @@ import { commands as localLlmCommands } from "@meeki/plugin-local-llm";
 import { commands as miscCommands } from "@meeki/plugin-misc";
 import { sonnerToast } from "@meeki/ui/components/ui/toast";
 
-import { listUntranscribedSessions, useAudioBacklog } from "./audio-backlog";
+import {
+  type BacklogItem,
+  listBacklog,
+  useAudioBacklog,
+} from "./audio-backlog";
 import { isStoppedTranscriptionError, useRunBatch } from "./useRunBatch";
 
 import { getEnhancerService } from "~/services/enhancer";
@@ -35,16 +39,18 @@ export function AudioBacklogWorker() {
 
   useKeepAwakeWhileRunning(running);
 
+  const summarize = useAudioBacklog((state) => state.summarize);
+
   const pending = useQuery({
     enabled: running,
-    queryKey: ["audio-backlog"],
-    queryFn: listUntranscribedSessions,
+    queryKey: ["audio-backlog", summarize],
+    queryFn: () => listBacklog({ summarize }),
     // Nothing emits an event when a transcript lands, and each item takes
     // minutes anyway, so polling costs nothing worth avoiding.
     refetchInterval: 5_000,
   });
 
-  const next = pending.data?.find((sessionId) => !failed.has(sessionId));
+  const next = pending.data?.find((item) => !failed.has(backlogItemKey(item)));
 
   // The queue is not known until the first fetch lands. Reporting "finished"
   // off an undefined list would end every run the instant it started.
@@ -54,7 +60,16 @@ export function AudioBacklogWorker() {
     return null;
   }
 
-  return <TranscribeOne key={next} sessionId={next} />;
+  return <ProcessOne key={backlogItemKey(next)} item={next} />;
+}
+
+/**
+ * Keyed by kind as well as session, because one recording can appear in both
+ * passes across a run — transcribed now, summarized later — and a failure in
+ * one must not blacklist it from the other.
+ */
+function backlogItemKey(item: BacklogItem): string {
+  return `${item.kind}:${item.sessionId}`;
 }
 
 const KEEP_AWAKE_REASON = "Meeki is transcribing imported recordings";
@@ -126,14 +141,15 @@ function useBacklogProgressToast(active: boolean, hasWork: boolean) {
 }
 
 /**
- * One session's worth of work: transcribe, then summarise.
+ * One item of work: a recording to transcribe, or a transcript to summarize.
  *
  * A hook-shaped component rather than a plain async loop because `useRunBatch`
  * needs the session and its participants, and both arrive through hooks keyed
- * on the session id. Keying this component on the id is what gives each session
+ * on the session id. Keying this component on the item is what gives each one
  * its own instance of them.
  */
-function TranscribeOne({ sessionId }: { sessionId: string }) {
+function ProcessOne({ item }: { item: BacklogItem }) {
+  const { sessionId, kind } = item;
   const { aiTaskStore } = useRouteContext({ from: "__root__" });
   const runBatch = useRunBatch(sessionId);
   const recordDone = useAudioBacklog((state) => state.recordDone);
@@ -145,42 +161,47 @@ function TranscribeOne({ sessionId }: { sessionId: string }) {
   useEffect(() => {
     let cancelled = false;
 
+    const transcribe = async () => {
+      const path = await fsSyncCommands.audioPath(sessionId);
+      if (path.status === "error") {
+        throw new Error(path.error);
+      }
+
+      // Transcription is MLX on the GPU; the language model is llama.cpp on
+      // the same GPU. Metal will only wire ~75% of unified memory — measured
+      // at 11.84 GiB on a 16 GB M1 — and Gemma 4 12B's weights plus its caches
+      // are most of that on their own. Leaving the model resident through
+      // transcription exhausted that budget on exactly such a machine: the
+      // command buffer came back
+      // kIOGPUCommandBufferCallbackErrorOutOfMemory, MLX threw from Metal's
+      // completion handler where nothing can catch it, and the app aborted.
+      // WindowServer went down with the same error a second earlier.
+      await localLlmCommands.stopServer();
+
+      await runBatchRef.current(path.data, {
+        promotion: { scope: "whole_session" },
+      });
+    };
+
+    const summarize = async () => {
+      const started = await getEnhancerService()?.enhance(sessionId);
+      if (started && "noteId" in started && aiTaskStore) {
+        await waitForEnhance(aiTaskStore, started.noteId, () => cancelled);
+      }
+    };
+
     void (async () => {
       try {
-        const path = await fsSyncCommands.audioPath(sessionId);
-        if (path.status === "error") {
-          throw new Error(path.error);
+        if (kind === "transcribe") {
+          await transcribe();
         }
 
-        // Transcription is MLX on the GPU; the language model is llama.cpp on
-        // the same GPU. Metal will only wire ~75% of unified memory — measured
-        // at 11.84 GiB on a 16 GB M1 — and Gemma 4 12B's weights plus its
-        // caches are most of that on their own. Leaving the model resident
-        // through transcription exhausted the wired-memory budget on exactly
-        // that machine: the command buffer came back
-        // kIOGPUCommandBufferCallbackErrorOutOfMemory, MLX threw from Metal's
-        // completion handler where nothing can catch it, and the app aborted.
-        // WindowServer went down with the same error a second earlier.
-        //
-        // The summary step below starts it again. That costs a weight reload
-        // per recording, which is worth it to not crash.
-        await localLlmCommands.stopServer();
-
-        await runBatchRef.current(path.data, {
-          promotion: { scope: "whole_session" },
-        });
-
-        // Read at use rather than subscribed to, so flipping the choice
-        // mid-run cannot re-render this component and restart its work.
-        if (useAudioBacklog.getState().summarize) {
-          const started = await getEnhancerService()?.enhance(sessionId);
-          // `enhance` resolves once the task is queued, not once the summary
-          // exists. Waiting for it matters here: two summaries in flight can
-          // want different context windows, and growing the window restarts
-          // llama-server underneath whichever one is still streaming.
-          if (started && "noteId" in started && aiTaskStore) {
-            await waitForEnhance(aiTaskStore, started.noteId, () => cancelled);
-          }
+        // A summarize item is the recovery path: its recording already has a
+        // transcript and an empty note, which is what put it in this queue.
+        // A transcribe item only summarizes if the user asked for summaries,
+        // read at use so changing that mid-run cannot restart this component.
+        if (kind === "summarize" || useAudioBacklog.getState().summarize) {
+          await summarize();
         }
 
         if (!cancelled) {
@@ -192,12 +213,13 @@ function TranscribeOne({ sessionId }: { sessionId: string }) {
         }
         console.error("[audio-backlog] failed to process session", {
           sessionId,
+          kind,
           error,
         });
         if (!cancelled) {
           // Counted as done and skipped for the rest of this run: one
           // unreadable file must not stall the several hundred behind it.
-          recordFailure(sessionId);
+          recordFailure(backlogItemKey(item));
         }
       }
     })();
@@ -205,7 +227,7 @@ function TranscribeOne({ sessionId }: { sessionId: string }) {
     return () => {
       cancelled = true;
     };
-  }, [sessionId, recordDone, recordFailure]);
+  }, [item, sessionId, kind, aiTaskStore, recordDone, recordFailure]);
 
   return null;
 }

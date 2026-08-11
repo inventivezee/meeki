@@ -13,7 +13,7 @@ import { loadExportableRecordings } from "~/session/recordings/queries";
 import { useNewNoteAndUpload } from "~/shared/useNewNote";
 import type { EditorView } from "~/store/zustand/tabs/schema";
 import {
-  listUntranscribedSessions,
+  listBacklog,
   startBacklogRun,
   useAudioBacklog,
 } from "~/stt/audio-backlog";
@@ -55,7 +55,7 @@ function PendingTranscriptions() {
     }
 
     let current = true;
-    void listUntranscribedSessions()
+    void listBacklog()
       .then((pending) => current && setCount(pending.length))
       .catch(() => {});
     return () => {
@@ -76,7 +76,7 @@ function PendingTranscriptions() {
               Transcribing {done} of {total}
             </Trans>
           ) : (
-            <Trans>{count} recordings have no transcript</Trans>
+            <Trans>{count} recordings still to process</Trans>
           )}
         </p>
         <p className="text-muted-foreground text-xs">
@@ -100,7 +100,7 @@ function PendingTranscriptions() {
           className="shrink-0"
           onClick={() => void startBacklogRun()}
         >
-          <Trans>Transcribe all</Trans>
+          <Trans>Process all</Trans>
         </Button>
       )}
     </div>

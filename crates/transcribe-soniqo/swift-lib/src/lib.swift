@@ -1,5 +1,6 @@
 import AudioCommon
 import Foundation
+import MLX
 import OmnilingualASR
 import ParakeetASR
 import ParakeetStreamingASR
@@ -413,8 +414,31 @@ private func decodeFloatSamples(from data: Data) throws -> [Float] {
   return samples
 }
 
+/// Caps the GPU buffer pool MLX keeps between operations.
+///
+/// MLX retains freed Metal buffers rather than returning them, so a run of
+/// transcriptions grows the pool to whatever the largest one needed and holds
+/// it: measured at 6.3 GB across 6,549 IOAccelerator regions after a few
+/// hundred recordings. Metal will only wire about 75% of unified memory —
+/// 11.84 GiB of a 16 GB M1 — so that pool competes directly with the language
+/// model, and losing that race is what aborted the app with
+/// kIOGPUCommandBufferCallbackErrorOutOfMemory.
+///
+/// A cap rather than clearing after each file: clearing would throw away
+/// buffers the next recording is about to ask for again, and the reuse is why
+/// the cache exists. 512 MB is comfortably above what one transcription needs
+/// and far below what the pool grew to unbounded.
+private let gpuCacheLimitBytes = 512 * 1024 * 1024
+private let configureGPUOnce: Void = {
+  MLX.Memory.cacheLimit = gpuCacheLimitBytes
+}()
+
 private actor SoniqoBridge {
   static let shared = SoniqoBridge()
+
+  init() {
+    _ = configureGPUOnce
+  }
 
   private var loadedModels: [SpeechModelKind: LoadedSpeechModel] = [:]
   private var modelTasks: [SpeechModelKind: Task<LoadedSpeechModel, Error>] = [:]

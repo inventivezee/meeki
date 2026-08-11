@@ -4,7 +4,12 @@ const mocks = vi.hoisted(() => ({ execute: vi.fn() }));
 
 vi.mock("~/db", () => ({ liveQueryClient: { execute: mocks.execute } }));
 
-import { listUntranscribedSessions, useAudioBacklog } from "./audio-backlog";
+import {
+  listBacklog,
+  listUnsummarizedSessions,
+  listUntranscribedSessions,
+  useAudioBacklog,
+} from "./audio-backlog";
 
 describe("finding the pending recordings", () => {
   beforeEach(() => {
@@ -70,5 +75,51 @@ describe("tracking a backlog run", () => {
     const state = useAudioBacklog.getState();
     expect(state.running).toBe(false);
     expect(state.done).toBe(1);
+  });
+});
+
+describe("finding recordings that were never summarized", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.execute.mockResolvedValue([]);
+  });
+
+  it("treats an empty summary as missing, not as done", async () => {
+    await listUnsummarizedSessions();
+
+    const [sql] = mocks.execute.mock.calls[0] as [string];
+    // ensureSummaryDocument writes the row before generation, so a failed
+    // summary leaves one behind. Testing for the row alone would call every
+    // failure finished.
+    expect(sql).toContain("TRIM(session_documents.body) <> ''");
+    expect(sql).toContain("'summary', 'template_output'");
+    expect(sql).toContain("FROM transcripts");
+  });
+
+  it("queues transcription first and never queues a session twice", async () => {
+    mocks.execute
+      .mockResolvedValueOnce([{ session_id: "needs-transcript" }])
+      .mockResolvedValueOnce([
+        { session_id: "needs-transcript" },
+        { session_id: "needs-summary" },
+      ]);
+
+    const backlog = await listBacklog();
+
+    // A recording about to be transcribed will be summarized by that same
+    // pass, so it must not also appear as summary work.
+    expect(backlog).toEqual([
+      { sessionId: "needs-transcript", kind: "transcribe" },
+      { sessionId: "needs-summary", kind: "summarize" },
+    ]);
+  });
+
+  it("asks for no summary work when the user declined summaries", async () => {
+    mocks.execute.mockResolvedValueOnce([{ session_id: "a" }]);
+
+    const backlog = await listBacklog({ summarize: false });
+
+    expect(backlog).toEqual([{ sessionId: "a", kind: "transcribe" }]);
+    expect(mocks.execute).toHaveBeenCalledTimes(1);
   });
 });

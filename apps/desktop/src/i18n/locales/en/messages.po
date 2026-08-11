@@ -27,8 +27,8 @@ msgid "{0} opened on"
 msgstr "{0} opened on"
 
 #: src/settings/recordings/index.tsx
-msgid "{count} recordings have no transcript"
-msgstr "{count} recordings have no transcript"
+msgid "{count} recordings still to process"
+msgstr "{count} recordings still to process"
 
 #. placeholder {0}: formatLanguageList(unsupportedLanguages)
 #: src/settings/ai/stt/select.tsx
@@ -1685,6 +1685,10 @@ msgstr "Pro"
 msgid "Pro trial"
 msgstr "Pro trial"
 
+#: src/settings/recordings/index.tsx
+msgid "Process all"
+msgstr "Process all"
+
 #: src/settings/general/e2ee-setup.tsx
 msgid "Protect cloud sync"
 msgstr "Protect cloud sync"
@@ -2470,11 +2474,6 @@ msgstr "Timezone"
 msgid "Tip: The Meeki team loves our users!"
 msgstr "Tip: The Meeki team loves our users!"
 
-#: src/main/empty.tsx
-#~ msgid "Transcribe {count} imported recordings"
-#~ msgstr "Transcribe {count} imported recordings"
-
-#: src/settings/recordings/index.tsx
 #: src/shared/bulk-import-prompt.tsx
 msgid "Transcribe all"
 msgstr "Transcribe all"

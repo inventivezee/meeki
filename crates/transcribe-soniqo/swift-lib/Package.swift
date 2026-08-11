@@ -16,6 +16,9 @@ let package = Package(
       url: "https://github.com/Brendonovich/swift-rs",
       revision: "01980f981bc642a6da382cc0788f18fdd4cde6df"),
     .package(url: "https://github.com/soniqo/speech-swift", exact: "0.0.22"),
+    // Already resolved at this version as a dependency of speech-swift; named
+    // here only so this target may bound MLX's GPU buffer cache.
+    .package(url: "https://github.com/ml-explore/mlx-swift", exact: "0.31.3"),
   ],
   targets: [
     .target(
@@ -27,6 +30,7 @@ let package = Package(
         .product(name: "ParakeetStreamingASR", package: "speech-swift"),
         .product(name: "Qwen3ASR", package: "speech-swift"),
         .product(name: "SwiftRs", package: "swift-rs"),
+        .product(name: "MLX", package: "mlx-swift"),
       ],
       path: "src"
     )

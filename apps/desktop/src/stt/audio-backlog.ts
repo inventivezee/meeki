@@ -41,6 +41,79 @@ export async function listUntranscribedSessions(): Promise<string[]> {
   return rows.map((row) => row.session_id);
 }
 
+/**
+ * Sessions that were transcribed but never summarized.
+ *
+ * The transcribe pass marks a recording processed the moment its transcript
+ * lands, so a summary that failed afterwards left nothing to look for — the
+ * recording had dropped out of the only queue there was. This is the second
+ * half: same trick, different question.
+ *
+ * An empty body counts as missing, because `ensureSummaryDocument` writes the
+ * row before generation starts. A summary that failed leaves that row behind,
+ * so testing for the row alone would declare every failure finished.
+ */
+const PENDING_SUMMARY_SQL = `
+  SELECT session.id AS session_id
+  FROM sessions AS session
+  WHERE session.deleted_at IS NULL
+    AND EXISTS (
+      SELECT 1
+      FROM transcripts
+      WHERE transcripts.session_id = session.id
+        AND transcripts.deleted_at IS NULL
+    )
+    AND NOT EXISTS (
+      SELECT 1
+      FROM session_documents
+      WHERE session_documents.session_id = session.id
+        AND session_documents.deleted_at IS NULL
+        AND session_documents.kind IN ('summary', 'template_output')
+        AND TRIM(session_documents.body) <> ''
+    )
+  ORDER BY session.created_at, session.id
+`;
+
+export async function listUnsummarizedSessions(): Promise<string[]> {
+  const rows = await liveQueryClient.execute<{ session_id: string }>(
+    PENDING_SUMMARY_SQL,
+  );
+  return rows.map((row) => row.session_id);
+}
+
+export type BacklogItem = {
+  sessionId: string;
+  kind: "transcribe" | "summarize";
+};
+
+/**
+ * Everything still to do, transcription first.
+ *
+ * Ordering matters: a recording transcribed in this run should be summarized by
+ * the pass that follows rather than queued twice, and putting transcription
+ * first means the summary sweep sees a settled picture when it gets there.
+ */
+export async function listBacklog(options?: {
+  summarize?: boolean;
+}): Promise<BacklogItem[]> {
+  const [untranscribed, unsummarized] = await Promise.all([
+    listUntranscribedSessions(),
+    options?.summarize === false
+      ? Promise.resolve<string[]>([])
+      : listUnsummarizedSessions(),
+  ]);
+
+  const transcribing = new Set(untranscribed);
+  return [
+    ...untranscribed.map(
+      (sessionId): BacklogItem => ({ sessionId, kind: "transcribe" }),
+    ),
+    ...unsummarized
+      .filter((sessionId) => !transcribing.has(sessionId))
+      .map((sessionId): BacklogItem => ({ sessionId, kind: "summarize" })),
+  ];
+}
+
 type BacklogState = {
   running: boolean;
   /** How many were pending when the user started, so progress reads as N of M. */
@@ -93,7 +166,7 @@ export const useAudioBacklog = create<BacklogState>((set) => ({
 export async function startBacklogRun(options?: {
   summarize?: boolean;
 }): Promise<void> {
-  const pending = await listUntranscribedSessions().catch(() => []);
+  const pending = await listBacklog(options).catch(() => []);
   if (pending.length === 0) {
     return;
   }
