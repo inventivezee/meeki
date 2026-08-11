@@ -18,7 +18,7 @@ permissions = [
     "allow-audio-import",
     "allow-audio-import-data",
     "allow-audio-source-metadata",
-    "allow-audio-source-sha256",
+    "allow-audio-source-fingerprint",
     "allow-audio-path",
     "allow-session-dir",
     "allow-load-session-content",

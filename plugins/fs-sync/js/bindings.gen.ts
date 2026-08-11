@@ -150,12 +150,12 @@ async audioSourceMetadata(sourcePath: string) : Promise<Result<AudioSourceMetada
 }
 },
 /**
- * Content hash of a recording still sitting outside the vault, so an import
- * can skip a file it already has instead of copying it in to find out.
+ * Content hash and size of a recording still sitting outside the vault, so an
+ * import can skip a file it already has instead of copying it in to find out.
  */
-async audioSourceSha256(sourcePath: string) : Promise<Result<string, string>> {
+async audioSourceFingerprint(sourcePath: string) : Promise<Result<AudioSourceFingerprint, string>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("plugin:fs-sync|audio_source_sha256", { sourcePath }) };
+    return { status: "ok", data: await TAURI_INVOKE("plugin:fs-sync|audio_source_fingerprint", { sourcePath }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -270,6 +270,11 @@ export type AttachmentInfo = { attachmentId: string; path: string; extension: st
 export type AttachmentSaveResult = { path: string; attachmentId: string }
 export type AudioFileMetadata = { filename: string; contentType: string; sizeBytes: number; sha256: string }
 export type AudioImportEvent = { type: "audioImportStarted"; session_id: string } | { type: "audioImportProgress"; session_id: string; percentage: number } | { type: "audioImportCompleted"; session_id: string } | { type: "audioImportFailed"; session_id: string; error: string }
+/**
+ * What a recording outside the vault looks like, for deciding whether it is
+ * one we already have. Deliberately the same pair the attachment row stores.
+ */
+export type AudioSourceFingerprint = { sha256: string; sizeBytes: number }
 export type AudioSourceMetadata = { createdAt: string | null; modifiedAt: string | null; durationMs: number | null }
 export type FolderInfo = { name: string; parent_folder_id: string | null }
 export type FolderSessionUpdate = { sessionId: string; folderId: string }

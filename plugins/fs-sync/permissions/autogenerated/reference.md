@@ -21,7 +21,7 @@ Default permissions for the fs-sync plugin
 - `allow-audio-import`
 - `allow-audio-import-data`
 - `allow-audio-source-metadata`
-- `allow-audio-source-sha256`
+- `allow-audio-source-fingerprint`
 - `allow-audio-path`
 - `allow-session-dir`
 - `allow-load-session-content`
@@ -351,6 +351,32 @@ Enables the audio_path command without any pre-configured scope.
 <td>
 
 Denies the audio_path command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`fs-sync:allow-audio-source-fingerprint`
+
+</td>
+<td>
+
+Enables the audio_source_fingerprint command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`fs-sync:deny-audio-source-fingerprint`
+
+</td>
+<td>
+
+Denies the audio_source_fingerprint command without any pre-configured scope.
 
 </td>
 </tr>

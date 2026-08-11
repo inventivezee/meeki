@@ -11,7 +11,8 @@ import { createSession } from "~/session/queries";
 import { askBulkImportChoice } from "~/shared/bulk-import-prompt";
 import {
   createDuplicateFilter,
-  loadImportedAudioHashes,
+  discardDuplicateImport,
+  loadImportedAudioFingerprints,
 } from "~/shared/import-duplicates";
 import { useTabs } from "~/store/zustand/tabs";
 import { startBacklogRun } from "~/stt/audio-backlog";
@@ -289,11 +290,9 @@ async function importBatch<T>(
   let skipped = 0;
   let stopped = false;
 
-  const duplicates = sourcePathOf
-    ? createDuplicateFilter(
-        await loadImportedAudioHashes().catch(() => new Set<string>()),
-      )
-    : null;
+  const duplicates = createDuplicateFilter(
+    await loadImportedAudioFingerprints().catch(() => new Set<string>()),
+  );
 
   const report = (done: number) => {
     sonnerToast.message(`Importing ${total} recordings`, {
@@ -319,20 +318,34 @@ async function importBatch<T>(
       break;
     }
 
-    // Checked before the copy, so a duplicate costs a read rather than a read,
-    // a write and a delete.
-    if (duplicates && sourcePathOf) {
-      if (await duplicates.isDuplicate(sourcePathOf(item))) {
-        skipped += 1;
-        report(sessionIds.length);
-        continue;
-      }
+    // Cheapest when we have a path: a duplicate costs one read rather than a
+    // read, a write and a delete.
+    if (
+      sourcePathOf &&
+      (await duplicates.isDuplicateSource(sourcePathOf(item)))
+    ) {
+      skipped += 1;
+      report(sessionIds.length);
+      continue;
     }
 
     const sessionId = await importIntoNewNote(toImport(item));
-    if (sessionId) {
-      sessionIds.push(sessionId);
+    if (!sessionId) {
+      report(sessionIds.length);
+      continue;
     }
+
+    // Dropped files only become checkable once they are on disk, so the copy
+    // is made and then reclaimed. Only ever the session created a line above —
+    // it has no title, notes or transcript, so there is nothing else to lose.
+    if (!sourcePathOf && (await duplicates.isDuplicateImport(sessionId))) {
+      await discardDuplicateImport(sessionId);
+      skipped += 1;
+      report(sessionIds.length);
+      continue;
+    }
+
+    sessionIds.push(sessionId);
     report(sessionIds.length);
   }
 

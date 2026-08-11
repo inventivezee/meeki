@@ -383,13 +383,17 @@ pub(crate) async fn audio_source_metadata(
     })
 }
 
-/// Content hash of a recording still sitting outside the vault, so an import
-/// can skip a file it already has instead of copying it in to find out.
+/// Content hash and size of a recording still sitting outside the vault, so an
+/// import can skip a file it already has instead of copying it in to find out.
 #[tauri::command]
 #[specta::specta]
-pub(crate) async fn audio_source_sha256(source_path: String) -> Result<String, String> {
+pub(crate) async fn audio_source_fingerprint(
+    source_path: String,
+) -> Result<crate::audio::AudioSourceFingerprint, String> {
     spawn_blocking!({
-        crate::audio::file_sha256(&PathBuf::from(source_path)).map_err(|e| e.to_string())
+        crate::audio::file_fingerprint(&PathBuf::from(source_path))
+            .map(|(sha256, size_bytes)| crate::audio::AudioSourceFingerprint { sha256, size_bytes })
+            .map_err(|e| e.to_string())
     })
 }
 

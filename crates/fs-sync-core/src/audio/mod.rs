@@ -29,6 +29,15 @@ pub struct AudioSourceMetadata {
     pub duration_ms: Option<u64>,
 }
 
+/// What a recording outside the vault looks like, for deciding whether it is
+/// one we already have. Deliberately the same pair the attachment row stores.
+#[derive(Clone, Debug, PartialEq, Eq, serde::Serialize, specta::Type)]
+#[serde(rename_all = "camelCase")]
+pub struct AudioSourceFingerprint {
+    pub sha256: String,
+    pub size_bytes: u64,
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, serde::Serialize, specta::Type)]
 #[serde(rename_all = "camelCase")]
 pub struct AudioFileMetadata {
@@ -68,17 +77,21 @@ fn hex_digest(hasher: Sha256) -> String {
         })
 }
 
-/// Streaming sha256 of a file anywhere on disk.
+/// Content hash and size of a file anywhere on disk.
 ///
 /// Exists so an import can ask "is this recording already in the library?"
 /// before paying to copy it in. `metadata` can only answer that for a file
 /// already inside a session folder, which is too late to skip the copy — and
 /// across a folder of several hundred recordings the copies are the expensive
 /// part. Chunked, so a large file costs 64 KiB of memory rather than its size.
-pub fn file_sha256(path: &Path) -> std::io::Result<String> {
+///
+/// Size comes back alongside the hash because the pass has to count the bytes
+/// anyway, and it lets both sides of the duplicate check key on the same pair.
+pub fn file_fingerprint(path: &Path) -> std::io::Result<(String, u64)> {
     let mut file = std::fs::File::open(path)?;
     let mut hasher = Sha256::new();
     let mut buffer = [0_u8; 64 * 1024];
+    let mut size_bytes = 0_u64;
 
     loop {
         let bytes_read = file.read(&mut buffer)?;
@@ -86,9 +99,12 @@ pub fn file_sha256(path: &Path) -> std::io::Result<String> {
             break;
         }
         hasher.update(&buffer[..bytes_read]);
+        size_bytes = size_bytes
+            .checked_add(bytes_read as u64)
+            .ok_or_else(|| std::io::Error::other("audio_file_too_large"))?;
     }
 
-    Ok(hex_digest(hasher))
+    Ok((hex_digest(hasher), size_bytes))
 }
 
 pub fn metadata(session_dir: &Path) -> std::io::Result<Option<AudioFileMetadata>> {
