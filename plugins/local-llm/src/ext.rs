@@ -3,6 +3,9 @@ use tauri::{Manager, Runtime, ipc::Channel};
 
 use meeki_model_downloader::{DownloadableModel, ModelDownloadManager, ModelDownloaderRuntime};
 
+/// Only one server start at a time. See `start_server`.
+static START_MUTEX: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
+
 struct TauriModelRuntime<R: Runtime> {
     app_handle: tauri::AppHandle<R>,
     channels: Arc<std::sync::Mutex<HashMap<String, Channel<i8>>>>,
@@ -255,6 +258,16 @@ impl<'a, R: Runtime, M: Manager<R>> LocalLlmExt<'a, R, M> {
         model: crate::SupportedModel,
         ctx_size: Option<u32>,
     ) -> Result<String, crate::Error> {
+        // Serialised across callers, and held for the whole start rather than
+        // just the state read. Several things ask for the server independently
+        // — the five-second liveness poll, and sizing the window before a
+        // summary — and replacing a server empties the state while the new one
+        // loads. Without this, a caller arriving in that window saw nothing
+        // running and spawned a second llama-server: observed as pairs of
+        // processes a fraction of a second apart, each loading the weights
+        // again, on a machine that then had two copies of the model resident.
+        let _starting = START_MUTEX.lock().await;
+
         let state = self.manager.state::<crate::SharedState>();
         let model_id = model.openai_model_id();
         let ctx_size = meeki_local_llm_core::resolved_ctx_size(Some(&model), ctx_size);

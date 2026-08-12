@@ -424,17 +424,21 @@ private func decodeFloatSamples(from data: Data) throws -> [Float] {
 /// language model, and losing that race aborted the app with
 /// kIOGPUCommandBufferCallbackErrorOutOfMemory.
 ///
-/// A share of RAM rather than one fixed number. A cap tight enough to protect
-/// a 16 GB machine starves a 64 GB one, where the pool is pure speed and there
-/// is memory to spare: too small and MLX returns buffers it is about to ask
-/// for again, which shows up as slower transcription.
+/// Flat at or below 16 GB, scaling above it. 16 GB is where the pool actually
+/// crowded the language model out of Metal's wired-memory budget, so that end
+/// stays deliberately tight; past it there is room to spare and the pool is
+/// pure speed, so it gets an eighth of RAM up to 8 GB.
 ///
 /// A cap, not a periodic clear, because reuse between operations is the whole
 /// point of the cache.
 private let gpuCacheLimitBytes: Int = {
     let physical = ProcessInfo.processInfo.physicalMemory
+    let sixteenGB: UInt64 = 16 * 1024 * 1024 * 1024
+    if physical <= sixteenGB {
+        return 512 * 1024 * 1024
+    }
     let share = Int(min(physical / 8, UInt64(Int.max)))
-    return min(max(share, 512 * 1024 * 1024), 8 * 1024 * 1024 * 1024)
+    return min(share, 8 * 1024 * 1024 * 1024)
 }()
 
 private let configureGPUOnce: Void = {
