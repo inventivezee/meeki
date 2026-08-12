@@ -432,17 +432,17 @@ private func decodeFloatSamples(from data: Data) throws -> [Float] {
 /// A cap, not a periodic clear, because reuse between operations is the whole
 /// point of the cache.
 private let gpuCacheLimitBytes: Int = {
-    let physical = ProcessInfo.processInfo.physicalMemory
-    let sixteenGB: UInt64 = 16 * 1024 * 1024 * 1024
-    if physical <= sixteenGB {
-        return 512 * 1024 * 1024
-    }
-    let share = Int(min(physical / 8, UInt64(Int.max)))
-    return min(share, 8 * 1024 * 1024 * 1024)
+  let physical = ProcessInfo.processInfo.physicalMemory
+  let sixteenGB: UInt64 = 16 * 1024 * 1024 * 1024
+  if physical <= sixteenGB {
+    return 512 * 1024 * 1024
+  }
+  let share = Int(min(physical / 8, UInt64(Int.max)))
+  return min(share, 8 * 1024 * 1024 * 1024)
 }()
 
 private let configureGPUOnce: Void = {
-    MLX.Memory.cacheLimit = gpuCacheLimitBytes
+  MLX.Memory.cacheLimit = gpuCacheLimitBytes
 }()
 
 private actor SoniqoBridge {
