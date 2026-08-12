@@ -414,23 +414,31 @@ private func decodeFloatSamples(from data: Data) throws -> [Float] {
   return samples
 }
 
-/// Caps the GPU buffer pool MLX keeps between operations.
+/// Caps the GPU buffer pool MLX keeps between operations, sized to the machine.
 ///
 /// MLX retains freed Metal buffers rather than returning them, so a run of
 /// transcriptions grows the pool to whatever the largest one needed and holds
 /// it: measured at 6.3 GB across 6,549 IOAccelerator regions after a few
 /// hundred recordings. Metal will only wire about 75% of unified memory —
-/// 11.84 GiB of a 16 GB M1 — so that pool competes directly with the language
-/// model, and losing that race is what aborted the app with
+/// 11.84 GiB of a 16 GB Mac — so an unbounded pool competes directly with the
+/// language model, and losing that race aborted the app with
 /// kIOGPUCommandBufferCallbackErrorOutOfMemory.
 ///
-/// A cap rather than clearing after each file: clearing would throw away
-/// buffers the next recording is about to ask for again, and the reuse is why
-/// the cache exists. 512 MB is comfortably above what one transcription needs
-/// and far below what the pool grew to unbounded.
-private let gpuCacheLimitBytes = 512 * 1024 * 1024
+/// A share of RAM rather than one fixed number. A cap tight enough to protect
+/// a 16 GB machine starves a 64 GB one, where the pool is pure speed and there
+/// is memory to spare: too small and MLX returns buffers it is about to ask
+/// for again, which shows up as slower transcription.
+///
+/// A cap, not a periodic clear, because reuse between operations is the whole
+/// point of the cache.
+private let gpuCacheLimitBytes: Int = {
+    let physical = ProcessInfo.processInfo.physicalMemory
+    let share = Int(min(physical / 8, UInt64(Int.max)))
+    return min(max(share, 512 * 1024 * 1024), 8 * 1024 * 1024 * 1024)
+}()
+
 private let configureGPUOnce: Void = {
-  MLX.Memory.cacheLimit = gpuCacheLimitBytes
+    MLX.Memory.cacheLimit = gpuCacheLimitBytes
 }()
 
 private actor SoniqoBridge {
