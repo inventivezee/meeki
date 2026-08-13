@@ -2479,6 +2479,10 @@ msgid "Transcribe all"
 msgstr ""
 
 #: src/settings/recordings/index.tsx
+msgid "Transcribe only"
+msgstr ""
+
+#: src/settings/recordings/index.tsx
 msgid "Transcribing {done} of {total}"
 msgstr ""
 

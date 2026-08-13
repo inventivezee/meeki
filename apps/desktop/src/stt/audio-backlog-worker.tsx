@@ -12,6 +12,7 @@ import {
   listBacklog,
   useAudioBacklog,
 } from "./audio-backlog";
+import { useListener } from "./contexts";
 import { isStoppedTranscriptionError, useRunBatch } from "./useRunBatch";
 
 import { getEnhancerService } from "~/services/enhancer";
@@ -52,11 +53,20 @@ export function AudioBacklogWorker() {
 
   const next = pending.data?.find((item) => !failed.has(backlogItemKey(item)));
 
+  // A live recording drives the same Swift transcriber this queue does. Running
+  // both at once tripped a fatal assertion inside it and took the app down
+  // mid-call, losing the recording. The batch waits; the call does not.
+  const recording = useListener((state) => state.live.status !== "inactive");
+
   // The queue is not known until the first fetch lands. Reporting "finished"
   // off an undefined list would end every run the instant it started.
-  useBacklogProgressToast(running && pending.isSuccess, Boolean(next));
+  useBacklogProgressToast(
+    running && pending.isSuccess,
+    Boolean(next),
+    recording,
+  );
 
-  if (!running || !next) {
+  if (!running || recording || !next) {
     return null;
   }
 
@@ -70,6 +80,39 @@ export function AudioBacklogWorker() {
  */
 function backlogItemKey(item: BacklogItem): string {
   return `${item.kind}:${item.sessionId}`;
+}
+
+/**
+ * Below this, the language model is stopped before every transcription.
+ *
+ * Metal will only wire about 75% of unified memory — 11.84 GiB measured on a
+ * 16 GB M1 — and Gemma 4 12B's weights plus its caches are most of that alone.
+ * Leaving it resident through transcription exhausted that budget on exactly
+ * such a machine: the command buffer returned
+ * kIOGPUCommandBufferCallbackErrorOutOfMemory and the app aborted.
+ *
+ * Above it there is headroom for both, and keeping the model loaded saves a
+ * cold 12B reload before every single summary. 32 GiB rather than 24 GiB
+ * because the ceiling scales with total memory — 24 GiB wires only 18 GiB, and
+ * that margin is too thin to bet a several-hundred-file run on.
+ */
+const KEEP_MODEL_RESIDENT_MIN_BYTES = 32 * 1024 * 1024 * 1024;
+
+let modelMayStayResident: Promise<boolean> | undefined;
+
+function canKeepModelResident(): Promise<boolean> {
+  // Asked once per launch: total memory does not change, and this sits in the
+  // path of every recording. Any failure answers "no" — the machines this
+  // protects are the ones that crash when it is wrong.
+  modelMayStayResident ??= localLlmCommands
+    .recommendedModel()
+    .then(
+      (result) =>
+        result.status === "ok" &&
+        result.data.total_memory_bytes >= KEEP_MODEL_RESIDENT_MIN_BYTES,
+    )
+    .catch(() => false);
+  return modelMayStayResident;
 }
 
 const KEEP_AWAKE_REASON = "Meeki is transcribing imported recordings";
@@ -99,11 +142,26 @@ function useKeepAwakeWhileRunning(running: boolean) {
   }, [running]);
 }
 
-function useBacklogProgressToast(active: boolean, hasWork: boolean) {
+function useBacklogProgressToast(
+  active: boolean,
+  hasWork: boolean,
+  paused: boolean,
+) {
   const { total, done, failed, stop } = useAudioBacklog();
 
   useEffect(() => {
     if (!active) {
+      return;
+    }
+
+    // Checked before "finished": a run held for a recording still has work, and
+    // announcing completion here would stop it for good.
+    if (paused) {
+      sonnerToast.message("Recording — transcription paused", {
+        id: BACKLOG_TOAST_ID,
+        description: `${done} of ${total} · resumes when the recording ends`,
+        duration: Infinity,
+      });
       return;
     }
 
@@ -137,7 +195,7 @@ function useBacklogProgressToast(active: boolean, hasWork: boolean) {
         },
       },
     });
-  }, [active, hasWork, done, total, failed, stop]);
+  }, [active, hasWork, paused, done, total, failed, stop]);
 }
 
 /**
@@ -168,15 +226,13 @@ function ProcessOne({ item }: { item: BacklogItem }) {
       }
 
       // Transcription is MLX on the GPU; the language model is llama.cpp on
-      // the same GPU. Metal will only wire ~75% of unified memory — measured
-      // at 11.84 GiB on a 16 GB M1 — and Gemma 4 12B's weights plus its caches
-      // are most of that on their own. Leaving the model resident through
-      // transcription exhausted that budget on exactly such a machine: the
-      // command buffer came back
-      // kIOGPUCommandBufferCallbackErrorOutOfMemory, MLX threw from Metal's
-      // completion handler where nothing can catch it, and the app aborted.
-      // WindowServer went down with the same error a second earlier.
-      await localLlmCommands.stopServer();
+      // the same GPU. On a machine that cannot hold both, the model goes away
+      // for the duration — see KEEP_MODEL_RESIDENT_MIN_BYTES for what happens
+      // when it does not. On one that can, it stays, because stopping it means
+      // reloading 12B from cold before the summary that follows.
+      if (!(await canKeepModelResident())) {
+        await localLlmCommands.stopServer();
+      }
 
       await runBatchRef.current(path.data, {
         promotion: { scope: "whole_session" },
@@ -249,9 +305,16 @@ function ProcessOne({ item }: { item: BacklogItem }) {
  * So there are two waits: one for it to start, one for it to end. A summary
  * that never starts is not worth blocking a several-hundred-file run over, and
  * one that never ends must not block it forever either.
+ *
+ * The start wait is minutes, not seconds. Transcription kills llama-server
+ * first to keep the two models off the GPU at once, so the summary that follows
+ * has to load a 12B model from cold on a machine that has just finished
+ * saturating the GPU. At sixty seconds this gave up before that load finished,
+ * moved to the next recording, and killed the server it had just started — 116
+ * summaries in one batch left an empty row and no text.
  */
-const ENHANCE_START_TIMEOUT_MS = 60_000;
-const ENHANCE_SETTLE_TIMEOUT_MS = 30 * 60_000;
+const ENHANCE_START_TIMEOUT_MS = 5 * 60_000;
+const ENHANCE_SETTLE_TIMEOUT_MS = 10 * 60_000;
 const ENHANCE_POLL_MS = 500;
 
 async function waitForEnhance(
