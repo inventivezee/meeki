@@ -106,6 +106,22 @@ fn parse_ctx_size(raw: Option<&str>, fallback: u32) -> u32 {
         .unwrap_or(fallback)
 }
 
+/// The largest window asked for so far in this process.
+///
+/// Two callers ask for a server independently and disagree about size: the
+/// liveness poll passes nothing and gets the default, while sizing a summary
+/// passes what that transcript needs. Without a shared floor the poll starts a
+/// default-sized server and the summary immediately replaces it — two
+/// llama-servers a fraction of a second apart, each loading the weights again,
+/// on every single recording of a batch. Flooring every start at the high-water
+/// mark makes the poll start the server the summary was going to ask for, so
+/// the summary reuses it instead of replacing it.
+///
+/// Only ever rises, which matches the documented contract: a window already
+/// paid for is never given back mid-session, because shrinking costs a full
+/// reload and buys nothing.
+static CTX_HIGH_WATER: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
+
 /// The window to start llama-server with.
 ///
 /// `needed` is what the work in hand actually requires — a long transcript
@@ -129,6 +145,9 @@ pub fn resolved_ctx_size(model: Option<&SupportedModel>, needed: Option<u32>) ->
         }
         None => MIN_CTX_SIZE,
     };
+    let previous = CTX_HIGH_WATER.fetch_max(fallback, std::sync::atomic::Ordering::Relaxed);
+    let fallback = fallback.max(previous);
+
     parse_ctx_size(std::env::var(CTX_SIZE_ENV).ok().as_deref(), fallback)
 }
 
