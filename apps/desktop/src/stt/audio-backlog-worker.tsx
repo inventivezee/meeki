@@ -72,6 +72,39 @@ function backlogItemKey(item: BacklogItem): string {
   return `${item.kind}:${item.sessionId}`;
 }
 
+/**
+ * Below this, the language model is stopped before every transcription.
+ *
+ * Metal will only wire about 75% of unified memory — 11.84 GiB measured on a
+ * 16 GB M1 — and Gemma 4 12B's weights plus its caches are most of that alone.
+ * Leaving it resident through transcription exhausted that budget on exactly
+ * such a machine: the command buffer returned
+ * kIOGPUCommandBufferCallbackErrorOutOfMemory and the app aborted.
+ *
+ * Above it there is headroom for both, and keeping the model loaded saves a
+ * cold 12B reload before every single summary. 32 GiB rather than 24 GiB
+ * because the ceiling scales with total memory — 24 GiB wires only 18 GiB, and
+ * that margin is too thin to bet a several-hundred-file run on.
+ */
+const KEEP_MODEL_RESIDENT_MIN_BYTES = 32 * 1024 * 1024 * 1024;
+
+let modelMayStayResident: Promise<boolean> | undefined;
+
+function canKeepModelResident(): Promise<boolean> {
+  // Asked once per launch: total memory does not change, and this sits in the
+  // path of every recording. Any failure answers "no" — the machines this
+  // protects are the ones that crash when it is wrong.
+  modelMayStayResident ??= localLlmCommands
+    .recommendedModel()
+    .then(
+      (result) =>
+        result.status === "ok" &&
+        result.data.total_memory_bytes >= KEEP_MODEL_RESIDENT_MIN_BYTES,
+    )
+    .catch(() => false);
+  return modelMayStayResident;
+}
+
 const KEEP_AWAKE_REASON = "Meeki is transcribing imported recordings";
 
 /**
@@ -168,15 +201,13 @@ function ProcessOne({ item }: { item: BacklogItem }) {
       }
 
       // Transcription is MLX on the GPU; the language model is llama.cpp on
-      // the same GPU. Metal will only wire ~75% of unified memory — measured
-      // at 11.84 GiB on a 16 GB M1 — and Gemma 4 12B's weights plus its caches
-      // are most of that on their own. Leaving the model resident through
-      // transcription exhausted that budget on exactly such a machine: the
-      // command buffer came back
-      // kIOGPUCommandBufferCallbackErrorOutOfMemory, MLX threw from Metal's
-      // completion handler where nothing can catch it, and the app aborted.
-      // WindowServer went down with the same error a second earlier.
-      await localLlmCommands.stopServer();
+      // the same GPU. On a machine that cannot hold both, the model goes away
+      // for the duration — see KEEP_MODEL_RESIDENT_MIN_BYTES for what happens
+      // when it does not. On one that can, it stays, because stopping it means
+      // reloading 12B from cold before the summary that follows.
+      if (!(await canKeepModelResident())) {
+        await localLlmCommands.stopServer();
+      }
 
       await runBatchRef.current(path.data, {
         promotion: { scope: "whole_session" },
