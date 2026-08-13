@@ -20,6 +20,7 @@ import {
   createTaskId,
   type TaskId,
 } from "~/store/zustand/ai-task/task-configs";
+import { listenerStore } from "~/store/zustand/listener/instance";
 
 const BACKLOG_TOAST_ID = "audio-backlog";
 
@@ -184,10 +185,12 @@ function useBacklogProgressToast(
         label: "Stop",
         onClick: () => {
           stop();
-          // The recording in flight is left to finish rather than abandoned
-          // half-transcribed; Stop means no more after this one. Replacing the
-          // toast here is what clears it — the effect above has already
-          // returned by the time `running` is false.
+          // Stop means stop: this unmounts the worker, whose teardown cancels
+          // the file being transcribed rather than leaving the GPU busy for
+          // another ten minutes. Nothing is lost — the queue is derived from
+          // the database, so that recording is simply still pending.
+          // Replacing the toast here is what clears it — the effect above has
+          // already returned by the time `running` is false.
           sonnerToast.message(`Stopped after ${done} of ${total}`, {
             id: BACKLOG_TOAST_ID,
             duration: 5_000,
@@ -246,6 +249,8 @@ function ProcessOne({ item }: { item: BacklogItem }) {
       }
     };
 
+    let settled = false;
+
     void (async () => {
       try {
         if (kind === "transcribe") {
@@ -277,11 +282,22 @@ function ProcessOne({ item }: { item: BacklogItem }) {
           // unreadable file must not stall the several hundred behind it.
           recordFailure(`${kind}:${sessionId}`);
         }
+      } finally {
+        settled = true;
       }
     })();
 
     return () => {
       cancelled = true;
+
+      // Torn down with work still running — a call just started, or the shell
+      // remounted. Marking it cancelled only skips the bookkeeping; the file is
+      // still being transcribed on the GPU, which is precisely the collision
+      // that took the app down mid-call. This actually stops it. The queue is
+      // derived from the database, so the recording simply comes round again.
+      if (!settled && kind === "transcribe") {
+        void listenerStore.getState().stopTranscription(sessionId);
+      }
     };
     // Deliberately not `item`: the queue query rebuilds those objects on every
     // five-second refetch, so depending on it re-ran this effect — and its
