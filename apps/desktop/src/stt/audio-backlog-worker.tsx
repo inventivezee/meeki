@@ -12,6 +12,7 @@ import {
   listBacklog,
   useAudioBacklog,
 } from "./audio-backlog";
+import { useListener } from "./contexts";
 import { isStoppedTranscriptionError, useRunBatch } from "./useRunBatch";
 
 import { getEnhancerService } from "~/services/enhancer";
@@ -52,11 +53,20 @@ export function AudioBacklogWorker() {
 
   const next = pending.data?.find((item) => !failed.has(backlogItemKey(item)));
 
+  // A live recording drives the same Swift transcriber this queue does. Running
+  // both at once tripped a fatal assertion inside it and took the app down
+  // mid-call, losing the recording. The batch waits; the call does not.
+  const recording = useListener((state) => state.live.status !== "inactive");
+
   // The queue is not known until the first fetch lands. Reporting "finished"
   // off an undefined list would end every run the instant it started.
-  useBacklogProgressToast(running && pending.isSuccess, Boolean(next));
+  useBacklogProgressToast(
+    running && pending.isSuccess,
+    Boolean(next),
+    recording,
+  );
 
-  if (!running || !next) {
+  if (!running || recording || !next) {
     return null;
   }
 
@@ -132,11 +142,26 @@ function useKeepAwakeWhileRunning(running: boolean) {
   }, [running]);
 }
 
-function useBacklogProgressToast(active: boolean, hasWork: boolean) {
+function useBacklogProgressToast(
+  active: boolean,
+  hasWork: boolean,
+  paused: boolean,
+) {
   const { total, done, failed, stop } = useAudioBacklog();
 
   useEffect(() => {
     if (!active) {
+      return;
+    }
+
+    // Checked before "finished": a run held for a recording still has work, and
+    // announcing completion here would stop it for good.
+    if (paused) {
+      sonnerToast.message("Recording — transcription paused", {
+        id: BACKLOG_TOAST_ID,
+        description: `${done} of ${total} · resumes when the recording ends`,
+        duration: Infinity,
+      });
       return;
     }
 
@@ -170,7 +195,7 @@ function useBacklogProgressToast(active: boolean, hasWork: boolean) {
         },
       },
     });
-  }, [active, hasWork, done, total, failed, stop]);
+  }, [active, hasWork, paused, done, total, failed, stop]);
 }
 
 /**
