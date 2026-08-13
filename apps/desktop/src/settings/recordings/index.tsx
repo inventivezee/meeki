@@ -95,13 +95,21 @@ function PendingTranscriptions() {
           <Trans>Stop</Trans>
         </Button>
       ) : (
-        <Button
-          variant="outline"
-          className="shrink-0"
-          onClick={() => void startBacklogRun()}
-        >
-          <Trans>Process all</Trans>
-        </Button>
+        <div className="flex shrink-0 gap-2">
+          {/* Transcribing stops the language model to keep both off the GPU, so
+              every summary reloads it from cold. Skipping summaries here is
+              worth minutes a recording across several hundred of them, and the
+              summary sweep picks them all up afterwards. */}
+          <Button
+            variant="outline"
+            onClick={() => void startBacklogRun({ summarize: false })}
+          >
+            <Trans>Transcribe only</Trans>
+          </Button>
+          <Button variant="outline" onClick={() => void startBacklogRun()}>
+            <Trans>Process all</Trans>
+          </Button>
+        </div>
       )}
     </div>
   );
