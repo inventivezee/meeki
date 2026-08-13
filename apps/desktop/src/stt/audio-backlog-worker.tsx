@@ -249,9 +249,16 @@ function ProcessOne({ item }: { item: BacklogItem }) {
  * So there are two waits: one for it to start, one for it to end. A summary
  * that never starts is not worth blocking a several-hundred-file run over, and
  * one that never ends must not block it forever either.
+ *
+ * The start wait is minutes, not seconds. Transcription kills llama-server
+ * first to keep the two models off the GPU at once, so the summary that follows
+ * has to load a 12B model from cold on a machine that has just finished
+ * saturating the GPU. At sixty seconds this gave up before that load finished,
+ * moved to the next recording, and killed the server it had just started — 116
+ * summaries in one batch left an empty row and no text.
  */
-const ENHANCE_START_TIMEOUT_MS = 60_000;
-const ENHANCE_SETTLE_TIMEOUT_MS = 30 * 60_000;
+const ENHANCE_START_TIMEOUT_MS = 5 * 60_000;
+const ENHANCE_SETTLE_TIMEOUT_MS = 10 * 60_000;
 const ENHANCE_POLL_MS = 500;
 
 async function waitForEnhance(
