@@ -219,7 +219,7 @@ function ProcessOne({ item }: { item: BacklogItem }) {
         if (!cancelled) {
           // Counted as done and skipped for the rest of this run: one
           // unreadable file must not stall the several hundred behind it.
-          recordFailure(backlogItemKey(item));
+          recordFailure(`${kind}:${sessionId}`);
         }
       }
     })();
@@ -227,7 +227,12 @@ function ProcessOne({ item }: { item: BacklogItem }) {
     return () => {
       cancelled = true;
     };
-  }, [item, sessionId, kind, aiTaskStore, recordDone, recordFailure]);
+    // Deliberately not `item`: the queue query rebuilds those objects on every
+    // five-second refetch, so depending on it re-ran this effect — and its
+    // cleanup — every five seconds. The work restarted continuously and
+    // recordDone never fired, because the run that would have called it had
+    // already been cancelled. Progress froze while transcription carried on.
+  }, [sessionId, kind, aiTaskStore, recordDone, recordFailure]);
 
   return null;
 }
