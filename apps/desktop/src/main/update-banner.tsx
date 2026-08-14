@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { AlertTriangleIcon, DownloadIcon, RotateCwIcon } from "lucide-react";
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 
+import { commands as localLlmCommands } from "@meeki/plugin-local-llm";
 import {
   commands as updaterCommands,
   events as updaterEvents,
@@ -12,6 +13,7 @@ import { cn } from "@meeki/utils";
 
 import { useMountEffect } from "~/shared/hooks/useMountEffect";
 import { useDevtoolsOtaPreview } from "~/store/zustand/devtools-ota-preview";
+import { useAudioBacklog } from "~/stt/audio-backlog";
 
 export type UpdateBannerStatus =
   | "available"
@@ -45,6 +47,46 @@ type UpdateCheckState = {
 
 const UPDATE_CHECK_QUERY_KEY = ["updater2", "check"] as const;
 const UPDATE_CHECK_INTERVAL_MS = 30 * 60 * 1000;
+
+/**
+ * Brings transcription to a stop before the process is replaced.
+ *
+ * Restarting calls exit(), which runs the C++ static destructors belonging to
+ * MLX and its Metal buffers. If transcription is still running when that
+ * happens, those destructors tear down state the Swift side is actively using
+ * and the process dies in __cxa_finalize_ranges — which is why updating during
+ * a batch reported a crash even though the update itself had succeeded.
+ *
+ * So the work is stopped first and given a moment to unwind. Stopping the run
+ * unmounts the worker, whose teardown cancels the file being transcribed; the
+ * language model is shut down explicitly because nothing else owns it.
+ *
+ * Best effort by nature — there is no signal for "MLX has finished unwinding",
+ * so this waits a short fixed time. Nothing here can fail the update: an
+ * update that installs is worth more than a tidy shutdown.
+ */
+const RESTART_SETTLE_MS = 1_500;
+
+async function quiesceBeforeRestart(): Promise<void> {
+  // Only a batch drives MLX from this side; with none running there is nothing
+  // to unwind, and an update should not be held up for a second and a half to
+  // wait for nothing.
+  if (!useAudioBacklog.getState().running) {
+    return;
+  }
+
+  try {
+    useAudioBacklog.getState().stop();
+    // Lets React unmount the worker so its teardown cancels the file being
+    // transcribed before we continue.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    await localLlmCommands.stopServer();
+    await new Promise((resolve) => setTimeout(resolve, RESTART_SETTLE_MS));
+  } catch (error) {
+    console.error("[updater] failed to quiesce before restart", error);
+  }
+}
 
 export function useDesktopUpdateControl(): DesktopUpdateControl {
   const [eventState, setEventState] = useState<UpdateEventState | null>(null);
@@ -242,6 +284,7 @@ export function useDesktopUpdateControl(): DesktopUpdateControl {
 
   const { mutate: installUpdate, isPending: installing } = useMutation({
     mutationFn: async (version: string) => {
+      await quiesceBeforeRestart();
       const result = unwrapResult(await updaterCommands.install(version));
       unwrapResult(await updaterCommands.postinstall(result));
     },
