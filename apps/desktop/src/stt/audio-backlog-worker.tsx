@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRouteContext } from "@tanstack/react-router";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { commands as fsSyncCommands } from "@meeki/plugin-fs-sync";
 import { commands as localLlmCommands } from "@meeki/plugin-local-llm";
@@ -55,6 +55,17 @@ export function AudioBacklogWorker() {
 
   const next = pending.data?.find((item) => !failed.has(backlogItemKey(item)));
 
+  // The item being worked on, pinned until it finishes.
+  //
+  // Reading it straight from the query was the bug behind the empty summaries.
+  // A transcript lands, that session leaves the transcribe queue, and within
+  // five seconds the refetch makes `next` a different recording — changing the
+  // key and unmounting the component while its summary was still generating.
+  // The transcript survived because it had already been written; the summary
+  // died seconds after it began, and recordDone never fired.
+  const [current, setCurrent] = useState<BacklogItem | undefined>(undefined);
+  const finish = useCallback(() => setCurrent(undefined), []);
+
   // A live recording drives the same Swift transcriber this queue does. Running
   // both at once tripped a fatal assertion inside it and took the app down
   // mid-call, losing the recording. The batch waits; the call does not.
@@ -69,11 +80,27 @@ export function AudioBacklogWorker() {
     transcribe ? "Transcribing recordings" : "Writing summaries",
   );
 
-  if (!running || recording || !next) {
+  useEffect(() => {
+    if (!running || recording) {
+      // Whatever was in flight has been cancelled by the teardown below; the
+      // queue is a database query, so it is simply still pending.
+      setCurrent(undefined);
+      return;
+    }
+    setCurrent((held) => held ?? next);
+  }, [running, recording, next]);
+
+  if (!running || recording || !current) {
     return null;
   }
 
-  return <ProcessOne key={backlogItemKey(next)} item={next} />;
+  return (
+    <ProcessOne
+      key={backlogItemKey(current)}
+      item={current}
+      onFinished={finish}
+    />
+  );
 }
 
 /**
@@ -212,7 +239,13 @@ function useBacklogProgressToast(
  * on the session id. Keying this component on the item is what gives each one
  * its own instance of them.
  */
-function ProcessOne({ item }: { item: BacklogItem }) {
+function ProcessOne({
+  item,
+  onFinished,
+}: {
+  item: BacklogItem;
+  onFinished: () => void;
+}) {
   const { sessionId, kind } = item;
   const { aiTaskStore } = useRouteContext({ from: "__root__" });
   const runBatch = useRunBatch(sessionId);
@@ -287,6 +320,9 @@ function ProcessOne({ item }: { item: BacklogItem }) {
         }
       } finally {
         settled = true;
+        if (!cancelled) {
+          onFinished();
+        }
       }
     })();
 
@@ -307,7 +343,7 @@ function ProcessOne({ item }: { item: BacklogItem }) {
     // cleanup — every five seconds. The work restarted continuously and
     // recordDone never fired, because the run that would have called it had
     // already been cancelled. Progress froze while transcription carried on.
-  }, [sessionId, kind, aiTaskStore, recordDone, recordFailure]);
+  }, [sessionId, kind, aiTaskStore, recordDone, recordFailure, onFinished]);
 
   return null;
 }
