@@ -60,6 +60,7 @@
     "@meeki/plugin-local-llm": "workspace:*",
     "@meeki/plugin-local-stt": "workspace:*",
     "@meeki/plugin-misc": "workspace:*",
+    "@meeki/plugin-tracing": "workspace:*",
     "@meeki/plugin-notification": "workspace:*",
     "@meeki/plugin-notify": "workspace:*",
     "@meeki/plugin-opener2": "workspace:*",

@@ -81,6 +81,45 @@ export async function listUnsummarizedSessions(): Promise<string[]> {
   return rows.map((row) => row.session_id);
 }
 
+/**
+ * How much of the library has been transcribed, over the whole library.
+ *
+ * The run counter counts items finished since the user last pressed the
+ * button, so after days of work it still reads a handful and looks like
+ * nothing is happening. This is the number people actually want, and being a
+ * query it cannot drift from reality across a stop, a crash or a restart.
+ */
+const PROGRESS_SQL = `
+  SELECT
+    COUNT(*) AS total,
+    SUM(
+      CASE WHEN EXISTS (
+        SELECT 1
+        FROM transcripts
+        WHERE transcripts.session_id = session.id
+          AND transcripts.deleted_at IS NULL
+      ) THEN 1 ELSE 0 END
+    ) AS done
+  FROM session_attachments AS attachment
+  JOIN sessions AS session ON session.id = attachment.session_id
+  WHERE attachment.source_type = 'session_audio'
+    AND attachment.source_id = 'primary'
+    AND attachment.deleted_at IS NULL
+    AND session.deleted_at IS NULL
+`;
+
+export async function libraryProgress(): Promise<{
+  total: number;
+  done: number;
+}> {
+  const rows = await liveQueryClient.execute<{
+    total: number;
+    done: number | null;
+  }>(PROGRESS_SQL);
+  const row = rows[0];
+  return { total: row?.total ?? 0, done: row?.done ?? 0 };
+}
+
 export type BacklogItem = {
   sessionId: string;
   kind: "transcribe" | "summarize";

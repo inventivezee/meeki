@@ -5,10 +5,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { commands as fsSyncCommands } from "@meeki/plugin-fs-sync";
 import { commands as localLlmCommands } from "@meeki/plugin-local-llm";
 import { commands as miscCommands } from "@meeki/plugin-misc";
+import { commands as tracingCommands } from "@meeki/plugin-tracing";
 import { sonnerToast } from "@meeki/ui/components/ui/toast";
 
 import {
   type BacklogItem,
+  libraryProgress,
   listBacklog,
   useAudioBacklog,
 } from "./audio-backlog";
@@ -53,6 +55,15 @@ export function AudioBacklogWorker() {
     refetchInterval: 5_000,
   });
 
+  // Library-wide, so the toast reads as progress through the whole job rather
+  // than through whatever is left since the button was last pressed.
+  const progress = useQuery({
+    enabled: running,
+    queryKey: ["audio-backlog", "progress"],
+    queryFn: libraryProgress,
+    refetchInterval: 5_000,
+  });
+
   const next = pending.data?.find((item) => !failed.has(backlogItemKey(item)));
 
   // The item being worked on, pinned until it finishes.
@@ -78,6 +89,7 @@ export function AudioBacklogWorker() {
     Boolean(next),
     recording,
     transcribe ? "Transcribing recordings" : "Writing summaries",
+    progress.data,
   );
 
   useEffect(() => {
@@ -177,8 +189,12 @@ function useBacklogProgressToast(
   hasWork: boolean,
   paused: boolean,
   title: string,
+  library: { total: number; done: number } | undefined,
 ) {
   const { total, done, failed, stop } = useAudioBacklog();
+  const overall = library
+    ? `${library.done} of ${library.total} transcribed`
+    : `${done} of ${total}`;
 
   useEffect(() => {
     if (!active) {
@@ -190,7 +206,7 @@ function useBacklogProgressToast(
     if (paused) {
       sonnerToast.message("Recording — transcription paused", {
         id: BACKLOG_TOAST_ID,
-        description: `${done} of ${total} · resumes when the recording ends`,
+        description: `${overall} · resumes when the recording ends`,
         duration: Infinity,
       });
       return;
@@ -209,7 +225,7 @@ function useBacklogProgressToast(
 
     sonnerToast.message(title, {
       id: BACKLOG_TOAST_ID,
-      description: `${done} of ${total} · this runs for hours`,
+      description: `${overall} · this runs for hours`,
       duration: Infinity,
       action: {
         label: "Stop",
@@ -228,7 +244,7 @@ function useBacklogProgressToast(
         },
       },
     });
-  }, [active, hasWork, paused, title, done, total, failed, stop]);
+  }, [active, hasWork, paused, title, overall, done, total, failed, stop]);
 }
 
 /**
@@ -308,6 +324,14 @@ function ProcessOne({
         if (isStoppedTranscriptionError(error)) {
           return;
         }
+        // Also sent to the Rust log, not just the webview console. This ran
+        // for days writing summaries that failed every time, and the reason
+        // was only ever visible in a console nobody could open on the machine
+        // it was happening on.
+        void tracingCommands.doLog("ERROR", [
+          "[audio-backlog] failed to process session",
+          { sessionId, kind, error: String(error) },
+        ]);
         console.error("[audio-backlog] failed to process session", {
           sessionId,
           kind,
@@ -361,14 +385,14 @@ function ProcessOne({
  * that never starts is not worth blocking a several-hundred-file run over, and
  * one that never ends must not block it forever either.
  *
- * The start wait is minutes, not seconds. Transcription kills llama-server
- * first to keep the two models off the GPU at once, so the summary that follows
- * has to load a 12B model from cold on a machine that has just finished
- * saturating the GPU. At sixty seconds this gave up before that load finished,
- * moved to the next recording, and killed the server it had just started — 116
- * summaries in one batch left an empty row and no text.
+ * The start wait allows for a cold model load but no more. It was raised to
+ * five minutes on the theory that summaries were timing out during that load;
+ * they were not, they were failing outright, so every recording simply waited
+ * five idle minutes before moving on. Until the failure itself is understood —
+ * see the log line the catch below now writes — this should not cost the batch
+ * more than the load could plausibly take.
  */
-const ENHANCE_START_TIMEOUT_MS = 5 * 60_000;
+const ENHANCE_START_TIMEOUT_MS = 90_000;
 const ENHANCE_SETTLE_TIMEOUT_MS = 10 * 60_000;
 const ENHANCE_POLL_MS = 500;
 
