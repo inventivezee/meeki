@@ -106,6 +106,15 @@ function PendingTranscriptions() {
           >
             <Trans>Transcribe only</Trans>
           </Button>
+          {/* Summaries sit behind every recording still to be transcribed, so
+              with a large import a failed summary is days from being retried.
+              This reaches them directly. */}
+          <Button
+            variant="outline"
+            onClick={() => void startBacklogRun({ transcribe: false })}
+          >
+            <Trans>Summaries only</Trans>
+          </Button>
           <Button variant="outline" onClick={() => void startBacklogRun()}>
             <Trans>Process all</Trans>
           </Button>

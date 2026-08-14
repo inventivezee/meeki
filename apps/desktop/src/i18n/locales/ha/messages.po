@@ -2315,6 +2315,10 @@ msgstr ""
 msgid "Summaries need a language model. Download one that runs on this Mac, or connect a provider you already use."
 msgstr ""
 
+#: src/settings/recordings/index.tsx
+msgid "Summaries only"
+msgstr ""
+
 #: src/shared/bulk-import-prompt.tsx
 msgid "Summarize all"
 msgstr ""

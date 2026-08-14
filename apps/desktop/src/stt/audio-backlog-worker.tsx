@@ -42,11 +42,12 @@ export function AudioBacklogWorker() {
   useKeepAwakeWhileRunning(running);
 
   const summarize = useAudioBacklog((state) => state.summarize);
+  const transcribe = useAudioBacklog((state) => state.transcribe);
 
   const pending = useQuery({
     enabled: running,
-    queryKey: ["audio-backlog", summarize],
-    queryFn: () => listBacklog({ summarize }),
+    queryKey: ["audio-backlog", summarize, transcribe],
+    queryFn: () => listBacklog({ summarize, transcribe }),
     // Nothing emits an event when a transcript lands, and each item takes
     // minutes anyway, so polling costs nothing worth avoiding.
     refetchInterval: 5_000,
@@ -65,6 +66,7 @@ export function AudioBacklogWorker() {
     running && pending.isSuccess,
     Boolean(next),
     recording,
+    transcribe ? "Transcribing recordings" : "Writing summaries",
   );
 
   if (!running || recording || !next) {
@@ -147,6 +149,7 @@ function useBacklogProgressToast(
   active: boolean,
   hasWork: boolean,
   paused: boolean,
+  title: string,
 ) {
   const { total, done, failed, stop } = useAudioBacklog();
 
@@ -177,7 +180,7 @@ function useBacklogProgressToast(
       return;
     }
 
-    sonnerToast.message("Transcribing recordings", {
+    sonnerToast.message(title, {
       id: BACKLOG_TOAST_ID,
       description: `${done} of ${total} · this runs for hours`,
       duration: Infinity,
@@ -198,7 +201,7 @@ function useBacklogProgressToast(
         },
       },
     });
-  }, [active, hasWork, paused, done, total, failed, stop]);
+  }, [active, hasWork, paused, title, done, total, failed, stop]);
 }
 
 /**

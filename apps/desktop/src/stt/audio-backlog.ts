@@ -95,9 +95,15 @@ export type BacklogItem = {
  */
 export async function listBacklog(options?: {
   summarize?: boolean;
+  transcribe?: boolean;
 }): Promise<BacklogItem[]> {
   const [untranscribed, unsummarized] = await Promise.all([
-    listUntranscribedSessions(),
+    // Skipped for a summary-only run. Transcription comes first in this list,
+    // so with several hundred recordings still to transcribe the summaries
+    // behind them are days away — which is no way to retry a failed summary.
+    options?.transcribe === false
+      ? Promise.resolve<string[]>([])
+      : listUntranscribedSessions(),
     options?.summarize === false
       ? Promise.resolve<string[]>([])
       : listUnsummarizedSessions(),
@@ -121,13 +127,19 @@ type BacklogState = {
   done: number;
   /** Whether to write a summary after each transcript, as the user chose. */
   summarize: boolean;
+  /** False for a summary-only run, which retries summaries without waiting
+   * behind every recording still to be transcribed. */
+  transcribe: boolean;
   /**
    * Sessions this run could not transcribe. Held in memory only: a file that
    * fails today may well succeed after the user fixes the model or the disk,
    * and a persisted skip list would quietly hide it forever.
    */
   failed: Set<string>;
-  start: (total: number, options?: { summarize?: boolean }) => void;
+  start: (
+    total: number,
+    options?: { summarize?: boolean; transcribe?: boolean },
+  ) => void;
   stop: () => void;
   recordDone: () => void;
   recordFailure: (sessionId: string) => void;
@@ -138,6 +150,7 @@ export const useAudioBacklog = create<BacklogState>((set) => ({
   total: 0,
   done: 0,
   summarize: true,
+  transcribe: true,
   failed: new Set(),
   start: (total, options) =>
     set({
@@ -145,6 +158,7 @@ export const useAudioBacklog = create<BacklogState>((set) => ({
       total,
       done: 0,
       summarize: options?.summarize ?? true,
+      transcribe: options?.transcribe ?? true,
       failed: new Set(),
     }),
   stop: () => set({ running: false }),
@@ -165,6 +179,7 @@ export const useAudioBacklog = create<BacklogState>((set) => ({
  */
 export async function startBacklogRun(options?: {
   summarize?: boolean;
+  transcribe?: boolean;
 }): Promise<void> {
   const pending = await listBacklog(options).catch(() => []);
   if (pending.length === 0) {
