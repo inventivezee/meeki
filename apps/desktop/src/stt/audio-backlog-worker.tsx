@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { commands as fsSyncCommands } from "@meeki/plugin-fs-sync";
 import { commands as localLlmCommands } from "@meeki/plugin-local-llm";
 import { commands as miscCommands } from "@meeki/plugin-misc";
+import { commands as tracingCommands } from "@meeki/plugin-tracing";
 import { sonnerToast } from "@meeki/ui/components/ui/toast";
 
 import {
@@ -308,6 +309,14 @@ function ProcessOne({
         if (isStoppedTranscriptionError(error)) {
           return;
         }
+        // Also sent to the Rust log, not just the webview console. This ran
+        // for days writing summaries that failed every time, and the reason
+        // was only ever visible in a console nobody could open on the machine
+        // it was happening on.
+        void tracingCommands.doLog("ERROR", [
+          "[audio-backlog] failed to process session",
+          { sessionId, kind, error: String(error) },
+        ]);
         console.error("[audio-backlog] failed to process session", {
           sessionId,
           kind,
