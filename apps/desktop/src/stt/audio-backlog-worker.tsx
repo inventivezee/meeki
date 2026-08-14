@@ -18,10 +18,12 @@ import { useListener } from "./contexts";
 import { isStoppedTranscriptionError, useRunBatch } from "./useRunBatch";
 
 import { getEnhancerService } from "~/services/enhancer";
+import { markSessionAudioTranscriptionComplete } from "~/session/attachments";
 import {
   createTaskId,
   type TaskId,
 } from "~/store/zustand/ai-task/task-configs";
+import { isEmptyBatchTranscriptError } from "~/store/zustand/listener/batch";
 import { listenerStore } from "~/store/zustand/listener/instance";
 
 const BACKLOG_TOAST_ID = "audio-backlog";
@@ -322,6 +324,22 @@ function ProcessOne({
         }
       } catch (error) {
         if (isStoppedTranscriptionError(error)) {
+          return;
+        }
+
+        // Silence is a final answer. The batch path reports "nothing to
+        // persist" as an error, and treating it as a failure left the
+        // recording exactly as it was: no transcript, nothing marked done, so
+        // it came back at the head of the queue on every future run and failed
+        // again in forty milliseconds. Several hundred imported files were
+        // silent, which is a large part of why the queue would not drain.
+        if (isEmptyBatchTranscriptError(error)) {
+          await markSessionAudioTranscriptionComplete(sessionId).catch(
+            () => {},
+          );
+          if (!cancelled) {
+            recordDone();
+          }
           return;
         }
         // Also sent to the Rust log, not just the webview console. This ran
