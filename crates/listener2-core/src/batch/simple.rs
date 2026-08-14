@@ -622,18 +622,34 @@ fn transcribe_soniqo_samples(
         .map_err(|e| e.to_string())
 }
 
+/// Shorter than this and there is nothing for the model to look at.
+///
+/// The mel front-end needs a full window before it can emit a single frame, so
+/// a chunk below that produces an empty spectrogram and the Swift side aborts
+/// the process on it — a trap Rust cannot catch. It reached us as the leftover
+/// tail of an ordinary recording: 96 samples, six milliseconds, after 1,060
+/// chunks of a file that was transcribing perfectly. Every batch containing a
+/// file whose length left a small remainder died the same way.
+///
+/// 100ms is well above the window and well below the shortest tail seen to
+/// transcribe successfully (310ms), and no speech survives being alone in six
+/// milliseconds anyway.
+const MIN_TRANSCRIBABLE_SAMPLES: usize = TARGET_SAMPLE_RATE as usize / 10;
+
 fn soniqo_channel_chunks(
     model: meeki_transcribe_soniqo::SoniqoModel,
     samples: &[f32],
 ) -> std::result::Result<Vec<AudioChunk>, String> {
-    if model == meeki_transcribe_soniqo::SoniqoModel::ParakeetBatch {
-        return Ok(split_audio_samples(
-            samples,
-            SONIQO_PARAKEET_MAX_CHUNK_SAMPLES,
-        ));
-    }
+    let chunks = if model == meeki_transcribe_soniqo::SoniqoModel::ParakeetBatch {
+        split_audio_samples(samples, SONIQO_PARAKEET_MAX_CHUNK_SAMPLES)
+    } else {
+        chunk_channel_audio::<meeki_audio_chunking::Error>(samples).map_err(|e| e.to_string())?
+    };
 
-    chunk_channel_audio::<meeki_audio_chunking::Error>(samples).map_err(|e| e.to_string())
+    Ok(chunks
+        .into_iter()
+        .filter(|chunk| chunk.samples.len() >= MIN_TRANSCRIBABLE_SAMPLES)
+        .collect())
 }
 
 fn split_audio_samples(samples: &[f32], max_samples: usize) -> Vec<AudioChunk> {
