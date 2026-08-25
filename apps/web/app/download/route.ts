@@ -48,13 +48,7 @@ async function resolveDmgUrl(): Promise<string | null> {
   return candidate;
 }
 
-export async function GET(request: Request) {
-  const cache = await caches.open("meeki-download");
-  const cacheKey = new Request(new URL(request.url).origin + "/download");
-
-  const cached = await cache.match(cacheKey);
-  if (cached) return cached;
-
+export async function GET() {
   let dmg: string | null = null;
   try {
     dmg = await resolveDmgUrl();
@@ -62,18 +56,23 @@ export async function GET(request: Request) {
     // Fall through to the releases page.
   }
 
-  const response = new Response(null, {
+  return new Response(null, {
     status: 302,
     headers: {
       Location: dmg ?? RELEASES_URL,
       // Only cache a resolved DMG. Caching the fallback would pin visitors to
       // the releases page for the whole TTL after one transient failure.
-      "Cache-Control": dmg ? `public, max-age=${CACHE_SECONDS}` : "no-store",
+      //
+      // This used to be a manual `caches.open("meeki-download")` round-trip.
+      // The Cache API is a Workers global and does not exist on Node, so that
+      // call threw before its own try/catch could help — every /download would
+      // have 500'd. s-maxage hands the same job to the CDN, which is where it
+      // belonged anyway: one origin miss per TTL, shared across all visitors
+      // rather than per-isolate.
+      "Cache-Control": dmg
+        ? `public, s-maxage=${CACHE_SECONDS}, stale-while-revalidate=86400`
+        : "no-store",
       "X-Robots-Tag": "noindex, nofollow",
     },
   });
-
-  if (dmg) await cache.put(cacheKey, response.clone());
-
-  return response;
 }

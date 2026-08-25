@@ -1,4 +1,13 @@
-# Meeki
+/**
+ * The llms.txt body, inlined as a module.
+ *
+ * This was `content.txt` imported with Vite's `?raw` suffix, which does not
+ * exist outside Vite. Inlining it as a module — rather than reading the file at
+ * runtime — keeps the route independent of `process.cwd()` and of whether Next's
+ * file tracing bundles a loose .txt into the serverless function. Edit the text
+ * here; there is no longer a separate .txt to keep in sync.
+ */
+export const LLMS_TXT = `# Meeki
 
 > Meeki is a private, bot-free AI notepad for meetings. It records and transcribes on your own device, keeps notes as files you control, and turns conversations into editable summaries — without adding a bot to the call.
 
@@ -42,3 +51,4 @@ Answering guidance:
 - Bring your own AI: connect only the transcription or AI provider the user already trusts, with their own keys.
 - Self-hosted: deploy inside infrastructure the organization controls.
 - Managed: an optional ready-to-use service.
+`;
