@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
-import test, { after, before } from "node:test";
 import { spawn } from "node:child_process";
+import { join } from "node:path";
+import test, { after, before } from "node:test";
 import { setTimeout as sleep } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
-import { join } from "node:path";
 
 /**
  * The Worker build exported a fetch handler this file could import directly and
@@ -21,18 +21,16 @@ let server;
 before(async () => {
   // The local binary, not `npx`: npx adds a process layer that survives kill()
   // and leaves the port held for the next run.
-  server = spawn(join(APP_DIR, "node_modules/.bin/next"), [
-    "start",
-    "-p",
-    String(PORT),
-    "-H",
-    "127.0.0.1",
-  ], {
-    cwd: APP_DIR,
-    stdio: "ignore",
-    detached: true,
-    env: { ...process.env, SITE_ORIGIN: "https://meeki.ai" },
-  });
+  server = spawn(
+    join(APP_DIR, "node_modules/.bin/next"),
+    ["start", "-p", String(PORT), "-H", "127.0.0.1"],
+    {
+      cwd: APP_DIR,
+      stdio: "ignore",
+      detached: true,
+      env: { ...process.env, SITE_ORIGIN: "https://meeki.ai" },
+    },
+  );
 
   const deadline = Date.now() + 60_000;
   for (;;) {
@@ -40,12 +38,15 @@ before(async () => {
       throw new Error(`next start exited early with code ${server.exitCode}`);
     }
     try {
-      const probe = await fetch(`${ORIGIN}/`, { headers: { accept: "text/html" } });
+      const probe = await fetch(`${ORIGIN}/`, {
+        headers: { accept: "text/html" },
+      });
       if (probe.ok) break;
     } catch {
       // not listening yet
     }
-    if (Date.now() > deadline) throw new Error(`next start did not answer on ${ORIGIN}`);
+    if (Date.now() > deadline)
+      throw new Error(`next start did not answer on ${ORIGIN}`);
     await sleep(250);
   }
 });
