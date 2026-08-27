@@ -38,12 +38,34 @@ runs:
         PLATFORM: ${{ inputs.platform }}
         OUTPUT: ${{ inputs.output }}
       run: |
+        set -euo pipefail
+
         ASSET_ID=$(echo "$ASSETS" | jq -r --arg platform "$PLATFORM" '.assets[] | select(.publicPlatform == $platform) | .id')
         if [[ -z "$ASSET_ID" || "$ASSET_ID" == "null" ]]; then
-          echo "Asset not found for platform $PLATFORM"
+          # Fatal, not `exit 0`. The caller reads no `id` off this step, so a
+          # soft failure here used to sail past and let the release job publish
+          # a tag with no installer attached.
           echo "success=false" >> $GITHUB_OUTPUT
-          exit 0
+          echo "::error::No CrabNebula asset for platform $PLATFORM. Assets present: \
+        $(echo "$ASSETS" | jq -rc '[.assets[].publicPlatform]')"
+          exit 1
         fi
+
         echo "Downloading asset $ASSET_ID to $OUTPUT"
-        curl -L "https://cdn.crabnebula.app/asset/$ASSET_ID" -o "$OUTPUT"
+        # -f so an HTTP error becomes a non-zero exit instead of an error page
+        # written into the .dmg. Without it curl exits 0 on a 5xx, the body gets
+        # checksummed, and ncipollo publishes it as makeLatest.
+        curl -fSL --retry 5 --retry-delay 5 --retry-all-errors --max-time 900 \
+          "https://cdn.crabnebula.app/asset/$ASSET_ID" -o "$OUTPUT"
+
+        # A DMG that CN reports at ~199 MB should never come back as a few KB of
+        # JSON. Cheap guard against a truncated or substituted body.
+        SIZE=$(wc -c < "$OUTPUT")
+        if [[ "$SIZE" -lt 50000000 ]]; then
+          echo "success=false" >> $GITHUB_OUTPUT
+          echo "::error::$OUTPUT is only ${SIZE} bytes; expected a disk image of ~200 MB."
+          echo "First bytes:"; head -c 200 "$OUTPUT" || true
+          exit 1
+        fi
+        echo "Downloaded ${SIZE} bytes"
         echo "success=true" >> $GITHUB_OUTPUT

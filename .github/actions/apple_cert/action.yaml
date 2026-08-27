@@ -39,11 +39,28 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
-        CERT_INFO=$(security find-identity -v -p codesigning build.keychain | grep "Developer ID Application")
+        # `grep` exiting 1 under `set -o pipefail` used to kill this step on the
+        # assignment itself, which made the ::error:: below unreachable and
+        # reported an expired certificate as a bare "Process completed with exit
+        # code 1". Keep the `|| true` so the diagnosis survives the failure.
+        CERT_INFO=$(security find-identity -v -p codesigning build.keychain | grep "Developer ID Application" || true)
         if [[ -z "$CERT_INFO" ]]; then
-          echo "::error::No Developer ID Application certificate found in keychain"
+          echo "::error::No valid Developer ID Application certificate in the keychain. find-identity -v lists only unexpired identities, so the usual cause is an expired certificate or a lapsed Apple Developer Program membership."
+          echo "Identities present (including invalid):"
+          security find-identity -p codesigning build.keychain || true
           exit 1
         fi
         CERT_ID=$(echo "$CERT_INFO" | awk -F'"' '{print $2}')
         echo "cert-id=$CERT_ID" >> $GITHUB_OUTPUT
         echo "Certificate imported."
+
+        # Print days-to-expiry every run. Nothing else in the pipeline measures
+        # this, so a cert quietly approaching its end date is invisible until the
+        # build that fails on it.
+        if NOT_AFTER=$(security find-certificate -c "$CERT_ID" -p build.keychain 2>/dev/null \
+          | openssl x509 -noout -enddate 2>/dev/null | cut -d= -f2); then
+          if EXPIRY_EPOCH=$(date -j -f "%b %d %T %Y %Z" "$NOT_AFTER" +%s 2>/dev/null); then
+            DAYS=$(( (EXPIRY_EPOCH - $(date +%s)) / 86400 ))
+            echo "::notice::Signing certificate expires in ${DAYS} day(s) (${NOT_AFTER})"
+          fi
+        fi
